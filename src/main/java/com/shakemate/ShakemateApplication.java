@@ -1,4 +1,4 @@
-package com.cja101g4.shakemate;
+package com.shakemate;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

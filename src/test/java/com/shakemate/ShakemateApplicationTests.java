@@ -1,4 +1,4 @@
-package com.cja101g4.shakemate;
+package com.shakemate;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

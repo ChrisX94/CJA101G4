@@ -8,7 +8,7 @@
 		<version>3.5.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.CJA101G4</groupId>
+	<groupId>com</groupId>
 	<artifactId>shakemate</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>shakemate</name>
