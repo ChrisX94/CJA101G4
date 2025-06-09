@@ -11,6 +11,7 @@
 	<groupId>com</groupId>
 	<artifactId>shakemate</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
 	<name>shakemate</name>
 	<description>shakemate</description>
 	<url/>
@@ -34,10 +35,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jdbc</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
@@ -50,10 +48,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web-services</artifactId>
@@ -69,30 +64,240 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>io.projectreactor</groupId>
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency><!-- ＠用途說明2: Add typical dependencies for a web application -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency><!-- ＠用途說明3: marked the embedded servlet container as provided -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency><!-- ＠用途說明4: test -->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		<!-- 用途說明5: Starter for using Spring Data JPA with Hibernate -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- 用途說明6: for log4j.properties -->
+		<!-- Spring Boot日誌系統預設是使用logback -->
+		<!-- 對於習慣了log4j的開發者，Spring Boot依然有很好的支援 -->
+		<!-- 不過我們在引入log4j之前，需要先排除該logback jar的依賴，再引入log4j的依賴，如下所示: -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+			<!-- <version>3.4.1</version> -->
+		</dependency>
+
+		<!-- ========================================================================================== -->
+		<!-- ●前面的jpa已經包含有hibernate，以下為純 hibernate 使用● -->
+
+		<!-- hibernate-core 核心 -->  <!-- spring-boot-starter-data-jpa(3.4.1) 已內建 Hibernate 6.6.4.Final 依賴 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>6.6.4.Final</version>
+		</dependency>
+
+		<!-- hibernate-c3p0 連線池 -->               <!-- spring-boot 已內建依賴，但預設未下載 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>6.6.4.Final</version>
+		</dependency>
+
+		<!-- hibernate-proxool 連線池 -->            <!-- spring-boot 已內建依賴，但預設未下載 -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-proxool</artifactId>
+			<version>6.6.4.Final</version>
+		</dependency>
+
+
+		<!-- ========================================================================================== -->
+		<!-- ●以下為 Web App 預備使用● -->
+
+		<!-- Servlet 6.0.0 -->                       <!-- spring-boot 已內建 Servlet 6.0.0 依賴，但預設未下載 -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<!-- <version>6.0.0</version> -->
+			<scope>provided</scope>                  <!-- ※provided只提供編譯，jar檔不匯出 -->
+		</dependency>
+
+		<!-- JSTL -->                                <!-- spring-boot 未內建依賴 -->
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl</artifactId>
+			<!-- <version>3.0.1</version> -->
+		</dependency>
+
+		<!-- JSTL -->                                <!-- spring-boot 未內建依賴 -->
+		<dependency>
+			<groupId>jakarta.servlet.jsp.jstl</groupId>
+			<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+			<!-- <version>3.0.2</version> -->
+		</dependency>
+
+		<!-- websocket -->                           <!-- spring-boot 已內建依賴，但預設未下載 -->
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+			<!-- <version>2.1.1</version> -->
+			<scope>provided</scope>                  <!-- ※provided只提供編譯，jar檔不匯出 -->
+		</dependency>
+
+		<!-- javax.json -->                          <!-- spring-boot 未內建依賴 -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.1.4</version>
+		</dependency>
+
+		<!-- com.sun.mail -->                        <!-- spring-boot 未內建依賴 -->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+
+
+
+		<!-- ========================================================================================== -->
+		<!-- ●以下為 JSR 303/349/380 Bean Validation Framework 預備使用● -->
+
+		<!-- javax.validation -->                    <!-- spring-boot(3.4.1) 已內建依賴，但預設未下載 -->
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<!-- <version>3.0.2</version> -->
+		</dependency>
+
+		<!-- org.hibernate.validator -->             <!-- spring-boot(3.4.1) 已內建依賴，但預設未下載 -->
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<!-- <version>8.0.2.Final</version> -->
+		</dependency>
+
+		<!-- ========================================================================================== -->
+		<!-- ●以下為 資料庫驅動程式 預備使用● -->
+
+		<!-- Oracle JDBC驅動程式 ojdbc8.jar -->
+		<!-- Oracle JDBC Driver compatible with JDK8, JDK11, JDK12, JDK13, JDK14
+			 and JDK15 -->
+		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<!-- <version>23.5.0.24.07</version> -->  <!-- spring-boot(3.4.1) 已內建依賴23.5.0.24.07，但預設未下載 -->
+		</dependency>
+
+		<!-- MySQL8 JDBC驅動程式 mysql-connector-java-8.x.xx.jar -->
+		<!-- https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<!-- <version>9.1.0</version> -->         <!-- spring-boot(3.4.1) 已內建依賴9.1.0，但預設未下載 -->
+		</dependency>
+
+
+
+		<!-- ========================================================================================== -->
+		<!-- ●以下為 thymeleaf 預備使用● -->
+
+		<!-- thymeleaf -->
+
+		<dependency>
+			<groupId>nz.net.ultraq.thymeleaf</groupId>
+			<artifactId>thymeleaf-layout-dialect</artifactId>
+		</dependency>
+
+		<!-- hot swapping, disable cache for template, enable live reload -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Optional, for bootstrap -->
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>bootstrap</artifactId>
+			<version>4.2.1</version>
+		</dependency>
+
+
+		<!-- ========================================================================================== -->
+		<!-- ●以下為 lombok 預備使用● -->
+
+		<!-- lombok -->  <!-- spring-boot 已內建依賴，但預設未下載 -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<!-- <version>1.18.36</version> -->
+			<scope>provided</scope>      <!-- ※provided只提供編譯，jar檔不匯出 -->
+		</dependency>
+
+
+		<!-- ========================================================================================== -->
+		<!-- ●以下為 Gson 預備使用● -->
+
+		<!-- Gson -->   <!-- spring-boot 已內建依賴，但預設未下載 -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<!-- <version>2.11.0</version> -->
+		</dependency>
+
+		<!-- jakarta EL -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>jakarta.el</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
