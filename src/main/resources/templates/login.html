@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+
+<body>
+
+<center>
+    <div th:if="${errorMsg != null}" style="color: red; margin: 10px;">
+        <p th:text="${errorMsg}"></p>
+    </div>
+    <form th:action="@{/login/loginHandler}" method="post">
+
+        <table border="1">
+            <tr>
+                <td colspan="2" align="center">
+                    <p>
+                        輸入 <b>(測試登入)</b>:<br>
+                        帳號: <b>tomcat</b><br>
+                        密碼: <b>tomcat</b><br>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <td align="right"><b>account:</b></td>
+                <td><input type="text" name="account" size="15" /></td>
+            </tr>
+
+            <tr>
+                <td align="right"><b>password:</b></td>
+                <td><input type="password" name="password" size="15" /></td>
+            </tr>
+
+            <tr>
+                <td colspan="2" align="center">
+                    <input type="submit" name="login" value="login" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <a th:href="@{/login/testlogin}" >test login</a>
+</center>
+</body>
+
+</html>
