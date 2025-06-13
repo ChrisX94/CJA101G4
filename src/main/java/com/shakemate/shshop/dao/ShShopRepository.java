@@ -1,0 +1,43 @@
+package com.shakemate.shshop.dao;
+
+import com.shakemate.shshop.model.ShProd;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface ShShopRepository extends JpaRepository<ShProd, Integer> {
+
+@Query("""
+SELECT DISTINCT p FROM ShProd p
+ LEFT JOIN FETCH p.prodPics
+ LEFT JOIN FETCH p.shProdType
+""")
+    List<ShProd> findAllWithPics();
+
+@Query("""
+SELECT p FROM ShProd p
+ LEFT JOIN FETCH p.prodPics
+ LEFT JOIN FETCH p.shProdType
+ WHERE p.prodId = ?1
+""")
+    ShProd getById(Integer id);
+
+@Query("""
+SELECT DISTINCT p FROM ShProd p
+ LEFT JOIN FETCH p.prodPics
+ LEFT JOIN FETCH p.shProdType
+ WHERE p.shProdType.prodTypeId = :typeId
+""")
+    List<ShProd> getByType(@Param("typeId") Integer typeId);
+
+@Query("""
+SELECT DISTINCT p FROM ShProd p
+ LEFT JOIN FETCH p.prodPics
+ LEFT JOIN FETCH p.shProdType
+ WHERE p.user.userId = :userId
+""")
+    List<ShProd> getByUserId(@Param("userId") Integer userId);
+}
+

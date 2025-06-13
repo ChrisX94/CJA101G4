@@ -33,6 +33,7 @@ public class LoginController {
         // 登入成功
         HttpSession session = request.getSession();
         session.setAttribute("account", user.getUserId());
+        System.out.println(session.getAttribute("account"));
 
         String location = (String) session.getAttribute("location");
         return (location != null ? location : "/testlogin/testlogin");
@@ -53,6 +54,7 @@ public class LoginController {
 
         return "redirect:/testlogin/testlogin"; // 回登入畫面
     }
+
 
 
 }
