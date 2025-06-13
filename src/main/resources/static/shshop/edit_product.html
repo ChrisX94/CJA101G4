@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商品上架｜二手商城</title>
+  <link rel="stylesheet" href="../css/header.css" />
+  <link rel="stylesheet" href="../css/add_product.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="header__logo">
+      <a href="#"><img src="../img/logoText.png" alt="Logo" /></a>
+    </div>
+    <nav class="header__nav">
+      <ul class="header__list">
+        <li class="header__item"><a href="#">配對</a></li>
+        <li class="header__item"><a href="#">聊天室</a></li>
+        <li class="header__item"><a href="#">活動</a></li>
+        <li class="header__item"><a href="#">討論區</a></li>
+        <li class="header__item"><a href="#">商城</a></li>
+        <li class="header__item"><a href="#">二手商城</a></li>
+        <li class="header__item"><a href="#">會員專區</a></li>
+      </ul>
+    </nav>
+    <i class="fa-solid fa-user"></i>
+  </header>
+
+  <div class="feature-bar">
+    <a href="#" class="feature-link">瀏覽二手商品</a>
+    <a href="#" class="feature-link">我的二手商品</a>
+    <a href="#" class="feature-link">上架二手商品</a>
+    <a href="#" class="feature-link">已購賣商品</a>
+  </div>
+  <main class="form-wrapper">
+    <h1>更新二手商品</h1>
+
+    <form class="form-layout" method="post" action="http://localhost:8081/CJA10138_Webapp_war_exploded/newOne"
+      enctype="multipart/form-data">
+      <input type="hidden" name="prodId" value="">
+      <input type="hidden" name="prodStatus" value="">
+      <!-- ✅ 基本資料 -->
+      <section class="form-section">
+        <div class="form-label-col">
+          <p>基本資訊</p>
+        </div>
+        <div class="form-input-col">
+          <div class="form-group">
+            <label>Product Name:</label>
+            <input type="text" name="prodName">
+            <div class="error-msg" id="prodNameError"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Product Brand:</label>
+            <input type="text" name="prodBrand">
+            <div class="error-msg" id="prodBrandError"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Product category:</label>
+            <select name="prodTypeId">
+              <option value="">Product Type</option>
+            </select>
+            <div class="error-msg" id="prodTypeIdError"></div>
+          </div>
+
+          <div class="form-row -number">
+            <div class="form-group">
+              <label>Product Price:</label>
+              <input type="number" name="prodPrice">
+              <div class="error-msg" id="prodPriceError"></div>
+            </div>
+
+            <div class="form-group">
+              <label>Product Qty:</label>
+              <input type="number" name="prodCount" value="1">
+              <div class="error-msg" id="prodCountError"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Product content:</label>
+            <textarea name="prodContent" rows="4"></textarea>
+            <div class="error-msg" id="prodContentError"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ✅ 圖片 -->
+      <section class="form-section">
+        <div class="form-label-col">
+          <p>圖片</p>
+        </div>
+        <div class="form-input-col">
+          <div class="image-preview-row">
+            <div class="img-box">img</div>
+            <div class="img-box">img</div>
+            <div class="img-box">img</div>
+            <div class="img-box">img</div>
+            <div class="img-box">img</div>
+          </div>
+          <div class="form-group">
+            <label>圖片（可多選）：</label>
+            <input type="file" name="prodImage" accept="image/*" multiple>
+          </div>
+        </div>
+      </section>
+
+      <!-- ✅ 介紹 -->
+      <section class="form-section">
+        <div class="form-label-col">
+          <p>介紹</p>
+        </div>
+        <div class="form-input-col">
+          <label>Product info:</label>
+          <textarea name="prodStatusDesc" rows="5"></textarea>
+          <div class="error-msg" id="prodStatusDescError"></div>
+        </div>
+      </section>
+
+      <!-- ✅ 按鈕區 -->
+      <div class="button-row">
+        <input type="hidden" name="action" value="updateProd" />
+        <button type="reset" class="discard">discard</button>
+        <button type="submit" class="save">save</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script> // 這裡是載入類別
+    $(document).ready(function () {
+      $.ajax({
+        url: "http://localhost:8081/CJA10138_Webapp_war_exploded/newOne",
+        method: "GET",
+        data: {
+          action: "allTypes"
+        },
+        dataType: "json",
+        success: function (data) {
+          const $select = $('select[name="prodTypeId"]');
+          $select.empty().append('<option value="">Product Type</option>');
+          data.forEach(function (type) {
+            $select.append(
+              `<option value="${type.prodTypeId}">${type.prodTypeName}</option>`
+            );
+          });
+        },
+        error: function (xhr, status, error) {
+          console.error("載入分類失敗", error);
+        }
+      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const prodId = localStorage.getItem("editingProdId");
+      const prodStatus = localStorage.getItem("prodStatus");
+      if (prodId) {
+        // 填入到 hidden 欄位中
+        document.getElementById("prodIdHidden").value = prodId;
+      }
+
+      const formData = new FormData();
+      formData.append("action", "getProd");
+      formData.append("id", prodId);
+      formData.append("prodStatus", prodStatus);
+    
+
+      fetch("http://localhost:8081/CJA10138_Webapp_war_exploded/newOne", {
+        method: "POST",
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("資料:", data);
+
+          // 自動填入表單欄位
+          document.querySelector('input[name="prodId"]').value = data.prodId;
+          document.querySelector('input[name="prodName"]').value = data.prodName;
+          document.querySelector('input[name="prodBrand"]').value = data.prodBrand;
+          document.querySelector('input[name="prodPrice"]').value = data.prodPrice;
+          document.querySelector('input[name="prodCount"]').value = data.prodCount;
+          document.querySelector('textarea[name="prodContent"]').value = data.prodContent;
+          document.querySelector('textarea[name="prodStatusDesc"]').value = data.prodDesc;
+
+          // 類別下拉要等 AJAX
+          const timer = setInterval(() => {
+            const select = document.querySelector('select[name="prodTypeId"]');
+            if (select && select.options.length > 1) {
+              select.value = data.prodTypeId;
+              clearInterval(timer);
+            }
+          }, 100);
+
+          // 顯示圖片
+          const imgBoxes = document.querySelectorAll(".img-box");
+          if (data.picUrls) {
+            data.picUrls.forEach((url, idx) => {
+              if (imgBoxes[idx]) {
+                imgBoxes[idx].innerHTML = `<img src="${url}" style="width:100%">`;
+              }
+            });
+          }
+
+          // 設定為更新模式
+          document.querySelector('input[name="action"]').value = "updateProd";
+
+          // ✅ 清除 localStorage
+          localStorage.removeItem("editingProdId");
+        })
+        .catch(err => {
+          alert("無法載入商品資料");
+          console.error(err);
+        });
+    });
+  </script>
+
+
+
+</body>
+
+</html>
