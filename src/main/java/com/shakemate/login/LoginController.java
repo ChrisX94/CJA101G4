@@ -35,7 +35,7 @@ public class LoginController {
         session.setAttribute("account", user.getUserId());
 
         String location = (String) session.getAttribute("location");
-        return (location != null ? location : "/testlogin/testlogin");
+        return "redirect:" + (location != null ? location : "/match.html");
     }
 
     // 處理登出
