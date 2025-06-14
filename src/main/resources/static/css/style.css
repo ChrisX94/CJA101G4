@@ -1,6 +1,5 @@
 @charset "UTF-8";
 
-@charset "UTF-8";
 /* 全域設定 */
 * {
 	padding: 0;
@@ -705,43 +704,38 @@ html {
 }
 
 /* ✅ 定義 fadeOut 動畫 */
-@
-keyframes fadeOut {from { opacity:1;
-	transform: scale(1);
-}
-
-to {
-	opacity: 0;
-	transform: scale(0.95);
-}
-
+@keyframes fadeOut {
+	from { opacity:1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.95);
+	}
 }
 
 /* ✅ 定義 fadeIn 動畫 */
-@
-keyframes fadeIn {from { opacity:0;
-	transform: scale(1.05);
-}
-
-to {
-	opacity: 1;
-	transform: scale(1);
-}
-
+@keyframes fadeIn {
+	from { opacity:0;
+		transform: scale(1.05);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 .chat-item.fade-in {
 	animation: fadeInMove 0.4s ease-out;
 }
 
-keyframes fadeInMove {from { opacity:0;
-	transform: translateY(10px);
-}
-
-to {
-	opacity: 1;
-	transform: translateY(0);
-}
-
+@keyframes fadeInMove {
+	from { opacity:0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 .unread-dot {
 	display: none;
