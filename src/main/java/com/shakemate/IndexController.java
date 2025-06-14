@@ -17,5 +17,9 @@ public class IndexController {
         return "login"; // 對應 resources/templates/login.html
     }
 
+    @GetMapping("/shprod")
+    public String productPage() {
+        return "forward:/shshop/select_page.html";
+    }
 
 }

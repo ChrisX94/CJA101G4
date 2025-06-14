@@ -133,115 +133,109 @@
 </main>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script> // 這裡是載入類別
-    $(document).ready(function () {
-      $.ajax({
-        url: "http://localhost:8087/api/ShShop/allTypes",
-        method: "GET",
-        data: {
-          action: "allTypes"
-        },
-        dataType: "json",
-        success: function (data) {
-          const $select = $('select[name="prodTypeId"]');
-          $select.empty().append('<option value="">Product Type</option>');
-          data.forEach(function (type) {
-            $select.append(
-              `<option value="${type.prodTypeId}">${type.prodTypeName}</option>`
-            );
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    fetch("http://localhost:8087/api/ShShop/allTypes")
+      .then(response => {
+        if (!response.ok) throw new Error("分類載入失敗");
+        return response.json();
+      })
+      .then(res => {
+        if (res.status === 200 && Array.isArray(res.data)) {
+          const $select = document.querySelector('select[name="prodTypeId"]');
+          $select.innerHTML = '<option value="">Product Type</option>';
+
+          res.data.forEach(type => {
+            const option = document.createElement("option");
+            option.value = type.prodTypeId;
+            option.textContent = type.prodTypeName;
+            $select.appendChild(option);
           });
-        },
-        error: function (xhr, status, error) {
-          console.error("載入分類失敗", error);
+        } else {
+          console.error("後端格式錯誤或無資料");
         }
+      })
+      .catch(err => {
+        console.error("載入分類失敗：", err);
       });
-    });
-  </script>
+  });
+</script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.querySelector(".form-layout");
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(".form-layout");
 
-      form.addEventListener("submit", function (e) {
-        e.preventDefault(); // 阻止原始提交
+    form.addEventListener("submit", function (e) {
+      e.preventDefault(); // 阻止原始提交
 
-        // 清除舊的錯誤提示
-        document.querySelectorAll(".error-msg").forEach(el => el.innerText = "");
+      // 清除舊的錯誤提示
+      document.querySelectorAll(".error-msg").forEach(el => el.innerText = "");
 
-        const formData = new FormData(form);
+      const formData = new FormData(form);
 
-        fetch("http://localhost:8087/api/ShShop/addNewProd", {
-          method: "POST",
-          body: formData
+      fetch("http://localhost:8087/api/ShShop/addNewProd", {
+        method: "POST",
+        body: formData
+      })
+        .then(response => {
+          return response.json().then(data => {
+            return { status: response.status, body: data };
+          });
         })
-          .then(response => {
-            if (!response.ok) throw new Error("伺服器錯誤");
-            return response.json();
-          })
-          .then(data => {
-            if (data.status === "success") {
-              const prodId = data.data.prodId;
-              if (prodId) {
-                window.location.href = `http://localhost:8087/api/ShShop/product_page.html?id=${prodId}`;
-              } else {
-                alert("商品上傳成功，但找不到商品編號！");
-              }
-            } else if (data.status === "error") {
-              // ✅ 顯示錯誤訊息
-              for (const field in data.errors) {
-                const errBox = document.querySelector(`#${field}Error`);
-                if (errBox) errBox.innerText = data.errors[field];
+        .then(({ status, body }) => {
+          if (body.message === "success") {
+            const prodId = body.data?.prodId;
+            if (prodId) {
+              window.location.href = `http://localhost:8087/ShShop/product_page.html?id=${prodId}`;
+            } else {
+              alert("商品上傳成功，但找不到商品編號！");
+            }
+          } else if (status === 400 && body.message === "validation_failed") {
+            // ✅ 顯示後端回傳的欄位錯誤訊息
+            const errors = body.errors || {};
+            for (const field in errors) {
+              const errBox = document.querySelector(`#${field}Error`);
+              if (errBox) {
+                errBox.innerText = errors[field];
               }
             }
-          })
-          .catch(error => {
-            alert("商品上傳失敗！");
-            console.error(error);
-          });
+          } else {
+            alert("發生未知錯誤：" + (body.message || "請稍後再試"));
+          }
+        })
+        .catch(error => {
+          alert("商品上傳失敗！");
+          console.error(error);
+        });
+    });
+  });
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const fileInput = document.querySelector("input[name='prodImage']");
+    const previewBoxes = document.querySelectorAll(".img-box");
+
+    fileInput.addEventListener("change", function () {
+      const files = Array.from(fileInput.files);
+
+      previewBoxes.forEach(box => {
+        box.innerHTML = "img"; // 清空預設文字
+      });
+
+      files.forEach((file, index) => {
+        if (index >= previewBoxes.length) return; // 最多顯示五張
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewBoxes[index].innerHTML = `<img src="${e.target.result}" alt="預覽圖片">`;
+        };
+        reader.readAsDataURL(file);
       });
     });
-  </script>
-
-
-
-  <script>
-    // $(document).ready(function () {
-
-    //   // ✅ 商品上架表單提交事件
-    //   $(".form-layout").on("submit", function (e) {
-    //     e.preventDefault(); // 阻止表單預設提交行為
-
-    //     const formData = {
-    //       action: "add",
-    //       userId: 1, // 之後改成動態帶入的會員ID
-    //       prodName: $("input[name='prodName']").val(),
-    //       prodBrand: $("input[name='prodBrand']").val(),
-    //       prodTypeId: $("select[name='prodTypeId']").val(),
-    //       prodPrice: $("input[name='prodPrice']").val(),
-    //       prodCount: $("input[name='prodCount']").val(),
-    //       prodContent: $("textarea[name='prodContent']").val(),
-    //       prodStatusDesc: $("textarea[name='prodStatusDesc']").val(),
-    //       prodStatus: 1, // 預設為上架狀態（1 = 有效）
-    //       shProdPicUrl: ["https://placehold.co/400x300"] // 你之後要改成圖片上傳功能
-    //     };
-
-    //     $.ajax({
-    //       url: "http://localhost:8081/CJA10138_Webapp_war_exploded/newOne",
-    //       method: "POST",
-    //       contentType: "application/json",
-    //       data: JSON.stringify(formData),
-    //       success: function (res) {
-    //         alert("上架成功！");
-    //         console.log(res);
-    //       },
-    //       error: function (xhr, status, error) {
-    //         alert("上架失敗！");
-    //         console.error(error);
-    //       }
-    //     });
-    //   });
-    // });
-  </script>
+  });
+</script>
 
 </body>
 

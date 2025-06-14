@@ -36,7 +36,7 @@
     <div class="feature-bar">
         <a href="#" class="feature-link">瀏覽二手商品</a>
         <a href="./product_manager.html" class="feature-link">我的二手商品</a>
-        <a href="add_product.html" class="feature-link">上架二手商品</a>
+        <a href="./add_product.html" class="feature-link">上架二手商品</a>
         <a href="#" class="feature-link">已購賣商品</a>
     </div>
 
@@ -80,35 +80,42 @@
             localStorage.setItem("prodStatus", prodStatus);
             window.location.href = "edit_product.html";
         }
-        document.addEventListener("DOMContentLoaded", function () {
 
-            fetch("http://localhost:8087/api/ShShop/getProds", {
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("http://localhost:8087/api/ShShop/myProds", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: new URLSearchParams({
-                    action: "getUserProdList",
-                    userId: 1 // 如果需要帶 userId
+                    action: "getUserProdList" // 如果你後端需要 action，記得加
                 })
             })
                 .then(res => res.json())
-                .then(data => {
+                .then(res => {
+                    if (!res || !res.data || !Array.isArray(res.data)) {
+                        console.error("回傳格式錯誤", res);
+                        return;
+                    }
+
                     const tbody = document.querySelector("tbody");
                     tbody.innerHTML = ""; // 清空原有資料
 
-                    data.forEach(prod => {
-                        const firstImg = prod.picUrls && prod.picUrls.length > 0 ? prod.picUrls[0] : "https://via.placeholder.com/60";
+                    res.data.forEach(prod => {
+                        const firstImg = prod.picUrls && prod.picUrls.length > 0
+                            ? prod.picUrls[0]
+                            : "https://via.placeholder.com/60";
+
                         const tr = document.createElement("tr");
                         tr.innerHTML = `
             <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
             <td>${prod.prodName}</td>
             <td>$${prod.prodPrice}</td>
             <td>${prod.prodCount}</td>
-            <td>${prod.prodDesc}</td>
-            <td>${prod.prodStatusStr}</td>
+            <td>${prod.prodDesc || ''}</td>
+            <td>${prod.prodStatusStr || ''}</td>
             <td>
-                <button type="button" class="edit-btn" onclick="goToEdit(${prod.prodId, prod.prodStatus})">修改</button>
+              <button type="button" class="edit-btn" onclick="goToEdit(${prod.prodId}, ${prod.prodStatus})">修改</button>
             </td>
           `;
                         tbody.appendChild(tr);

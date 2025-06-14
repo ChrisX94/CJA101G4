@@ -64,6 +64,7 @@ public class ShProdType implements Serializable {
         return shProds;
     }
 
+
     public void setShProds(List<ShProd> shProds) {
         this.shProds = shProds;
     }
