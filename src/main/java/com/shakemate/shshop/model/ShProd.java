@@ -3,6 +3,7 @@ package com.shakemate.shshop.model;
 
 import com.shakemate.user.model.Users;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -23,10 +24,16 @@ public class ShProd implements Serializable {
     @Column(name = "PROD_ID")
     private Integer prodId;
 
+
     @ManyToOne
     @JoinColumn(name = "USER_ID", nullable = false)
     private Users user;
 
+    @NotEmpty(message="商品名稱: 請勿空白")
+    @Pattern(
+            regexp = "^[\\p{L}\\p{N}\\p{Zs}\\p{Punct}]{1,50}$",
+            message = "商品內容只能包含中、英文、日韓法文字、數字與標點，最多50字"
+    )
     @Column(name = "PROD_NAME")
     private String prodName;
 
@@ -35,17 +42,38 @@ public class ShProd implements Serializable {
     private ShProdType shProdType;
 
     @Column(name = "PROD_CONTENT")
+    @NotEmpty(message="商品內容: 請勿空白")
+    @Pattern(
+            regexp = "^[\\p{L}\\p{N}\\p{Zs}\\p{Punct}]{1,800}$",
+            message = "商品內容只能包含中、英文、日韓法文字、數字與標點，最多800字"
+    )
     private String prodContent;
 
+    @NotEmpty(message="商品敘述: 請勿空白")
+    @Pattern(
+            regexp = "^[\\p{L}\\p{N}\\p{Zs}\\p{Punct}]{1,800}$",
+            message = "商品內容只能包含中、英文、日韓法文字、數字與標點，最多800字"
+    )
     @Column(name = "PROD_STATUS_DESC")
     private String prodStatusDesc;
 
+    @NotNull(message = "商品價格: 請勿空白")
+    @Min(value = 1, message = "商品價格: 不能小於 {value}")
+    @Max(value = 10000, message = "商品價格: 不能超過 {value}")
     @Column(name = "PROD_PRICE")
     private Integer prodPrice;
 
+    @NotEmpty(message="商品品牌: 請勿空白")
+    @Pattern(
+            regexp = "^[\\p{L}\\p{N}\\p{Zs}\\p{Punct}]{1,50}$",
+            message = "商品內容只能包含中、英文、日韓法文字、數字與標點，最多50字"
+    )
     @Column(name = "PROD_BRAND")
     private String prodBrand;
 
+    @NotNull(message = "商品數量: 請勿空白")
+    @Min(value = 1, message = "商品數量: 不能小於 {value}")
+    @Max(value = 10, message = "商品數量: 不能超過 {value}")
     @Column(name = "PROD_COUNT")
     private Integer prodCount;
 

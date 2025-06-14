@@ -102,14 +102,17 @@
                 console.error("缺少商品 id");
                 return;
             }
-            fetch(`http://localhost:8087/api/ShShop/product_page.html?id=${productId}`)
+
+            fetch(`http://localhost:8087/api/ShShop/getProd?id=${productId}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error("後端回傳錯誤");
                     }
                     return response.json();
                 })
-                .then(data => {
+                .then(responseData => {
+                    const data = responseData.data; // ✅ 取出內層 data 才是商品資訊
+
                     // 主圖
                     const mainImg = document.querySelector(".main-img img");
                     if (data.picUrls && data.picUrls.length > 0) {
@@ -126,7 +129,6 @@
                     document.querySelector(".qty").innerHTML = `<strong>商品數量：</strong>${data.prodCount}`;
                     // 價錢
                     document.querySelector(".price").innerHTML = `<strong>商品價錢：</strong>$${data.prodPrice}`;
-
                     // 商品性質（類別）
                     document.querySelector(".prod_type").innerHTML = `<strong>商品類別：</strong>${data.prodTypeName}`;
 
@@ -153,6 +155,7 @@
                 });
         });
     </script>
+
 
 
 
