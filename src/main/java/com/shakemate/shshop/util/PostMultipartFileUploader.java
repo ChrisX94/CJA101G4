@@ -1,4 +1,4 @@
-package com.shakemate.util;
+package com.shakemate.shshop.util;
 
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import java.util.Base64;
 
 @Component
 public class PostMultipartFileUploader {
-    private static final String IMGBB_API_KEY = "46151f177ffa2e0129395cc448b2c190";
+    private static final String IMGBB_API_KEY = ImgbbAK.getImgbbApiKey("for_ShShop_Use_Only");
 
     public static String uploadImageToImgbb(MultipartFile imageFile) throws IOException {
         if (imageFile == null || imageFile.isEmpty()) return null;
