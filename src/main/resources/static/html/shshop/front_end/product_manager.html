@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My MatchMarket</title>
+    <link rel="stylesheet" href="../../../css/shshop/header.css" />
+    <link rel="stylesheet" href="../../../css/shshop/product_manager.css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header__logo">
+            <a href="#"><img src="../../../img/logoText.png" alt="Logo" /></a>
+        </div>
+        <nav class="header__nav">
+            <ul class="header__list">
+                <li class="header__item"><a href="#">配對</a></li>
+                <li class="header__item"><a href="#">聊天室</a></li>
+                <li class="header__item"><a href="#">活動</a></li>
+                <li class="header__item"><a href="#">討論區</a></li>
+                <li class="header__item"><a href="#">MatchMarket</a></li>
+                <li class="header__item"><a href="#">會員專區</a></li>
+            </ul>
+        </nav>
+        <i class="fa-solid fa-user"></i>
+    </header>
+
+    <div class="feature-bar">
+        <a href="http://localhost:8087/shshop" class="feature-link">看一下商品</a>
+        <a href="#" class="feature-link">我的商品</a>
+        <a href="add_product.html" class="feature-link">上架商品</a>
+        <a href="#" class="feature-link">已購賣商品</a>
+    </div>
+
+    <!-- ✅ 側邊欄 -->
+    <div class="sidebar">
+        <h3>商品管理</h3>
+        <a href="#">全部商品</a>
+        <a href="#">已上架商品</a>
+        <a href="#">下架商品</a>
+        <a href="#">查看審核狀態</a>
+        <a href="#" class="active">我的商品</a>
+    </div>
+
+    <!-- ✅ 主內容 -->
+    <div class="main-content">
+        <div class="page-title">我的商品</div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>商品圖片</th>
+                    <th>商品名稱</th>
+                    <th>價格</th>
+                    <th>數量</th>
+                    <th>描述</th>
+                    <th>商品狀態</th>
+                    <th>修改</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <script>
+        function goToEdit(prodId, prodStatus) {
+            localStorage.setItem("editingProdId", prodId);
+            localStorage.setItem("prodStatus", prodStatus);
+            window.location.href = "edit_product.html";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("http://localhost:8087/api/ShShop/myProds", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    action: "getUserProdList"
+                })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (!res || !res.data || !Array.isArray(res.data)) {
+                        console.error("回傳格式錯誤", res);
+                        return;
+                    }
+
+                    const tbody = document.querySelector("tbody");
+                    tbody.innerHTML = ""; // 清空原有資料
+
+                    res.data.forEach(prod => {
+                        const firstImg = prod.picUrls && prod.picUrls.length > 0
+                            ? prod.picUrls[0]
+                            : "https://via.placeholder.com/60";
+
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+            <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
+            <td>${prod.prodName}</td>
+            <td>$${prod.prodPrice}</td>
+            <td>${prod.prodCount}</td>
+            <td>${prod.prodDesc || ''}</td>
+            <td>${prod.prodStatusStr || ''}</td>
+            <td>
+              <button type="button" class="edit-btn" onclick="goToEdit(${prod.prodId}, ${prod.prodStatus})">修改</button>
+            </td>
+          `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("載入商品失敗：", err);
+                });
+        });
+    </script>
+
+
+
+
+</body>
+
+</html>
