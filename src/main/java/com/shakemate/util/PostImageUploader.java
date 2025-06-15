@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PostImageUploader {
-    private static final String IMGBB_API_KEY = "46151f177ffa2e0129395cc448b2c190"; // 請換成你自己的
+    private static final String IMGBB_API_KEY = ""; //
 
     public static String uploadImageToImgbb(Part imagePart) throws IOException {
         if (imagePart == null || imagePart.getSize() == 0) return null;

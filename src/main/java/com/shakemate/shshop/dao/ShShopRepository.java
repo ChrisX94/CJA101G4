@@ -39,5 +39,22 @@ SELECT DISTINCT p FROM ShProd p
  WHERE p.user.userId = :userId
 """)
     List<ShProd> getByUserId(@Param("userId") Integer userId);
+
+@Query("""
+SELECT DISTINCT p FROM ShProd p
+ LEFT JOIN FETCH p.prodPics
+ LEFT JOIN FETCH p.shProdType
+ WHERE p.user.userId = :userId
+ AND(
+    p.prodName LIKE CONCAT('%', :keyStr, '%')
+    OR p.prodBrand LIKE CONCAT('%', :keyStr, '%')
+    OR p.prodContent LIKE CONCAT('%', :keyStr, '%')
+    )
+""")
+List<ShProd> getByUserAndKeyStr(@Param("userId") Integer userId, @Param("keyStr") String keyStr);
+
+
+
 }
+
 
