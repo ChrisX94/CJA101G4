@@ -79,19 +79,12 @@ public class ShProdDto {
 
 
     public  String getProdStatusStr(byte prodStatus) {
-        String result = "";
-        switch (prodStatus) {
-            case 0: result = "審核中";
-            break;
-            case 1: result = "審核不通過";
-            break;
-            case 2: result = "已上架";
-            break;
-            case 3: result = "已下架";
-            default:
-                result = "審核中";
-                break;
-        }
+        String result = switch (prodStatus) {
+            case 1 -> "審核不通過";
+            case 2 -> "已上架";
+            case 3 -> "已下架";
+            default -> "審核中";
+        };
         return result;
     }
 

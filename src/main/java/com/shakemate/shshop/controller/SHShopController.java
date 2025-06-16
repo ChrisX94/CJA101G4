@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")
@@ -123,7 +124,7 @@ public class SHShopController {
 
     // 用user找商品(用戶管理商品用)
     @PostMapping("/myProds")
-    public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(HttpSession session) {
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("action") String status, HttpSession session) {
         Object userIdObj = session.getAttribute("account");
         if (userIdObj == null) {
             return ResponseEntity
@@ -132,9 +133,27 @@ public class SHShopController {
         }
         Integer userId = Integer.parseInt(userIdObj.toString());
         List<ShProdDto> data = shShopService.getProdsByUser(userId);
+        switch (status) {
+            case "pending":
+                data = data.stream().filter(p -> p.getProdStatus() == 0).collect(Collectors.toList());
+                break;
+            case "rejected":
+                data = data.stream().filter(p -> (p.getProdStatus() == 1)).collect(Collectors.toList());
+                break;
+            case "OnPending":
+                data = data.stream().filter(p -> (p.getProdStatus() == 0 || p.getProdStatus() == 1)).collect(Collectors.toList());
+                break;
+            case "available":
+                data = data.stream().filter(p -> p.getProdStatus() == 2).collect(Collectors.toList());
+                break;
+            case "notAvailable":
+                data = data.stream().filter(p -> p.getProdStatus() == 3).collect(Collectors.toList());
+                break;
+            default:
+                break;
+        }
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
-
 
 
     // 用PK找商品(get) 會計數
@@ -218,6 +237,28 @@ public class SHShopController {
         }
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
+
+    // 會員下架商品
+    @PostMapping("/delist")
+    public ResponseEntity<ApiResponse<ShProdDto>> changeStatus(@RequestParam("prodId") Integer prodId,
+                                                               HttpSession session) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Integer userId = Integer.parseInt(userIdObj.toString());
+        ShProdDto data = shShopService.delistProdByUser(userId, prodId);
+        if (data == null) {
+            return ResponseEntity.ok(ApiResponseFactory.success("No Such Product", null));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success("success", null));
+        }
+    }
+
+
+
     /* ======================================== Back-End ========================================== */
 
     // 以分類搜尋(管理員用)
@@ -262,11 +303,11 @@ public class SHShopController {
         }
         List<UserDto> list = shShopService.getFriendsInfo(Integer.parseInt(userIdObj.toString()));
         if (list == null || list.size() == 0) {
-                return ResponseEntity.ok(ApiResponseFactory.success("目前沒有好友有商品，配對連結", list));
-            } else {
-                return ResponseEntity.ok(ApiResponseFactory.success("success", list));
-            }
+            return ResponseEntity.ok(ApiResponseFactory.success("目前沒有好友有商品，配對連結", list));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success("success", list));
         }
+    }
 
 
 }

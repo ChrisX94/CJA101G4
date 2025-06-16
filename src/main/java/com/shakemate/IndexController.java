@@ -16,7 +16,6 @@ public class IndexController {
     public String showLoginForm() {
         return "login"; // 對應 resources/templates/login.html
     }
-
     @GetMapping("/shshop")
     public String productPage() {
         return "forward:html/shshop/front_end/select_page.html";

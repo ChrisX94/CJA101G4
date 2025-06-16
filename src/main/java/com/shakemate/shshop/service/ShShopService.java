@@ -66,7 +66,6 @@ public class ShShopService {
         }
     }
 
-
     // 找尋全部朋友的商品
     @Transactional(readOnly = true)
     public List<ShProdDto> findAvailableProds(Integer userId) {
@@ -211,7 +210,7 @@ public class ShShopService {
         }
     }
 
-    // 查全部(管理員用)
+    // 查全部(管理員用，不以會員的session限制能看到的商品)
     @Transactional(readOnly = true)
     public List<ShProdDto> getAll() {
         List<ShProd> list = repo.findAllWithPics();
@@ -254,6 +253,35 @@ public class ShShopService {
             repo.save(prod);
         }
     }
+
+    // 會員下架商品(為安全起見，會員只能下架自己的商品)
+    @Transactional
+    public ShProdDto delistProdByUser(Integer userId, Integer prodId) {
+        List<ShProd> prods = repo.getByUserId(userId);
+        ShProdDto prod = null;
+        if (prods != null || prods.size() > 0) {
+            for (ShProd p : prods) {
+                if (p.getProdId() == prodId) {
+                    p.setProdStatus((byte) 3);
+                    prod =new ShProdDto(repo.save(p));
+                    break;
+                }
+            }
+        }
+        return prod;
+    }
+
+
+    // 修改商品狀態
+    @Transactional
+    public void changeProdStatus(int id, byte status) {
+        ShProd prod = repo.getById(id);
+        if (prod != null) {
+            prod.setProdStatus(status);
+            repo.save(prod);
+        }
+    }
+
 
     @Transactional(readOnly = true)
     public List<ShProdDto> getProdsByType(Integer typeId) {
