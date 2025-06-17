@@ -1,6 +1,8 @@
-package com.shakemate.util;
+package com.shakemate.shshop.util;
 
-
+import org.json.JSONObject;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -8,20 +10,15 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Base64;
 
-import jakarta.servlet.http.Part;
-import org.json.JSONObject;
-import org.springframework.stereotype.Component;
-
 @Component
-public class PostImageUploader {
-    private static final String IMGBB_API_KEY = ""; //
+public class PostMultipartFileUploader {
+    private static final String IMGBB_API_KEY = ImgbbAK.getImgbbApiKey("for_ShShop_Use_Only");
 
-    public static String uploadImageToImgbb(Part imagePart) throws IOException {
-        if (imagePart == null || imagePart.getSize() == 0) return null;
+    public static String uploadImageToImgbb(MultipartFile imageFile) throws IOException {
+        if (imageFile == null || imageFile.isEmpty()) return null;
 
         // 1. 將圖片讀成 Base64
-        InputStream imageStream = imagePart.getInputStream();
-        byte[] imageBytes = imageStream.readAllBytes();
+        byte[] imageBytes = imageFile.getBytes();
         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 
         // 2. 發送 POST 請求到 Imgbb
@@ -46,7 +43,6 @@ public class PostImageUploader {
             }
         }
 
-
         // 4. 解析 JSON 回傳
         JSONObject jsonObject = new JSONObject(response.toString());
 
@@ -55,7 +51,6 @@ public class PostImageUploader {
             return null;
         }
 
-        String imageUrl = jsonObject.getJSONObject("data").getString("url");
-        return imageUrl;
+        return jsonObject.getJSONObject("data").getString("url");
     }
 }
