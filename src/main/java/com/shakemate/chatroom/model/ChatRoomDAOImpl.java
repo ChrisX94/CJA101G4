@@ -1,8 +1,8 @@
-package com.shakemate.model;
+package com.shakemate.chatroom.model;
 
 import org.springframework.stereotype.Repository;
 
-import com.shakemate.vo.ChatRoomVO;
+import com.shakemate.chatroom.vo.ChatRoomVO;
 
 import javax.sql.DataSource;
 import java.sql.*;

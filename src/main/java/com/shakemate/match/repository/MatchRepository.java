@@ -1,15 +1,18 @@
-package com.shakemate.model;
+package com.shakemate.match.repository;
+
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.shakemate.vo.UserMatchVO;
+import com.shakemate.match.vo.UserMatchVO;
 
 @Repository
-public interface MatchDAO2 extends JpaRepository<UserMatchVO, Integer> {
+public interface MatchRepository extends JpaRepository<UserMatchVO, Integer> {
 	// 檢查 userId 是否已經對 targetId 執行過任何配對動作（不分 like / dislike / matched）
 	boolean existsByActionUserIdAndTargetUserId(int actionUserId, int targetUserId);
 	
@@ -39,4 +42,17 @@ public interface MatchDAO2 extends JpaRepository<UserMatchVO, Integer> {
 
 	// 查詢是否已有配對紀錄
     UserMatchVO findByActionUserIdAndTargetUserIdAndActionType(int userId, int targetId, int actionType);
+
+    @Query(value = """
+            SELECT 
+                CASE 
+                    WHEN action_user_id = :userId THEN target_user_id
+                    WHEN target_user_id = :userId THEN action_user_id
+                END AS friendId
+            FROM user_matches
+            WHERE action_type = 2
+              AND (action_user_id = :userId OR target_user_id = :userId)
+        """, nativeQuery = true)
+    List<Integer> findFriendIdsByUserId(@Param("userId") Integer userId);
+
 }

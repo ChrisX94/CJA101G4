@@ -1,4 +1,4 @@
-package com.shakemate.WebSocket.controller;
+package com.shakemate.chatroom.WebSocket.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

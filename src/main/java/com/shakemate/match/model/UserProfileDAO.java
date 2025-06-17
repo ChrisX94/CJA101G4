@@ -1,9 +1,9 @@
-package com.shakemate.model;
+package com.shakemate.match.model;
 
 import java.sql.SQLException;
 import java.util.List;
 
-import com.shakemate.vo.UserProfileVO;
+import com.shakemate.match.vo.UserProfileVO;
 
 public interface UserProfileDAO {
 	public UserProfileVO findById(int userId) throws SQLException;

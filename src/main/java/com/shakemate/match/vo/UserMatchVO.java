@@ -1,4 +1,4 @@
-package com.shakemate.vo;
+package com.shakemate.match.vo;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,8 +1,9 @@
-package com.shakemate.controller;
+package com.shakemate.match.controller;
 
-import com.shakemate.service.MatchService;
-import com.shakemate.vo.UserProfileVO;
-import com.shakemate.model.UserProfileDAOImpl;
+import com.shakemate.match.model.UserProfileDAOImpl;
+import com.shakemate.match.service.MatchService;
+import com.shakemate.match.vo.UserProfileVO;
+
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;

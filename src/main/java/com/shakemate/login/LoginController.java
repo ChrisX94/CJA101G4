@@ -35,7 +35,7 @@ public class LoginController {
         session.setAttribute("account", user.getUserId());
 
         String location = (String) session.getAttribute("location");
-        return "redirect:" + (location != null ? location : "/match.html");
+        return "redirect:" + (location != null ? location : "/match_chatroom/match.html");
     }
 
     // 處理登出

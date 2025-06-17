@@ -1,8 +1,8 @@
-package com.shakemate.model;
+package com.shakemate.match.model;
 
 import org.springframework.stereotype.Repository;
 
-import com.shakemate.vo.UserProfileVO;
+import com.shakemate.match.vo.UserProfileVO;
 
 import javax.sql.DataSource;
 import java.sql.*;

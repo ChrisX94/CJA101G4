@@ -1,4 +1,4 @@
-package com.shakemate.vo;
+package com.shakemate.chatroom.vo;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

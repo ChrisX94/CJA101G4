@@ -1,4 +1,4 @@
-package com.shakemate.WebSocket.controller;
+package com.shakemate.chatroom.WebSocket.controller;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;

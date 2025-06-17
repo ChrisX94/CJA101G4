@@ -1,12 +1,12 @@
-package com.shakemate.controller;
+package com.shakemate.chatroom.controller;
 
-import com.shakemate.model.ChatMessageDAO2;
-import com.shakemate.model.ChatRoomDAO;
-import com.shakemate.model.UserProfileDAO;
-import com.shakemate.service.ChatMessageService;
-import com.shakemate.vo.ChatMessageVO;
-import com.shakemate.vo.ChatRoomVO;
-import com.shakemate.vo.UserProfileVO;
+import com.shakemate.chatroom.model.ChatRoomDAO;
+import com.shakemate.chatroom.repository.ChatMessageRepository;
+import com.shakemate.chatroom.service.ChatMessageService;
+import com.shakemate.chatroom.vo.ChatMessageVO;
+import com.shakemate.chatroom.vo.ChatRoomVO;
+import com.shakemate.match.model.UserProfileDAO;
+import com.shakemate.match.vo.UserProfileVO;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -32,7 +32,7 @@ public class ChatRoomController {
 	private ChatMessageService chatMessageService;
 	
 	@Autowired
-	private ChatMessageDAO2 chatMessageDAO2;
+	private ChatMessageRepository chatMessageRepository;
 
 	@Autowired
 	private UserProfileDAO userProfileDAO;
@@ -91,7 +91,19 @@ public class ChatRoomController {
     public ResponseEntity<?> markAsRead(@RequestParam int roomId, HttpSession session) {
         try {
             Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
-            chatMessageService.markMessagesAsReadWithRetry(currentUserId, roomId);
+            chatMessageService.markMessagesAsReadWhenClickRoom(currentUserId, roomId);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("error");
+        }
+    }
+    
+    // ✅ 雙方都在聊天室內的已讀訊息
+    @PostMapping("/markAsReadInRoom")
+    public ResponseEntity<?> markAsReadInRoom(@RequestParam int roomId, @RequestParam int currentUserId, HttpSession session) {
+        try {
+            chatMessageService.markMessagesAsReadWhenInRoom(currentUserId, roomId);
             return ResponseEntity.ok("success");
         } catch (Exception e) {
             e.printStackTrace();
