@@ -439,7 +439,7 @@ html {
   justify-content: space-between;
   padding: 0 4rem 0 2rem;
   box-sizing: border-box;
-  box-shadow: 0 0 2rem rgba(77, 112, 134, 0.2941176471);
+  box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294);
   position: relative;
   z-index: 1000;
 }
@@ -448,34 +448,77 @@ html {
   height: 4.5rem;
 }
 .header__logo img {
-  height: 4.5rem;
+  height: 100%;
 }
 
 .header__nav {
   display: flex;
+  align-items: center;
+  box-sizing: border-box;
   gap: 4rem;
-  margin-left: 45rem;
+  transition: all 0.3s ease;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__nav {
+    position: absolute;
+    top: 6.5rem;
+    right: 0;
+    flex-direction: column;
+    background: #fff;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    gap: 2rem;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+@media (max-width: 480px) {
+  .header__nav {
+    position: absolute;
+    top: 6.5rem;
+    right: 0;
+    flex-direction: column;
+    background: #fff;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    gap: 2rem;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__nav.open {
+    padding: 2rem;
+    max-height: 500px;
+  }
+}
+@media (max-width: 480px) {
+  .header__nav.open {
+    padding: 2rem;
+    max-height: 500px;
+  }
 }
 
-.header__nav-item {
-  font-size: 1.6rem;
-  color: #333;
-  cursor: pointer;
-}
-.header__nav-item:hover {
-  color: #3e92cc;
-}
-
-.header__logo {
-  font-size: 2.4rem;
-  font-weight: bold;
-  color: #3e92cc;
-}
-
-.header__nav ul {
+.header__list {
   display: flex;
+  gap: 2.9rem;
   list-style: none;
-  gap: 3rem;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__list {
+    flex-direction: column;
+    width: 100%;
+    gap: 1.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .header__list {
+    flex-direction: column;
+    width: 100%;
+    gap: 1.5rem;
+  }
 }
 
 .header__item a {
@@ -495,6 +538,30 @@ html {
 }
 .fa-user:hover {
   color: #3e92cc;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 2.5rem;
+  height: 1.8rem;
+  cursor: pointer;
+}
+.hamburger span {
+  height: 0.3rem;
+  background: #333;
+  border-radius: 3px;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+}
+@media (max-width: 480px) {
+  .hamburger {
+    display: flex;
+  }
 }
 
 /* 📌 配對頁面 SCSS (支援翻頁) */
