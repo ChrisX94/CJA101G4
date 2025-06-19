@@ -344,7 +344,7 @@
         e.preventDefault(); // 阻止表單預設提交行為
 
         const formData = $(this).serialize(); // 將所有欄位轉為 URL encoded 格式
-        console.log("進階搜尋資料:", formData);
+    
         $.ajax({
           url: "http://localhost:8087/api/ShShop/advanceSearch", // 假設這是後端 endpoint
           method: "POST",
