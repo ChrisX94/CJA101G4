@@ -19,7 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -155,7 +157,6 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
-
     // 用PK找商品(get) 會計數
     @GetMapping("/getProd")
     public ResponseEntity<ApiResponse<ShProdDto>> getProdsById(@RequestParam("id") String idStr) {
@@ -198,7 +199,6 @@ public class SHShopController {
                 picUrls.add(url);
             }
         }
-
         ShProdDto saved = shShopService.createNewProduct(userId, form, picUrls);
         return ResponseEntity.ok(ApiResponseFactory.success(saved));
     }
@@ -258,6 +258,42 @@ public class SHShopController {
     }
 
 
+    @PostMapping("/advanceSearch")
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> advanceSearch(@RequestParam(value = "prodName", required = false) String prodName,
+                                                                      @RequestParam(value = "prodBrand", required = false) String prodBrand,
+                                                                      @RequestParam(value = "prodContent", required = false) String prodContent,
+                                                                      @RequestParam(value = "typeId", required = false) String typeId,
+                                                                      @RequestParam(value = "minPrice", required = false) String minPrice,
+                                                                      @RequestParam(value = "maxPrice", required = false) String maxPrice,
+                                                                      @RequestParam(value = "username", required = false) String username,
+                                                                      HttpSession session
+                                                                      ){
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Map<String, String> ParamMap = new HashMap();
+        Integer userId = Integer.parseInt(userIdObj.toString());
+        ParamMap.put("userId", userId.toString());
+        ParamMap.put("prodName", prodName);
+        ParamMap.put("prodBrand", prodBrand);
+        ParamMap.put("prodContent", prodContent);
+        ParamMap.put("typeId", typeId);
+        ParamMap.put("minPrice", minPrice);
+        ParamMap.put("maxPrice", maxPrice);
+        ParamMap.put("username", username);
+        List<ShProdDto> data = shShopService.getProdsByCompositeQuery(ParamMap);
+
+        if (data == null) {
+            return ResponseEntity.ok(ApiResponseFactory.success("No Such Product", null));
+        }else{
+            return ResponseEntity.ok(ApiResponseFactory.success("success", data));
+        }
+    }
+
+
 
     /* ======================================== Back-End ========================================== */
 
@@ -278,12 +314,49 @@ public class SHShopController {
 
     // 用user找商品(會員、管理員共用)
     @PostMapping("/getProdsByUser")
-    public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("userId") String userIdStr) {
-        Integer userId = Integer.parseInt(userIdStr.toString());
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("userId") Integer userId) {
         List<ShProdDto> data = shShopService.getProdsByUser(userId);
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
+    // 修改商品狀態
+    @PostMapping("/changeStatus")
+    public ResponseEntity<ApiResponse<String>> ApproveProd(@RequestParam("prodId") Integer prodId,
+                                                              @RequestParam("status") String status,
+                                                              HttpSession session) {
+//        // 等adm做好在加
+//        Object AdmObj = session.getAttribute("Adm");
+//        if (userIdObj == null) {
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body(ApiResponseFactory.error(400, "管理員尚未登入"));
+//        }
+        String returnMsg;
+        switch (status) {
+            case "pending": returnMsg = "pending review";
+                    shShopService.changeProdStatus(prodId,(byte)0);
+                break;
+            case "reject": returnMsg = "Rejected";
+                shShopService.changeProdStatus(prodId,(byte)1);
+                break;
+            case "approve": returnMsg = "Approved";
+                shShopService.changeProdStatus(prodId,(byte)2);
+                break;
+            case "delist": returnMsg = "Delist";
+                shShopService.changeProdStatus(prodId,(byte)3);
+                break;
+            default: returnMsg = "Unknown Status";
+                break;
+        }
+        return ResponseEntity.ok(ApiResponseFactory.success(returnMsg));
+    }
 
+
+    // 用PK找商品(post)用於管理員審核
+    @PostMapping("/reviewProd")
+    public ResponseEntity<ApiResponse<ShProdDto>> reviewProd(@RequestParam("id") Integer id) {
+        ShProdDto data = shShopService.getById(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
 
     /* ======================================== General ========================================== */
     // 全部的類別，用於於前端顯示頁面
