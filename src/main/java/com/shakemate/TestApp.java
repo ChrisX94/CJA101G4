@@ -44,6 +44,8 @@ public class TestApp implements CommandLineRunner {
 //        System.out.println("findAvailableProdsAscTime" + shShopService.findAvailableProdsTimeAsc(10));
 //        System.out.println("findAvailableProdsByStr" + shShopService.findAvailableProdsByStr(10, "二"));
 //        System.out.println("findAvailableProdsByStr" + shShopService.getFriendsInfo(10));
+//        System.out.println("delist" + shShopService.delistProdByUser(2, 19));
+
 
 
 

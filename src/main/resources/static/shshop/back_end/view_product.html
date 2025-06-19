@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Product details｜MatchMarket</title>
+    <link rel="stylesheet" href="css/header.css" />
+    <link rel="stylesheet" href="css/view_product.css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header__logo">
+            <a href="#"><img src="../../img/logoText.png" alt="Logo" /></a>
+        </div>
+        <nav class="header__nav">
+            <ul class="header__list">
+                <li class="header__item"><a href="#">配對</a></li>
+                <li class="header__item"><a href="#">聊天室</a></li>
+                <li class="header__item"><a href="#">活動</a></li>
+                <li class="header__item"><a href="#">討論區</a></li>
+                <li class="header__item"><a href="#">MatchMarket</a></li>
+                <li class="header__item"><a href="#">會員專區</a></li>
+            </ul>
+        </nav>
+        <i class="fa-solid fa-user"></i>
+    </header>
+
+    <div class="feature-bar">
+        <a href="select_page.html" class="feature-link">看一下商品</a>
+        <a href="product_manager.html" class="feature-link">My MatchMarket</a>
+        <a href="add_product.html" class="feature-link">上架商品</a>
+        <a href="#" class="feature-link">已購賣商品</a>
+    </div>
+
+
+    <main class="main-detail">
+        <div class="product-page">
+
+            <!-- 左側圖片 -->
+            <div class="left-image-box">
+                <div class="main-img">
+                    <img src="https://placehold.co/300x300" alt="主圖">
+                </div>
+                <div class="thumbnail-bar">
+                    <button class="nav-arrow">←</button>
+                    <img src="https://placehold.co/80x80" alt="圖1">
+                    <img src="https://placehold.co/80x80" alt="圖2">
+                    <img src="https://placehold.co/80x80" alt="圖3">
+                    <button class="nav-arrow">→</button>
+                </div>
+            </div>
+
+            <!-- 右側資訊 -->
+            <div class="right-info-box">
+                <h1>商品名稱：</h1>
+                <div class="info-grid">
+                    <p class="brand"><strong>商品品牌：</strong></p>
+                    <p><strong class="qty">商品數量：</strong></p>
+                    <p><strong class="price">商品價格：</strong></p>
+                    <p><strong class="prod_type">商品性質：</strong></p>
+                    <p><strong class="prod_view">商品瀏覽次數：</strong></p>
+                </div>
+                <div class="action-buttons">
+      
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 商品描述區塊 -->
+        <section class="product-section">
+            <h2>商品內容：</h2>
+            <p>商品內容介紹...</p>
+        </section>
+
+        <section class="product-section">
+            <h2>商品敘述：</h2>
+            <p>商品的詳細描述或說明</p>
+        </section>
+
+        <section class="product-section">
+            <h2>賣家會員資料：</h2>
+            <p>賣家暱稱、評價、介紹等資訊</p>
+        </section>
+    </main>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const productId = localStorage.getItem('viewProdId');
+        if (!productId) {
+            console.error("查無商品");
+            return;
+        }
+
+        fetch("http://localhost:8087/api/ShShop/reviewProd", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({ id: productId })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("後端回傳錯誤");
+                }
+                return response.json();
+            })
+            .then(responseData => {
+                const data = responseData.data;
+
+                // 主圖
+                const mainImg = document.querySelector(".main-img img");
+                if (data.picUrls && data.picUrls.length > 0) {
+                    mainImg.src = data.picUrls[0];
+                    mainImg.alt = data.prodName;
+                }
+
+                // 商品名稱
+                document.querySelector(".right-info-box h1").textContent = `商品名稱：${data.prodName}`;
+
+                // 品牌
+                document.querySelector(".brand").innerHTML = `<strong>商品品牌：</strong>${data.prodBrand}`;
+                // 數量
+                document.querySelector(".qty").innerHTML = `<strong>商品數量：</strong>${data.prodCount}`;
+                // 價錢
+                document.querySelector(".price").innerHTML = `<strong>商品價錢：</strong>$${data.prodPrice}`;
+                // 商品性質（類別）
+                document.querySelector(".prod_type").innerHTML = `<strong>商品類別：</strong>${data.prodTypeName}`;
+                // 瀏覽次數
+                document.querySelector(".prod_view").innerHTML = `<strong>商品瀏覽次數：</strong>${data.prodViews}`;
+                // 商品內容
+                document.querySelectorAll(".product-section")[0].querySelector("p").textContent = data.prodContent;
+                // 商品敘述
+                document.querySelectorAll(".product-section")[1].querySelector("p").textContent = data.prodDesc;
+                // 賣家資訊
+                document.querySelectorAll(".product-section")[2].querySelector("p").textContent = `上架者：${data.userName}`;
+
+                // 商品縮圖
+                const thumbnails = document.querySelectorAll(".thumbnail-bar img");
+                data.picUrls.forEach((url, index) => {
+                    if (thumbnails[index]) {
+                        thumbnails[index].src = url;
+                        thumbnails[index].alt = `商品圖${index + 1}`;
+                    }
+                });
+            })
+            .catch(err => {
+                console.error("載入商品資料失敗：", err);
+            });
+    });
+</script>
+
+
+
+</body>
+
+</html>

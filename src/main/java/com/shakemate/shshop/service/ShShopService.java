@@ -7,6 +7,7 @@ import com.shakemate.shshop.dto.ShProdTypeDto;
 import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdPic;
 import com.shakemate.shshop.model.ShProdType;
+import com.shakemate.shshop.util.CompositeQueryForShshop;
 import com.shakemate.user.dao.UserMatchRepository;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.dto.UserDto;
@@ -20,6 +21,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service("ShShop")
 public class ShShopService {
@@ -210,7 +213,7 @@ public class ShShopService {
         }
     }
 
-    // 查全部(管理員用，不以會員的session限制能看到的商品)
+    // 查全部(管理員用，不以會員的session限制能看到的商品) **到時候要補上管理員的session
     @Transactional(readOnly = true)
     public List<ShProdDto> getAll() {
         List<ShProd> list = repo.findAllWithPics();
@@ -247,7 +250,6 @@ public class ShShopService {
     @Transactional
     public void addViews(int id) {
         ShProd prod = repo.getById(id);
-        ShProdDto dto = null;
         if (prod != null) {
             prod.setProdViews(prod.getProdViews() + 1);
             repo.save(prod);
@@ -366,6 +368,20 @@ public class ShShopService {
         }
         return dtos;
     }
+
+    public List<ShProdDto> getProdsByCompositeQuery(Map<String, String> paraMap){
+        List<Integer> friendIds = matchRepo.findFriendIdsByUserId(Integer.parseInt(paraMap.get("userId")));
+        String friendIdStr = friendIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        paraMap.put("friendIds", friendIdStr);
+        List<ShProdDto> dtoList =  CompositeQueryForShshop.getAllComposite(paraMap, session.openSession());
+
+
+
+        return dtoList;
+    }
+
 
     private List<ShProdPic> shProdPic(List<String> shProdPicUrl, ShProd shProd) {
         List<ShProdPic> pics = shProd.getProdPics();
