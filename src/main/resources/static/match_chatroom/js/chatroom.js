@@ -189,6 +189,7 @@ async function sendMessage() {
 	if (!response.ok) {
 	    throw new Error("傳送失敗");
 	}
+
 	// 即時顯示在畫面上
 	const container = document.getElementById("chatContent");
 	const timeStr = getTimeString(); // ex: 上午11:28
@@ -348,7 +349,6 @@ function connectWebSocket(userId) {
 	};
 	socket.onmessage = (event) => {
 		const data = JSON.parse(event.data);
-		console.log("印出data我看", event.data);
 		const { roomId, senderId, type, content, imgBase64 } = data;
 		const li = document.querySelector(`.chat-list li[data-roomid="${roomId}"]`);
 		setTimeout(() => {
@@ -369,6 +369,7 @@ function connectWebSocket(userId) {
 			}
 		}, 300); 
 		
+
 		if (type === "read") {
 			return;
 		}
@@ -377,7 +378,7 @@ function connectWebSocket(userId) {
 			// 更新 preview 文本
 			const preview = li.querySelector("p");
 //			preview.textContent = contentRaw.startsWith("image:") ? "[圖圖]" : contentRaw.slice(0, 10) + (contentRaw.length > 10 ? "..." : "");
-			
+
 			preview.textContent = type === "image" ? "[圖圖]" : content.slice(0, 10) + (content.length > 10 ? "..." : "");
 			// 更新訊息傳送時間			
 			const time = li.querySelector(".chat-time");
@@ -415,6 +416,7 @@ function connectWebSocket(userId) {
 					senderId: currentUserId,
 					receiveId: receiveId
 				}));
+
 				fetch(`${API_BASE}/markAsReadInRoom`, {
 					method: "POST",
 					headers: {
