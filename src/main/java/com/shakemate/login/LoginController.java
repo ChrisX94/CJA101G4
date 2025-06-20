@@ -33,9 +33,10 @@ public class LoginController {
         // 登入成功
         HttpSession session = request.getSession();
         session.setAttribute("account", user.getUserId());
+        System.out.println(session.getAttribute("account"));
 
         String location = (String) session.getAttribute("location");
-        return "redirect:" + (location != null ? location : "/match.html");
+        return "redirect:" + (location != null ? location : "/match_chatroom/match.html");
     }
 
     // 處理登出
@@ -53,6 +54,7 @@ public class LoginController {
 
         return "redirect:/testlogin/testlogin"; // 回登入畫面
     }
+
 
 
 }

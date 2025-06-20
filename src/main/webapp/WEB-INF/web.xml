@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                      https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+  version="6.0"
+  metadata-complete="false">
+	<display-name>0205U_Maven_SpringBootMVC_Thymeleaf_Ver5_SpringData-Jpa</display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+
+	<!-- 這裡是註冊濾器 -->
+	<filter>
+		<filter-name>loginFilter</filter-name> <!-- 註冊濾器的名稱 -->
+		<filter-class>com.shakemate.filter.LoginFilter</filter-class> <!-- 註冊濾器的class路徑 -->
+	</filter>
+	<filter-mapping> <!-- 註冊濾器的對應 -->
+		<filter-name>loginFilter</filter-name> <!-- 註冊的名稱 -->
+		<url-pattern>/shop/*</url-pattern> <!-- 要使用路徑的對應 -->
+		<dispatcher>REQUEST</dispatcher> <!-- 下面這些都是要加的dispatcher REQUEST 是預設值 -->
+		<dispatcher>FORWARD</dispatcher> <!-- 來自Servlet協同的forward()的請求會套用這個濾器 -->
+		<dispatcher>INCLUDE</dispatcher> <!-- 來自Servlet協同的include()的請求會套用這個濾器 -->
+		<dispatcher>ERROR</dispatcher>  <!-- 例外處理轉交的的請求會套用這個濾器 -->
+		<dispatcher>ASYNC</dispatcher>  <!-- 非同步處理的的請求會套用這個濾器 -->
+	</filter-mapping>
+
+	<!-- 這裡是註冊 UTF-8 的 setCharacterEncoding-->
+	<filter>
+		<filter-name>setCharacterEncoding</filter-name>
+		<filter-class>com.shakemate.filter.SetCharacterEncodingFilter</filter-class>
+		<init-param> <!-- 註冊初始參數 -->
+			<param-name>encoding</param-name> <!-- 初始參數的變數名稱 -->
+			<param-value>UTF-8</param-value>  <!-- 初始參數的值 -->
+		</init-param>
+
+	</filter>
+	<filter-mapping>
+		<filter-name>setCharacterEncoding</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+		<dispatcher>ASYNC</dispatcher>
+	</filter-mapping>
+
+
+</web-app>

@@ -26,6 +26,7 @@ function startMatchPage() {
 		menuBody.classList.toggle('open');
 	});
 
+
 	// ✅ 頁面一開始，檢查是否有 localStorage 暫存的 matchList（來自 matchSuccess.html）
 	const savedList = localStorage.getItem(`matchedList_${currentUserId}`);
 	const savedFilters = localStorage.getItem(`matchFilters_${currentUserId}`);

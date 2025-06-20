@@ -453,6 +453,7 @@ html {
 
 .header__nav {
   display: flex;
+
   align-items: center;
   box-sizing: border-box;
   gap: 4rem;
@@ -521,6 +522,28 @@ html {
   }
 }
 
+.header__nav-item {
+  font-size: 1.6rem;
+  color: #333;
+  cursor: pointer;
+}
+.header__nav-item:hover {
+  color: #3e92cc;
+}
+
+.header__logo {
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #3e92cc;
+}
+
+.header__nav ul {
+  display: flex;
+  list-style: none;
+  gap: 3rem;
+
+}
+
 .header__item a {
   text-decoration: none;
   font-size: 1.6rem;
@@ -539,6 +562,7 @@ html {
 .fa-user:hover {
   color: #3e92cc;
 }
+
 
 .hamburger {
   display: none;
@@ -563,6 +587,7 @@ html {
     display: flex;
   }
 }
+
 
 /* 📌 配對頁面 SCSS (支援翻頁) */
 .match {
