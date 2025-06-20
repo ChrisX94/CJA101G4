@@ -208,7 +208,13 @@ function startMatchPage() {
 
 			const p = document.createElement("p");
 			p.className = "match__field-content";
-			p.textContent = f.content;
+
+			// 👇 加入 highlight 判斷
+			if (f.title === "人格特質") {
+				p.innerHTML = getHighlightedText(f.title, f.content);
+			} else {
+				p.textContent = f.content;
+			}
 
 			field.appendChild(h3);
 			field.appendChild(p);
@@ -337,4 +343,19 @@ function goToMatch() {
 			window.location.href = `match.html?currentUserId=${currentUserId}&fromSuccess=1`;
 		})
 		.catch(() => alert("⚠️ 無法取得使用者 ID"));
+}
+
+// 符合條件篩選，就把文字變色
+function getHighlightedText(title, content) {
+	const filters = JSON.parse(localStorage.getItem(`matchFilters_${currentUserId}`));
+	if (!filters || !filters.personality) return content;
+
+	const selectedTraits = filters.personality; // 勾選的陣列
+	const traits = content.split(/[、,，]/); // 分割卡牌上的特質
+
+	return traits.map(trait => {
+		return selectedTraits.includes(trait.trim())
+			? `<span class="highlight">${trait.trim()}</span>`
+			: trait.trim();
+	}).join(',');
 }

@@ -859,4 +859,12 @@ html {
   border-radius: 3px;
 }
 
+.highlight {
+	color: #fff;
+	background-color: #ff8c00;
+	border-radius: 5px;
+	padding: 0 4px;
+}
+
+
 /*# sourceMappingURL=style.css.map */
