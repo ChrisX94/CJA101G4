@@ -15,6 +15,7 @@
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
 
+
 	<!-- 這裡是註冊濾器 -->
 
 <!--	<filter>-->
@@ -33,6 +34,7 @@
 
 
 	<!-- 這裡是註冊 UTF-8 的 setCharacterEncoding-->
+
 <!--	<filter>-->
 <!--		<filter-name>setCharacterEncoding</filter-name>-->
 <!--		<filter-class>com.shakemate.filter.SetCharacterEncodingFilter</filter-class>-->

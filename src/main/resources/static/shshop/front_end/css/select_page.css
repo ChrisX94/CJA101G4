@@ -87,6 +87,7 @@ aside.aside {
     text-decoration: none;
     color: #333;
     font-weight: bold;
+    border-radius: 4px;
 }
 
 main.main {
@@ -132,18 +133,41 @@ main.main {
 
 .item_text {
     padding: 1rem;
-    font-size: 1.4rem;
 }
 
 .prod-name {
     font-weight: bold;
-    margin-bottom: 0.5rem;
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+}
+
+.prod-brand {
+    color: #555;
+    margin-bottom: 0.8rem;
+}
+
+.prod-type {
+    color: #555;
+    font-size: 0.8rem;
+    
 }
 
 .prod-price {
     color: #d35400;
     font-weight: bold;
+    font-size: 2rem;
+    text-align: right;
 }
+
+.owner{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+
 
 /* ✅ 好友清單浮動樣式 */
 .friend-floating {
@@ -275,16 +299,16 @@ main.main {
 }
 
 .advanced-search {
-  margin-top: 2rem;
-  padding: 1rem;
-  background-color: #e0f7ff;
-  border-radius: 5px;
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #e0f7ff;
+    border-radius: 5px;
 }
 
 .advanced-search form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
 }
 
 aside.aside {
@@ -292,10 +316,12 @@ aside.aside {
     top: var(--header-height);
     left: 0;
     width: var(--aside-width);
-    height: calc(100vh - var(--header-height)); /* ✅ 修正高度 */
+    height: calc(100vh - var(--header-height));
+    /* ✅ 修正高度 */
     background-color: lightblue;
     padding: 2rem 1rem;
-    overflow-y: auto; /* ✅ 加入滾動條 */
+    overflow-y: auto;
+    /* ✅ 加入滾動條 */
     z-index: 800;
     scroll-behavior: smooth;
 }

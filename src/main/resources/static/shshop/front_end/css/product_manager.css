@@ -1,103 +1,394 @@
- body {
-     font-family: Arial, sans-serif;
-     margin: 0;
-     display: flex;
-     height: 100vh;
- }
 
- /* 側邊欄 */
- .sidebar {
-     width: 200px;
-     background-color: #f5f5f5;
-     border-right: 1px solid #ccc;
-     /* padding: 20px 10px; */
-     padding-top: calc(var(--header-height) + 5.5rem);
-     box-sizing: border-box;
- }
 
- .sidebar h3 {
-     font-size: 16px;
-     margin-bottom: 10px;
- }
-
- .sidebar a {
-     display: block;
-     padding: 8px 12px;
-     margin-bottom: 6px;
-     text-decoration: none;
-     color: #333;
-     border-radius: 4px;
- }
-
- .sidebar a:hover,
- .sidebar a.active {
-     background-color: #d0e8ff;
-     font-weight: bold;
- }
-
- /* 主區塊 */
- .main-content {
-     flex: 1;
-     padding-top: calc(var(--header-height) + 5.5rem);
-     overflow-y: auto;
- }
-
- .page-title {
-     font-size: 20px;
-     margin-bottom: 16px;
- }
-
- table {
-     width: 100%;
-     border-collapse: collapse;
- }
-
- th,
- td {
-     border: 1px solid #ccc;
-     padding: 10px;
-     text-align: center;
- }
-
- th {
-     background-color: #f0f0f0;
- }
-
- img.prod-img {
-     width: 60px;
-     height: 60px;
-     object-fit: cover;
-     border-radius: 4px;
- }
-
-.edit-btn:hover {
-  background-color: #2e76b4;
-}
-.prod-img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 4px;
+:root {
+    --primary-color: #6200ee;
+    /* 主要顏色 */
+    --primary-light-color: #bb86fc;
+    /* 主要顏色較淺 */
+    --primary-dark-color: #3700b3;
+    /* 主要顏色較深 */
+    --secondary-color: #03dac6;
+    /* 次要顏色 (強調色) */
+    --background-color: #f5f5f5;
+    /* 背景色 */
+    --surface-color: #ffffff;
+    /* 表面顏色 (卡片、表格背景) */
+    --on-primary: #ffffff;
+    /* 主要顏色上的文字顏色 */
+    --on-surface: #212121;
+    /* 表面顏色上的文字顏色 */
+    --text-light-gray: #757575;
+    /* 淺灰色文字 */
+    --header-height: 64px;
+    /* 導覽列高度 */
 }
 
-.edit-btn {
-  background: none;
-  border: none;
-  color: #007bff;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font: inherit;
+/* 全局樣式 */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    /* 使用 Roboto 字體或備用字體 */
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--background-color);
+    color: var(--on-surface);
+    overflow-x: hidden;
+    /* 防止水平滾動條 */
 }
 
-.down-btn {
-    background-color: #f44336;
-    color: white;
-    padding: 4px 10px;
+/* Header 導覽列 (整合原 header.css 樣式並 Material Design 化) */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    /* background-color: var(--primary-color); */
+    /* Material Design Primary Color */
+    color: var(--on-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+    /* Material Design 陰影 */
+    z-index: 1000;
+}
+
+.header__logo img {
+    height: 40px;
+    /* 調整 Logo 大小 */
+    vertical-align: middle;
+}
+
+.header__nav {
+    flex-grow: 1;
+    text-align: center;
+}
+
+.header__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    /* 增加導覽項目間距 */
+}
+
+.header__item a {
+    /* color: var(--on-primary); */
+    text-decoration: none;
+    font-weight: 500;
+    /* Medium 字重 */
+    padding: 8px 0;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.header__item a:hover {
+    color: var(--secondary-color);
+    /* hover 時使用強調色 */
+}
+
+/* 下拉選單 */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: var(--surface-color);
+    /* 背景色使用表面顏色 */
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    /* Material Design 陰影 */
+    z-index: 1;
+    border-radius: 4px;
+    /* 圓角 */
+    padding: 8px 0;
+    top: calc(100% + 5px);
+    /* 距離父元素下方一些 */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dropdown-menu li a {
+    color: var(--on-surface);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-menu li a:hover {
+    background-color: var(--background-color);
+    /* hover 時背景色 */
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* 子下拉選單 */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: 5px;
+}
+
+.dropdown-submenu:hover .dropdown-menu {
+    display: block;
+}
+
+.header__user {
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--on-primary);
+}
+
+/* 側邊欄 */
+.sidebar {
+    width: 250px;
+    /* 調整寬度 */
+    background-color: var(--surface-color);
+    box-shadow: 2px 0px 4px -1px rgba(0, 0, 0, 0.1);
+    /* 輕微陰影 */
+    padding-top: var(--header-height);
+    /* 讓側邊欄從 Header 下方開始 */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    /* Medium 字重 */
+    color: var(--text-light-gray);
+    padding: 20px 24px 10px 24px;
+    margin: 0;
+    text-transform: uppercase;
+    /* 大寫 */
+}
+
+.sidebar-item {
+    display: block;
+    padding: 12px 24px;
+    /* 增加內邊距 */
+    margin: 4px 8px;
+    /* 增加外邊距 */
+    text-decoration: none;
+    color: var(--on-surface);
+    border-radius: 4px;
+    /* 輕微圓角 */
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-weight: 400;
+    /* Regular 字重 */
+}
+
+.sidebar-item:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.08);
+    /* 使用主色調的輕微透明背景 */
+}
+
+.sidebar-item.active {
+    background-color: var(--primary-light-color);
+    /* 選中時使用淺色主色 */
+    color: var(--on-primary);
+    font-weight: 500;
+    /* 加粗 */
+    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+    /* 選中項目的陰影 */
+}
+
+/* 主內容 */
+.main-content {
+    flex: 1;
+    padding: 24px;
+    padding-top: calc(var(--header-height) + 24px);
+    /* 從 Header 下方開始 */
+    overflow-y: auto;
+}
+
+.page-title-container {
+    background-color: var(--surface-color);
+    padding: 24px;
+    border-radius: 8px;
+    /* 圓角 */
+    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+    /* Material Design 陰影 */
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-size: 2rem;
+    /* 增大標題字體 */
+    font-weight: 300;
+    /* Light 字重 */
+    color: var(--on-surface);
+    margin: 0;
+}
+
+.table-container {
+    background-color: var(--surface-color);
+    border-radius: 8px;
+    /* 圓角 */
+    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+    /* Material Design 陰影 */
+    overflow: hidden;
+    /* 防止表格內容超出圓角 */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* 固定表格佈局 */
+}
+
+th,
+td {
+    border: none;
+    /* 移除表格邊框，依靠陰影和間距來區分 */
+    padding: 16px;
+    /* 增加內邊距 */
+    text-align: left;
+    /* 左對齊 */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    /* 底部細線分隔 */
+    color: var(--on-surface);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+th {
+    background-color: var(--surface-color);
+    /* 表頭背景色 */
+    font-weight: 500;
+    /* Medium 字重 */
+    color: var(--text-light-gray);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+tr:last-child td {
+    border-bottom: none;
+    /* 最後一行移除底部邊框 */
+}
+
+tr:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.04);
+    /* 行 hover 效果 */
+}
+
+img.prod-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    /* 輕微圓角 */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    /* 圖片邊框 */
+}
+
+
+/* Material Design 按鈕基礎樣式 */
+.material-button {
+    background-color: var(--primary-color);
+    color: var(--on-primary);
+    padding: 8px 16px;
     border: none;
     border-radius: 4px;
+    /* 圓角 */
     cursor: pointer;
+    font-weight: 500;
+    /* Medium 字重 */
+    text-transform: uppercase;
+    /* 大寫 */
+    letter-spacing: 0.02857em;
+    /* 字距 */
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+        0px 3px 1px -2px rgba(0, 0, 0, 0.12),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.2);
+    /* 預設陰影 */
+    outline: none;
+    position: relative;
+    overflow: hidden;
 }
+
+.material-button:hover {
+    background-color: var(--primary-dark-color);
+    box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+        0px 1px 10px 0px rgba(0, 0, 0, 0.12),
+        0px 2px 4px -1px rgba(0, 0, 0, 0.2);
+    /* hover 時陰影升高 */
+}
+
+.material-button:active {
+    box-shadow: 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0px 3px 14px 2px rgba(0, 0, 0, 0.12),
+        0px 5px 5px -3px rgba(0, 0, 0, 0.2);
+    /* active 時陰影更明顯 */
+}
+
+/* 修改按鈕樣式 */
+.edit-btn {
+    background-color: transparent;
+    color: var(--primary-color);
+    /* 使用主色作為文字顏色 */
+    box-shadow: none;
+    /* 移除陰影 */
+    padding: 8px 12px;
+    text-transform: none;
+    /* 不強制大寫 */
+    font-weight: 500;
+    /* 保持中等字重 */
+}
+
+.edit-btn:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.08);
+    /* hover 時輕微背景色 */
+    box-shadow: none;
+}
+
+.edit-btn:active {
+    background-color: rgba(var(--primary-color-rgb), 0.16);
+    /* active 時更深的背景色 */
+    box-shadow: none;
+}
+
+
+.down-btn {
+    background-color: #ef5350;
+    /* Material Design Red 500 */
+}
+
 .down-btn:hover {
     background-color: #d32f2f;
+    /* Material Design Red 700 */
+}
+
+/* Helper for RGB color values for rgba() */
+/* This is a simple trick to get RGB values from CSS variables */
+body {
+    --primary-color-rgb: 98, 0, 238;
+    /* RGB for #6200ee */
 }

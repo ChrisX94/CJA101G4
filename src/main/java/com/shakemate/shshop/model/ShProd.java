@@ -59,7 +59,7 @@ public class ShProd implements Serializable {
 
     @NotNull(message = "商品價格: 請勿空白")
     @Min(value = 1, message = "商品價格: 不能小於 {value}")
-    @Max(value = 10000, message = "商品價格: 不能超過 {value}")
+    @Max(value = 30000, message = "商品價格: 不能超過 {value}")
     @Column(name = "PROD_PRICE")
     private Integer prodPrice;
 

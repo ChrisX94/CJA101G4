@@ -31,11 +31,11 @@
 
         <!-- 🔽 MatchMarket Dropdown -->
         <li class="header__item dropdown">
-          <a href="#">MatchMarket</a>
+          <a href="select_page.html">MatchMarket</a>
           <ul class="dropdown-menu">
-            <li><a href="#">看一下商品</a></li>
+            <li><a href="select_page.html">看一下商品</a></li>
             <li class="dropdown-submenu">
-              <a href="#">My MatchMarket</a>
+              <a href="product_manager.html">My MatchMarket</a>
               <ul class="dropdown-menu">
                 <li><a href="add_product.html">上架商品</a></li>
                 <li><a href="#">已購賣商品</a></li>
@@ -165,7 +165,7 @@
         method: "GET",
         dataType: "json",
         success: function (response) {
-          if (!response.data) return showError("類別載入失敗");
+          if (!response.data) return showError("無法載入類別");
 
           navList.empty();
           navList.append(`<li><a href="#" class="active" data-type-id="">所有商品</a></li>`);
@@ -344,7 +344,7 @@
         e.preventDefault(); // 阻止表單預設提交行為
 
         const formData = $(this).serialize(); // 將所有欄位轉為 URL encoded 格式
-    
+
         $.ajax({
           url: "http://localhost:8087/api/ShShop/advanceSearch", // 假設這是後端 endpoint
           method: "POST",
