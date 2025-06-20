@@ -43,6 +43,7 @@ public interface MatchRepository extends JpaRepository<UserMatchVO, Integer> {
 	// 查詢是否已有配對紀錄
     UserMatchVO findByActionUserIdAndTargetUserIdAndActionType(int userId, int targetId, int actionType);
 
+	// 查詢好友id列表
     @Query(value = """
             SELECT 
                 CASE 

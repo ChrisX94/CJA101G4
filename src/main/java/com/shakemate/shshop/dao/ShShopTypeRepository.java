@@ -7,5 +7,4 @@ import org.springframework.data.jpa.repository.Query;
 public interface ShShopTypeRepository extends JpaRepository<ShProdType, Integer> {
 
 
-
 }
