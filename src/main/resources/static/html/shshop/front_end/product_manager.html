@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My MatchMarket</title>
+    <link rel="stylesheet" href="../../../css/shshop/header.css" />
+    <link rel="stylesheet" href="../../../css/shshop/product_manager.css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header__logo">
+            <a href="#"><img src="../../../img/logoText.png" alt="Logo" /></a>
+        </div>
+        <nav class="header__nav">
+            <ul class="header__list">
+                <li class="header__item"><a href="#">配對</a></li>
+                <li class="header__item"><a href="#">聊天室</a></li>
+                <li class="header__item"><a href="#">活動</a></li>
+                <li class="header__item"><a href="#">討論區</a></li>
+                <li class="header__item"><a href="#">MatchMarket</a></li>
+                <li class="header__item"><a href="#">會員專區</a></li>
+            </ul>
+        </nav>
+        <i class="fa-solid fa-user"></i>
+    </header>
+
+    <div class="feature-bar">
+        <a href="http://localhost:8087/shshop" class="feature-link">看一下商品</a>
+        <a href="#" class="feature-link">我的商品</a>
+        <a href="add_product.html" class="feature-link">上架商品</a>
+        <a href="#" class="feature-link">已購賣商品</a>
+    </div>
+
+    <!-- ✅ 側邊欄 -->
+    <div class="sidebar">
+        <h3>商品管理</h3>
+        <a href="#" id="view-all-btn" class="active">全部商品</a>
+        <a href="#" id="view-on-depending">查看審核狀態</a>
+        <a href="#" id="view-on-sale-btn">已上架商品</a>
+        <a href="#" id="view-on-delist-btn">已下架商品</a>
+    </div>
+
+    <!-- ✅ 主內容 -->
+    <div class="main-content">
+        <div class="page-title">我的商品</div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>商品圖片</th>
+                    <th>商品名稱</th>
+                    <th>價格</th>
+                    <th>數量</th>
+                    <th>描述</th>
+                    <th>商品狀態</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+
+    <script>
+        function goToEdit(prodId, prodStatus) {
+            localStorage.setItem("editingProdId", prodId);
+            localStorage.setItem("prodStatus", prodStatus);
+            window.location.href = "edit_product.html";
+        }
+
+        // 原始載入全部商品（登入者的）
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAllProducts(); // 預設載入所有商品
+        });
+
+        function loadAllProducts() {
+            fetch("http://localhost:8087/api/ShShop/myProds", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    action: "all" // 這裡可以根據需要調整查詢條件
+                })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (!res || !res.data || !Array.isArray(res.data)) {
+                        console.error("回傳格式錯誤", res);
+                        return;
+                    }
+
+                    const tbody = document.querySelector("tbody");
+                    tbody.innerHTML = ""; // 清空原有資料
+
+                    res.data.forEach(prod => {
+                        const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
+
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                        <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
+                        <td>${prod.prodName}</td>
+                        <td>$${prod.prodPrice}</td>
+                        <td>${prod.prodCount}</td>
+                        <td>${prod.prodDesc || ''}</td>
+                        <td>${prod.prodStatusStr || ''}</td>
+                        <td>
+                          <button type="button" class="edit-btn" onclick="goToEdit(${prod.prodId}, ${prod.prodStatus})">修改</button>
+                        </td>
+                    `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("載入商品失敗：", err);
+                });
+        }
+
+        // 點選「全部商品」時載入所有商品
+        document.getElementById("view-all-btn").addEventListener("click", function (e) {
+            e.preventDefault();
+            loadAllProducts(); // 重新載入所有商品
+        });
+        //  點選「已上架中商品」時只顯示上架中的商品，並加上「下架」按鈕
+        document.getElementById("view-on-depending").addEventListener("click", function (e) {
+            e.preventDefault();
+            loadOnPendingProducts();
+        });
+
+        //  點選「已上架中商品」時只顯示上架中的商品，並加上「下架」按鈕
+        document.getElementById("view-on-sale-btn").addEventListener("click", function (e) {
+            e.preventDefault();
+            loadOnSaleProducts();
+        });
+
+        //  點選「下架商品」時只顯示下架中的商品
+        document.getElementById("view-on-delist-btn").addEventListener("click", function (e) {
+            e.preventDefault();
+            loadOnDelistProducts();
+        });
+
+
+        function loadOnSaleProducts() {
+            fetch("http://localhost:8087/api/ShShop/myProds", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({ action: "available" })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (!res || !res.data || !Array.isArray(res.data)) {
+                        console.error("回傳格式錯誤", res);
+                        return;
+                    }
+
+                    const tbody = document.querySelector("tbody");
+                    tbody.innerHTML = "";
+
+                    const onSale = res.data;
+
+                    if (onSale.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='7'>目前沒有上架中的商品</td></tr>";
+                        return;
+                    }
+
+                    onSale.forEach(prod => {
+                        const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
+                        const tr = document.createElement("tr");
+
+
+                        tr.innerHTML = `
+                        <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
+                        <td>${prod.prodName}</td>
+                        <td>$${prod.prodPrice}</td>
+                        <td>${prod.prodCount}</td>
+                        <td>${prod.prodDesc}</td>
+                        <td>${prod.prodStatusStr}</td>
+                        <td>
+                            <button class="down-btn" onclick="deactivateProduct(${prod.prodId})">下架</button>
+                        </td>
+                    `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("載入上架商品失敗：", err);
+                });
+        }
+
+        function deactivateProduct(prodId) {
+            const confirmed = confirm("確定要下架這個商品嗎？");
+            if (!confirmed) return;
+
+            fetch("http://localhost:8087/api/ShShop/delist", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    prodId: prodId,
+                    action: "deactivate"
+                })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.message === "success") {
+                        alert("商品已下架！");
+                        loadOnSaleProducts(); // 🔁 重新載入上架中商品
+                    } else {
+                        alert("下架失敗：" + (res.message || "請稍後再試"));
+                    }
+                })
+                .catch(err => {
+                    console.error("下架失敗：", err);
+                    alert("伺服器錯誤，請稍後再試");
+                });
+
+        }
+        function loadOnDelistProducts() {
+            fetch("http://localhost:8087/api/ShShop/myProds", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({ action: "notAvailable" })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (!res || !res.data || !Array.isArray(res.data)) {
+                        console.error("回傳格式錯誤", res);
+                        return;
+                    }
+
+                    const tbody = document.querySelector("tbody");
+                    tbody.innerHTML = "";
+
+                    const onSale = res.data;
+
+                    if (onSale.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='7'>目前沒有下架的商品</td></tr>";
+                        return;
+                    }
+
+                    onSale.forEach(prod => {
+                        const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
+                        const tr = document.createElement("tr");
+
+                        tr.innerHTML = `
+                        <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
+                        <td>${prod.prodName}</td>
+                        <td>$${prod.prodPrice}</td>
+                        <td>${prod.prodCount}</td>
+                        <td>${prod.prodDesc}</td>
+                        <td>${prod.prodStatusStr}</td>
+                    `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("載入已下架商品失敗：", err);
+                });
+        }
+        function loadOnPendingProducts() {
+            fetch("http://localhost:8087/api/ShShop/myProds", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({ action: "OnPending" })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (!res || !res.data || !Array.isArray(res.data)) {
+                        console.error("回傳格式錯誤", res);
+                        return;
+                    }
+
+                    const tbody = document.querySelector("tbody");
+                    tbody.innerHTML = "";
+                    const onSale = res.data;
+
+                    if (onSale.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='7'>目前沒有審核中的商品</td></tr>";
+                        return;
+                    }
+
+                    onSale.forEach(prod => {
+                        const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
+                        const tr = document.createElement("tr");
+
+                        tr.innerHTML = `
+                        <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
+                        <td>${prod.prodName}</td>
+                        <td>$${prod.prodPrice}</td>
+                        <td>${prod.prodCount}</td>
+                        <td>${prod.prodDesc}</td>
+                        <td>${prod.prodStatusStr}</td>
+                    `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("載入審核中商品失敗：", err);
+                });
+        }
+    </script>
+
+
+
+
+
+
+
+</body>
+
+</html>
