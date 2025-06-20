@@ -23,20 +23,17 @@ public class LoginController {
                         @RequestParam String password,
                         HttpServletRequest request,
                         Model model) {
-
         Users user = userService.getUserByEmail(account);
         if (user == null || !userService.login(user.getEmail(), password)) {
             model.addAttribute("errorMsg", "登入失敗，請檢查帳號或密碼！");
             return "login"; // 回到 login.html
         }
-
         // 登入成功
         HttpSession session = request.getSession();
         session.setAttribute("account", user.getUserId());
         System.out.println(session.getAttribute("account"));
-
         String location = (String) session.getAttribute("location");
-        return "redirect:" + (location != null ? location : "/match_chatroom/match.html");
+        return "redirect:" + (location != null ? location : "testlogin");
     }
 
     // 處理登出
@@ -52,7 +49,7 @@ public class LoginController {
     @GetMapping("/testlogin")
     public String testLogin(HttpServletRequest request) {
 
-        return "redirect:/testlogin/testlogin"; // 回登入畫面
+        return "testlogin/testlogin"; // 回登入畫面
     }
 
 
