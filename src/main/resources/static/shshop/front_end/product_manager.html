@@ -7,66 +7,83 @@
     <title>My MatchMarket</title>
     <link rel="stylesheet" href="css/header.css" />
     <link rel="stylesheet" href="css/product_manager.css" />
-
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
 
 </head>
 
 <body>
-
     <header class="header">
         <div class="header__logo">
-            <a href="#"><img src="../../img/logoText.png" alt="Logo" /></a>
+            <a href="/">
+                <img src="../../img/logoText.png" alt="Logo" />
+            </a>
         </div>
+
         <nav class="header__nav">
             <ul class="header__list">
                 <li class="header__item"><a href="#">配對</a></li>
                 <li class="header__item"><a href="#">聊天室</a></li>
                 <li class="header__item"><a href="#">活動</a></li>
                 <li class="header__item"><a href="#">討論區</a></li>
-                <li class="header__item"><a href="#">MatchMarket</a></li>
+
+                <li class="header__item dropdown">
+                    <a href="select_page.html">MatchMarket</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="select_page.html">看一下商品</a></li>
+                        <li class="dropdown-submenu">
+                            <a href="product_manager.html">My MatchMarket</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="add_product.html">上架商品</a></li>
+                                <li><a href="#">已購賣商品</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="header__item"><a href="#">會員專區</a></li>
             </ul>
         </nav>
-        <i class="fa-solid fa-user"></i>
+
+        <div class="header__user">
+            <i class="fa-solid fa-user"></i>
+        </div>
     </header>
 
-    <div class="feature-bar">
-        <a href="select_page.html" class="feature-link">看一下商品</a>
-        <a href="#" class="feature-link">My MatchMarket</a>
-        <a href="add_product.html" class="feature-link">上架商品</a>
-        <a href="#" class="feature-link">已購賣商品</a>
-    </div>
 
-    <!-- ✅ 側邊欄 -->
     <div class="sidebar">
-        <h3>商品管理</h3>
-        <a href="#" id="view-all-btn" class="active">全部商品</a>
-        <a href="#" id="view-on-depending">查看審核狀態</a>
-        <a href="#" id="view-on-sale-btn">已上架商品</a>
-        <a href="#" id="view-on-delist-btn">已下架商品</a>
+        <h3 class="sidebar-title">商品管理</h3>
+        <a href="#" id="view-all-btn" class="active sidebar-item">全部商品</a>
+        <a href="#" id="view-on-depending" class="sidebar-item">查看審核狀態</a>
+        <a href="#" id="view-on-sale-btn" class="sidebar-item">已上架商品</a>
+        <a href="#" id="view-on-delist-btn" class="sidebar-item">已下架商品</a>
     </div>
 
-    <!-- ✅ 主內容 -->
     <div class="main-content">
-        <div class="page-title">我的商品</div>
+        <div class="page-title-container">
+            <h1 class="page-title">我的商品</h1>
+        </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>商品圖片</th>
-                    <th>商品名稱</th>
-                    <th>價格</th>
-                    <th>數量</th>
-                    <th>描述</th>
-                    <th>商品狀態</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>商品圖片</th>
+                        <th>商品名稱</th>
+                        <th>價格</th>
+                        <th>數量</th>
+                        <th>描述</th>
+                        <th>商品狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 
@@ -80,6 +97,11 @@
         // 原始載入全部商品（登入者的）
         document.addEventListener("DOMContentLoaded", function () {
             loadAllProducts(); // 預設載入所有商品
+            // 初始化側邊欄按鈕的 active 狀態
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById('view-all-btn').classList.add('active');
         });
 
         function loadAllProducts() {
@@ -102,6 +124,11 @@
                     const tbody = document.querySelector("tbody");
                     tbody.innerHTML = ""; // 清空原有資料
 
+                    if (res.data.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='7'>目前沒有任何商品</td></tr>";
+                        return;
+                    }
+
                     res.data.forEach(prod => {
                         const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
 
@@ -114,7 +141,7 @@
                         <td>${prod.prodDesc || ''}</td>
                         <td>${prod.prodStatusStr || ''}</td>
                         <td>
-                          <button type="button" class="edit-btn" onclick="goToEdit(${prod.prodId}, ${prod.prodStatus})">修改</button>
+                          <button type="button" class="material-button edit-btn" onclick="goToEdit(${prod.prodId}, '${prod.prodStatusStr}')">修改</button>
                         </td>
                     `;
                         tbody.appendChild(tr);
@@ -125,27 +152,26 @@
                 });
         }
 
-        // 點選「全部商品」時載入所有商品
-        document.getElementById("view-all-btn").addEventListener("click", function (e) {
-            e.preventDefault();
-            loadAllProducts(); // 重新載入所有商品
-        });
-        //  點選「已上架中商品」時只顯示上架中的商品，並加上「下架」按鈕
-        document.getElementById("view-on-depending").addEventListener("click", function (e) {
-            e.preventDefault();
-            loadOnPendingProducts();
-        });
+        // 點選側邊欄按鈕時，更新 active 狀態並載入對應商品
+        document.querySelectorAll('.sidebar-item').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                this.classList.add('active');
 
-        //  點選「已上架中商品」時只顯示上架中的商品，並加上「下架」按鈕
-        document.getElementById("view-on-sale-btn").addEventListener("click", function (e) {
-            e.preventDefault();
-            loadOnSaleProducts();
-        });
-
-        //  點選「下架商品」時只顯示下架中的商品
-        document.getElementById("view-on-delist-btn").addEventListener("click", function (e) {
-            e.preventDefault();
-            loadOnDelistProducts();
+                // 根據 ID 呼叫對應的載入函數
+                if (this.id === 'view-all-btn') {
+                    loadAllProducts();
+                } else if (this.id === 'view-on-depending') {
+                    loadOnPendingProducts();
+                } else if (this.id === 'view-on-sale-btn') {
+                    loadOnSaleProducts();
+                } else if (this.id === 'view-on-delist-btn') {
+                    loadOnDelistProducts();
+                }
+            });
         });
 
 
@@ -187,7 +213,7 @@
                         <td>${prod.prodDesc}</td>
                         <td>${prod.prodStatusStr}</td>
                         <td>
-                            <button class="down-btn" onclick="deactivateProduct(${prod.prodId})">下架</button>
+                            <button class="material-button down-btn" onclick="deactivateProduct(${prod.prodId})">下架</button>
                         </td>
                     `;
                         tbody.appendChild(tr);
@@ -263,6 +289,7 @@
                         <td>${prod.prodCount}</td>
                         <td>${prod.prodDesc}</td>
                         <td>${prod.prodStatusStr}</td>
+                        <td></td>
                     `;
                         tbody.appendChild(tr);
                     });
@@ -306,6 +333,7 @@
                         <td>${prod.prodCount}</td>
                         <td>${prod.prodDesc}</td>
                         <td>${prod.prodStatusStr}</td>
+                        <td></td>
                     `;
                         tbody.appendChild(tr);
                     });
@@ -315,8 +343,6 @@
                 });
         }
     </script>
-
-
 
 
 
