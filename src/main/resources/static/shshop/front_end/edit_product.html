@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>更新商品｜MatchMarket</title>
+  <link rel="stylesheet" href="css/header.css" />
+  <link rel="stylesheet" href="css/edit_product.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+</head>
+
+<body>
+
+  <header class="header">
+    <!-- Logo 區 -->
+    <div class="header__logo">
+      <a href="/">
+        <img src="../../img/logoText.png" alt="Logo" />
+      </a>
+    </div>
+
+    <!-- 導覽列 -->
+    <nav class="header__nav">
+      <ul class="header__list">
+        <li class="header__item"><a href="#">配對</a></li>
+        <li class="header__item"><a href="#">聊天室</a></li>
+        <li class="header__item"><a href="#">活動</a></li>
+        <li class="header__item"><a href="#">討論區</a></li>
+
+        <!-- 🔽 MatchMarket Dropdown -->
+        <li class="header__item dropdown">
+          <a href="select_page.html">MatchMarket</a>
+          <ul class="dropdown-menu">
+            <li><a href="select_page.html">看一下商品</a></li>
+            <li class="dropdown-submenu">
+              <a href="product_manager.html">My MatchMarket</a>
+              <ul class="dropdown-menu">
+                <li><a href="add_product.html">上架商品</a></li>
+                <li><a href="#">已購賣商品</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li class="header__item"><a href="#">會員專區</a></li>
+      </ul>
+    </nav>
+
+    <!-- 使用者圖示 -->
+    <div class="header__user">
+      <i class="fa-solid fa-user"></i>
+    </div>
+  </header>
+
+  <main class="form-wrapper">
+    <div class="form-header-row">
+      <h1>更新商品</h1>
+      <div class="form-group status-group">
+        <label>商品狀態：</label>
+        <span id="prodStatusDisplay" class="status-text">載入中...</span>
+      </div>
+    </div>
+
+    <form class="form-layout" method="post" action="http://localhost:8087/api/ShShop/updateProd"
+      enctype="multipart/form-data">
+      <input type="hidden" id="prodId" name="prodId" value="">
+
+      <!-- ✅ 基本資料 -->
+      <section class="form-section">
+        <div class="form-label-col">
+          <p>基本資訊</p>
+        </div>
+        <div class="form-input-col">
+
+          <div class="form-group">
+            <label>商品名稱：</label>
+            <input type="text" name="prodName" placeholder="請輸入商品名稱">
+            <div class="error-msg" id="prodNameError"></div>
+          </div>
+
+          <div class="form-group">
+            <label>品牌：</label>
+            <input type="text" name="prodBrand" placeholder="請輸入品牌名稱">
+            <div class="error-msg" id="prodBrandError"></div>
+          </div>
+
+          <div class="form-group">
+            <label>商品分類：</label>
+            <select name="prodTypeId">
+              <option value="">請選擇分類</option>
+            </select>
+            <div class="error-msg" id="prodTypeIdError"></div>
+          </div>
+
+          <div class="form-row -number">
+            <div class="form-group">
+              <label>價格：</label>
+              <input type="number" name="prodPrice" placeholder="單位：元">
+              <div class="error-msg" id="prodPriceError"></div>
+            </div>
+
+            <div class="form-group">
+              <label>數量：</label>
+              <input type="number" name="prodCount" value="1" placeholder="預設為 1">
+              <div class="error-msg" id="prodCountError"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>簡要描述：</label>
+            <textarea name="prodContent" rows="4" placeholder="請輸入商品簡介..."></textarea>
+            <div class="error-msg" id="prodContentError"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ✅ 圖片 -->
+      <section class="form-section">
+        <div class="form-label-col">
+          <p>圖片</p>
+        </div>
+        <div class="form-input-col">
+          <div class="form-group">
+            <label>商品圖片（最多 5 張，建議尺寸：800x800）：</label>
+            <div class="image-preview-row" id="existingPreviewContainer">
+              <!-- 原圖預覽容器 -->
+            </div>
+            <input type="file" id="prodImageInput" name="prodImage" accept="image/*" multiple>
+          </div>
+        </div>
+      </section>
+
+      <!-- ✅ 商品說明 -->
+      <section class="form-section">
+        <div class="form-label-col">
+          <p>商品說明</p>
+        </div>
+        <div class="form-input-col">
+          <label>商品狀況說明：</label>
+          <textarea name="prodStatusDesc" rows="5" placeholder="例如：二手良品、九成新、未拆封等..."></textarea>
+          <div class="error-msg" id="prodStatusDescError"></div>
+        </div>
+      </section>
+
+      <!-- ✅ 按鈕 -->
+      <div class="button-row">
+        <input type="hidden" name="action" value="updateProd" />
+        <button type="reset" class="discard">重設</button>
+        <button type="submit" class="save">儲存變更</button>
+      </div>
+    </form>
+  </main>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="js/shshopType.js">  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const prodId = localStorage.getItem("editingProdId");
+      const prodStatus = localStorage.getItem("prodStatus");
+      const form = document.querySelector(".form-layout");
+      const statusSpan = document.getElementById("prodStatusDisplay");
+      const prodIdInput = document.getElementById("prodId");
+      const originalImagesContainer = document.getElementById("existingPreviewContainer");
+      const removedPicUrls = [];
+
+      if (statusSpan) statusSpan.innerText = prodStatus || "未提供";
+      if (prodId && prodIdInput) prodIdInput.value = prodId;
+
+      // 初始化取得商品資料
+      const initFormData = new FormData();
+      initFormData.append("id", prodId);
+
+      fetch("http://localhost:8087/api/ShShop/getProd", {
+        method: "POST",
+        body: initFormData
+      })
+        .then(res => res.json())
+        .then(data => {
+          const prod = data.data;
+          if (!prod) throw new Error("找不到商品資料");
+
+          // 填入表單欄位
+          form.prodName.value = prod.prodName;
+          form.prodBrand.value = prod.prodBrand;
+          form.prodPrice.value = prod.prodPrice;
+          form.prodCount.value = prod.prodCount;
+          form.prodContent.value = prod.prodContent;
+          form.prodStatusDesc.value = prod.prodDesc;
+
+          // 類別下拉載入完再設定選項
+          const select = form.prodTypeId;
+          const timer = setInterval(() => {
+            if (select.options.length > 1) {
+              select.value = prod.prodTypeId?.toString();
+              clearInterval(timer);
+            }
+          }, 100);
+
+          // 產生原始圖片區塊
+          console.log(prod.picUrls);
+          if (!prod.picUrls || prod.picUrls.length === 0) {
+            originalImagesContainer.innerHTML = "<p>尚未上傳圖片</p>";
+            return;
+          }
+          originalImagesContainer.innerHTML = "";
+          prod.picUrls?.forEach((url, idx) => {
+            const imgBox = document.createElement("div");
+            imgBox.classList.add("img-box");
+            imgBox.innerHTML = `
+          <div class="img-wrapper">
+            <img src="${url}" alt="圖片${idx + 1}" />
+            <button type="button" class="delete-btn" data-url="${url}">&times;</button>
+          </div>
+        `;
+            originalImagesContainer.appendChild(imgBox);
+          });
+
+          form.action.value = "updateProd";
+        })
+        .catch(err => {
+          alert("無法載入商品資料，請稍後再試");
+          console.error(err);
+        });
+
+      // 🗑️ 點擊刪除圖示
+      originalImagesContainer.addEventListener("click", function (e) {
+        if (e.target.classList.contains("delete-btn")) {
+          const imgBox = e.target.closest(".img-box");
+          const url = e.target.getAttribute("data-url");
+
+          if (url && !removedPicUrls.includes(url)) {
+            removedPicUrls.push(url); // 記錄要刪的圖
+          }
+
+          if (imgBox) imgBox.remove(); // 前端移除
+        }
+      });
+
+      // ✅ 即時預覽新上傳圖片
+      const fileInput = form.querySelector('input[name="prodImage"]');
+      const previewBoxes = document.querySelectorAll(".img-box");
+
+      fileInput.addEventListener("change", function () {
+        const files = Array.from(fileInput.files);
+
+        previewBoxes.forEach((box, idx) => {
+          if (files[idx]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+              box.innerHTML = `
+            <img src="${e.target.result}" style="width:100%; height:100%; object-fit: cover;" />
+          `;
+            };
+            reader.readAsDataURL(files[idx]);
+          } else {
+            box.innerHTML = "img";
+          }
+        });
+      });
+
+      // ✅ 表單送出處理（更新商品）
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // 清除錯誤訊息
+        form.querySelectorAll(".error-msg").forEach(el => (el.innerText = ""));
+
+        const submitData = new FormData(form);
+
+        // 加入被刪除的圖片 URL
+        removedPicUrls.forEach((url, idx) => {
+          submitData.append(`removePicUrls[${idx}]`, url);
+        });
+
+        fetch("http://localhost:8087/api/ShShop/updateProd", {
+          method: "POST",
+          body: submitData
+        })
+          .then(response =>
+            response.json().then(data => ({ status: response.status, body: data }))
+          )
+          .then(({ status, body }) => {
+            if (body.message === "success") {
+              const updatedId = body.data?.prodId;
+              if (updatedId) {
+                window.location.href = `product_page.html?id=${updatedId}`;
+              } else {
+                alert("更新成功，但找不到商品編號！");
+              }
+            } else if (status === 400 && body.message === "validation_failed") {
+              const errors = body.errors || {};
+              for (const field in errors) {
+                const errBox = document.getElementById(`${field}Error`);
+                if (errBox) errBox.innerText = errors[field];
+              }
+            } else {
+              alert("發生錯誤：" + (body.message || "請稍後再試"));
+            }
+          })
+          .catch(error => {
+            alert("商品更新失敗！");
+            console.error(error);
+          });
+      });
+    });
+
+    // ✅ 離開清除暫存資料
+    window.addEventListener("beforeunload", () => {
+      localStorage.removeItem("editingProdId");
+      localStorage.removeItem("prodStatus");
+    });
+
+  </script>
+
+
+
+
+</body>
+
+</html>

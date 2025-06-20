@@ -17,5 +17,4 @@ public class IndexController {
         return "login"; // 對應 resources/templates/login.html
     }
 
-
 }
