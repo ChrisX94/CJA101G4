@@ -241,7 +241,6 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
-
     /* ======================================== General ========================================== */
     // 全部的類別，用於於前端顯示頁面
     @GetMapping("/allTypes")
