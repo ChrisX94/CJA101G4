@@ -16,6 +16,7 @@
 	</welcome-file-list>
 
 	<!-- 這裡是註冊濾器 -->
+
 <!--	<filter>-->
 <!--		<filter-name>loginFilter</filter-name> &lt;!&ndash; 註冊濾器的名稱 &ndash;&gt;-->
 <!--		<filter-class>com.shakemate.filter.LoginFilter</filter-class> &lt;!&ndash; 註冊濾器的class路徑 &ndash;&gt;-->
@@ -29,6 +30,7 @@
 <!--		<dispatcher>ERROR</dispatcher>  &lt;!&ndash; 例外處理轉交的的請求會套用這個濾器 &ndash;&gt;-->
 <!--		<dispatcher>ASYNC</dispatcher>  &lt;!&ndash; 非同步處理的的請求會套用這個濾器 &ndash;&gt;-->
 <!--	</filter-mapping>-->
+
 
 	<!-- 這裡是註冊 UTF-8 的 setCharacterEncoding-->
 <!--	<filter>-->

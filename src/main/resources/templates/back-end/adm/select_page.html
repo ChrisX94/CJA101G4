@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>管理員查詢</title>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-light">
+
+	<div class="container py-5">
+		<div class="card shadow-sm">
+			<div class="card-header bg-primary text-white">
+				<h3 class="mb-0">🔍 管理員複合查詢</h3>
+			</div>
+			<div class="card-body">
+				<form method="post" th:action="@{/adm/listAdms_ByCompositeQuery}">
+					<div class="row mb-3">
+						<div class="col-md-4">
+							<label class="form-label">管理員姓名：</label> <input type="text"
+								name="admName" class="form-control">
+						</div>
+						<div class="col-md-4">
+							<label class="form-label">管理員帳號：</label> <input type="text"
+								name="admAcc" class="form-control">
+						</div>
+						<div class="col-md-4">
+							<label class="form-label">權限：</label> <select name="authFuncId"
+								class="form-select">
+								<option value="">-- 全部 --</option>
+								<option th:each="auth : ${authFuncListData}"
+									th:value="${auth.authId}" th:text="${auth.authName}"></option>
+							</select>
+						</div>
+					</div>
+					<div class="d-flex justify-content-between">
+						<div>
+							<button type="submit" class="btn btn-primary me-2">🔎 查詢</button>
+							<a th:href="@{/adm/listAllAdm}" class="btn btn-secondary">📃
+								查詢全部</a>
+						</div>
+						<button type="reset" class="btn btn-outline-danger">🧹 清除</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div class="mt-4" th:if="${admListData != null}">
+			<div class="card">
+				<div class="card-header bg-info text-white">
+					<h5 class="mb-0">查詢結果</h5>
+				</div>
+				<div class="card-body">
+					<table class="table table-bordered table-hover">
+						<thead class="table-light">
+							<tr>
+								<th>管理員ID</th>
+								<th>姓名</th>
+								<th>帳號</th>
+								<th>權限</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="adm : ${admListData}">
+								<td th:text="${adm.admId}"></td>
+								<td th:text="${adm.admName}"></td>
+								<td th:text="${adm.admAcc}"></td>
+								<td><span th:each="auth : ${adm.authFuncs}"
+									th:text="${auth.authName + ' '}" /></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
