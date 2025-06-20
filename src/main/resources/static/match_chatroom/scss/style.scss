@@ -481,7 +481,7 @@
     justify-content: space-between;
     padding: 0 4rem 0 2rem;
     box-sizing: border-box;
-    box-shadow: 0 0 2rem rgba(77, 112, 134, 0.2941176471);
+    box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294);
     position: relative;
     z-index: 1000;
   }
@@ -490,14 +490,75 @@
     height: 4.5rem;
   
     img {
-      height: 4.5rem;
+      height: 100%;
     }
   }
   
   .header__nav {
     display: flex;
+
+    align-items: center;
+    box-sizing: border-box;
     gap: 4rem;
-    margin-left: 45rem;
+    transition: all 0.3s ease;
+  
+    @include pad {
+      position: absolute;
+      top: 6.5rem;
+      right: 0;
+      flex-direction: column;
+      background: #fff;
+      width: 100%;
+      max-height: 0;
+      overflow: hidden;
+      gap: 2rem;
+      padding: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  
+    @include mobile {
+      position: absolute;
+      top: 6.5rem;
+      right: 0;
+      flex-direction: column;
+      background: #fff;
+      width: 100%;
+      max-height: 0;
+      overflow: hidden;
+      gap: 2rem;
+      padding: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  
+    &.open {
+      @include pad {
+        padding: 2rem;
+        max-height: 500px;
+      }
+  
+      @include mobile {
+        padding: 2rem;
+        max-height: 500px;
+      }
+    }
+  }
+  
+  .header__list {
+    display: flex;
+    gap: 2.9rem;
+    list-style: none;
+  
+    @include pad {
+      flex-direction: column;
+      width: 100%;
+      gap: 1.5rem;
+    }
+  
+    @include mobile {
+      flex-direction: column;
+      width: 100%;
+      gap: 1.5rem;
+    }
   }
   
   .header__nav-item {
@@ -543,6 +604,31 @@
     }
   }
   
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 2.5rem;
+    height: 1.8rem;
+    cursor: pointer;
+  
+    span {
+      height: 0.3rem;
+      background: #333;
+      border-radius: 3px;
+    }
+  
+    @include pad {
+      display: flex;
+    }
+  
+    @include mobile {
+      display: flex;
+    }
+  }
+  
+
   /* 📌 配對頁面 SCSS (支援翻頁) */
   
   .match {
