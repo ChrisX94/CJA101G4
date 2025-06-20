@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+	rel="stylesheet">
+<title>配對系統</title>
+<!-- Swiper 的 CSS -->
+<link rel="stylesheet"
+	href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+<!-- Swiper 的 JS -->
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+	<!-- 🔹 頂部選單 -->
+	<header class="header">
+		<div class="header__logo">
+			<a href="#"> <img src="img/logoText.png" alt="">
+			</a>
+		</div>
+
+		<div class="hamburger">
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+
+		<nav class="header__nav">
+			<ul class="header__list">
+				<li class="header__item"><a href="match.html">配對</a></li>
+				<li class="header__item"><a href="chatroom.html">聊天室</a></li>
+				<li class="header__item"><a href="#">活動</a></li>
+				<li class="header__item"><a href="#">討論區</a></li>
+				<li class="header__item"><a href="#">商城</a></li>
+				<li class="header__item"><a href="#">二手商城</a></li>
+				<li class="header__item"><a href="#">會員專區</a></li>
+			</ul>
+			<a href="#">
+				<i class="fa-solid fa-user"></i>
+			</a>
+		</nav>
+	</header>
+	
+			<!-- 🔘 篩選條件按鈕 -->
+		<div class="filter-btn-wrapper">
+			<button class="filterBtn">條件篩選</button>
+		</div>
+	
+	<!-- 🔹 配對主內容區 -->
+	<main class="match">
+		<!-- 🔹 上方名字與基本資料 -->
+		<div class="match__wrap">
+			<div class="match__header">
+				<h2 class="match__name"></h2>
+				<p class="match__info"></p>
+			</div>
+
+			<!-- 配對卡片滑動容器 -->
+			<div class="swiper match__card">
+				<div class="swiper-wrapper">
+
+					<!-- 🧡 第一頁：油條的基本資料 -->
+					<!-- 				<div class="swiper-slide"> -->
+					<!-- 					<div class="match__body"> -->
+					<!-- 						<div class="match__avatar-box"> -->
+					<!-- 							<div class="swiper avatar-swiper"> -->
+					<!-- 								<div class="swiper-wrapper"> -->
+					<!-- 									<div class="swiper-slide"> -->
+					<!-- 										<img src="img/yo.jpg" class="match__avatar" /> -->
+					<!-- 									</div> -->
+					<!-- 									<div class="swiper-slide"> -->
+					<!-- 										<img src="img/yo2.jpg" class="match__avatar" /> -->
+					<!-- 									</div> -->
+					<!-- 									可以再加更多 slide -->
+					<!-- 								</div> -->
+					<!-- 								<div class="swiper-pagination"></div> -->
+					<!-- 							</div> -->
+					<!-- 						</div> -->
+					<!-- 						<div class="match__details"> -->
+					<!-- 							<div class="match__field"> -->
+					<!-- 								<h3 class="match__field-title">人格特質</h3> -->
+					<!-- 								<p class="match__field-content">活潑開朗、愛分享</p> -->
+					<!-- 							</div> -->
+					<!-- 							<div class="match__field"> -->
+					<!-- 								<h3 class="match__field-title">興趣專長</h3> -->
+					<!-- 								<p class="match__field-content">喜歡散步、愛吃肉乾的小臘腸🐶</p> -->
+					<!-- 							</div> -->
+					<!-- 							<div class="match__field"> -->
+					<!-- 								<h3 class="match__field-title">個人簡介</h3> -->
+					<!-- 								<p class="match__field-content">我是一隻小臘腸，希望找到一起曬太陽的人！</p> -->
+					<!-- 							</div> -->
+					<!-- 						</div> -->
+					<!-- 					</div> -->
+					<!-- 				</div> -->
+				</div>
+
+			</div>
+		</div>
+
+		<!-- 🪟 篩選條件彈窗 -->
+		<div id="filterModal" class="modal-overlay">
+			<div class="modal-content">
+				<h2 class="modal-title">理想條件</h2>
+
+				<!-- 性別 -->
+				<label for="genderSelect"  class="filter-title">性別</label>
+				<select id="genderSelect"
+					class="select-full">
+					<option value="">不限</option>
+					<option value="0">男</option>
+					<option value="1">女</option>
+				</select>
+
+				<!-- 興趣 -->
+				<div class="filter-section">
+					<label class="filter-title">興趣</label>
+					<div class="checkbox-group">
+						<label><input type="checkbox" class="interest" value="打籃球"> 打籃球</label>
+						<label><input type="checkbox" class="interest" value="投資"> 投資</label>
+						<label><input type="checkbox" class="interest" value="健身"> 健身</label>
+						<label><input type="checkbox" class="interest" value="旅遊"> 旅遊</label>
+						<label><input type="checkbox" class="interest" value="烹飪"> 烹飪</label>
+						<label><input type="checkbox" class="interest" value="攝影"> 攝影</label>
+						<label><input type="checkbox" class="interest" value="閱讀"> 閱讀</label>
+						<label><input type="checkbox" class="interest" value="散步"> 散步</label>
+						<label><input type="checkbox" class="interest" value="寫作"> 寫作</label>
+						<label><input type="checkbox" class="interest" value="彈鋼琴"> 彈鋼琴</label>
+						<label><input type="checkbox" class="interest" value="追劇"> 追劇</label>
+						<label><input type="checkbox" class="interest" value="打遊戲"> 打遊戲</label>
+					</div>
+				</div>
+
+				<!-- 人格特質 -->
+				<div class="filter-section">
+					<label class="filter-title">人格特質</label>
+					<div class="checkbox-group">
+						<label><input type="checkbox" class="personality" value="穩重"> 穩重</label>
+						<label><input type="checkbox" class="personality" value="務實"> 務實</label>
+						<label><input type="checkbox" class="personality" value="陽光"> 陽光</label>
+						<label><input type="checkbox" class="personality" value="外向"> 外向</label>
+						<label><input type="checkbox" class="personality" value="樂觀"> 樂觀</label>
+						<label><input type="checkbox" class="personality" value="開朗"> 開朗</label>
+						<label><input type="checkbox" class="personality" value="文靜"> 文靜</label>
+						<label><input type="checkbox" class="personality" value="細心"> 細心</label>
+						<label><input type="checkbox" class="personality" value="浪漫"> 浪漫</label>
+						<label><input type="checkbox" class="personality" value="感性"> 感性</label>
+						<label><input type="checkbox" class="personality" value="神秘"> 神秘</label>
+						<label><input type="checkbox" class="personality" value="可愛"> 可愛</label>
+						<label><input type="checkbox" class="personality" value="溫柔"> 溫柔</label>
+						<label><input type="checkbox" class="personality" value="黏人"> 黏人</label>
+						<label><input type="checkbox" class="personality" value="厭世"> 厭世</label>
+						<label><input type="checkbox" class="personality" value="淘氣"> 淘氣</label>
+					</div>
+				</div>
+
+				<!-- 按鈕 -->
+				<div class="modal-actions">
+					<button class="filter-btn btn-primary">套用篩選</button>
+					<button class="filter-btn btn-secondary">取消</button>
+				</div>
+			</div>
+		</div>
+
+
+		<!-- 🔹 按鈕區 -->
+		<div class="match__actions">
+			<button class="match__button match__button--like">抖一下</button>
+			<button class="match__button match__button--dislike">不喜歡</button>
+		</div>
+	</main>
+	<script src="js/matchSystem.js"></script>
+</body>
+
+</html>

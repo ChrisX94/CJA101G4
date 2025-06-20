@@ -1,0 +1,27 @@
+// 手機：≤ 480px
+@mixin mobile {
+  @media (max-width: 480px) {
+    @content;
+  }
+}
+  
+// 平板：481px ~ 768px
+@mixin pad {
+  @media (min-width: 481px) and (max-width: 768px) {
+    @content;
+  }
+}
+
+// 筆電：769px ~ 1199px
+@mixin laptop {
+  @media (min-width: 769px) and (max-width: 1199px) {
+    @content;
+  }
+}
+
+// 大螢幕（桌機）：≥ 1200px
+@mixin desktop {
+  @media (min-width: 1200px) {
+    @content;
+  }
+}  

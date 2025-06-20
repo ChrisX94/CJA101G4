@@ -1,5 +1,6 @@
 package com.shakemate.shshop.service;
 
+import com.shakemate.match.repository.MatchRepository;
 import com.shakemate.shshop.dao.ShShopRepository;
 import com.shakemate.shshop.dao.ShShopTypeRepository;
 import com.shakemate.shshop.dto.ShProdDto;
@@ -8,7 +9,6 @@ import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdPic;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.util.CompositeQueryForShshop;
-import com.shakemate.user.dao.UserMatchRepository;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.dto.UserDto;
 import com.shakemate.user.model.Users;
@@ -34,7 +34,7 @@ public class ShShopService {
     private ShShopTypeRepository typeRepo;
 
     @Autowired
-    private UserMatchRepository matchRepo;
+    private MatchRepository matchRepo;
 
     @Autowired
     UsersRepository usersRepo;
