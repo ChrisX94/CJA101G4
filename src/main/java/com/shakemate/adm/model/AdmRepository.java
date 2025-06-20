@@ -7,11 +7,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AdmRepository extends JpaRepository<AdmVO, Integer> {
-    List<AdmVO> findByAdmNameContaining(String admName);
-    
-    AdmVO findByAdmAcc(String admAcc);
+	List<AdmVO> findByAdmNameContaining(String admName);
 
-
+	// 根據帳號查詢
+	AdmVO findByAdmAcc(String admAcc);
 
 //	@Transactional
 //	@Modifying

@@ -9,6 +9,8 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.shakemate.adm.util.PasswordUtil;
+
 //import hibernate.util.CompositeQuery.HibernateUtil_CompositeQuery_Emp3;
 
 @Service("admService")
@@ -29,6 +31,12 @@ public class AdmService {
 	}
 
 	public void addAdm(AdmVO admVO) {
+		//取出使用者輸入的明文密碼
+		String plainPassword = admVO.getAdmPwd();
+		//呼叫工具類加密（hash）
+		String hashedPassword = PasswordUtil.hashPassword(plainPassword);
+		//把加密後的密碼塞回 admVO
+		admVO.setAdmPwd(hashedPassword);
 		repository.save(admVO);
 	}
 
@@ -83,8 +91,16 @@ public class AdmService {
 	}
 
 	public List<AdmVO> findByConditions(String admName, String admAccount, String authName) {
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public AdmVO validateLogin(String admAcc, String admPwd) {
+		AdmVO adm = repository.findByAdmAcc(admAcc); // only search for account
+		if (adm != null && adm.getAdmPwd().equals(admPwd)) {
+			return adm;
+		}
+		return null;
+
 	}
 
 }

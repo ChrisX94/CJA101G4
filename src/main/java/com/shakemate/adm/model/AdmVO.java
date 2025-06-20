@@ -1,42 +1,25 @@
 package com.shakemate.adm.model;
 
-import java.io.IOException;
-import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.Past;
-
-import jakarta.validation.constraints.NotEmpty;
-
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.multipart.MultipartFile;
-
-import jakarta.persistence.Entity;
 
 @Entity
 @Table(name = "ADM")
@@ -124,5 +107,10 @@ public class AdmVO implements java.io.Serializable {
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "adm_auth", joinColumns = @JoinColumn(name = "adm_id"), inverseJoinColumns = @JoinColumn(name = "auth_id"))
 	private Set<AuthFuncVO> authFuncs = new HashSet<>();
+
+	@Transient
+	@NotBlank(message = "密碼不能空白")
+	@Size(min = 6, message = "密碼至少要 6 碼")
+	private String inputPwd; // 暫時用來裝使用者輸入的明碼密碼
 
 }

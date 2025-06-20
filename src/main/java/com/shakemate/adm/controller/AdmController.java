@@ -130,9 +130,9 @@ public class AdmController {
 	@GetMapping("listAllAdm")
 	public String listAllAdm(HttpSession session, ModelMap model) {
 		AdmVO adm = (AdmVO) session.getAttribute("loggedInAdmin");
-//		if (adm == null || adm.getAuthFuncs().stream().noneMatch(a -> a.getAuthName().equals("最高管理員"))) {
-//			return "redirect:/login";
-//		}
+		if (adm == null || adm.getAuthFuncs().stream().noneMatch(a -> a.getAuthName().equals("最高管理員"))) {
+			return "redirect:/login";
+		}
 		List<AdmVO> list = admSvc.getAll();
 		model.addAttribute("admListData", list);
 		return "back-end/adm/listAllAdm";
@@ -144,6 +144,14 @@ public class AdmController {
 	                                   @RequestParam(required = false) String admAccount,
 	                                   @RequestParam(required = false) String authName,
 	                                   Model model) {
+		if ((admName == null || admName.isBlank()) &&
+			    (admAccount == null || admAccount.isBlank()) &&
+			    (authName == null || authName.isBlank())) {
+
+			    model.addAttribute("error", "請至少輸入一個查詢條件");
+			    return "back-end/adm/searchPage"; // 或原查詢頁面
+			}
+
 
 	    // 你可以依條件去 service 查資料
 	    List<AdmVO> list = admSvc.findByConditions(admName, admAccount, authName);

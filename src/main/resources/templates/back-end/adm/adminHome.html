@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>管理員首頁</title>
+</head>
+<body>
+    <h1 th:if="${loggedInAdm != null}">
+        歡迎回來，<span th:text="${loggedInAdm.admName}">管理員</span>
+    </h1>
+    <h1 th:unless="${loggedInAdm != null}">
+        歡迎回來，管理員
+    </h1>
+</body>
+</html>
