@@ -513,6 +513,16 @@ html {
   transition: all 0.3s ease;
 }
 @media (min-width: 481px) and (max-width: 768px) {
+  .header__nav .member {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .header__nav .member {
+    display: none;
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
   .header__nav {
     position: absolute;
     top: 6.5rem;
@@ -615,8 +625,26 @@ html {
   color: #3e92cc;
 }
 
-.hamburger {
+.mobile__nav {
   display: none;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .mobile__nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+}
+@media (max-width: 480px) {
+  .mobile__nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+.hamburger {
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 2.5rem;
@@ -627,16 +655,6 @@ html {
   height: 0.3rem;
   background: #333;
   border-radius: 3px;
-}
-@media (min-width: 481px) and (max-width: 768px) {
-  .hamburger {
-    display: flex;
-  }
-}
-@media (max-width: 480px) {
-  .hamburger {
-    display: flex;
-  }
 }
 
 /* 📌 配對頁面 SCSS (支援翻頁) */

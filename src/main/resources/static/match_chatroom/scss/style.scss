@@ -539,11 +539,19 @@
   
   .header__nav {
     display: flex;
-
     align-items: center;
     box-sizing: border-box;
     gap: 4rem;
     transition: all 0.3s ease;
+
+    .member {
+      @include pad() {
+        display: none;
+      }
+      @include mobile() {
+        display: none;
+      }
+    }
   
     @include pad {
       position: absolute;
@@ -647,9 +655,24 @@
     }
   }
   
+  .mobile__nav {
+    display: none;
+
+    @include pad {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+  
+    @include mobile {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+  }
 
   .hamburger {
-    display: none;
+    display: flex;
     flex-direction: column;
     justify-content: space-between;
     width: 2.5rem;
@@ -660,14 +683,6 @@
       height: 0.3rem;
       background: #333;
       border-radius: 3px;
-    }
-  
-    @include pad {
-      display: flex;
-    }
-  
-    @include mobile {
-      display: flex;
     }
   }
   
