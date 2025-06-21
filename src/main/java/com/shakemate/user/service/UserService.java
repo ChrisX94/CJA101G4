@@ -7,11 +7,18 @@ import com.shakemate.user.model.Users;
 import com.shakemate.util.PasswordConvert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.Period;
 
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -22,8 +29,6 @@ public class UserService {
     @Autowired
     private PasswordConvert pc;
 
-
-
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
@@ -33,18 +38,25 @@ public class UserService {
         return user != null && pc.passwordVerify(user.getPwd(), inputPassword);
     }
 
-    public void signIn(String userName, String email, String password, byte gender, Date birthday, String location,
-                       String intro, String interests, String personality) throws NoSuchAlgorithmException {
-        Users user = new Users();
-        user.setUsername(userName);
-        user.setEmail(email);
-        user.setPwd(pc.hashing(password));
-        user.setGender(gender);
-        user.setBirthday(birthday);
-        user.setLocation(location);
-        user.setIntro(intro);
-        user.setInterests(interests);
-        user.setPersonality(personality);
+    @Transactional
+    public void signIn(Users user, String[] interestsArr, String[] personalityArr, String imgUrl ){
+        String rowPassword = user.getPwd();
+        user.setPwd(pc.hashing(rowPassword));
+        user.setImg1(imgUrl);
+        if(interestsArr != null && interestsArr.length > 0) {
+            String interests = String.join(",", interestsArr);
+            user.setInterests(interests);
+        }
+        if(personalityArr != null && personalityArr.length > 0){
+            String personality = String.join(",", personalityArr);
+            user.setPersonality(personality);
+        }
+
+
+
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        user.setCreatedTime(now);
+        user.setUpdatedTime(now);
         user.setUserStatus((byte) 0);
         user.setPostStatus(false);
         user.setAtAcStatus(false);

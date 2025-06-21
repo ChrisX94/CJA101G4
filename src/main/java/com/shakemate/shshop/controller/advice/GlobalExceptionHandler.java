@@ -2,15 +2,17 @@ package com.shakemate.shshop.controller.advice;
 
 import com.shakemate.shshop.dto.ApiResponse;
 import com.shakemate.shshop.dto.ApiResponseFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.shakemate.shshop.controller")
 public class GlobalExceptionHandler {
 
     // 處理一般錯誤
@@ -32,5 +34,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(ApiResponseFactory.error(400, "validation_failed", errors));
+    }
+    // 處理404路徑錯誤
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<String> handle404(NoHandlerFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("找不到你要的資源 😢：請確認路徑是否正確！");
     }
 }

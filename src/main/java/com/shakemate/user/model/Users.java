@@ -2,6 +2,7 @@ package com.shakemate.user.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.io.Serializable;
 import java.sql.Date;
@@ -18,21 +19,31 @@ public class Users implements Serializable {
     @Column(name = "USER_ID")
     private Integer userId;
 
-    @Column(name = "USERNAME", nullable = false, length = 30)
+    @Size(min = 1, max = 50, message = "名稱必須為 1~50 字")
+    @NotEmpty(message = "請輸入使用者名稱")
+    @Column(name = "USERNAME", nullable = false, length = 50)
     private String username;
 
-    @Column(name = "EMAIL", nullable = false, length = 30, unique = true)
+    @NotEmpty(message = "請輸入Email")
+    @Column(name = "EMAIL", nullable = false, length = 50, unique = true)
     private String email;
 
-    @Column(name = "PWD", nullable = false, length = 20)
+
+    @NotEmpty(message = "請輸入密碼")
+    @Column(name = "PWD", nullable = false, length = 255)
     private String pwd;
 
+    @Min(value = 0, message = "性別只能為 0 或 1")
+    @Max(value = 1, message = "性別只能為 0 或 1")
+    @NotNull(message = "性別為必填欄位")
     @Column(name = "GENDER", nullable = false)
     private byte gender;
 
+    @NotNull(message = "生日為必填")
     @Column(name = "BIRTHDAY")
     private Date birthday;
 
+    @NotEmpty(message = "請輸入居住地")
     @Column(name = "LOCATION", length = 50)
     private String location;
 
@@ -62,6 +73,7 @@ public class Users implements Serializable {
 
     @Column(name = "PERSONALITY", length = 300)
     private String personality;
+
 
     @Column(name = "UPDATED_TIME", nullable = false)
     private Timestamp updatedTime;
