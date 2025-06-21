@@ -17,13 +17,29 @@
   .chat-layout {
     display: flex;
     height: 80vh;
-    max-width: 75%;
+    max-width: 1000px;
     margin: auto;
     margin-top: 3rem;
     background: #fff;
     box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
     border-radius: 1rem;
     overflow: hidden;
+    @include laptop() {
+      max-width: 90%;
+    }
+  
+    @include pad() {
+      height: calc(100vh - 65px);
+      margin-top: 0;
+      max-width: 100%;
+    }
+  
+    @include mobile() {
+      display: block;
+      margin-top: 0;
+      height: auto;
+      max-width: 100%;
+    }
   }
   
   .chat-list {
@@ -32,9 +48,17 @@
     border-right: 1px solid #ddd;
     padding: 1rem;
     box-sizing: border-box;
-  
     /* 	max-height: 80vh; */
     overflow-y: auto;
+
+    @include pad() {
+      width: 20.5rem;
+    }
+  
+    @include mobile() {
+      width: 100%;
+      height: calc(100vh - 65px);
+    }
   
     ul {
       list-style: none;
@@ -87,12 +111,23 @@
   .chat-list-txt {
     display: flex;
     flex-direction: column;
+    p {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1; /* 限制為 1 行 */
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
   
   .chatroom {
     flex: 1;
     display: flex;
     flex-direction: column;
+    @include mobile() {
+      width: 100%;
+      height: calc(100vh - 65px);
+    }
   }
   
   .chatroom__bar-content {
@@ -192,6 +227,10 @@
       gap: 0.5rem;
       margin-top: 0.3rem;
       max-width: 60%;
+
+      @include pad() {
+        max-width: 70%;
+      }
     }
   
     &.right .bubble-block {
@@ -200,6 +239,10 @@
       gap: 0.5rem;
       max-width: 60%;
       flex-direction: row-reverse;
+
+      @include pad() {
+        max-width: 70%;
+      }
     }
   }
   
