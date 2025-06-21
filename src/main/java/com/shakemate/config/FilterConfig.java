@@ -16,8 +16,6 @@ public class FilterConfig {
         registrationBean.setFilter(new LoginFilter()); // 註冊自訂的 LoginFilter
         registrationBean.addUrlPatterns(
                 "/user/*",     // 可根據實際需要改為攔截哪些 URL
-                "/chatroom/*",
-                "/match/*",
                 "/testlogin/*"
 
         );
