@@ -15,13 +15,33 @@ html {
 .chat-layout {
   display: flex;
   height: 80vh;
-  max-width: 75%;
+  max-width: 1000px;
   margin: auto;
   margin-top: 3rem;
   background: #fff;
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
   border-radius: 1rem;
   overflow: hidden;
+}
+@media (min-width: 769px) and (max-width: 1199px) {
+  .chat-layout {
+    max-width: 90%;
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .chat-layout {
+    height: calc(100vh - 65px);
+    margin-top: 0;
+    max-width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .chat-layout {
+    display: block;
+    margin-top: 0;
+    height: auto;
+    max-width: 100%;
+  }
 }
 
 .chat-list {
@@ -32,6 +52,17 @@ html {
   box-sizing: border-box;
   /* 	max-height: 80vh; */
   overflow-y: auto;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .chat-list {
+    width: 20.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .chat-list {
+    width: 100%;
+    height: calc(100vh - 65px);
+  }
 }
 .chat-list ul {
   list-style: none;
@@ -78,11 +109,24 @@ html {
   display: flex;
   flex-direction: column;
 }
+.chat-list-txt p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1; /* 限制為 1 行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .chatroom {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+@media (max-width: 480px) {
+  .chatroom {
+    width: 100%;
+    height: calc(100vh - 65px);
+  }
 }
 
 .chatroom__bar-content {
@@ -176,12 +220,22 @@ html {
   margin-top: 0.3rem;
   max-width: 60%;
 }
+@media (min-width: 481px) and (max-width: 768px) {
+  .message.left .bubble-block {
+    max-width: 70%;
+  }
+}
 .message.right .bubble-block {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
   max-width: 60%;
   flex-direction: row-reverse;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .message.right .bubble-block {
+    max-width: 70%;
+  }
 }
 
 .meta-info {
@@ -453,11 +507,20 @@ html {
 
 .header__nav {
   display: flex;
-
   align-items: center;
   box-sizing: border-box;
   gap: 4rem;
   transition: all 0.3s ease;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__nav .member {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .header__nav .member {
+    display: none;
+  }
 }
 @media (min-width: 481px) and (max-width: 768px) {
   .header__nav {
@@ -541,7 +604,6 @@ html {
   display: flex;
   list-style: none;
   gap: 3rem;
-
 }
 
 .header__item a {
@@ -563,9 +625,26 @@ html {
   color: #3e92cc;
 }
 
+.mobile__nav {
+  display: none;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .mobile__nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+}
+@media (max-width: 480px) {
+  .mobile__nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+}
 
 .hamburger {
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 2.5rem;
@@ -577,17 +656,6 @@ html {
   background: #333;
   border-radius: 3px;
 }
-@media (min-width: 481px) and (max-width: 768px) {
-  .hamburger {
-    display: flex;
-  }
-}
-@media (max-width: 480px) {
-  .hamburger {
-    display: flex;
-  }
-}
-
 
 /* 📌 配對頁面 SCSS (支援翻頁) */
 .match {
