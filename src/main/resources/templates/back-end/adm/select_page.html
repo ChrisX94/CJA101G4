@@ -16,7 +16,7 @@
 				<h3 class="mb-0">🔍 管理員複合查詢</h3>
 			</div>
 			<div class="card-body">
-				<form method="post" th:action="@{/adm/listAdms_ByCompositeQuery}">
+				<form method="post" th:action="@{/templates/front-end/adm/listAdms_ByCompositeQuery}">
 					<div class="row mb-3">
 						<div class="col-md-4">
 							<label class="form-label">管理員姓名：</label> <input type="text"
@@ -38,7 +38,7 @@
 					<div class="d-flex justify-content-between">
 						<div>
 							<button type="submit" class="btn btn-primary me-2">🔎 查詢</button>
-							<a th:href="@{/adm/listAllAdm}" class="btn btn-secondary">📃
+							<a th:href="@{/templates/front-end/adm/listAllAdm}" class="btn btn-secondary">📃
 								查詢全部</a>
 						</div>
 						<button type="reset" class="btn btn-outline-danger">🧹 清除</button>
