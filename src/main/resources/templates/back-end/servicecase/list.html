@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-TW"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout/layout :: layout">
+  
+  <div th:fragment="content">
+    <h2>案件列表</h2>
+    <!-- 1. 链接改为 /servicecases/add -->
+    <a th:href="@{/servicecase/add}"
+       class="send-button"
+       style="margin-bottom: 10px;">
+      新增案件
+    </a>
+
+    <table border="1" width="100%" cellpadding="5" cellspacing="0">
+      <thead>
+        <tr>
+          <th>編號</th>
+          <th>使用者ID</th>
+          <th>標題</th>
+          <th>狀態</th>
+          <th>建立時間</th>
+          <th>更新時間</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="sc : ${cases}">
+          <td th:text="${sc.caseId}">1</td>
+          <td th:text="${sc.userId}">123</td>
+          <td th:text="${sc.title}">標題範例</td>
+          <td th:text="${sc.caseStatus}">0</td>
+          <td th:text="${#dates.format(sc.createTime, 'yyyy-MM-dd HH:mm')}">2025-06-20 12:00</td>
+          <td th:text="${#dates.format(sc.updateTime, 'yyyy-MM-dd HH:mm')}">2025-06-20 12:30</td>
+          <td>
+            <!-- 编辑也改为 /servicecase/edit/{id} -->
+            <a th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}">編輯</a> |
+            <!-- 删除改为 /servicecase/delete/{id} 并用 Thymeleaf 内联 JS -->
+            <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}"
+               th:onclick="|return confirm('確定刪除 ID=${sc.caseId} 嗎？');|">
+              刪除
+            </a>
+          </td>
+        </tr>
+        <tr th:if="${cases.empty}">
+          <td colspan="7" style="text-align:center;">目前沒有任何案件</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</html>
