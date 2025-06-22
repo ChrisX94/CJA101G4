@@ -12,7 +12,15 @@ fetch(`${MATCH_API_BASE}/currentUserId`)
 		currentUserId = data.currentUserId;
 		console.log(data);
 		console.log("✅ currentUserId 抓到了：", currentUserId);
-
+		
+		// ✅ 檢查是否換帳號，如果有就清掉上一位留下的篩選資料與配對清單
+		const savedUserId = localStorage.getItem('lastUserId');
+		if (savedUserId !== currentUserId.toString()) {
+			console.log("🧼 換帳號了，清除舊資料");
+			localStorage.removeItem(`matchFilters_${savedUserId}`);
+			localStorage.removeItem(`matchedList_${savedUserId}`);
+			localStorage.setItem('lastUserId', currentUserId); // 更新登入者
+		}
 		// ⏬ 把你原本的初始化邏輯、篩選綁定、按鈕綁定都放進來 ⏬
 		startMatchPage(); // ← 你原本的主邏輯全寫這裡
 	})
@@ -97,6 +105,13 @@ function startMatchPage() {
 			interests: interests,
 			personality: personality
 		};
+		
+		// ✅ 儲存篩選資料（提前做！）
+		localStorage.setItem(`matchFilters_${currentUserId}`, JSON.stringify({
+			gender,
+			interests,
+			personality
+		}));
 
 		// 👉 發送 POST 請求
 		fetch(`${MATCH_API_BASE}/getFiltered`, {
@@ -118,11 +133,6 @@ function startMatchPage() {
 
 				// ✅ 儲存篩選資料與結果
 				localStorage.setItem(`matchedList_${currentUserId}`, JSON.stringify(matchList));
-				localStorage.setItem(`matchFilters_${currentUserId}`, JSON.stringify({
-					gender,
-					interests,
-					personality
-				}));
 			})
 			.catch(err => {
 				console.error("❌ 發送失敗：", err);
@@ -218,7 +228,7 @@ function startMatchPage() {
 			p.className = "match__field-content";
 
 			// 👇 加入 highlight 判斷
-			if (f.title === "人格特質") {
+			if (f.title === "人格特質" || f.title === "興趣專長") {
 				p.innerHTML = getHighlightedText(f.title, f.content);
 			} else {
 				p.textContent = f.content;
@@ -353,17 +363,28 @@ function goToMatch() {
 		.catch(() => alert("⚠️ 無法取得使用者 ID"));
 }
 
-// 符合條件篩選，就把文字變色
 function getHighlightedText(title, content) {
 	const filters = JSON.parse(localStorage.getItem(`matchFilters_${currentUserId}`));
-	if (!filters || !filters.personality) return content;
+	if (!filters) return content.replace(/[,，]/g, '、');
 
-	const selectedTraits = filters.personality; // 勾選的陣列
-	const traits = content.split(/[、,，]/); // 分割卡牌上的特質
+	let selected = [];
 
-	return traits.map(trait => {
-		return selectedTraits.includes(trait.trim())
-			? `<span class="highlight">${trait.trim()}</span>`
-			: trait.trim();
-	}).join(',');
+	if (title === "人格特質" && Array.isArray(filters.personality) && filters.personality.length > 0) {
+		selected = filters.personality;
+	} else if (title === "興趣專長" && Array.isArray(filters.interests) && filters.interests.length > 0) {
+		selected = filters.interests;
+	} else {
+		return content.replace(/[,，]/g, '、');
+	}
+
+	const items = content.split(/[、,，]/);
+
+	return items.map(item => {
+		const trimmed = item.trim();
+		return selected.includes(trimmed)
+			? `<span class="highlight">${trimmed}</span>`
+			: trimmed;
+	}).join('、');
 }
+
+
