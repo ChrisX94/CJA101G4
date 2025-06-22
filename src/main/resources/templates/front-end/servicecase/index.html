@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<title>智能客服系統</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- 載入CSS -->
+<link rel="stylesheet" th:href="@{/css/chat.css}" />
+</head>
+<body>
+	<div class="container">
+
+		<!-- Header -->
+		<header>
+			<h1>智能客服系統</h1>
+		</header>
+
+		<div class="main-content">
+
+			<!-- Sidebar -->
+			<aside class="sidebar">
+				<ul id="categoryList" class="category-list">
+					<!-- JavaScript 動態產生 -->
+				</ul>
+
+			</aside>
+
+			<!-- Chat Container -->
+			<main class="chat-container">
+
+				<div class="chat-messages" id="chatMessages">
+					<div class="message message-bot">
+						<p>您好！請先選擇問題類別，AI 將會立即回應。</p>
+					<span class="message-time"></span>
+					</div>
+				</div>
+
+				<div class="typing-indicator hidden" id="typingIndicator">
+					<div class="typing-bubble"></div>
+					<div class="typing-bubble"></div>
+					<div class="typing-bubble"></div>
+				</div>
+
+				<div class="chat-input-container">
+					<input type="text" class="chat-input" id="chatInput"
+						placeholder="請輸入您的問題..." disabled />
+					<button class="send-button" id="sendButton" disabled>發送</button>
+				</div>
+
+			</main>
+		</div>
+	</div>
+
+  <!-- 浮動「我要提問」改到 CRUD 列表頁 -->
+  <a th:href="@{/servicecase/add}" 
+     style="background-color:orange; position:fixed; top:20px; right:80px; z-index:1000;"
+     class="send-button">
+    無法解決嗎?點此新增提問
+  </a>
+  
+	<!-- 載入JS -->
+	<script th:src="@{/js/chat.js}" defer></script>
+</body>
+</html>

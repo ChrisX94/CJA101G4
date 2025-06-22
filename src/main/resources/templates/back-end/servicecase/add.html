@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<!-- 這個 fragment 會被插入到 layout.html 的 <main> 位置 -->
+<div th:fragment="content">
+	<h2>新增服務案件</h2>
+
+	<form th:action="@{/servicecase/save}" th:object="${serviceCase}"
+		method="post"
+		style="display: flex; flex-direction: column; gap: 10px; max-width: 600px;">
+
+		<!-- 使用者 ID -->
+		<div>
+			<label for="userId">使用者 ID：</label> <input type="number" id="userId"
+				th:field="*{userId}" placeholder="輸入使用者 ID" required />
+		</div>
+
+		<!-- 管理員 ID -->
+		<div>
+			<label for="admId">管理員 ID：</label> <input type="number" id="admId"
+				th:field="*{admId}" placeholder="輸入管理員 ID" />
+		</div>
+
+		<!-- 案件類型 -->
+		<div>
+			<label for="caseType">案件類型：</label> <select id="caseType"
+				th:field="*{caseType.caseTypeId}" required>
+				<option th:each="type : ${allTypes}" th:value="${type.caseTypeId}"
+					th:text="${type.typeName}"></option>
+			</select>
+		</div>
+
+		<!-- 標題 -->
+		<div>
+			<label for="title">標題：</label> <input type="text" id="title"
+				th:field="*{title}" placeholder="輸入標題" required />
+		</div>
+
+		<!-- 內容 -->
+		<div>
+			<label for="content">內容：</label>
+			<textarea id="content" th:field="*{content}" placeholder="輸入內容"
+				rows="5" required></textarea>
+		</div>
+
+		<!-- 狀態 -->
+		<div>
+			<label for="caseStatus">狀態：</label> <select id="caseStatus"
+				th:field="*{caseStatus}" required>
+				<option th:value="0">未處理</option>
+				<option th:value="1">處理中</option>
+				<option th:value="2">已完成</option>
+			</select>
+		</div>
+
+		<!-- 按鈕 -->
+		<div style="margin-top: 20px;">
+			<button type="submit" class="send-button">儲存</button>
+			<a th:href="@{/servicecase}" style="margin-left: 10px;">取消</a>
+		</div>
+	</form>
+</div>
+</html>
