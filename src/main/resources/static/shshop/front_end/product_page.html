@@ -125,114 +125,126 @@
     </div>
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const productId = urlParams.get("id");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get("id");
 
-        if (!productId) {
-            console.error("查無商品");
-            return;
-        }
+            if (!productId) {
+                console.error("查無商品");
+                return;
+            }
 
-        const mainImg = document.querySelector(".main-img img");
-        const thumbnailTrack = document.querySelector(".thumbnail-track");
-        let thumbnails = [];
-        let currentImgIndex = 0;
+            const mainImg = document.querySelector(".main-img img");
+            const thumbnailTrack = document.querySelector(".thumbnail-track");
+            let thumbnails = [];
+            let currentImgIndex = 0;
 
-        // 從後端取得商品資料
-        fetch(`http://localhost:8087/api/ShShop/getProd?id=${productId}`)
-            .then(response => {
-                if (!response.ok) throw new Error("後端回傳錯誤");
-                return response.json();
-            })
-            .then(responseData => {
-                const data = responseData.data;
+            // 從後端取得商品資料
+            fetch(`http://localhost:8087/api/ShShop/getProd?id=${productId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("後端回傳錯誤");
+                    return response.json();
+                })
+                .then(responseData => {
+                    const data = responseData.data;
 
-                // 設定主圖
-                if (data.picUrls && data.picUrls.length > 0) {
-                    mainImg.src = data.picUrls[0];
-                    mainImg.alt = data.prodName;
+                    // 設定主圖
+                    if (data.picUrls && data.picUrls.length > 0) {
+                        mainImg.src = data.picUrls[0];
+                        mainImg.alt = data.prodName;
 
-                    // 建立縮圖列
-                    data.picUrls.forEach((url, index) => {
-                        const thumb = document.createElement("img");
-                        thumb.src = url;
-                        thumb.alt = `商品圖${index + 1}`;
-                        thumb.addEventListener("click", () => {
-                            mainImg.src = url;
-                            currentImgIndex = index;
+                        // 建立縮圖列
+                        data.picUrls.forEach((url, index) => {
+                            const thumb = document.createElement("img");
+                            thumb.src = url;
+                            thumb.alt = `商品圖${index + 1}`;
+                            thumb.addEventListener("click", () => {
+                                mainImg.src = url;
+                                currentImgIndex = index;
+                            });
+                            thumbnailTrack.appendChild(thumb);
+                            thumbnails.push(thumb);
                         });
-                        thumbnailTrack.appendChild(thumb);
-                        thumbnails.push(thumb);
-                    });
-                }
+                    }
 
-                // 點主圖放大
-                mainImg.addEventListener("click", () => {
-                    document.getElementById("modalImg").src = mainImg.src;
-                    document.getElementById("imgModal").style.display = "flex";
+                    // 點主圖放大
+                    mainImg.addEventListener("click", () => {
+                        document.getElementById("modalImg").src = mainImg.src;
+                        document.getElementById("imgModal").style.display = "flex";
+                    });
+
+                    // 商品資訊
+                    document.querySelector(".prodName").textContent = `商品名稱：${data.prodName}`;
+                    document.querySelector(".price").innerHTML = `價格：<strong class='price_info'>$${data.prodPrice}</strong>`;
+                    document.querySelector(".brand").innerHTML = `<strong>商品品牌：</strong>${data.prodBrand}`;
+                    document.querySelector(".qty").innerHTML = `<strong>商品數量：</strong>${data.prodCount}`;
+                    document.querySelector(".prod_type").innerHTML = `<strong>商品類別：</strong>${data.prodTypeName}`;
+                    document.querySelector(".prod_view").innerHTML = `<strong>商品瀏覽次數：</strong>${data.prodViews}`;
+
+                    document.querySelectorAll(".product-section")[0].querySelector("p").textContent = data.prodContent;
+                    document.querySelectorAll(".product-section")[1].querySelector("p").textContent = data.prodDesc;
+                    document.querySelectorAll(".product-section")[2].querySelector("p").textContent = `上架者：${data.userName}`;
+
+                    // 數量控制
+                    const qtyInput = document.getElementById("buyQty");
+                    if (qtyInput && data.prodCount) {
+                        qtyInput.max = data.prodCount;
+
+                        qtyInput.addEventListener("input", () => {
+                            let val = parseInt(qtyInput.value);
+                            if (val < 1) qtyInput.value = 1;
+                            if (val > parseInt(qtyInput.max)) qtyInput.value = qtyInput.max;
+                        });
+
+                        document.getElementById("increaseBtn").onclick = () => {
+                            const current = parseInt(qtyInput.value);
+                            if (current < parseInt(qtyInput.max)) qtyInput.value = current + 1;
+                        };
+
+                        document.getElementById("decreaseBtn").onclick = () => {
+                            const current = parseInt(qtyInput.value);
+                            if (current > 1) qtyInput.value = current - 1;
+                        };
+                    }
+                })
+                .catch(err => {
+                    console.error("載入商品資料失敗：", err);
                 });
 
-                // 商品資訊
-                document.querySelector(".prodName").textContent = `商品名稱：${data.prodName}`;
-                document.querySelector(".price").innerHTML = `價格：<strong class='price_info'>$${data.prodPrice}</strong>`;
-                document.querySelector(".brand").innerHTML = `<strong>商品品牌：</strong>${data.prodBrand}`;
-                document.querySelector(".qty").innerHTML = `<strong>商品數量：</strong>${data.prodCount}`;
-                document.querySelector(".prod_type").innerHTML = `<strong>商品類別：</strong>${data.prodTypeName}`;
-                document.querySelector(".prod_view").innerHTML = `<strong>商品瀏覽次數：</strong>${data.prodViews}`;
-
-                document.querySelectorAll(".product-section")[0].querySelector("p").textContent = data.prodContent;
-                document.querySelectorAll(".product-section")[1].querySelector("p").textContent = data.prodDesc;
-                document.querySelectorAll(".product-section")[2].querySelector("p").textContent = `上架者：${data.userName}`;
-
-                // 數量控制
-                const qtyInput = document.getElementById("buyQty");
-                if (qtyInput && data.prodCount) {
-                    qtyInput.max = data.prodCount;
-
-                    qtyInput.addEventListener("input", () => {
-                        let val = parseInt(qtyInput.value);
-                        if (val < 1) qtyInput.value = 1;
-                        if (val > parseInt(qtyInput.max)) qtyInput.value = qtyInput.max;
-                    });
-
-                    document.getElementById("increaseBtn").onclick = () => {
-                        const current = parseInt(qtyInput.value);
-                        if (current < parseInt(qtyInput.max)) qtyInput.value = current + 1;
-                    };
-
-                    document.getElementById("decreaseBtn").onclick = () => {
-                        const current = parseInt(qtyInput.value);
-                        if (current > 1) qtyInput.value = current - 1;
-                    };
+            // 左右箭頭切換主圖
+            document.querySelectorAll(".nav-arrow")[0].addEventListener("click", () => {
+                if (thumbnails.length > 0) {
+                    currentImgIndex = (currentImgIndex - 1 + thumbnails.length) % thumbnails.length;
+                    mainImg.src = thumbnails[currentImgIndex].src;
                 }
-            })
-            .catch(err => {
-                console.error("載入商品資料失敗：", err);
             });
 
-        // 左右箭頭切換主圖
-        document.querySelectorAll(".nav-arrow")[0].addEventListener("click", () => {
-            if (thumbnails.length > 0) {
-                currentImgIndex = (currentImgIndex - 1 + thumbnails.length) % thumbnails.length;
-                mainImg.src = thumbnails[currentImgIndex].src;
+            document.querySelectorAll(".nav-arrow")[1].addEventListener("click", () => {
+                if (thumbnails.length > 0) {
+                    currentImgIndex = (currentImgIndex + 1) % thumbnails.length;
+                    mainImg.src = thumbnails[currentImgIndex].src;
+                }
+            });
+
+            // 關閉圖片 Modal
+            document.querySelector(".close-modal").addEventListener("click", () => {
+                document.getElementById("imgModal").style.display = "none";
+            });
+
+            // 顯示後端回傳的錯誤訊息（如果有）
+            const serverErrorDiv = document.getElementById('serverErrorContainer');
+            const backendErrorMessage = serverErrorDiv?.getAttribute('data-error-message-th');
+            const pwdMismatchMessage = serverErrorDiv?.getAttribute('data-pwd-mismatch-th');
+
+            if (backendErrorMessage && backendErrorMessage.trim() !== 'null' && backendErrorMessage.trim() !== '') {
+                showMessage(backendErrorMessage, 'error');
+            }
+            if (pwdMismatchMessage && pwdMismatchMessage.trim() !== 'null' && pwdMismatchMessage.trim() !== '') {
+                showMessage(pwdMismatchMessage, 'error');
             }
         });
-
-        document.querySelectorAll(".nav-arrow")[1].addEventListener("click", () => {
-            if (thumbnails.length > 0) {
-                currentImgIndex = (currentImgIndex + 1) % thumbnails.length;
-                mainImg.src = thumbnails[currentImgIndex].src;
-            }
-        });
-
-        // 關閉圖片 Modal
-        document.querySelector(".close-modal").addEventListener("click", () => {
-            document.getElementById("imgModal").style.display = "none";
-        });
-    });
-</script>
+    </script>
 
 
 

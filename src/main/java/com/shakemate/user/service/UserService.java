@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Period;
+
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
@@ -40,10 +43,17 @@ public class UserService {
         String rowPassword = user.getPwd();
         user.setPwd(pc.hashing(rowPassword));
         user.setImg1(imgUrl);
-        String interests = String.join(",", interestsArr);
-        String personality = String.join(",", personalityArr);
-        user.setInterests(interests);
-        user.setPersonality(personality);
+        if(interestsArr != null && interestsArr.length > 0) {
+            String interests = String.join(",", interestsArr);
+            user.setInterests(interests);
+        }
+        if(personalityArr != null && personalityArr.length > 0){
+            String personality = String.join(",", personalityArr);
+            user.setPersonality(personality);
+        }
+
+
+
         Timestamp now = new Timestamp(System.currentTimeMillis());
         user.setCreatedTime(now);
         user.setUpdatedTime(now);

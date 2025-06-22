@@ -15,7 +15,7 @@ public class UserProfileVO {
     @Column(name = "username")
     private String username;
 
-    @Column(name = "age")
+    @Transient
     private int age;
 
     @Transient

@@ -25,26 +25,37 @@
 
 <div class="main-container">
     <h2 class="form-title">註冊新帳號</h2>
+
+
     <form  id="registrationForm" th:action='@{/login/signupHandler}' th:object="${user}"  method="POST" class="form-layout" enctype="multipart/form-data">
+        <!-- 全局錯誤訊息 -->
+        <div th:if="${errorMessage}" class="bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded mb-4">
+            <p th:text="${errorMessage}"></p>
+        </div>
+
         <!-- Username -->
         <div>
             <label for="username" class="form-label">使用者名稱</label>
             <input id="username" type="text" th:field="*{username}" class="form-input" placeholder="請輸入您的使用者名稱"/>
-            <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error"></span>
+            <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-red-500 text-sm"></span>
         </div>
 
         <!-- Email -->
         <div>
             <label for="email" class="form-label">電子郵件</label>
             <input id="email" type="email" th:field="*{email}" class="form-input" placeholder="請輸入您的電子郵件"/>
-            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-sm block mt-1"
+            ></span>
         </div>
 
         <!-- Password -->
         <div>
             <label for="pwd" class="form-label">密碼</label>
             <input id="pwd" type="password" th:field="*{pwd}" class="form-input" placeholder="請輸入密碼"/>
-            <span th:if="${#fields.hasErrors('pwd')}" th:errors="*{pwd}" class="error"></span>
+            <span id="pwdError"
+                  class="text-red-500 text-sm hidden"
+                  th:text="${#fields.hasErrors('pwd')} ? ${#fields.errors('pwd')} : ''"
+                  th:classappend="${#fields.hasErrors('pwd')} ? '' : 'hidden'"></span>
         </div>
 
         <!-- Confirm Password -->
@@ -53,7 +64,7 @@
             <input type="password" id="confirm_password" name="confirm_password" required
                    class="form-input"
                    placeholder="請再次輸入密碼">
-            <span th:if="${pwdMismatch}" th:text="${pwdMismatch}" class="error"></span>
+            <span th:if="${pwdMismatch}" th:text="${pwdMismatch}" class="text-red-500 text-sm block mt-1"></span>
         </div>
 
         <!-- Gender -->
@@ -69,7 +80,7 @@
                     <span class="form-option-text">女</span>
                 </label>
             </div>
-            <span th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}" class="error"></span>
+            <span th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}" class="text-red-500 text-sm block mt-1"></span>
         </div>
 
         <!-- Birthday -->
@@ -81,10 +92,8 @@
         </div>
 
         <!-- Location -->
-        <div>
-            <label for="location" class="form-label">居住地點</label>
-            <input type="text" id="location" th:field="*{location}" class="form-input" placeholder="例如：台北市"/>
-        </div>
+        <input type="text" id="location" th:field="*{location}" class="form-input" placeholder="例如：台北市"/>
+        <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="text-red-500 text-sm block mt-1"></span>
 
         <!-- Introduction -->
         <div>
@@ -93,7 +102,7 @@
         </div>
         <!-- Interests (Checkboxes) -->
         <div>
-            <label class="form-label">興趣愛好</label>
+            <label class="form-label">興趣</label>
             <div class="checkbox-grid">
                 <!-- Checkbox items for Interests -->
                 <label class="inline-flex items-center">
@@ -149,7 +158,7 @@
 
         <!-- Personality Traits (Checkboxes) -->
         <div>
-            <label class="form-label">個性特徵</label>
+            <label class="form-label">人格特質</label>
             <div class="checkbox-grid">
                 <!-- Checkbox items for Personality -->
                 <label class="inline-flex items-center">
@@ -225,8 +234,7 @@
             <div class="drop-zone-area" id="dropZone">
                 拖曳圖片到此處，或點擊選擇
             </div>
-            <input type="file" id="prodImageInput" name="image" accept="image/*" hidden required>
-            <span class="error" th:utext="${errorMessage}" id="image.errors"></span>
+            <input type="file" id="prodImageInput" name="image" accept="image/*" hidden >
             <div class="preview-gallery" id="previewContainer"></div>
         </div>
 
@@ -420,7 +428,7 @@
             }, 3000);
         }
         // Other form validations (e.g., password confirmation, can be added here)
-        const password = document.getElementById('password').value;
+        const password = document.getElementById('pwd').value;
         const confirmPassword = document.getElementById('confirm_password').value;
         if (password !== confirmPassword) {
             event.preventDefault();
@@ -433,6 +441,41 @@
         fileToUpload = null;
         clearPreviews();
         updateFileInputFile(); // Ensure initial state is empty
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const pwdInput = document.getElementById("pwd");
+        const errorSpan = document.getElementById("pwdError");
+
+        const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:'"\\|,.<>\/?]).{8,30}$/;
+
+        pwdInput.addEventListener("blur", function () {
+            const value = pwdInput.value;
+
+            if (!pwdRegex.test(value)) {
+                errorSpan.textContent = "密碼需包含英文、數字、符號，長度 8～30 字元";
+                errorSpan.classList.remove("hidden");
+                pwdInput.classList.add("border-red-500");
+            } else {
+                errorSpan.textContent = "";
+                errorSpan.classList.add("hidden");
+                pwdInput.classList.remove("border-red-500");
+            }
+        });
+
+        const form = pwdInput.closest("form");
+        form.addEventListener("submit", function (e) {
+            const value = pwdInput.value;
+
+            if (!pwdRegex.test(value)) {
+                e.preventDefault();
+                errorSpan.textContent = "密碼需包含英文、數字、符號，長度 8～30 字元";
+                errorSpan.classList.remove("hidden");
+                pwdInput.classList.add("border-red-500");
+                pwdInput.focus();
+            }
+        });
     });
 </script>
 </body>
