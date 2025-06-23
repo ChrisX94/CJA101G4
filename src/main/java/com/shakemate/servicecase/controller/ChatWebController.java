@@ -15,12 +15,12 @@ public class ChatWebController {
     @Autowired
     private CaseTypeRepository caseTypeRepository;
 
-    // 原本的 index mapping
-    @GetMapping("/")
-    public String index(Model model) {
-        model.addAttribute("categories", caseTypeRepository.findAll());
-        return "index";
-    }
+//    // 原本的 index mapping
+//    @GetMapping("/")
+//    public String index(Model model) {
+//        model.addAttribute("categories", caseTypeRepository.findAll());
+//        return "index";
+//    }
 
     // 新增：提問頁面
     @GetMapping("/ask")

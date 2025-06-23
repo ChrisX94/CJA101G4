@@ -22,7 +22,7 @@ SELECT p FROM ShProd p
  LEFT JOIN FETCH p.shProdType
  WHERE p.prodId = ?1
 """)
-    ShProd getById(Integer id);
+    ShProd getByID(Integer id);
 
 @Query("""
 SELECT DISTINCT p FROM ShProd p

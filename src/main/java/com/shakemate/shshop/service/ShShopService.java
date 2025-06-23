@@ -229,17 +229,17 @@ public class ShShopService {
     //查一個給商品頁面用
     @Transactional(readOnly = true)
     public ShProdDto getById(int id) {
-        ShProd prod = repo.getById(id);
+        ShProd prod = repo.getByID(id);
         ShProdDto dto = null;
         if (prod != null) {
             dto = new ShProdDto(prod);
         }
         return dto;
     }
-
+    // 查一個給更新商品用
     @Transactional(readOnly = true)
     public ShProdDto getByIdForUpdate(int id) {
-        ShProd prod = repo.getById(id);
+        ShProd prod = repo.getByID(id);
         ShProdDto dto = null;
         if (prod != null) {
             dto = new ShProdDto().forUpdateDisplay(prod);
@@ -247,9 +247,10 @@ public class ShShopService {
         return dto;
     }
 
+    // 計數器
     @Transactional
     public void addViews(int id) {
-        ShProd prod = repo.getById(id);
+        ShProd prod = repo.getByID(id);
         if (prod != null) {
             prod.setProdViews(prod.getProdViews() + 1);
             repo.save(prod);
@@ -273,18 +274,17 @@ public class ShShopService {
         return prod;
     }
 
-
     // 修改商品狀態
     @Transactional
     public void changeProdStatus(int id, byte status) {
-        ShProd prod = repo.getById(id);
+        ShProd prod = repo.getByID(id);
         if (prod != null) {
             prod.setProdStatus(status);
             repo.save(prod);
         }
     }
 
-
+    // 用類別取得商品
     @Transactional(readOnly = true)
     public List<ShProdDto> getProdsByType(Integer typeId) {
         List<ShProd> list = repo.getByType(typeId);
@@ -336,7 +336,7 @@ public class ShShopService {
 
     @Transactional
     public ShProdDto updateProd(Integer prodId, Integer userId, ShProd form, List<String> picUrls) {
-        ShProd prod = repo.getById(prodId);
+        ShProd prod = repo.getByID(prodId);
         if (prod != null) {
             if (prod.getUser().getUserId() != userId) { // 這裡確認是否為會員的商品(安全機制)
                 return null;
@@ -376,8 +376,6 @@ public class ShShopService {
                 .collect(Collectors.joining(","));
         paraMap.put("friendIds", friendIdStr);
         List<ShProdDto> dtoList =  CompositeQueryForShshop.getAllComposite(paraMap, session.openSession());
-
-
 
         return dtoList;
     }

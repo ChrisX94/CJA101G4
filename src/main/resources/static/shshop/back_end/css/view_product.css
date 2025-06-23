@@ -1,118 +1,302 @@
-/* 商品詳情主區 */
-.main-detail {
-    padding: 2rem;
-    padding-top: calc(var(--header-height) + 5.2rem);
-    background-color: #f5f5f5;
+/* 通用樣式 */
+* {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Noto Sans TC", sans-serif;
 }
 
+/* 網頁主體佈局 */
+body {
+    display: flex; /* 使用 Flexbox 佈局，使側邊欄和主要內容並排 */
+    height: 100vh; /* 讓網頁主體佔滿整個視窗高度 */
+    background-color: #f4f6f8; /* 淺灰色背景 */
+}
+
+/* 側邊欄樣式 */
+aside {
+    width: 12%; /* 側邊欄寬度 */
+    background-color: #2c3e50; /* 深藍灰色背景 */
+    color: white; /* 文字顏色 */
+    padding: 20px; /* 內邊距 */
+}
+
+aside h2 {
+    margin-bottom: 20px; /* 標題下方間距 */
+    font-size: 1.5rem; /* 標題字體大小 */
+}
+
+aside nav ul {
+    list-style: none; /* 移除列表項目符號 */
+}
+
+aside nav ul li {
+    margin: 15px 0; /* 列表項目上下間距 */
+}
+
+aside nav ul li a {
+    color: white; /* 連結文字顏色 */
+    text-decoration: none; /* 移除底線 */
+    display: block; /* 讓連結佔滿整個區塊，方便點擊 */
+    padding: 10px; /* 連結內邊距 */
+    border-radius: 5px; /* 圓角 */
+}
+
+aside nav ul li a:hover {
+    background-color: #34495e; /* 連結懸停時的背景顏色 */
+}
+
+/* 主要內容區塊樣式 */
+main {
+    flex: 1; /* 讓主要內容區塊佔滿剩餘空間 */
+    padding: 20px; /* 內邊距 */
+    overflow-x: auto; /* 當內容溢出時顯示水平滾動條 */
+}
+
+/* 內容區塊的頂部導覽列/標題欄 */
+header {
+    background-color: #ffffff; /* 白色背景 */
+    padding: 15px 20px; /* 內邊距 */
+    border-bottom: 1px solid #ddd; /* 底部邊框 */
+    margin-bottom: 20px; /* 底部間距 */
+}
+
+/* 通用內容區塊樣式 (例如：商品詳細資訊、表格等) */
+.content-section {
+    background-color: #fff; /* 白色背景 */
+    padding: 20px; /* 內邊距 */
+    border-radius: 10px; /* 圓角 */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); /* 輕微陰影 */
+    overflow-x: auto; /* 當內容溢出時顯示水平滾動條 */
+}
+
+.content-section h3 {
+    margin-bottom: 15px; /* 標題下方間距 */
+    font-size: 1.3rem; /* 標題字體大小 */
+}
+
+/* 表格樣式 */
+table {
+    width: 100%; /* 表格寬度佔滿父容器 */
+    border-collapse: collapse; /* 合併表格邊框 */
+    min-width: 1200px; /* 最小寬度，防止內容過多時壓縮 */
+}
+
+table,
+th,
+td {
+    border: 1px solid #ccc; /* 邊框樣式 */
+}
+
+th,
+td {
+    padding: 10px; /* 單元格內邊距 */
+    text-align: left; /* 文字靠左對齊 */
+    vertical-align: middle; /* 垂直置中 */
+    word-break: break-word; /* 自動換行 */
+    font-size: 0.95rem; /* 字體大小 */
+}
+
+.id_td {
+    width: 5%; /* ID 欄位寬度 */
+    max-width: 50px; /* 最大寬度 */
+    text-align: center; /* 文字置中 */
+}
+
+th {
+    background-color: #f1f1f1; /* 表頭背景色 */
+    font-weight: bold; /* 字體加粗 */
+}
+
+/* 商品名稱區塊樣式 */
+.prod-name-box {
+    display: flex; /* 使用 Flexbox 佈局 */
+    align-items: center; /* 垂直置中 */
+    gap: 8px; /* 項目間距 */
+}
+
+.prod-name-box img {
+    width: 40px; /* 圖片寬度 */
+    height: 40px; /* 圖片高度 */
+    object-fit: cover; /* 圖片裁剪方式 */
+    border-radius: 4px; /* 圖片圓角 */
+}
+
+/* 狀態標籤樣式 */
+.status-tag {
+    padding: 4px 8px; /* 內邊距 */
+    border-radius: 5px; /* 圓角 */
+    font-size: 0.85rem; /* 字體大小 */
+    color: white; /* 文字顏色 */
+    display: inline-block; /* 行內區塊顯示 */
+}
+
+.status-up {
+    background-color: #27ae60; /* 上架中：綠色 */
+}
+
+.status-down {
+    background-color: #95a5a6; /* 已下架：灰色 */
+}
+
+.status-pending {
+    background-color: #e67e22; /* 待審核：橘色 */
+}
+
+/* 動作按鈕樣式 */
+.btn-action {
+    padding: 5px 10px; /* 內邊距 */
+    margin: 2px; /* 外邊距 */
+    font-size: 0.85rem; /* 字體大小 */
+    cursor: pointer; /* 鼠標變為手形 */
+    border: none; /* 無邊框 */
+    border-radius: 4px; /* 圓角 */
+    color: white; /* 文字顏色 */
+}
+
+.btn-edit {
+    background-color: #3498db; /* 編輯按鈕：藍色 */
+}
+
+.btn-toggle {
+    background-color: #7f8c8d; /* 切換按鈕：深灰色 */
+}
+
+/* 搜尋輸入框樣式 */
+#searchInput {
+    margin-bottom: 10px; /* 底部間距 */
+    padding: 8px; /* 內邊距 */
+    width: 300px; /* 寬度 */
+    border-radius: 5px; /* 圓角 */
+    border: 1px solid #ccc; /* 邊框 */
+}
+
+/* 搜尋和篩選區塊樣式 */
+.search-filter {
+    display: flex; /* 使用 Flexbox 佈局 */
+    align-items: center; /* 垂直置中 */
+    gap: 10px; /* 項目間距 */
+    margin-bottom: 10px; /* 底部間距 */
+}
+
+.filter-buttons {
+    display: flex; /* 使用 Flexbox 佈局 */
+    gap: 6px; /* 按鈕間距 */
+}
+
+.filter-btn {
+    padding: 6px 10px; /* 內邊距 */
+    border: 1px solid #ccc; /* 邊框 */
+    border-radius: 4px; /* 圓角 */
+    background-color: white; /* 白色背景 */
+    cursor: pointer; /* 鼠標變為手形 */
+    font-size: 0.85rem; /* 字體大小 */
+}
+
+.filter-btn.active {
+    background-color: #3498db; /* 啟用狀態的背景色 */
+    color: white; /* 啟用狀態的文字顏色 */
+    border-color: #2980b9; /* 啟用狀態的邊框顏色 */
+}
+
+/* 按鈕組樣式 */
+.btn-group {
+    display: flex; /* 使用 Flexbox 佈局 */
+    flex-direction: column; /* 垂直排列 */
+    gap: 4px; /* 按鈕間距 */
+}
+
+.btn-status {
+    background-color: #6c7a89; /* 狀態按鈕：藍灰色 */
+}
+
+.btn-status:hover {
+    opacity: 0.85; /* 懸停時透明度變化 */
+}
+
+/* 商品詳細頁面特有樣式 */
 .product-page {
-    max-width: 90%;
-    /* ⭐ 限制整體寬度 */
-    margin: 8px auto 1rem auto;
-
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
+    display: flex; /* 使圖片和資訊並排 */
+    gap: 20px; /* 圖片和資訊之間的間距 */
+    margin-bottom: 30px; /* 底部間距 */
 }
 
-/* 左邊圖片 */
 .left-image-box {
-    flex: 1 1 35%;
-    max-width: 400px;
+    flex: 0 0 350px; /* 固定左側圖片區塊寬度 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.left-image-box .main-img {
-flex: 1 1 60%;
-  max-width: 400px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+.main-img {
+    width: 300px; /* 主圖寬度 */
+    height: 300px; /* 主圖高度 */
+    border: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 10px;
 }
 
-.left-image-box .main-img img {
-    width: 100%;
-    height: auto;
+.main-img img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* 圖片適應容器 */
 }
 
 .thumbnail-bar {
     display: flex;
+    gap: 10px;
     align-items: center;
-    justify-content: center;
-    margin-top: 1rem;
-    gap: 0.5rem;
 }
 
 .thumbnail-bar img {
     width: 80px;
     height: 80px;
-    border: 1px solid #aaa;
-    border-radius: 4px;
     object-fit: cover;
-}
-
-.nav-arrow {
-    background-color: transparent;
-    font-size: 1.6rem;
-    border: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     cursor: pointer;
 }
 
-/* 右邊商品資訊 */
+.thumbnail-bar button.nav-arrow {
+    background-color: #ddd;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
 .right-info-box {
-    flex: 1 1 400px;
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    flex: 1; /* 右側資訊區塊佔滿剩餘空間 */
 }
 
 .right-info-box h1 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 兩欄佈局 */
+    gap: 10px; /* 網格間距 */
+    margin-bottom: 20px;
 }
 
 .info-grid p {
-    font-size: 1.4rem;
-    margin-bottom: 0.8rem;
+    font-size: 1rem;
+    color: #555;
+}
+
+.info-grid strong {
+    color: #333;
+    margin-right: 5px;
 }
 
 .action-buttons {
-    margin-top: 2rem;
+    margin-top: 20px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.action-buttons button {
-    padding: 0.8rem 1.2rem;
-    font-size: 1.4rem;
-    background-color: #3e92cc;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.action-buttons button:hover {
-    background-color: #2b6ca3;
-}
-
-/* 底部區塊 */
-.product-section {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-.product-section h2 {
-    font-size: 1.6rem;
-    margin-bottom: 1rem;
-}
-
-.product-section p {
-    font-size: 1.4rem;
-    color: #333;
+    gap: 10px;
 }
