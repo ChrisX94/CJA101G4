@@ -312,3 +312,11 @@ th {
     scroll-behavior: smooth;
     gap: 0.5rem;
 }
+.status-tag.status-rejected {
+    background-color: #f8d7da;
+    color: #a94442;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: inline-block;
+}

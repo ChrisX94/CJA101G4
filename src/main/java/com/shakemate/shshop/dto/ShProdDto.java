@@ -29,6 +29,7 @@ public class ShProdDto {
     private List<String> picUrls;
     private Timestamp updatedTime;
     private Integer prodViews;
+    private String rejectReason;
 
 
 

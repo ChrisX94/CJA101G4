@@ -9,6 +9,7 @@ import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdPic;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.util.CompositeQueryForShshop;
+import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.dto.UserDto;
 import com.shakemate.user.model.Users;
@@ -41,6 +42,9 @@ public class ShShopService {
 
     @Autowired
     private SessionFactory session;
+
+    @Autowired
+    private ShShopRedisUtil redisUtil;
 
     // 找尋朋友清單
     @Transactional(readOnly = true)
@@ -225,7 +229,6 @@ public class ShShopService {
         return dtoList;
     }
 
-
     //查一個給商品頁面用
     @Transactional(readOnly = true)
     public ShProdDto getById(int id) {
@@ -274,14 +277,38 @@ public class ShShopService {
         return prod;
     }
 
+    // 會員下架商品(為安全起見，會員只能下架自己的商品)
+    @Transactional
+    public ShProdDto sendReviewProdByUser(Integer userId, Integer prodId) {
+        List<ShProd> prods = repo.getByUserId(userId);
+        ShProdDto prod = null;
+        if (prods != null || prods.size() > 0) {
+            for (ShProd p : prods) {
+                if (p.getProdId() == prodId) {
+                    p.setProdStatus((byte) 0);
+                    prod =new ShProdDto(repo.save(p));
+                    break;
+                }
+            }
+        }
+        return prod;
+    }
+
     // 修改商品狀態
     @Transactional
-    public void changeProdStatus(int id, byte status) {
+    public String changeProdStatus(int id, byte status) {
         ShProd prod = repo.getByID(id);
+        String returnStr = "";
         if (prod != null) {
-            prod.setProdStatus(status);
-            repo.save(prod);
+            if ((byte)2 == status && prod.getProdCount() <= 0) {
+                returnStr = "商品數量小於 1 無法上架" ;
+            }else {
+                prod.setProdStatus(status);
+                repo.save(prod);
+                returnStr = "Success";
+            }
         }
+        return returnStr;
     }
 
     // 用類別取得商品
@@ -297,7 +324,7 @@ public class ShShopService {
 
     }
 
-
+    // 用user id 取得商品
     @Transactional(readOnly = true)
     public List<ShProdDto> getProdsByUser(Integer userId) {
         List<ShProd> list = repo.getByUserId(userId);
@@ -310,6 +337,7 @@ public class ShShopService {
 
     }
 
+    // 新增商品
     @Transactional
     public ShProdDto createNewProduct(Integer userId, ShProd form, List<String> picUrls) {
         ShProd prod = new ShProd();
@@ -334,6 +362,7 @@ public class ShShopService {
         return new ShProdDto(repo.save(prod));
     }
 
+    // 更新商品
     @Transactional
     public ShProdDto updateProd(Integer prodId, Integer userId, ShProd form, List<String> picUrls) {
         ShProd prod = repo.getByID(prodId);
@@ -358,6 +387,7 @@ public class ShShopService {
         }
     }
 
+    // 取得所有商品類別
     @Transactional(readOnly = true)
     public List<ShProdTypeDto> getAllType() {
         List<ShProdType> list = typeRepo.findAll();
@@ -369,6 +399,23 @@ public class ShShopService {
         return dtos;
     }
 
+
+    // 處理商品審核
+    public ShProdDto prodRejection(Integer prodId ,String reason){
+        ShProd prod = repo.getByID(prodId);
+        ShProdDto prodDto = null;
+        if (prod != null && prod.getProdStatus() == (byte) 0) {
+            prod.setProdStatus((byte) 1);
+            repo.save(prod);
+            prodDto = new ShProdDto(prod);
+        }
+        String keyName = "RejectionProdId_" + prodId;
+        redisUtil.set(keyName, reason);
+        return prodDto;
+    }
+
+
+    // 複合查詢
     public List<ShProdDto> getProdsByCompositeQuery(Map<String, String> paraMap){
         List<Integer> friendIds = matchRepo.findFriendIdsByUserId(Integer.parseInt(paraMap.get("userId")));
         String friendIdStr = friendIds.stream()
@@ -381,6 +428,7 @@ public class ShShopService {
     }
 
 
+    // 圖片處裡
     private List<ShProdPic> shProdPic(List<String> shProdPicUrl, ShProd shProd) {
         List<ShProdPic> pics = shProd.getProdPics();
         if (pics == null) {
