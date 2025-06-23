@@ -8,7 +8,9 @@ import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.service.ShShopService;
 import com.shakemate.shshop.util.PostMultipartFileUploader;
+import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dto.UserDto;
+import com.shakemate.util.PostImageUploader;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")
@@ -31,10 +36,49 @@ public class SHShopController {
     private ShShopService shShopService;
     @Autowired
     private PostMultipartFileUploader postImageUploader;
+    @Autowired
+    private ShShopRedisUtil redisUtil;
 
 
     /* ======================================== Front-End ========================================== */
-    // 取得全部好友商品
+
+    // 複合查詢
+    @PostMapping("/advanceSearch")
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> advanceSearch(@RequestParam(value = "prodName", required = false) String prodName,
+                                                                      @RequestParam(value = "prodBrand", required = false) String prodBrand,
+                                                                      @RequestParam(value = "prodContent", required = false) String prodContent,
+                                                                      @RequestParam(value = "typeId", required = false) String typeId,
+                                                                      @RequestParam(value = "minPrice", required = false) String minPrice,
+                                                                      @RequestParam(value = "maxPrice", required = false) String maxPrice,
+                                                                      @RequestParam(value = "username", required = false) String username,
+                                                                      HttpSession session
+    ) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Map<String, String> ParamMap = new HashMap();
+        Integer userId = Integer.parseInt(userIdObj.toString());
+        ParamMap.put("userId", userId.toString());
+        ParamMap.put("prodName", prodName);
+        ParamMap.put("prodBrand", prodBrand);
+        ParamMap.put("prodContent", prodContent);
+        ParamMap.put("typeId", typeId);
+        ParamMap.put("minPrice", minPrice);
+        ParamMap.put("maxPrice", maxPrice);
+        ParamMap.put("username", username);
+        List<ShProdDto> data = shShopService.getProdsByCompositeQuery(ParamMap);
+
+        if (data == null) {
+            return ResponseEntity.ok(ApiResponseFactory.success("No Such Product", null));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success("success", data));
+        }
+    }
+
+    // 取得全部好友商品(會員用)
     @GetMapping("/getProds")
     public ResponseEntity<ApiResponse<List<ShProdDto>>> getAvailableProds(HttpSession session) throws IOException {
         Object userIdObj = session.getAttribute("account");
@@ -122,7 +166,7 @@ public class SHShopController {
 
     // 用user找商品(用戶管理商品用)
     @PostMapping("/myProds")
-    public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(HttpSession session) {
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("action") String status, HttpSession session) {
         Object userIdObj = session.getAttribute("account");
         if (userIdObj == null) {
             return ResponseEntity
@@ -131,6 +175,29 @@ public class SHShopController {
         }
         Integer userId = Integer.parseInt(userIdObj.toString());
         List<ShProdDto> data = shShopService.getProdsByUser(userId);
+        switch (status) {
+            case "pending":
+                data = data.stream().filter(p -> p.getProdStatus() == 0).collect(Collectors.toList());
+                break;
+            case "rejected":
+                data = data.stream().filter(p -> (p.getProdStatus() == 1)).collect(Collectors.toList());
+                break;
+            case "OnPending":
+                data = data.stream().filter(p -> (p.getProdStatus() == 0 || p.getProdStatus() == 1)).collect(Collectors.toList());
+                for(ShProdDto p : data){
+                    String reason = "RejectionProdId_" + p.getProdId().toString();
+                    p.setRejectReason(redisUtil.get(reason));
+                }
+                break;
+            case "available":
+                data = data.stream().filter(p -> p.getProdStatus() == 2).collect(Collectors.toList());
+                break;
+            case "notAvailable":
+                data = data.stream().filter(p -> p.getProdStatus() == 3).collect(Collectors.toList());
+                break;
+            default:
+                break;
+        }
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
@@ -187,6 +254,7 @@ public class SHShopController {
             @Valid @ModelAttribute ShProd form,
             @RequestParam("prodId") Integer prodId,
             @RequestParam("prodTypeId") Integer prodTypeId,
+            @RequestParam(value = "picUrls", required = false) List<String> OriginalPicUrls,
             @RequestParam("prodImage") MultipartFile[] parts,
             HttpSession session) throws IOException {
 
@@ -202,12 +270,16 @@ public class SHShopController {
 
         Integer userId = Integer.parseInt(userIdObj.toString());
         List<String> picUrls = new ArrayList<>();
+        if (OriginalPicUrls != null && OriginalPicUrls.size() > 0) {
+            picUrls.addAll(OriginalPicUrls);
+        }
         for (MultipartFile p : parts) {
             if (!p.isEmpty()) {
                 String url = postImageUploader.uploadImageToImgbb(p);
                 picUrls.add(url);
             }
         }
+
         ShProdDto data = shShopService.updateProd(prodId, userId, form, picUrls);
         if (data == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -216,13 +288,66 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
+
+    // 會員下架商品(用session 去綁定)
+    @PostMapping("/delist")
+    public ResponseEntity<ApiResponse<ShProdDto>> delistProdByUser(@RequestParam("prodId") Integer prodId,
+                                                               HttpSession session) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Integer userId = Integer.parseInt(userIdObj.toString());
+        ShProdDto data = shShopService.delistProdByUser(userId, prodId);
+
+        if (data == null) {
+            return ResponseEntity.ok(ApiResponseFactory.success("No Such Product", null));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success("success", null));
+        }
+    }
+
+    @PostMapping("/sendReview")
+    public ResponseEntity<ApiResponse<ShProdDto>> sendReviewByUser(@RequestParam("prodId") Integer prodId,
+                                                               HttpSession session) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Integer userId = Integer.parseInt(userIdObj.toString());
+        ShProdDto data = shShopService.sendReviewProdByUser(userId, prodId);
+
+        if (data == null) {
+            return ResponseEntity.ok(ApiResponseFactory.success("No Such Product", null));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success("success", null));
+        }
+    }
+
+
+
     /* ======================================== Back-End ========================================== */
+
+    // 用id 找商品，管理員用
+    @PostMapping("reviewProd")
+    public ResponseEntity<ApiResponse<ShProdDto>> reviewProd(@RequestParam("id") Integer prodId, HttpSession session) {
+
+        ShProdDto data = shShopService.getById(prodId);
+        if (data == null) {
+            return ResponseEntity.ok(ApiResponseFactory.success("查無此商品", data));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success(data));
+        }
+    }
 
     // 以分類搜尋(管理員用)
     @GetMapping("/getAllProdsByType")
-    public ResponseEntity<ApiResponse<List<ShProdDto>>> getAllProdsByType(@RequestParam("typeId") String typeIdStr) {
-        Integer typeId = Integer.parseInt(typeIdStr);
-        List<ShProdDto> data = shShopService.getProdsByType(typeId);
+    public ResponseEntity<ApiResponse<ShProdDto>> getAllProdsByType(@RequestParam("id") Integer prodId) {
+        ShProdDto data = shShopService.getById(prodId);
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
@@ -239,6 +364,62 @@ public class SHShopController {
         Integer userId = Integer.parseInt(userIdStr.toString());
         List<ShProdDto> data = shShopService.getProdsByUser(userId);
         return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+
+    // 修改商品狀態 (尚未導入adm session)
+    @PostMapping("/changeStatus")
+    public ResponseEntity<ApiResponse<String>> admChangeProdStatus(@RequestParam("prodId") Integer prodId,
+                                                                   @RequestParam("status") String status,
+                                                                   HttpSession session) {
+//        // 等adm做好在加
+//        Object AdmObj = session.getAttribute("Adm");
+//        if (userIdObj == null) {
+//            return ResponseEntity
+//                    .badRequest()
+//                    .body(ApiResponseFactory.error(400, "管理員尚未登入"));
+//        }
+        String returnMsg;
+        switch (status) {
+            case "pending":
+                returnMsg = "pending review";
+                shShopService.changeProdStatus(prodId, (byte) 0);
+                break;
+            case "reject": // 強制轉換用
+                returnMsg = "Rejected";
+                shShopService.changeProdStatus(prodId, (byte) 1);
+                break;
+            case "approve":
+                String msg = shShopService.changeProdStatus(prodId, (byte) 2);
+                if (msg != null && "Success".equals(msg)) {
+                    String reason = "RejectionProdId_" + prodId;
+                    redisUtil.delete(reason);
+                    returnMsg = "Approved";
+                }else{
+                    return ResponseEntity.ok(ApiResponseFactory.error(404 ,msg));
+                }
+                break;
+            case "delist":
+                returnMsg = "Delist";
+                shShopService.changeProdStatus(prodId, (byte) 3);
+                break;
+            default:
+                returnMsg = "Unknown Status";
+                break;
+        }
+        return ResponseEntity.ok(ApiResponseFactory.success(returnMsg));
+    }
+
+    // 審核不通過 (尚未導入adm session)
+    @PostMapping("/reject")
+    public ResponseEntity<ApiResponse<ShProdDto>> rejection(@RequestParam("id") Integer prodId,
+                                                            @RequestParam("reason") String reason,
+                                                            HttpSession session) {
+        ShProdDto data = shShopService.prodRejection(prodId, reason);
+        if (data == null) {
+            return ResponseEntity.ok(ApiResponseFactory.success("No Such Product Or Product status is not in pending", null));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success("success", data));
+        }
     }
 
     /* ======================================== General ========================================== */
@@ -259,11 +440,11 @@ public class SHShopController {
         }
         List<UserDto> list = shShopService.getFriendsInfo(Integer.parseInt(userIdObj.toString()));
         if (list == null || list.size() == 0) {
-                return ResponseEntity.ok(ApiResponseFactory.success("目前沒有好友有商品，配對連結", list));
-            } else {
-                return ResponseEntity.ok(ApiResponseFactory.success("success", list));
-            }
+            return ResponseEntity.ok(ApiResponseFactory.success("目前沒有好友有商品，配對連結", list));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success("success", list));
         }
+    }
 
 
 }

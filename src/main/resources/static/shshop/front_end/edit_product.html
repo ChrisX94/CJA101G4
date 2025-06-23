@@ -156,164 +156,193 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="js/shshopType.js">  </script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const prodId = localStorage.getItem("editingProdId");
-      const prodStatus = localStorage.getItem("prodStatus");
-      const form = document.querySelector(".form-layout");
-      const statusSpan = document.getElementById("prodStatusDisplay");
-      const prodIdInput = document.getElementById("prodId");
-      const originalImagesContainer = document.getElementById("existingPreviewContainer");
-      const removedPicUrls = [];
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const prodId = localStorage.getItem("editingProdId");
+  const prodStatus = localStorage.getItem("prodStatus");
 
-      if (statusSpan) statusSpan.innerText = prodStatus || "未提供";
-      if (prodId && prodIdInput) prodIdInput.value = prodId;
+  const form = document.querySelector(".form-layout");
+  const statusSpan = document.getElementById("prodStatusDisplay");
+  const prodIdInput = document.getElementById("prodId");
+  const previewContainer = document.getElementById("existingPreviewContainer");
+  const fileInput = form.querySelector('input[name="prodImage"]');
+  const removedPicUrls = [];
 
-      // 初始化取得商品資料
-      const initFormData = new FormData();
-      initFormData.append("id", prodId);
+  if (statusSpan) statusSpan.innerText = prodStatus || "未提供";
+  if (prodId && prodIdInput) prodIdInput.value = prodId;
 
-      fetch("http://localhost:8087/api/ShShop/getProd", {
-        method: "POST",
-        body: initFormData
+  // 初始化載入商品資料
+  loadProductData();
+
+  function loadProductData() {
+    const initFormData = new FormData();
+    initFormData.append("id", prodId);
+
+    fetch("http://localhost:8087/api/ShShop/getProd", {
+      method: "POST",
+      body: initFormData
+    })
+      .then(res => res.json())
+      .then(data => {
+        const prod = data.data;
+        if (!prod) throw new Error("找不到商品資料");
+
+        fillFormFields(prod);
+        renderOriginalImages(prod.picUrls);
+        selectProductTypeAfterOptionsReady(prod.prodTypeId);
       })
-        .then(res => res.json())
-        .then(data => {
-          const prod = data.data;
-          if (!prod) throw new Error("找不到商品資料");
+      .catch(err => {
+        alert("無法載入商品資料，請稍後再試");
+        console.error(err);
+      });
+  }
 
-          // 填入表單欄位
-          form.prodName.value = prod.prodName;
-          form.prodBrand.value = prod.prodBrand;
-          form.prodPrice.value = prod.prodPrice;
-          form.prodCount.value = prod.prodCount;
-          form.prodContent.value = prod.prodContent;
-          form.prodStatusDesc.value = prod.prodDesc;
+  function fillFormFields(prod) {
+    form.prodName.value = prod.prodName;
+    form.prodBrand.value = prod.prodBrand;
+    form.prodPrice.value = prod.prodPrice;
+    form.prodCount.value = prod.prodCount;
+    form.prodContent.value = prod.prodContent;
+    form.prodStatusDesc.value = prod.prodDesc;
+  }
 
-          // 類別下拉載入完再設定選項
-          const select = form.prodTypeId;
-          const timer = setInterval(() => {
-            if (select.options.length > 1) {
-              select.value = prod.prodTypeId?.toString();
-              clearInterval(timer);
-            }
-          }, 100);
+  function selectProductTypeAfterOptionsReady(prodTypeId) {
+    const select = form.prodTypeId;
+    const timer = setInterval(() => {
+      if (select.options.length > 1) {
+        select.value = prodTypeId?.toString();
+        clearInterval(timer);
+      }
+    }, 100);
+  }
 
-          // 產生原始圖片區塊
-          console.log(prod.picUrls);
-          if (!prod.picUrls || prod.picUrls.length === 0) {
-            originalImagesContainer.innerHTML = "<p>尚未上傳圖片</p>";
-            return;
-          }
-          originalImagesContainer.innerHTML = "";
-          prod.picUrls?.forEach((url, idx) => {
-            const imgBox = document.createElement("div");
-            imgBox.classList.add("img-box");
-            imgBox.innerHTML = `
+  function renderOriginalImages(picUrls) {
+    previewContainer.innerHTML = "";
+    picUrls.forEach((url, idx) => {
+      const imgBox = document.createElement("div");
+      imgBox.classList.add("img-box", "original-img");
+      imgBox.innerHTML = `
+        <div class="img-wrapper">
+          <img src="${url}" alt="圖片${idx + 1}" />
+          <button type="button" class="delete-btn" data-url="${url}">&times;</button>
+        </div>
+      `;
+      previewContainer.appendChild(imgBox);
+    });
+  }
+
+  // 刪除圖片（原圖記錄 URL，新增圖直接刪 DOM）
+  previewContainer.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("delete-btn")) return;
+
+    const imgBox = e.target.closest(".img-box");
+    const url = e.target.getAttribute("data-url");
+    if (url && !removedPicUrls.includes(url)) {
+      removedPicUrls.push(url);
+    }
+    if (imgBox) imgBox.remove();
+  });
+
+  // 新圖預覽（不清空 input）
+  fileInput.addEventListener("change", () => {
+    const files = Array.from(fileInput.files);
+    const currentCount = previewContainer.querySelectorAll(".img-box").length;
+    const availableSlots = 5 - currentCount;
+
+    if (availableSlots <= 0) {
+      alert("最多只能上傳 5 張圖片！");
+      return;
+    }
+
+    const filesToAdd = files.slice(0, availableSlots);
+    filesToAdd.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const imgBox = document.createElement("div");
+        imgBox.classList.add("img-box", "new-upload");
+        imgBox.innerHTML = `
           <div class="img-wrapper">
-            <img src="${url}" alt="圖片${idx + 1}" />
-            <button type="button" class="delete-btn" data-url="${url}">&times;</button>
+            <img src="${e.target.result}" alt="新圖片${idx + 1}" />
+            <button type="button" class="delete-btn">&times;</button>
           </div>
         `;
-            originalImagesContainer.appendChild(imgBox);
-          });
+        previewContainer.appendChild(imgBox);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
 
-          form.action.value = "updateProd";
-        })
-        .catch(err => {
-          alert("無法載入商品資料，請稍後再試");
-          console.error(err);
-        });
+  // 表單送出邏輯
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    clearAllErrors();
 
-      // 🗑️ 點擊刪除圖示
-      originalImagesContainer.addEventListener("click", function (e) {
-        if (e.target.classList.contains("delete-btn")) {
-          const imgBox = e.target.closest(".img-box");
-          const url = e.target.getAttribute("data-url");
+    const submitData = new FormData(form);
 
-          if (url && !removedPicUrls.includes(url)) {
-            removedPicUrls.push(url); // 記錄要刪的圖
-          }
+    // 加入保留的原圖 URL
+    previewContainer.querySelectorAll(".original-img img").forEach(img => {
+      const url = img.getAttribute("src");
+      if (!removedPicUrls.includes(url)) {
+        submitData.append("picUrls", url);
+      }
+    });
 
-          if (imgBox) imgBox.remove(); // 前端移除
+    // 加入被刪除的圖片 URL（後端可選擇處理）
+    removedPicUrls.forEach(url => {
+      submitData.append("removedPicUrls", url);
+    });
+
+    // 再補 prodId/prodTypeId（安全保險）
+    submitData.set("prodId", prodIdInput.value);
+    submitData.set("prodTypeId", form.prodTypeId.value);
+
+    // 除錯 log
+    for (const [key, value] of submitData.entries()) {
+      console.log("FormData:", key, value);
+    }
+
+    // 發送更新請求
+    fetch("http://localhost:8087/api/ShShop/updateProd", {
+      method: "POST",
+      body: submitData
+    })
+      .then(response => response.json().then(data => ({ status: response.status, body: data })))
+      .then(({ status, body }) => {
+        if (body.message === "success") {
+          const updatedId = body.data?.prodId;
+          window.location.href = updatedId ? `product_page.html?id=${updatedId}` : "/";
+        } else if (status === 400 && body.message === "validation_failed") {
+          showValidationErrors(body.errors);
+        } else {
+          alert("發生錯誤：" + (body.message || "請稍後再試"));
         }
+      })
+      .catch(error => {
+        alert("商品更新失敗！");
+        console.error(error);
       });
+  });
 
-      // ✅ 即時預覽新上傳圖片
-      const fileInput = form.querySelector('input[name="prodImage"]');
-      const previewBoxes = document.querySelectorAll(".img-box");
+  function clearAllErrors() {
+    form.querySelectorAll(".error-msg").forEach(el => (el.innerText = ""));
+  }
 
-      fileInput.addEventListener("change", function () {
-        const files = Array.from(fileInput.files);
+  function showValidationErrors(errors = {}) {
+    for (const field in errors) {
+      const errBox = document.getElementById(`${field}Error`);
+      if (errBox) errBox.innerText = errors[field];
+    }
+  }
+});
 
-        previewBoxes.forEach((box, idx) => {
-          if (files[idx]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-              box.innerHTML = `
-            <img src="${e.target.result}" style="width:100%; height:100%; object-fit: cover;" />
-          `;
-            };
-            reader.readAsDataURL(files[idx]);
-          } else {
-            box.innerHTML = "img";
-          }
-        });
-      });
+// 清除 localStorage 中的暫存狀態
+window.addEventListener("beforeunload", () => {
+  localStorage.removeItem("editingProdId");
+  localStorage.removeItem("prodStatus");
+});
+</script>
 
-      // ✅ 表單送出處理（更新商品）
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
 
-        // 清除錯誤訊息
-        form.querySelectorAll(".error-msg").forEach(el => (el.innerText = ""));
-
-        const submitData = new FormData(form);
-
-        // 加入被刪除的圖片 URL
-        removedPicUrls.forEach((url, idx) => {
-          submitData.append(`removePicUrls[${idx}]`, url);
-        });
-
-        fetch("http://localhost:8087/api/ShShop/updateProd", {
-          method: "POST",
-          body: submitData
-        })
-          .then(response =>
-            response.json().then(data => ({ status: response.status, body: data }))
-          )
-          .then(({ status, body }) => {
-            if (body.message === "success") {
-              const updatedId = body.data?.prodId;
-              if (updatedId) {
-                window.location.href = `product_page.html?id=${updatedId}`;
-              } else {
-                alert("更新成功，但找不到商品編號！");
-              }
-            } else if (status === 400 && body.message === "validation_failed") {
-              const errors = body.errors || {};
-              for (const field in errors) {
-                const errBox = document.getElementById(`${field}Error`);
-                if (errBox) errBox.innerText = errors[field];
-              }
-            } else {
-              alert("發生錯誤：" + (body.message || "請稍後再試"));
-            }
-          })
-          .catch(error => {
-            alert("商品更新失敗！");
-            console.error(error);
-          });
-      });
-    });
-
-    // ✅ 離開清除暫存資料
-    window.addEventListener("beforeunload", () => {
-      localStorage.removeItem("editingProdId");
-      localStorage.removeItem("prodStatus");
-    });
-
-  </script>
 
 
 

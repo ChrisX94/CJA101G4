@@ -58,7 +58,7 @@
 <main class="form-wrapper">
   <h1>上架商品</h1>
 
-  <form class="form-layout" method="post" action="http://localhost:8087/api/ShShop/addNewProd" enctype="multipart/form-data">
+  <form class="form-layout" method="post" enctype="multipart/form-data">
 
     <!-- ✅ 基本資料 -->
     <section class="form-section">
@@ -114,7 +114,7 @@
         <div class="form-group">
           <label>商品圖片（最多 5 張，建議尺寸：800x800）：</label>
           <div class="drop-zone" id="dropZone">拖曳圖片到此處，或點擊選擇</div>
-          <input type="file" id="prodImageInput" name="prodImage" accept="image/*" multiple hidden>
+          <input type="file" id="prodImageInput" accept="image/*" multiple hidden>
           <div class="preview-container" id="previewContainer"></div>
         </div>
       </div>

@@ -7,7 +7,7 @@
     <title>My MatchMarket</title>
     <link rel="stylesheet" href="css/header.css" />
     <link rel="stylesheet" href="css/product_manager.css" />
-    
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
@@ -77,6 +77,7 @@
                         <th>描述</th>
                         <th>商品狀態</th>
                         <th>操作</th>
+                        <th>審核拒絕原因</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -131,18 +132,21 @@
 
                     res.data.forEach(prod => {
                         const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
-
+                        if (prod.rejectReason == null) {
+                            prod.rejectReason = "";
+                        }
                         const tr = document.createElement("tr");
                         tr.innerHTML = `
                         <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
                         <td>${prod.prodName}</td>
                         <td>$${prod.prodPrice}</td>
                         <td>${prod.prodCount}</td>
-                        <td>${prod.prodDesc || ''}</td>
-                        <td>${prod.prodStatusStr || ''}</td>
+                        <td>${prod.prodDesc}</td>
+                        <td>${prod.prodStatusStr}</td>
                         <td>
                           <button type="button" class="material-button edit-btn" onclick="goToEdit(${prod.prodId}, '${prod.prodStatusStr}')">修改</button>
                         </td>
+                        <td>${prod.rejectReason || ""}</td>
                     `;
                         tbody.appendChild(tr);
                     });
@@ -203,7 +207,9 @@
                     onSale.forEach(prod => {
                         const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
                         const tr = document.createElement("tr");
-
+                        if (prod.rejectReason == null) {
+                            prod.rejectReason = "";
+                        }
 
                         tr.innerHTML = `
                         <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
@@ -215,6 +221,7 @@
                         <td>
                             <button class="material-button down-btn" onclick="deactivateProduct(${prod.prodId})">下架</button>
                         </td>
+                        <td>${prod.rejectReason}</td>
                     `;
                         tbody.appendChild(tr);
                     });
@@ -253,6 +260,38 @@
                 });
 
         }
+        // resend product for review
+        // 重新送審商品
+        function sendForReview(prodId) {
+            const confirmed = confirm("確定要重新送審這個商品嗎？");
+            if (!confirmed) return;
+
+            fetch("http://localhost:8087/api/ShShop/sendReview", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    prodId: prodId,
+                })
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.message === "success") {
+                        alert("商品送審！");
+                        loadOnDelistProducts(); // 🔁 重新載入已下架中商品
+                    } else {
+                        alert("商品送審失敗：" + (res.message || "請稍後再試"));
+                    }
+                })
+                .catch(err => {
+                    console.error("商品送審失敗：", err);
+                    alert("伺服器錯誤，請稍後再試");
+                });
+
+        }
+
+
         function loadOnDelistProducts() {
             fetch("http://localhost:8087/api/ShShop/myProds", {
                 method: "POST",
@@ -281,7 +320,9 @@
                     onSale.forEach(prod => {
                         const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
                         const tr = document.createElement("tr");
-
+                        if (prod.rejectReason == null) {
+                            prod.rejectReason = "";
+                        }
                         tr.innerHTML = `
                         <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
                         <td>${prod.prodName}</td>
@@ -289,7 +330,10 @@
                         <td>${prod.prodCount}</td>
                         <td>${prod.prodDesc}</td>
                         <td>${prod.prodStatusStr}</td>
-                        <td></td>
+                        <td>
+                            <button class="material-button down-btn" onclick="sendForReview(${prod.prodId})">重新送審</button>
+                        </td>
+                        <td>${prod.rejectReason}</td>
                     `;
                         tbody.appendChild(tr);
                     });
@@ -324,8 +368,11 @@
 
                     onSale.forEach(prod => {
                         const firstImg = prod.picUrls?.[0] || "https://via.placeholder.com/60";
-                        const tr = document.createElement("tr");
 
+                        const tr = document.createElement("tr");
+                        if (prod.rejectReason == null) {
+                            prod.rejectReason = "審核中";
+                        }
                         tr.innerHTML = `
                         <td><img class="prod-img" src="${firstImg}" alt="商品圖片" /></td>
                         <td>${prod.prodName}</td>
@@ -333,7 +380,10 @@
                         <td>${prod.prodCount}</td>
                         <td>${prod.prodDesc}</td>
                         <td>${prod.prodStatusStr}</td>
-                        <td></td>
+                        <td>
+                          <button type="button" class="material-button edit-btn" onclick="goToEdit(${prod.prodId}, '${prod.prodStatusStr}')">修改</button>
+                        </td>
+                        <td>${prod.rejectReason}</td>
                     `;
                         tbody.appendChild(tr);
                     });
