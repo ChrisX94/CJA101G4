@@ -300,3 +300,15 @@ th {
     display: flex;
     gap: 10px;
 }
+.thumbnail-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.thumbnail-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 0.5rem;
+}

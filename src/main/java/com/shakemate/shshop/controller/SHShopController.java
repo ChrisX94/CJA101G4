@@ -74,7 +74,7 @@ public class SHShopController {
         }
     }
 
-    // 取得全部好友商品
+    // 取得全部好友商品(會員用)
     @GetMapping("/getProds")
     public ResponseEntity<ApiResponse<List<ShProdDto>>> getAvailableProds(HttpSession session) throws IOException {
         Object userIdObj = session.getAttribute("account");
@@ -161,7 +161,6 @@ public class SHShopController {
     }
 
     // 用user找商品(用戶管理商品用)
-    // 用user找商品(用戶管理商品用)
     @PostMapping("/myProds")
     public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("action") String status, HttpSession session) {
         Object userIdObj = session.getAttribute("account");
@@ -247,6 +246,7 @@ public class SHShopController {
             @Valid @ModelAttribute ShProd form,
             @RequestParam("prodId") Integer prodId,
             @RequestParam("prodTypeId") Integer prodTypeId,
+            @RequestParam(value = "picUrls", required = false) List<String> OriginalPicUrls,
             @RequestParam("prodImage") MultipartFile[] parts,
             HttpSession session) throws IOException {
 
@@ -262,14 +262,16 @@ public class SHShopController {
 
         Integer userId = Integer.parseInt(userIdObj.toString());
         List<String> picUrls = new ArrayList<>();
+        if (OriginalPicUrls != null && OriginalPicUrls.size() > 0) {
+                picUrls.addAll(OriginalPicUrls);
+        }
         for (MultipartFile p : parts) {
-            System.out.println(p.getOriginalFilename());
             if (!p.isEmpty()) {
                 String url = postImageUploader.uploadImageToImgbb(p);
-                System.out.println(url);
                 picUrls.add(url);
             }
         }
+
         ShProdDto data = shShopService.updateProd(prodId, userId, form, picUrls);
         if (data == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -279,7 +281,7 @@ public class SHShopController {
     }
 
 
-    // 會員下架商品
+    // 會員下架商品(用session 去綁定)
     @PostMapping("/delist")
     public ResponseEntity<ApiResponse<ShProdDto>> changeStatus(@RequestParam("prodId") Integer prodId,
                                                                HttpSession session) {
@@ -291,6 +293,7 @@ public class SHShopController {
         }
         Integer userId = Integer.parseInt(userIdObj.toString());
         ShProdDto data = shShopService.delistProdByUser(userId, prodId);
+
         if (data == null) {
             return ResponseEntity.ok(ApiResponseFactory.success("No Such Product", null));
         } else {
@@ -334,9 +337,9 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
-    // 修改商品狀態
+    // 修改商品狀態 (尚未導入adm session)
     @PostMapping("/changeStatus")
-    public ResponseEntity<ApiResponse<String>> ApproveProd(@RequestParam("prodId") Integer prodId,
+    public ResponseEntity<ApiResponse<String>> admChangeProdStatus(@RequestParam("prodId") Integer prodId,
                                                            @RequestParam("status") String status,
                                                            HttpSession session) {
 //        // 等adm做好在加

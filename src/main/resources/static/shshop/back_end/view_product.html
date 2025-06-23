@@ -33,12 +33,8 @@
                     <div class="main-img">
                         <img src="https://placehold.co/300x300" alt="主圖">
                     </div>
-                    <div class="thumbnail-bar">
-                        <button class="nav-arrow">←</button>
-                        <img src="https://placehold.co/80x80" alt="圖1">
-                        <img src="https://placehold.co/80x80" alt="圖2">
-                        <img src="https://placehold.co/80x80" alt="圖3">
-                        <button class="nav-arrow">→</button>
+                    <div class="thumbnail-bar" id="thumbnailBar">
+                        <div class="thumbnail-track" id="thumbnailTrack"></div>
                     </div>
                 </div>
 
@@ -50,7 +46,8 @@
                         <p><strong class="price">商品價格：</strong>$<span id="prodPrice"></span></p>
                         <p><strong class="prod_type">商品性質：</strong><span id="prodType"></span></p>
                         <p><strong class="prod_view">商品瀏覽次數：</strong><span id="prodViews"></span></p>
-                        <p><strong class="prod_status">商品狀態：</strong><span id="prodStatus" class="status-tag"></span></p>
+                        <p><strong class="prod_status">商品狀態：</strong><span id="prodStatus" class="status-tag"></span>
+                        </p>
                     </div>
                     <div class="action-buttons">
                         <button class="btn-action btn-edit" id="toggleStatusBtn">狀態切換</button>
@@ -94,142 +91,160 @@
                     },
                     body: new URLSearchParams({ id: productId })
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("後端回傳錯誤");
-                    }
-                    return response.json();
-                })
-                .then(responseData => {
-                    const data = responseData.data;
-
-                    // 主圖
-                    const mainImg = document.querySelector(".main-img img");
-                    if (data.picUrls && data.picUrls.length > 0) {
-                        mainImg.src = data.picUrls[0];
-                        mainImg.alt = data.prodName;
-                    }
-
-                    // 商品名稱
-                    document.getElementById("prodName").textContent = data.prodName;
-
-                    // 品牌
-                    document.getElementById("prodBrand").textContent = data.prodBrand;
-                    // 數量
-                    document.getElementById("prodCount").textContent = data.prodCount;
-                    // 價錢
-                    document.getElementById("prodPrice").textContent = data.prodPrice;
-                    // 商品性質（類別）
-                    document.getElementById("prodType").textContent = data.prodTypeName;
-                    // 瀏覽次數
-                    document.getElementById("prodViews").textContent = data.prodViews;
-                    // 商品狀態
-                    const prodStatusElement = document.getElementById("prodStatus");
-                    prodStatusElement.textContent = data.prodStatusStr;
-                    prodStatusElement.className = 'status-tag'; // Reset classes
-                    if (data.prodStatus === 1) {
-                        prodStatusElement.classList.add('status-up');
-                    } else if (data.prodStatus === 0) {
-                        prodStatusElement.classList.add('status-down');
-                    } else {
-                        prodStatusElement.classList.add('status-pending');
-                    }
-
-
-                    // 商品內容
-                    document.getElementById("prodContent").textContent = data.prodContent;
-                    // 商品敘述
-                    document.getElementById("prodDesc").textContent = data.prodDesc;
-                    // 賣家資訊
-                    document.getElementById("sellerInfo").textContent = `上架者：${data.userName}`;
-
-                    // 商品縮圖
-                    const thumbnails = document.querySelectorAll(".thumbnail-bar img");
-                    data.picUrls.forEach((url, index) => {
-                        if (thumbnails[index]) {
-                            thumbnails[index].src = url;
-                            thumbnails[index].alt = `商品圖${index + 1}`;
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("後端回傳錯誤");
                         }
-                    });
+                        return response.json();
+                    })
+                    .then(responseData => {
+                        const data = responseData.data;
 
-                    // 根據商品狀態設定按鈕文字
-                    const toggleStatusBtn = document.getElementById("toggleStatusBtn");
-                    if (data.prodStatus === 1) {
-                        toggleStatusBtn.textContent = '下架商品';
-                        toggleStatusBtn.dataset.action = 'delist';
-                    } else {
-                        toggleStatusBtn.textContent = '上架商品';
-                        toggleStatusBtn.dataset.action = 'list';
-                    }
-                })
-                .catch(err => {
-                    console.error("載入商品資料失敗：", err);
-                });
+                        // 主圖
+                        const mainImg = document.querySelector(".main-img img");
+                        if (data.picUrls && data.picUrls.length > 0) {
+                            mainImg.src = data.picUrls[0];
+                            mainImg.alt = data.prodName;
+                        }
+
+                        // 商品名稱
+                        document.getElementById("prodName").textContent = data.prodName;
+
+                        // 品牌
+                        document.getElementById("prodBrand").textContent = data.prodBrand;
+                        // 數量
+                        document.getElementById("prodCount").textContent = data.prodCount;
+                        // 價錢
+                        document.getElementById("prodPrice").textContent = data.prodPrice;
+                        // 商品性質（類別）
+                        document.getElementById("prodType").textContent = data.prodTypeName;
+                        // 瀏覽次數
+                        document.getElementById("prodViews").textContent = data.prodViews;
+                        // 商品狀態
+                        const prodStatusElement = document.getElementById("prodStatus");
+                        prodStatusElement.textContent = data.prodStatusStr;
+                        prodStatusElement.className = 'status-tag'; // Reset classes
+                        if (data.prodStatus === 1) {
+                            prodStatusElement.classList.add('status-up');
+                        } else if (data.prodStatus === 0) {
+                            prodStatusElement.classList.add('status-down');
+                        } else {
+                            prodStatusElement.classList.add('status-pending');
+                        }
+
+
+                        // 商品內容
+                        document.getElementById("prodContent").textContent = data.prodContent;
+                        // 商品敘述
+                        document.getElementById("prodDesc").textContent = data.prodDesc;
+                        // 賣家資訊
+                        document.getElementById("sellerInfo").textContent = `上架者：${data.userName}`;
+
+                        // 商品縮圖
+                        const thumbnailBar = document.getElementById("thumbnailBar");
+
+                        if (data.picUrls && data.picUrls.length > 0) {
+                            data.picUrls.forEach((url, index) => {
+                                const img = document.createElement("img");
+                                img.src = url;
+                                img.alt = `商品圖${index + 1}`;
+                                img.style.width = "80px";
+                                img.style.height = "80px";
+                                img.style.objectFit = "cover";
+                                img.style.marginRight = "8px";
+                                img.style.cursor = "pointer";
+
+                                img.addEventListener("click", () => {
+                                    mainImg.src = url;
+                                });
+
+                                thumbnailBar.appendChild(img);
+                            });
+                        }
+
+                        // 根據商品狀態設定按鈕文字
+                        const toggleStatusBtn = document.getElementById("toggleStatusBtn");
+                        if (data.prodStatus === 0) {
+                            toggleStatusBtn.textContent = '通過審核/上架商品';
+                            toggleStatusBtn.dataset.action = 'approve';
+                        } else if (data.prodStatus === 1) {
+                            toggleStatusBtn.textContent = '';
+                        } else if (data.prodStatus === 2) {
+                            toggleStatusBtn.textContent = '下架商品';
+                            toggleStatusBtn.dataset.action = 'delist';
+                        } else {
+                            toggleStatusBtn.textContent = '上架商品';
+                            toggleStatusBtn.dataset.action = 'list';
+                        }
+                    })
+                    .catch(err => {
+                        console.error("載入商品資料失敗：", err);
+                    });
             }
 
             loadProductData(); // 初次載入商品資料
 
             // 上架/下架按鈕功能
-            document.getElementById("toggleStatusBtn").addEventListener("click", function() {
+            document.getElementById("toggleStatusBtn").addEventListener("click", function () {
                 const action = this.dataset.action;
-                const newStatus = action === 'list' ? 1 : 0; // 1 for list, 0 for delist
+                const newStatus = action === 'list' ? "approve" : "delist"; // 1 for list, 0 for delist
 
-                fetch("http://localhost:8087/api/ShShop/updateProdStatus", { // 假設有一個更新狀態的 API
+                fetch("http://localhost:8087/api/ShShop/changeStatus", { // 更新狀態的 API
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
                     },
-                    body: new URLSearchParams({ id: productId, status: newStatus })
+                    body: new URLSearchParams({ prodId: productId, status: newStatus })
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("更新商品狀態失敗");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert(`商品已${action === 'list' ? '上架' : '下架'}！`);
-                        loadProductData(); // 重新載入資料以更新狀態顯示
-                    } else {
-                        alert(`操作失敗: ${data.message}`);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error toggling product status:", error);
-                    alert("更新商品狀態時發生錯誤。");
-                });
-            });
-
-            // 審核不通過按鈕功能
-            document.getElementById("rejectBtn").addEventListener("click", function() {
-                const reason = prompt("請輸入審核不通過的原因：");
-                if (reason) {
-                    fetch("http://localhost:8087/api/ShShop/rejectProd", { // 假設有一個審核不通過的 API
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: new URLSearchParams({ id: productId, reason: reason })
-                    })
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error("審核不通過操作失敗");
+                            throw new Error("更新商品狀態失敗");
                         }
                         return response.json();
                     })
                     .then(data => {
-                        if (data.success) {
-                            alert("商品已設定為審核不通過！");
+                        if (data.message === "success") {
+                            alert(`商品已${action === 'list' ? '上架' : '下架'}！`);
                             loadProductData(); // 重新載入資料以更新狀態顯示
                         } else {
                             alert(`操作失敗: ${data.message}`);
                         }
                     })
                     .catch(error => {
-                        console.error("Error rejecting product:", error);
-                        alert("審核不通過操作時發生錯誤。");
+                        console.error("Error toggling product status:", error);
+                        alert("更新商品狀態時發生錯誤。");
                     });
+            });
+
+            // 審核不通過按鈕功能
+            document.getElementById("rejectBtn").addEventListener("click", function () {
+                const reason = prompt("請輸入審核不通過的原因：");
+                if (reason) {
+                    fetch("http://localhost:8087/api/ShShop/changeStatus", { // 審核不通過的 API
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({ id: productId, status: "reject", reason: reason })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("審核不通過操作失敗");
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                alert("商品已設定為審核不通過！");
+                                loadProductData(); // 重新載入資料以更新狀態顯示
+                            } else {
+                                alert(`操作失敗: ${data.message}`);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error rejecting product:", error);
+                            alert("審核不通過操作時發生錯誤。");
+                        });
                 } else if (reason !== null) {
                     alert("請輸入不通過原因。");
                 }
