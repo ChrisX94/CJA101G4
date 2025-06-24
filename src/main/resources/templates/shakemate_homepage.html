@@ -60,8 +60,8 @@
     }
 
     .search-btn {
-      border-color: #ff00aa;
-      color: #ff00aa;
+      border-color: orange;
+      color: orange;
       background: none;
     }
 
@@ -91,8 +91,16 @@
       box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
     }
 
+    .search-btn:hover,
+    .nav-item:hover {
+      border-color: none;
+      background: lightgray;
+      color: black;
+    }
+
     .login-btn:hover {
       background: rgba(0, 229, 255, 0.1);
+      color: lightgray;
     }
 
     .user-icon:hover {
@@ -140,27 +148,33 @@
       }
 
       33% {
-        transform: translateX(0%);
+        transform:
+          translateX(0%);
       }
 
       34% {
-        transform: translateX(-100%);
+        transform:
+          translateX(-100%);
       }
 
       66% {
-        transform: translateX(-100%);
+        transform:
+          translateX(-100%);
       }
 
       67% {
-        transform: translateX(-200%);
+        transform:
+          translateX(-200%);
       }
 
       99% {
-        transform: translateX(-200%);
+        transform:
+          translateX(-200%);
       }
 
       100% {
-        transform: translateX(0%);
+        transform:
+          translateX(0%);
       }
     }
 
@@ -194,25 +208,26 @@
       width: 80%;
       margin-left: auto;
       margin-right: auto;
-      perspective: 1000px; /* ✅ 加上這行 */
+      perspective: 1000px;
+      /* 加上這行 */
     }
 
     .icon-card {
-  flex: 1 1 auto;
-  max-width: 180px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  animation: floatCard 3s ease-in-out infinite;
-  transition: transform 0.4s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-  position: relative;
-  margin: 0 10px;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.1em;
+      flex: 1 1 auto;
+      max-width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      /* 	animation: floatfast 3s ease-in-out infinite; */
+      transition: transform 0.4s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+      position: relative;
+      margin: 0 10px;
+      color: lightgray;
+      font-weight: bold;
+      font-size: 1.1em;
     }
 
     .icon-card span {
@@ -223,43 +238,114 @@
       text-align: center;
     }
 
-    .shape-triangle {
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      background: #f43f5e;
-    }
-
     .shape-circle {
       border-radius: 50%;
-      background: #3b82f6;
+      background: #4dd0e1;
+      /* 輕亮藍 */
+      animation: floatmedium 3s ease-in-out infinite;
+      color: gray;
+      /* 	text-shadow: 0 0 20px rgba(77, 208, 225, 0.8); */
+      box-shadow: 0 0 20px rgba(77, 208, 225, 0.8);
     }
+
+    /* =============== */
+
+    /* 1. 父容器，加上 drop-shadow 且 overflow: visible */
+    .triangle-wrapper {
+      display: inline-block;
+      animation: floatfast 3s ease-in-out infinite;
+      /* 讓陰影超出子元素範圍 */
+      overflow: visible;
+      /* 在這裡套用陰影 */
+      filter: drop-shadow(0 0 20px rgba(255, 165, 0, 0.9));
+	  /* box-shadow: 0 0 30px rgba(255, 165, 0, 0.9); */
+      /* 加強發光 */
+      /* text-shadow: 0 0 25px rgba(255, 165, 0, 0.9); */
+    }
+
+    /* 2. 三角形本體：使用 clip-path */
+    .triangle {
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      color: gray;
+      /* 寬度、高度調整跟 icon-card 一樣 */
+	  width: 180px;
+	  height: 180px;
+      background: #ffda44;
+    }
+
+    /* ============== */
 
     .shape-square {
-      background: #10b981;
+      background: #f48fb1;
+      /* 柔和粉紅 */
+      animation: floatslow 3s ease-in-out infinite;
+      color: gray;
+      /* 	text-shadow: 0 0 20px rgba(244, 143, 177, 0.8); */
+      box-shadow: 0 0 20px rgba(244, 143, 177, 0.8);
     }
 
-    @keyframes floatCard {
+    .float-slow {
+      animation-delay: 1s;
+    }
+
+    .float-medium {
+      animation-delay: 5s;
+    }
+
+    .float-fast {
+      animation-delay: 3s;
+    }
+
+    @keyframes floatfast {
 
       0%,
       100% {
-        transform: translateY(0)
+        transform: translateY(0);
       }
 
       50% {
-        transform: translateY(-5px)
+        transform:
+          translateY(-20px);
       }
     }
 
+    @keyframes floatmedium {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform:
+          translateY(-15px);
+      }
+    }
+
+    @keyframes floatslow {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform:
+          translateY(-10px);
+      }
+    }
 
     .icon-card:hover {
-      	animation-play-state: paused; /* 如果你有 floatCard 動畫，這行仍建議保留 */
-  		transform: scale(1.1) rotate(5deg) !important;
-  		box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
-  		opacity: 0.9;
-
+      animation-play-state: paused;
+      /* 如果你有 floatCard 動畫，這行仍建議保留 */
+      transform: scale(1.1) rotate(5deg) !important;
+      box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
+      opacity: 0.9;
+      color: black;
     }
 
     /* Responsive */
-    @media(max-width:768px) {
+    @media (max-width :768px) {
       .hero-content h1 {
         font-size: 2.5em;
       }
@@ -293,16 +379,13 @@
 <body>
   <header class="header">
     <div class="nav-left">
-      <a th:href="@{/index}" class="nav-item">首頁</a>
-      <a th:href="@{/activity}" class="nav-item">活動</a>
-      <a th:href="@{/shop}" class="nav-item">商店</a>
-      <a th:href="@{/news}" class="nav-item">最新消息</a>
-      <a th:href="@{/shakemate/chat}" class="nav-item" style="text-decoration: none;">客服</a>
-      <a th:href="@{/login}" class="search-btn">搜尋</a>
+      <a th:href="@{/index}" class="nav-item">首頁</a> <a th:href="@{/activity}" class="nav-item">活動</a> <a
+        th:href="@{/shop}" class="nav-item">商店</a> <a th:href="@{/news}" class="nav-item">最新消息</a>
+      <a th:href="@{/shakemate/chat}" class="nav-item" style="text-decoration: none;">客服</a> <a th:href="@{/login}"
+        class="search-btn">搜尋</a>
     </div>
     <div class="nav-right">
-      <a th:href="@{/login/testlogin}" class="login-btn">Login 測試</a>
-      <a th:href="@{/login}" class="login-btn">登入</a>
+      <a th:href="@{/login/testlogin}" class="login-btn">Login 測試</a> <a th:href="@{/login}" class="login-btn">登入</a>
       <div class="user-icon">👤</div>
     </div>
   </header>
@@ -310,18 +393,21 @@
     <div class="slides">
       <!-- 圖片在這裡可直接替換 -->
       <div class="slide" th:style="|background-image:url(@{/img/4.png});|"></div>
-      <div class="slide" th:style="|background-image:url(@{/img/logoText.png});|"></div>
       <div class="slide" th:style="|background-image:url(@{/img/logo.png});|"></div>
+      <div class="slide" th:style="|background-image:url(@{/img/logoText.png});|"></div>
     </div>
     <div class="hero-content">
       <h1>Shakemates</h1>
-      <p>連結深度，分享時刻</p>
+      <p>深度連結，分享時刻</p>
+      <br>
       <div class="cta-icons">
-        <div class="icon-card shape-triangle" onclick="visitShop()">
+        <div class="icon-card shape-circle" onclick="visitShop()">
           <span>商店</span>
         </div>
-        <div class="icon-card shape-circle" onclick="startMatch()">
-          <span>開始配對</span>
+        <div class="triangle-wrapper">
+          <div class="icon-card triangle" onclick="startMatch()">
+            <span>開始配對</span>
+          </div>
         </div>
         <div class="icon-card shape-square" onclick="visitEvents()">
           <span>活動</span>
@@ -330,9 +416,15 @@
     </div>
   </section>
   <script>
-    function startMatch() { alert('🎉 開始您的交友之旅!'); }
-    function visitShop() { alert('🛍️ 前往商店...'); }
-    function visitEvents() { alert('🎯 前往活動...'); }
+    function startMatch() {
+      alert('開始配對!');
+    }
+    function visitShop() {
+      alert('前往商店...');
+    }
+    function visitEvents() {
+      alert('前往活動...');
+    }
   </script>
 </body>
 

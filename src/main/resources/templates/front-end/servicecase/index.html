@@ -2,18 +2,18 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8" />
-<title>智能客服系統</title>
+<title>客服系統</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- 載入CSS -->
-<link rel="stylesheet" th:href="@{/css/chat.css}" />
+<link rel="stylesheet" th:href="@{/css/servicecase/chat.css}" />
 </head>
 <body>
 	<div class="container">
 
 		<!-- Header -->
 		<header>
-			<h1>智能客服系統</h1>
+			<h1>Yggdrasill</h1>
 		</header>
 
 		<div class="main-content">
@@ -53,13 +53,15 @@
 	</div>
 
   <!-- 浮動「我要提問」改到 CRUD 列表頁 -->
-  <a th:href="@{/servicecase/add}" 
-     style="background-color:orange; position:fixed; top:20px; right:80px; z-index:1000;"
+  <a th:href="@{/servicecase}" 
+     style="background-color: skyblue; color: gray; text-align: center; position:fixed; top:10px; right:20px; z-index:1000;"
      class="send-button">
-    無法解決嗎?點此新增提問
+    無法解決嗎?
+    <br>
+    點此新增提問
   </a>
   
 	<!-- 載入JS -->
-	<script th:src="@{/js/chat.js}" defer></script>
+	<script th:src="@{/js/servicecase/chat.js}" defer></script>
 </body>
 </html>
