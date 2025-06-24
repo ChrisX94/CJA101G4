@@ -665,15 +665,29 @@ html {
   /* ✅ 主要新增：卡片包裹成 swiper */
 }
 
+@media (min-width: 769px) and (max-width: 1199px) {
+  .match__wrap {
+    width: 90%;
+  }
+}
+
 .match__header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin: 2.5rem 0;
+  position: relative;
+}
+@media (min-width: 769px) and (max-width: 1199px) {
+  .match__header {
+    margin: 2.5rem auto;
+    max-width: 75rem;
+  }
 }
 .match__header .match__name {
   font-size: 2.6rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   color: #0097a7;
+  line-height: 1;
 }
 .match__header .match__info {
   font-size: 1.6rem;
@@ -709,6 +723,26 @@ html {
   margin-bottom: 4rem;
   /* 稍微跟按鈕區拉開一點 */
 }
+@media (min-width: 769px) and (max-width: 1199px) {
+  .match__body {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .match__body {
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 480px) {
+  .match__body {
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
 
 .match__avatar-box {
   flex-shrink: 0;
@@ -716,6 +750,16 @@ html {
   height: 25rem;
   border-radius: 1rem;
   overflow: hidden;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .match__avatar-box {
+    width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .match__avatar-box {
+    width: 100%;
+  }
 }
 .match__avatar-box .match__avatar {
   width: 100%;
@@ -883,21 +927,20 @@ html {
 /* 篩選按鈕區塊 */
 .filter-btn-wrapper {
   text-align: center;
-  display: flex;
-  justify-content: flex-end;
-  width: 62rem;
-  margin: 1rem auto;
+  width: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .filterBtn {
   background-color: #0097a7;
   color: #fff;
   border: none;
-  padding: 0.6rem 1.2rem;
+  padding: 5px 10px;
   border-radius: 1.2rem;
   font-size: 1.6rem;
   cursor: pointer;
-  margin: 0 0.5rem;
 }
 
 #filterModal {
@@ -906,7 +949,7 @@ html {
 
 /* 彈窗背景遮罩 */
 .modal-overlay {
-  display: none;
+  display: block;
   /* 預設隱藏 */
   position: fixed;
   top: 0;
