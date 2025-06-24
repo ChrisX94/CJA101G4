@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -95,4 +97,20 @@ public class MatchController {
         result.put("disliked", true);
         return result;
     }
+    
+    @GetMapping("/getUserStatus")
+    public Map<String, Object> getUserStatus(HttpSession session) throws SQLException {
+        Map<String, Object> result = new HashMap<>();
+        Integer userId = (Integer) session.getAttribute("account");
+
+        if (userId == null) {
+            result.put("status", -1); // 表示未登入或 session 遺失
+            return result;
+        }
+
+        UserProfileVO profile = userProfileDAO.findById(userId);
+        result.put("status", profile.getUserStatus());
+        return result;
+    }
+
 }

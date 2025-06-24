@@ -38,6 +38,7 @@ public class UserDto {
     private Boolean postStatus;
     private Boolean atAcStatus;
     private Boolean sellStatus;
+    
 
     public UserDto SimpleUserDto(Users user) {
         UserDto dto = new UserDto();
