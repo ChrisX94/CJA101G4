@@ -3,7 +3,7 @@ package com.shakemate.shshop.eum;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum ShShopStatus {
+enum ShShopStatus {
     PENDING((byte) 0, "審核中"),
     REJECT((byte) 1, "審核不通過"),
     OPEN((byte) 2, "已上架"),

@@ -38,6 +38,8 @@
           <button class="filter-btn" data-status="3">下架</button>
           <button class="filter-btn" data-status="0">審核中</button>
         </div>
+        <!-- AI 審核按鈕 -->
+        <button id="aiReviewBtn" class="ai-review-btn">🤖 使用 AI 審核</button>
       </div>
       <table>
         <thead>
@@ -166,6 +168,26 @@
     function pad(n) {
       return n.toString().padStart(2, '0');
     }
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("aiReviewBtn").addEventListener("click", () => {
+        if (confirm("確定要啟動 AI 商品審核嗎？")) {
+          fetch("http://localhost:8087/api/ShShop/aiAudit", { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+              alert("審核完成：" + data.message);
+              location.reload();
+            })
+            .catch(err => {
+              console.error("審核錯誤", err);
+              alert("AI 審核失敗，請稍後再試");
+            });
+        }
+      });
+    });
+
   </script>
 
 

@@ -16,6 +16,15 @@ SELECT DISTINCT p FROM ShProd p
 """)
     List<ShProd> findAllWithPics();
 
+// 找待審核的商品
+    @Query("""
+SELECT DISTINCT p FROM ShProd p
+ LEFT JOIN FETCH p.prodPics
+ LEFT JOIN FETCH p.shProdType
+ WHERE p.prodStatus = 0
+""")
+    List<ShProd> findAllWithPendingApproval ();
+
 @Query("""
 SELECT p FROM ShProd p
  LEFT JOIN FETCH p.prodPics
