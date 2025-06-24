@@ -22,7 +22,7 @@ public class UserProfileDAOImpl implements UserProfileDAO {
 
     @Override
     public UserProfileVO findById(int userId) throws SQLException {
-        String sql = "SELECT username, birthday, personality, interests, intro, img1, img2, img3, img4, img5 FROM users WHERE user_id = ?";
+        String sql = "SELECT username, birthday, personality, interests, intro, img1, img2, img3, img4, img5, user_status FROM users WHERE user_id = ?";
 
         try (Connection con = dataSource.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
@@ -46,8 +46,9 @@ public class UserProfileDAOImpl implements UserProfileDAO {
                             avatarList.add(imgUrl);
                         }
                     }
-
-                    return new UserProfileVO(userId, username, age, zodiac, avatarList, personality, interests, intro);
+                    int userStatus = rs.getInt("user_status");
+                    
+                    return new UserProfileVO(userId, username, age, zodiac, avatarList, personality, interests, intro, userStatus);
                 }
             }
         }
@@ -58,12 +59,13 @@ public class UserProfileDAOImpl implements UserProfileDAO {
     public UserProfileVO getRandomUnmatchedUser(int currentUserId) throws SQLException {
         String sql = """
             SELECT user_id, username, birthday, personality, interests, intro,
-                   img1, img2, img3, img4, img5
+                   img1, img2, img3, img4, img5, user_status
             FROM users
             WHERE user_id != ?
               AND user_id NOT IN (
                   SELECT TARGET_USER_ID FROM user_matches WHERE ACTION_USER_ID = ?
               )
+              AND user_status IN (1, 2)
             ORDER BY RAND()
             LIMIT 1
         """;
@@ -92,8 +94,8 @@ public class UserProfileDAOImpl implements UserProfileDAO {
                             avatarList.add(url);
                         }
                     }
-
-                    return new UserProfileVO(userId, username, age, zodiac, avatarList, personality, interests, intro);
+                    int userStatus = rs.getInt("user_status");
+                    return new UserProfileVO(userId, username, age, zodiac, avatarList, personality, interests, intro, userStatus);
                 }
             }
         }
@@ -114,7 +116,7 @@ public class UserProfileDAOImpl implements UserProfileDAO {
                   interests,
                   intro,
                   img1, img2, img3, img4, img5,
-                  (
+        		  user_status, (
         """);
 
         List<String> matchExpressions = new ArrayList<>();
@@ -148,7 +150,8 @@ public class UserProfileDAOImpl implements UserProfileDAO {
         if (!optionalConds.isEmpty()) {
             sql.append("AND (\n").append(String.join(" OR\n", optionalConds)).append(")\n");
         }
-
+        
+        sql.append("AND user_status IN (1, 2)\n");
         sql.append("ORDER BY match_count DESC");
 
         System.out.println("🔍 組出 SQL：\n" + sql);
@@ -177,6 +180,7 @@ public class UserProfileDAOImpl implements UserProfileDAO {
                 vo.setPersonality(rs.getString("personality"));
                 vo.setInterests(rs.getString("interests"));
                 vo.setIntro(rs.getString("intro"));
+                vo.setUserStatus(rs.getInt("user_status"));
 
                 result.add(vo);
             }

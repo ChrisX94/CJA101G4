@@ -1027,4 +1027,45 @@ html {
 }
 
 
+
+/* 未開通會員權限的透明遮罩+按鈕 */
+.lock-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.8); /* 半透明白 */
+	backdrop-filter: blur(5px); /* 毛玻璃效果 */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 999;
+}
+
+.lock-content {
+	display: flex;
+	text-align: center;
+	flex-direction: column;
+}
+
+.lock-content i.fa-lock {
+	font-size: 6.5rem;
+	margin-bottom: 3rem;
+	color: white;
+}
+
+.lock-content button {
+	padding: 1rem 2rem;
+	font-size: 1.6rem;
+	border: none;
+	border-radius: 0.5rem;
+	background-color: white;
+	color: #0097a7;
+	cursor: pointer;
+}
+
+
+
 /*# sourceMappingURL=style.css.map */
