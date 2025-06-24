@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- 載入CSS -->
-<link rel="stylesheet" th:href="@{/css/servicecase/chat.css}" />
+<link rel="stylesheet" th:href="@{/servicecase/css/chat.css}" />
 </head>
 <body>
 	<div class="container">
@@ -53,7 +53,7 @@
 	</div>
 
   <!-- 浮動「我要提問」改到 CRUD 列表頁 -->
-  <a th:href="@{/servicecase}" 
+  <a th:href="@{/servicecase/add}" 
      style="background-color: skyblue; color: gray; text-align: center; position:fixed; top:10px; right:20px; z-index:1000;"
      class="send-button">
     無法解決嗎?
@@ -62,6 +62,6 @@
   </a>
   
 	<!-- 載入JS -->
-	<script th:src="@{/js/servicecase/chat.js}" defer></script>
+	<script th:src="@{/servicecase/js/chat.js}" defer></script>
 </body>
 </html>
