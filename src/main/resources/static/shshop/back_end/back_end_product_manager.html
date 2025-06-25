@@ -31,12 +31,21 @@
     <div class="content-section">
       <h3>📦 商品清單</h3>
       <div class="search-filter">
-        <input type="text" id="searchInput" placeholder="搜尋商品名稱、品牌或會員名稱...">
-        <div class="filter-buttons">
-          <button class="filter-btn active" data-status="all">全部</button>
-          <button class="filter-btn" data-status="2">上架</button>
-          <button class="filter-btn" data-status="3">下架</button>
-          <button class="filter-btn" data-status="0">審核中</button>
+        <!-- 左側區塊：搜尋 + 狀態按鈕 -->
+        <div class="left-group">
+          <input type="text" id="searchInput" placeholder="搜尋商品名稱、品牌或會員名稱...">
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-status="all">全部</button>
+            <button class="filter-btn" data-status="2">上架</button>
+            <button class="filter-btn" data-status="3">下架</button>
+            <button class="filter-btn" data-status="0">審核中</button>
+          </div>
+        </div>
+
+        <!-- 右側按鈕 -->
+        <div class="btn-group">
+          <button id="aiRecordBtn" class="ai-review-btn">📄 AI 審核紀錄</button>
+          <button id="aiReviewBtn" class="ai-review-btn">🤖 使用 AI 審核</button>
         </div>
       </div>
       <table>
@@ -63,12 +72,23 @@
     </div>
   </main>
 
+  <!-- AI審核紀錄 Modal -->
+  <div id="aiRecordModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>📄 AI 審核紀錄</h2>
+      <ul id="aiRecordList">
+        <li>載入中...</li>
+      </ul>
+    </div>
+  </div>
+
   <script>
     let allProducts = [];
     let currentStatusFilter = "all";
 
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("http://localhost:8087/api/ShShop/all")
+      fetch("http://localhost:8080/api/ShShop/all")
         .then(res => res.json())
         .then(json => {
           if (!json || !json.data || !Array.isArray(json.data)) {
@@ -167,6 +187,76 @@
       return n.toString().padStart(2, '0');
     }
   </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("aiReviewBtn").addEventListener("click", () => {
+        if (confirm("確定要啟動 AI 商品審核嗎？")) {
+          fetch("http://localhost:8080/api/ShShop/aiAudit", { method: "POST" })
+            .then(res => res.json())
+            .then(data => {
+              alert("審核完成：" + data.message);
+              location.reload();
+            })
+            .catch(err => {
+              console.error("審核錯誤", err);
+              alert("AI 審核失敗，請稍後再試");
+            });
+        }
+      });
+    });
+
+  </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("aiRecordModal");
+    const closeBtn = document.querySelector(".close-btn");
+    const recordList = document.getElementById("aiRecordList");
+
+    // 打開 Modal
+    document.getElementById("aiRecordBtn").addEventListener("click", () => {
+      modal.style.display = "block";
+
+      // 改成 POST 請求
+      fetch("http://localhost:8080/api/ShShop/aiAuditHistory", {
+        method: "POST"
+      })
+        .then(res => res.json())
+        .then(data => {
+          recordList.innerHTML = "";
+
+          if (!data || data.length === 0) {
+            recordList.innerHTML = "<li>目前沒有AI審核紀錄。</li>";
+          } else {
+            data.forEach(time => {
+              const li = document.createElement("li");
+              li.textContent = time;
+              recordList.appendChild(li);
+            });
+          }
+        })
+        .catch(err => {
+          console.error("取得紀錄失敗", err);
+          recordList.innerHTML = "<li>無法載入資料，請稍後再試。</li>";
+        });
+    });
+
+    // 關閉 Modal
+    closeBtn.onclick = function () {
+      modal.style.display = "none";
+    };
+
+    // 點擊外面也關閉
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+  });
+</script>
+
+
 
 
 </body>

@@ -1,12 +1,10 @@
 package com.shakemate.shshop.controller;
 
-import com.shakemate.shshop.dto.ApiResponse;
-import com.shakemate.shshop.dto.ApiResponseFactory;
-import com.shakemate.shshop.dto.ShProdDto;
-import com.shakemate.shshop.dto.ShProdTypeDto;
+import com.shakemate.shshop.dto.*;
 import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.service.ShShopService;
+import com.shakemate.shshop.util.OpenAiAPI;
 import com.shakemate.shshop.util.PostMultipartFileUploader;
 import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dto.UserDto;
@@ -38,6 +36,7 @@ public class SHShopController {
     private PostMultipartFileUploader postImageUploader;
     @Autowired
     private ShShopRedisUtil redisUtil;
+
 
 
     /* ======================================== Front-End ========================================== */
@@ -196,6 +195,10 @@ public class SHShopController {
                 data = data.stream().filter(p -> p.getProdStatus() == 3).collect(Collectors.toList());
                 break;
             default:
+                for(ShProdDto p : data){
+                    String reason = "RejectionProdId_" + p.getProdId().toString();
+                    p.setRejectReason(redisUtil.get(reason));
+                }
                 break;
         }
         return ResponseEntity.ok(ApiResponseFactory.success(data));
@@ -419,6 +422,28 @@ public class SHShopController {
             return ResponseEntity.ok(ApiResponseFactory.success("No Such Product Or Product status is not in pending", null));
         } else {
             return ResponseEntity.ok(ApiResponseFactory.success("success", data));
+        }
+    }
+
+    @PostMapping("/aiAudit")
+    public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAudit(){
+        List<ShProdDto> pendingList = shShopService.pending();
+        if(pendingList == null || pendingList.size() == 0){
+            return ResponseEntity.ok(ApiResponseFactory.success("目前沒有要審核的商品", null));
+        }else {
+            List<ProdAuditResult> aiResult = shShopService.autoAudit(pendingList);
+            return ResponseEntity.ok(ApiResponseFactory.success(aiResult));
+        }
+    }
+
+
+    @PostMapping("/aiAuditHistory")
+    public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAuditHistory(){
+        List<ProdAuditResult> data = shShopService.aiAuditHistory();
+        if (data == null || data.isEmpty()) {
+            return ResponseEntity.ok(ApiResponseFactory.success("目前沒有AI審核紀錄", data));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success(data));
         }
     }
 
