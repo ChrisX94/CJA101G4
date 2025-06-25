@@ -279,7 +279,7 @@
       contentBox.innerHTML = '載入中...';
       try {
         const contextPath = getContextPath();
-        const resp = await fetch(`${contextPath}/api/${type}`);
+        const resp = await fetch(`/api/${type}`);  // 8080 用相對路徑，8081用${contextPath}/api/${type}
         if (!resp.ok) throw new Error('載入失敗');
         const data = await resp.json();
 
