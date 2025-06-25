@@ -7,7 +7,7 @@ import com.shakemate.shshop.dto.ShProdTypeDto;
 import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.service.ShShopService;
-import com.shakemate.shshop.util.OpenAiAPI;
+//import com.shakemate.shshop.util.OpenAiAPI;
 import com.shakemate.shshop.util.PostMultipartFileUploader;
 import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dto.UserDto;
@@ -39,8 +39,8 @@ public class SHShopController {
     private PostMultipartFileUploader postImageUploader;
     @Autowired
     private ShShopRedisUtil redisUtil;
-    @Autowired
-    private OpenAiAPI openAiAPI;
+//    @Autowired
+//    private OpenAiAPI openAiAPI;
 
 
     /* ======================================== Front-End ========================================== */
@@ -425,17 +425,17 @@ public class SHShopController {
         }
     }
 
-    @PostMapping("/aiAudit")
-    public ResponseEntity<ApiResponse<String>> aiAudit(){
-        List<ShProdDto> pendingList = shShopService.pending();
-        String role = openAiAPI.getSystemSetting();
-        String content = openAiAPI.buildUserPrompt(pendingList);
-        String aiResult = openAiAPI.getResult(role, content);
-        System.out.println(aiResult);
-        shShopService.autoAudit(aiResult);
-        return ResponseEntity.ok(ApiResponseFactory.success(aiResult));
-
-    }
+//    @PostMapping("/aiAudit")
+//    public ResponseEntity<ApiResponse<String>> aiAudit(){
+//        List<ShProdDto> pendingList = shShopService.pending();
+//        String role = openAiAPI.getSystemSetting();
+//        String content = openAiAPI.buildUserPrompt(pendingList);
+//        String aiResult = openAiAPI.getResult(role, content);
+//        System.out.println(aiResult);
+//        shShopService.autoAudit(aiResult);
+//        return ResponseEntity.ok(ApiResponseFactory.success(aiResult));
+//
+//    }
 
     /* ======================================== General ========================================== */
     // 全部的類別，用於於前端顯示頁面

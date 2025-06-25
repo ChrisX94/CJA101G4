@@ -351,7 +351,7 @@ function goToChat() {
 		.then(res => res.json())
 		.then(data => {
 //			const currentUserId = data.currentUserId;
-			window.location.href = `chatroom.html?currentRoomId=${roomId}`;
+			window.location.href = `chatroom.html?roomId=${roomId}`;
 		})
 		.catch(() => alert("⚠️ 無法取得使用者 ID"));
 }

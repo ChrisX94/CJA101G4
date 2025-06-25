@@ -168,6 +168,7 @@ html {
 }
 
 .chatroom__bar-menu {
+  display: none;
   position: absolute;
   top: 30px;
   right: 0;
@@ -178,6 +179,11 @@ html {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 999;
 }
+
+.chatroom__bar-menu.show {
+	display: block;
+}
+
 .chatroom__bar-menu button {
   display: block;
   width: 100%;
@@ -190,6 +196,10 @@ html {
 }
 .chatroom__bar-menu button:hover {
   background-color: #f2f2f2;
+}
+
+.chatroom__bar-avatar, .chatroom__bar-name {
+  cursor: pointer;
 }
 
 .chat-content {
