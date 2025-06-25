@@ -37,6 +37,9 @@ public class SHShopController {
     @Autowired
     private ShShopRedisUtil redisUtil;
 
+    @Autowired
+    private OpenAiAPI openAiAPI;
+
 
 
     /* ======================================== Front-End ========================================== */
@@ -425,6 +428,8 @@ public class SHShopController {
         }
     }
 
+
+
     @PostMapping("/aiAudit")
     public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAudit(){
         List<ShProdDto> pendingList = shShopService.pending();
@@ -446,6 +451,7 @@ public class SHShopController {
             return ResponseEntity.ok(ApiResponseFactory.success(data));
         }
     }
+
 
     /* ======================================== General ========================================== */
     // 全部的類別，用於於前端顯示頁面
