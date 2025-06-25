@@ -223,25 +223,59 @@
         min-height: 100px;
       }
     }
+   
+   .right-links{
+	margin-left: 8px;
+	padding: 4px 8px;
+	font-size: 0.85rem;
+	color: #fff;
+
+   }
+    
+   .right-links a.home {
+	background: darkkhaki; /* 回首頁使用黃色 */
+	border-radius: 4px;
+	text-decoration: none;
+	transition: opacity .2s;
+	font-size: 20px;
+	
+	position: absolute;
+	top:30%;
+	right:20px;
+
+}
+.right-links a.home:hover {
+	color: black;
+	opacity: 0.8;
+    
   </style>
 </head>
 
 <body>
+
   <header>
     <button class="menu-btn" onclick="openMenu()">☰</button>
     <h1>後台管理系統</h1>
+    
+      <div class="right-links">
+  <a th:href="@{/}" class="home">回首頁</a>
+  </div>
+    
   </header>
-
+  
   <div class="overlay" id="overlay" onclick="closeMenu()"></div>
   <nav id="sideMenu" class="side-nav">
     <button class="close-btn" onclick="closeMenu()">✖</button>
-    <a th:href="@{/servicecase}">會員管理</a>
-    <a th:href="@{/servicecase}">商城管理</a>
-    <a th:href="@{/servicecase}">訂單管理</a>
-    <a th:href="@{/servicecase}">活動管理</a>
-    <a th:href="@{/servicecase}">配對管理</a>
+    <a th:href="@{/admin}">會員管理</a>
+    <a th:href="@{/admin}">管理員</a>
+    <a th:href="@{/admin}">商城管理</a>
+    <a th:href="@{/admin}">訂單管理</a>
+    <a th:href="@{/admin}">活動管理</a>
+    <a th:href="@{/admin}">配對管理</a>
     <a th:href="@{/servicecase}">客服管理</a>
   </nav>
+
+</div>
 
   <div class="container">
     <div class="button-grid">

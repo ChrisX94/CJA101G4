@@ -383,15 +383,18 @@
 <body>
     <header class="header">
         <div class="nav-left">
-            <a th:href="@{/index}" class="nav-item">首頁</a> <a th:href="@{/activity}" class="nav-item">活動</a> <a
-                th:href="@{/shop}" class="nav-item">商店</a> <a th:href="@{/news}" class="nav-item">最新消息</a>
-            <a th:href="@{/shakemate/chat}" class="nav-item" style="text-decoration: none;">客服</a> <a
-                th:href="@{/login}" class="search-btn">搜尋</a>
+            <a th:href="@{/}" class="nav-item">首頁</a> 
+            <a th:href="@{/}" class="nav-item">活動</a> 
+<!--             <a th:href="@{/ShShop}" class="nav-item">商店</a> -->
+            <a href="/shshop/front_end/select_page.html" class="nav-item">商店</a>
+            <a th:href="@{/news}" class="nav-item">最新消息</a>
+            <a th:href="@{/shakemate/chat}" class="nav-item" style="text-decoration: none;">客服</a> 
+            <a th:href="@{/}" class="search-btn">搜尋</a>
         </div>
         <div class="nav-right">
             <a th:href="@{/login}" class="login-btn">登入</a>
             <a th:href="@{/shakemate/manage}" class="login-btn">後台管理</a>
-            <div class="user-icon">👤</div>
+            <div th:href="@{/testlogin}" class="user-icon">👤</div>
         </div>
     </header>
     <section class="hero">
