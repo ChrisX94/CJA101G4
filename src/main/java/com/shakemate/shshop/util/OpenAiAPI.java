@@ -16,31 +16,41 @@ import com.shakemate.shshop.dao.ShShopRepository;
 import com.shakemate.shshop.dto.ShProdDto;
 import com.shakemate.shshop.service.ShShopService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OpenAiAPI {
-    // API key
-    private static final String KEY = KeyForOA.getKey();
-    // https://platform.openai.com/docs/api-reference/authentication
-    private static final String OPEN_AI_URL = KeyForOA.getOpenAiUrl();
+
+    private final OpenAIConfig openAIConfig;
+
+    @Autowired
+    public OpenAiAPI(OpenAIConfig openAIConfig) {
+        this.openAIConfig = openAIConfig;
+    }
+
 
 
     public String getResult(String systemRole, String content) {
+
         try {
+            String key = openAIConfig.getApiKey();
+            String url = openAIConfig.getApiUrl();
+
+            System.out.println(key);
             List<MessageForOpenAi> messages = new ArrayList<>();
             messages.add(new MessageForOpenAi("system", systemRole)); // 設定gpt角色
             messages.add(new MessageForOpenAi("user", content)); // 輸入要翻譯的內容
             Gson gson = new Gson();
             JsonObject json = new JsonObject();
-            json.addProperty("model", "gpt-4o-mini"); // 選擇模型
+            json.addProperty("model", "gpt-4o-mini"); // 選擇模型(demo時改成gpt-4o)
             json.add("messages", gson.toJsonTree(messages)); // 將List<Message> messages轉成json物件
 
             HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(OPEN_AI_URL)) //建立連線
+                    .uri(URI.create(url)) //建立連線
                     .header("Content-Type", "application/json") //傳送資料形式
-                    .header("Authorization", "Bearer " + KEY) // 傳送key
+                    .header("Authorization", "Bearer " + key) // 傳送key
                     .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(json)))
                     .build();
             HttpClient client = HttpClient.newHttpClient();
@@ -97,9 +107,27 @@ public class OpenAiAPI {
             }
 
         }
-
         return prompt.toString();
     }
 
+
+}
+
+@Component
+class OpenAIConfig {
+
+    @Value("${openai.api.key}")
+    private String apiKey;
+
+    @Value("${openai.api.url}")
+    private String apiUrl;
+
+
+    public String getApiKey() {
+        return apiKey;
+    }
+    public String getApiUrl() {
+        return apiUrl;
+    }
 
 }

@@ -13,23 +13,27 @@ import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdPic;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.util.CompositeQueryForShshop;
+import com.shakemate.shshop.util.OpenAiAPI;
 import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.dto.UserDto;
 import com.shakemate.user.model.Users;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.devtools.classpath.ClassPathFileSystemWatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service("ShShop")
 public class ShShopService {
@@ -51,6 +55,11 @@ public class ShShopService {
 
     @Autowired
     private ShShopRedisUtil redisUtil;
+
+    @Autowired
+    private OpenAiAPI openAiAPI;
+    @Autowired
+    private ClassPathFileSystemWatcher classPathFileSystemWatcher;
 
 
     // 找尋朋友清單
@@ -396,6 +405,7 @@ public class ShShopService {
                 prod.setProdContent(form.getProdContent());
                 prod.setProdStatusDesc(form.getProdStatusDesc());
                 prod.setProdPrice(form.getProdPrice());
+                prod.setProdStatus((byte) 0); // 每次更新都要重新審核
                 prod.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
                 List<ShProdPic> picList = shProdPic(picUrls, prod);
                 prod.setProdPics(picList);
@@ -448,16 +458,19 @@ public class ShShopService {
     }
 
     // OpenAI 自動商品審核
-    public void autoAudit(String aiResult) {
+    public List<ProdAuditResult> autoAudit(List<ShProdDto> pendingList) {
+        String role = openAiAPI.getSystemSetting();
+        String content = openAiAPI.buildUserPrompt(pendingList);
+        String aiResult = openAiAPI.getResult(role, content);
         RestTemplate restTemplate = new RestTemplate();
         Gson gson = new Gson();
         Type listType = new TypeToken<List<ProdAuditResult>>() {
         }.getType();
         List<ProdAuditResult> resultList = null;
         aiResult = aiResult.replace("```json", "").replace("```", "").trim();
-        System.out.println(aiResult);
         resultList = gson.fromJson(aiResult, listType);
-        String baseUrl = "http://localhost:8087/api/ShShop/";
+        redisUtil.saveAuditResult("auditResult", resultList); // 存入最新結果
+        String baseUrl = "http://localhost:8080/api/ShShop/";
         for (ProdAuditResult re : resultList) {
             Integer prodId = re.getProdId();
             String status = re.getStatus();
@@ -478,6 +491,31 @@ public class ShShopService {
                 );
             }
         }
+        return resultList;
+    }
+
+    // 取得AI 審核紀錄
+    public List<ProdAuditResult> aiAuditHistory() {
+        List<Object> rawList = redisUtil.getResultHistory("auditResult");
+        if (rawList == null || rawList.isEmpty()) {
+            return List.of();
+        }
+        Gson gson = new Gson();
+        // 轉換
+        List<ProdAuditResult> resultList = rawList.stream()
+                .flatMap(obj -> {
+                    try {
+                        // 每一筆是一個 JSON 字串陣列
+                        ProdAuditResult[] parsed = gson.fromJson(obj.toString(), ProdAuditResult[].class);
+                        return List.of(parsed).stream();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return Stream.empty();
+                    }
+                })
+                .toList();
+
+        return resultList;
     }
 
 

@@ -63,7 +63,7 @@
       </div>
     </div>
 
-    <form class="form-layout" method="post" action="http://localhost:8087/api/ShShop/updateProd"
+    <form class="form-layout" method="post" action="http://localhost:8080/api/ShShop/updateProd"
       enctype="multipart/form-data">
       <input type="hidden" id="prodId" name="prodId" value="">
 
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const initFormData = new FormData();
     initFormData.append("id", prodId);
 
-    fetch("http://localhost:8087/api/ShShop/getProd", {
+    fetch("http://localhost:8080/api/ShShop/getProd", {
       method: "POST",
       body: initFormData
     })
@@ -302,7 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 發送更新請求
-    fetch("http://localhost:8087/api/ShShop/updateProd", {
+    fetch("http://localhost:8080/api/ShShop/updateProd", {
       method: "POST",
       body: submitData
     })

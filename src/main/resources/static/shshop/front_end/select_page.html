@@ -161,7 +161,7 @@
 
     function loadTypes() {
       $.ajax({
-        url: "http://localhost:8087/api/ShShop/allTypes",
+        url: "http://localhost:8080/api/ShShop/allTypes",
         method: "GET",
         dataType: "json",
         success: function (response) {
@@ -183,8 +183,8 @@
 
     function loadProducts(typeId = "") {
       const url = typeId
-        ? `http://localhost:8087/api/ShShop/getProdsByType?typeId=${typeId}`
-        : `http://localhost:8087/api/ShShop/getProds`;
+        ? `http://localhost:8080/api/ShShop/getProdsByType?typeId=${typeId}`
+        : `http://localhost:8080/api/ShShop/getProds`;
 
       $.ajax({
         url,
@@ -206,7 +206,7 @@
 
     function loadSortedProducts(ord) {
       $.ajax({
-        url: `http://localhost:8087/api/ShShop/getProdsOrd?ord=${ord}`,
+        url: `http://localhost:8080/api/ShShop/getProdsOrd?ord=${ord}`,
         method: "GET",
         dataType: "json",
         success: function (res) {
@@ -227,7 +227,7 @@
       if (!keyword) return;
 
       $.ajax({
-        url: `http://localhost:8087/api/ShShop/keyWord?keyStr=${encodeURIComponent(keyword)}`,
+        url: `http://localhost:8080/api/ShShop/keyWord?keyStr=${encodeURIComponent(keyword)}`,
         method: "GET",
         dataType: "json",
         success: function (res) {
@@ -246,7 +246,7 @@
 
     function loadFriends() {
       $.ajax({
-        url: "http://localhost:8087/api/ShShop/friendList",
+        url: "http://localhost:8080/api/ShShop/friendList",
         method: "GET",
         dataType: "json",
         success: function (res) {
@@ -267,7 +267,7 @@
           friendList.on("click", "li", function () {
             const friendId = $(this).data("id");
             $.ajax({
-              url: `http://localhost:8087/api/ShShop/getProdsByUser?userId=${friendId}`,
+              url: `http://localhost:8080/api/ShShop/getProdsByUser?userId=${friendId}`,
               method: "POST",
               dataType: "json",
               success: function (res) {
@@ -332,7 +332,7 @@
 
       // 載入類別下拉選單
       function populateAdvancedTypeSelect() {
-        $.get("http://localhost:8087/api/ShShop/allTypes", function (res) {
+        $.get("http://localhost:8080/api/ShShop/allTypes", function (res) {
           const select = $("#advTypeSelect");
           res.data.forEach(t => {
             select.append(`<option value="${t.prodTypeId}">${t.prodTypeName}</option>`);
@@ -346,7 +346,7 @@
         const formData = $(this).serialize(); // 將所有欄位轉為 URL encoded 格式
 
         $.ajax({
-          url: "http://localhost:8087/api/ShShop/advanceSearch", // 假設這是後端 endpoint
+          url: "http://localhost:8080/api/ShShop/advanceSearch", // 假設這是後端 endpoint
           method: "POST",
           data: formData,
           dataType: "json",
