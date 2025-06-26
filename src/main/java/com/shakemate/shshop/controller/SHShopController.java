@@ -41,6 +41,9 @@ public class SHShopController {
     @Autowired
     private ShShopRedisUtil redisUtil;
 
+    @Autowired
+    private OpenAiAPI openAiAPI;
+
 
 
     /* ======================================== Front-End ========================================== */
@@ -336,7 +339,6 @@ public class SHShopController {
     }
 
 
-
     /* ======================================== Back-End ========================================== */
 
     // 用id 找商品，管理員用
@@ -428,6 +430,7 @@ public class SHShopController {
             return ResponseEntity.ok(ApiResponseFactory.success("success", data));
         }
     }
+
     // Open AI 審核
     @PostMapping("/aiAudit")
     public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAudit(){
@@ -482,7 +485,6 @@ public class SHShopController {
         }
     }
 
-
     /* ======================================== General ========================================== */
     // 全部的類別，用於於前端顯示頁面
     @GetMapping("/allTypes")
@@ -506,6 +508,5 @@ public class SHShopController {
             return ResponseEntity.ok(ApiResponseFactory.success("success", list));
         }
     }
-
 
 }

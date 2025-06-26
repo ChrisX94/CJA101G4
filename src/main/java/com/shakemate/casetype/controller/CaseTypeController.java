@@ -20,13 +20,13 @@ public class CaseTypeController {
 
     @GetMapping
     public List<CaseType> getAll() {
-    	System.out.println("✅ /api/casetype 被呼叫！");
+    	System.out.println("/api/casetype 被呼叫！");
         return caseTypeRepository.findAll();
     }
     
     @PostConstruct
     public void init() {
-        System.out.println("📌 CaseTypeController 已被 Spring 掃描並初始化");
+        System.out.println("CaseTypeController 已被 Spring 掃描並初始化");
     }
     
 }

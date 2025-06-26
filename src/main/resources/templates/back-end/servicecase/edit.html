@@ -1,67 +1,173 @@
 <!DOCTYPE html>
-<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org"
-	th:replace="layout/layout :: layout">
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>人工處理案件列表</title>
 
-<!-- 這個 fragment 會被插入到 layout.html 的 <main> 位置 -->
-<div th:fragment="content">
-	<h2>編輯服務案件</h2>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
 
-	<form th:action="@{/servicecase/save}" th:object="${serviceCase}"
-		method="post"
-		style="display: flex; flex-direction: column; gap: 10px; max-width: 600px;">
 
-		<!-- 隱藏的 Case ID -->
-		<input type="hidden" th:field="*{caseId}" />
+<style>
+* {
+	font-family: "LXGW WenKai TC", cursive;
+	font-weight: 400;
+	font-style: normal;
+	box-sizing: border-box;
+	margin: 5px;
+	padding: 5px;
+}
 
-		<!-- 使用者 ID -->
-		<div>
-			<label for="userId">使用者 ID：</label> <input type="number" id="userId"
-				th:field="*{userId}" placeholder="輸入使用者 ID" required />
-		</div>
+.body {
+	background: lightgoldenrodyellow;
+}
 
-		<!-- 管理員 ID -->
-		<div>
-			<label for="admId">管理員 ID：</label> <input type="number" id="admId"
-				th:field="*{admId}" placeholder="輸入管理員 ID" />
-		</div>
+table {
+	border-collapse: separate;
+	border-spacing: 0 10px; /* 行距 */
+	width: 100%;
+	background-color: #fff;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-		<!-- 案件類型 -->
-		<div>
-			<label for="caseType">案件類型：</label> <select id="caseType"
-				th:field="*{caseType.caseTypeId}" required>
-				<option th:each="type : ${allTypes}" th:value="${type.caseTypeId}"
-					th:text="${type.typeName}"></option>
-			</select>
-		</div>
+th, td {
+	border: 1px solid #ddd;
+	padding: 12px 16px;
+	text-align: center;
+}
 
-		<!-- 標題 -->
-		<div>
-			<label for="title">標題：</label> <input type="text" id="title"
-				th:field="*{title}" placeholder="輸入標題" required />
-		</div>
+th {
+	background-color: #f7f7f7;
+	color: #333;
+	font-weight: bold;
+	border-bottom: 2px solid #ccc;
+}
 
-		<!-- 內容 -->
-		<div>
-			<label for="content">內容：</label>
-			<textarea id="content" th:field="*{content}" placeholder="輸入內容"
-				rows="5" required></textarea>
-		</div>
+tr:nth-child(even) {
+	background-color: #f9f9f9;
+}
 
-		<!-- 狀態 -->
-		<div>
-			<label for="caseStatus">狀態：</label> <select id="caseStatus"
-				th:field="*{caseStatus}" required>
-				<option th:value="0" th:text="'未處理'"></option>
-				<option th:value="1" th:text="'處理中'"></option>
-				<option th:value="2" th:text="'已完成'"></option>
-			</select>
-		</div>
+tr:hover {
+	background-color: #f1f1f1;
+}
 
-		<!-- 按鈕 -->
-		<div style="margin-top: 20px;">
-			<button type="submit" class="send-button">更新</button>
-			<a th:href="@{/servicecase}" style="margin-left: 10px;">取消</a>
-		</div>
-	</form>
-</div>
+/* 新增一段 CSS */
+td.ed {
+	display: flex;
+	justify-content: space-evenly;
+	/* 或 space-between / space-around 看你想要的間隔效果 */
+	/* 如果要在小螢幕上也維持橫排，加入這行： */
+	white-space: nowrap;
+	margin: 0;
+}
+
+td.ed a {
+	flex: 1; /* 兩個 a 各佔一半空間 */
+	text-align: center; /* 置中 */
+}
+
+.edit {
+	background: lightskyblue;
+	text-decoration: none;
+	color: white;
+	border-radius: 20px;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: transform 0.3s, box-shadow 0.3s;
+	align-items: center;
+}
+
+.delete {
+	background: lightcoral;
+	text-decoration: none;
+	color: white;
+	border-radius: 20px;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: transform 0.3s, box-shadow 0.3s;
+	align-items: center;
+}
+
+.add {
+	margin-bottom: 10px;
+	background: lightgreen;
+	text-decoration: none;
+	color: white;
+	border-radius: 20px;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: transform 0.3s, box-shadow 0.3s;
+	align-items: center;
+}
+</style>
+</head>
+
+<body>
+	<!-- 這個 fragment 會被插入到 layout.html 的 <main> 位置 -->
+	<div th:fragment="content">
+		<h2>編輯服務案件</h2>
+
+		<form th:action="@{/servicecase/save}" th:object="${serviceCase}"
+			method="post"
+			style="display: flex; flex-direction: column; gap: 10px; max-width: 600px;">
+
+			<!-- 隱藏的 Case ID -->
+			<input type="hidden" th:field="*{caseId}" />
+
+			<!-- 使用者 ID -->
+			<div>
+				<label for="userId">使用者 ID：</label> <input type="number" id="userId"
+					th:field="*{userId}" placeholder="輸入使用者 ID" required />
+			</div>
+
+			<!-- 管理員 ID -->
+			<div>
+				<label for="admId">管理員 ID：</label> <input type="number" id="admId"
+					th:field="*{admId}" placeholder="輸入管理員 ID" />
+			</div>
+
+			<!-- 案件類型 -->
+			<div>
+				<label for="caseType">案件類型：</label> <select id="caseType"
+					th:field="*{caseType.caseTypeId}" required>
+					<option th:each="type : ${allTypes}" th:value="${type.caseTypeId}"
+						th:text="${type.typeName}"></option>
+				</select>
+			</div>
+
+			<!-- 標題 -->
+			<div>
+				<label for="title">標題：</label> <input type="text" id="title"
+					th:field="*{title}" placeholder="輸入標題" required />
+			</div>
+
+			<!-- 內容 -->
+			<div>
+				<label for="content">內容：</label>
+				<textarea id="content" th:field="*{content}" placeholder="輸入內容"
+					rows="5" required></textarea>
+			</div>
+
+			<!-- 狀態 -->
+			<div>
+				<label for="caseStatus">狀態：</label> <select id="caseStatus"
+					th:field="*{caseStatus}" required>
+					<option th:value="0" th:text="'未處理'"></option>
+					<option th:value="1" th:text="'處理中'"></option>
+					<option th:value="2" th:text="'已完成'"></option>
+				</select>
+			</div>
+
+			<!-- 按鈕 -->
+			<div style="margin-top: 20px;">
+				<button type="submit" class="send-button">更新</button>
+				<a th:href="@{/servicecase}" style="margin-left: 10px;">取消</a>
+			</div>
+		</form>
+	</div>
+</body>
 </html>

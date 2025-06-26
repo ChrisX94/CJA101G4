@@ -1,361 +1,492 @@
-
-<!-- <!DOCTYPE html> -->
-<!-- <html xmlns:th="http://www.thymeleaf.org"> -->
-
-<!-- <head> -->
-<!--     <meta charset="UTF-8"> -->
-<!--     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
-<!--     <title>Index.html</title> -->
-<!-- </head> -->
-<!-- <body> -->
-<!-- <a th:href="@{/login}" >login</a> -->
-<!-- <br> -->
-<!-- <a th:href="@{/login/testlogin}" >test login</a> -->
-<!-- <br> -->
-
-<!-- </body> -->
-<!-- </html> -->
-
-
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shakemates</title>
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Orbitron', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shakemates</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
+        }
 
-    body {
-      background: #0d0f14;
-      color: #ffffff;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+        body {
+            background: #0d0f14;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
 
-    /* Header */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      backdrop-filter: blur(12px);
-      background: rgba(13, 15, 20, 0.6);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      z-index: 100;
-    }
+        }
 
-    .nav-left,
-    .nav-right {
-      display: flex;
-      gap: 30px;
-      align-items: center;
-    }
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            backdrop-filter: blur(12px);
+            background: rgba(13, 15, 20, 0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            z-index: 100;
+        }
 
-    .nav-item,
-    .search-btn,
-    .login-btn,
-    .user-icon {
-      text-decoration: none;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 8px;
-      text-transform: uppercase;
-      font-weight: 500;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
+        .nav-left,
+        .nav-right {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
 
-    .search-btn {
-      border-color: #ff00aa;
-      color: #ff00aa;
-      background: none;
-    }
+        .nav-item,
+        .search-btn,
+        .login-btn,
+        .user-icon {
+            text-decoration: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            font-weight: 500;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
 
-    .login-btn {
-      padding: 10px 20px;
-      border-radius: 50px;
-      border-color: #00e5ff;
-      font-weight: 600;
-    }
+        .search-btn {
+            border-color: orange;
+            color: orange;
+            background: none;
+        }
 
-    .user-icon {
-      width: 40px;
-      height: 40px;
-      background: #fff;
-      color: #0d0f14;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
+        .login-btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border-color: #00e5ff;
+            font-weight: 600;
+        }
 
-    .nav-item:hover,
-    .search-btn:hover,
-    .login-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-    }
+        .user-icon {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            color: #0d0f14;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
 
-    .login-btn:hover {
-      background: rgba(0, 229, 255, 0.1);
-    }
+        .nav-item:hover,
+        .search-btn:hover,
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+        }
 
-    .user-icon:hover {
-      background: #fff;
-      color: #0d0f14;
-      transform: translateY(-3px);
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-    }
+        .search-btn:hover,
+        .nav-item:hover {
+            border-color: transparent;
+            background: lightgray;
+            color: black;
+        }
 
-    /* Hero Carousel */
-    .hero {
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-      margin-top: 80px;
-    }
+        .login-btn:hover {
+            background: rgba(0, 229, 255, 0.1);
+            color: lightgray;
+        }
 
-    .slides {
-      display: flex;
-      width: 300%;
-      height: 100%;
-      animation: slideAnim 18s infinite linear;
-    }
+        .user-icon:hover {
+            background: #fff;
+            color: #0d0f14;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+        }
 
-    .slide {
-      flex: 1 0 100%;
-      background-size: cover;
-      background-position: center;
-      position: relative;
-    }
+        /* Hero Carousel */
+        .hero {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            margin-top: 80px;
+            /*             min-height: 300px; */
+            /*             aspect-ratio: 16 / 9; */
+        }
 
-    .slide::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.35);
-    }
+        .slides {
+            display: flex;
+            width: 300%;
+            overflow: hidden;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+            /* 加上平滑過渡 */
+        }
 
-    @keyframes slideAnim {
-      0% {
-        transform: translateX(0%);
-      }
+        .slide {
+            /* width: 100vw; 百分之百的「視窗」寬度 */
+            width: 100vw;
+            height: 100%;
+            flex-shrink: 0;
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            position: relative;
+        }
 
-      33% {
-        transform: translateX(0%);
-      }
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+        }
 
-      34% {
-        transform: translateX(-100%);
-      }
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 2;
+            width: 100%;
+        }
 
-      66% {
-        transform: translateX(-100%);
-      }
+        .hero-content h1 {
+            font-size: 4em;
+            color: #00e5ff;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+        }
 
-      67% {
-        transform: translateX(-200%);
-      }
+        .hero-content p {
+            margin: 20px 0;
+            font-size: 1.2em;
+            color: #fff;
+        }
 
-      99% {
-        transform: translateX(-200%);
-      }
+        .cta-icons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            perspective: 1000px;
+            /* 加上這行 */
+        }
 
-      100% {
-        transform: translateX(0%);
-      }
-    }
+        .icon-card {
+            flex: 1 1 auto;
+            max-width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            /* 	animation: floatfast 3s ease-in-out infinite; */
+            transition: transform 0.4s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+            position: relative;
+            margin: 0 10px;
+            color: lightgray;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
 
-    .hero-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 2;
-      width: 100%;
-    }
+        .icon-card span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
 
-    .hero-content h1 {
-      font-size: 4em;
-      color: #00e5ff;
-      text-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
-    }
+        .shape-circle {
+            border-radius: 50%;
+            background: #4dd0e1;
+            /* 輕亮藍 */
+            animation: floatmedium 3s ease-in-out infinite;
+            color: gray;
+            /* 	text-shadow: 0 0 20px rgba(77, 208, 225, 0.8); */
+            box-shadow: 0 0 20px rgba(77, 208, 225, 0.8);
+        }
 
-    .hero-content p {
-      margin: 20px 0;
-      font-size: 1.2em;
-      color: #fff;
-    }
+        /* =============== */
 
-    .cta-icons {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 40px;
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-      perspective: 1000px; /* ✅ 加上這行 */
-    }
+        /* 1. 父容器，加上 drop-shadow 且 overflow: visible */
+        .triangle-wrapper {
+            display: inline-block;
+            animation: floatfast 3s ease-in-out infinite;
+            /* 讓陰影超出子元素範圍 */
+            overflow: visible;
+            /* 在這裡套用陰影 */
+            filter: drop-shadow(0 0 20px rgba(255, 165, 0, 0.9));
+            /* box-shadow: 0 0 30px rgba(255, 165, 0, 0.9); */
+            /* 加強發光 */
+            /* text-shadow: 0 0 25px rgba(255, 165, 0, 0.9); */
+        }
 
-    .icon-card {
-  flex: 1 1 auto;
-  max-width: 180px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  animation: floatCard 3s ease-in-out infinite;
-  transition: transform 0.4s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-  position: relative;
-  margin: 0 10px;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.1em;
-    }
+        /* 2. 三角形本體：使用 clip-path */
+        .triangle {
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            color: gray;
+            /* 寬度、高度調整跟 icon-card 一樣 */
+            width: 180px;
+            height: 180px;
+            background: #ffda44;
+        }
 
-    .icon-card span {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
+        /* ============== */
 
-    .shape-triangle {
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      background: #f43f5e;
-    }
+        .shape-square {
+            background: #f48fb1;
+            /* 柔和粉紅 */
+            animation: floatslow 3s ease-in-out infinite;
+            color: gray;
+            /* 	text-shadow: 0 0 20px rgba(244, 143, 177, 0.8); */
+            box-shadow: 0 0 20px rgba(244, 143, 177, 0.8);
+        }
 
-    .shape-circle {
-      border-radius: 50%;
-      background: #3b82f6;
-    }
+        .float-slow {
+            animation-delay: 1s;
+        }
 
-    .shape-square {
-      background: #10b981;
-    }
+        .float-medium {
+            animation-delay: 5s;
+        }
 
-    @keyframes floatCard {
+        .float-fast {
+            animation-delay: 3s;
+        }
 
-      0%,
-      100% {
-        transform: translateY(0)
-      }
+        @keyframes floatfast {
 
-      50% {
-        transform: translateY(-5px)
-      }
-    }
+            0%,
+            100% {
+                transform: translateY(0);
+            }
 
+            50% {
+                transform:
+                    translateY(-20px);
+            }
+        }
 
-    .icon-card:hover {
-      	animation-play-state: paused; /* 如果你有 floatCard 動畫，這行仍建議保留 */
-  		transform: scale(1.1) rotate(5deg) !important;
-  		box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
-  		opacity: 0.9;
+        @keyframes floatmedium {
 
-    }
+            0%,
+            100% {
+                transform: translateY(0);
+            }
 
-    /* Responsive */
-    @media(max-width:768px) {
-      .hero-content h1 {
-        font-size: 2.5em;
-      }
+            50% {
+                transform:
+                    translateY(-15px);
+            }
+        }
 
-      .nav-left,
-      .nav-right {
-        gap: 15px;
-      }
+        @keyframes floatslow {
 
-      .header {
-        padding: 15px 20px;
-      }
+            0%,
+            100% {
+                transform: translateY(0);
+            }
 
-      .cta-icons {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        width: 100%;
-      }
+            50% {
+                transform:
+                    translateY(-10px);
+            }
+        }
 
-      .icon-card {
-        width: 120px;
-        height: 120px;
-        max-width: none;
-        margin: 0;
-      }
-    }
-  </style>
+        .icon-card:hover {
+            animation-play-state: paused;
+            /* 如果你有 floatCard 動畫，這行仍建議保留 */
+            transform: scale(1.1) rotate(5deg) !important;
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
+            opacity: 0.9;
+            color: black;
+        }
+
+        /* Responsive */
+        @media (max-width :768px) {
+            .hero {
+                aspect-ratio: auto;
+                min-height: 60vh;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5em;
+            }
+
+            .nav-left,
+            .nav-right {
+                gap: 15px;
+            }
+
+            .header {
+                padding: 15px 20px;
+            }
+
+            .cta-icons {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+                width: 100%;
+            }
+
+            .icon-card {
+                width: 120px;
+                height: 120px;
+                max-width: none;
+                margin: 0;
+            }
+        }
+
+        /* 指示器容器 */
+        .dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+        }
+
+        /* 每個小圓點 */
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        /* 當前頁 active 狀態 */
+        .dot.active {
+            background: #00e5ff;
+        }
+    </style>
 </head>
 
 <body>
-  <header class="header">
-    <div class="nav-left">
-      <a th:href="@{/index}" class="nav-item">首頁</a>
-      <a th:href="@{/activity}" class="nav-item">活動</a>
-      <a th:href="@{/shop}" class="nav-item">商店</a>
-      <a th:href="@{/news}" class="nav-item">最新消息</a>
-      <a th:href="@{/shakemate/chat}" class="nav-item" style="text-decoration: none;">客服</a>
-      <a th:href="@{/login}" class="search-btn">搜尋</a>
-    </div>
-    <div class="nav-right">
-      <a th:href="@{/login/testlogin}" class="login-btn">Login 測試</a>
-      <a th:href="@{/login}" class="login-btn">登入</a>
-      <div class="user-icon">👤</div>
-    </div>
-  </header>
-  <section class="hero">
-    <div class="slides">
-      <!-- 圖片在這裡可直接替換 -->
-      <div class="slide" th:style="|background-image:url(@{/img/4.png});|"></div>
-      <div class="slide" th:style="|background-image:url(@{/img/logoText.png});|"></div>
-      <div class="slide" th:style="|background-image:url(@{/img/logo.png});|"></div>
-    </div>
-    <div class="hero-content">
-      <h1>Shakemates</h1>
-      <p>連結深度，分享時刻</p>
-      <div class="cta-icons">
-        <div class="icon-card shape-triangle" onclick="visitShop()">
-          <span>商店</span>
+    <header class="header">
+        <div class="nav-left">
+            <a th:href="@{/}" class="nav-item">首頁</a> 
+            <a th:href="@{/}" class="nav-item">活動</a> 
+<!--             <a th:href="@{/ShShop}" class="nav-item">商店</a> -->
+            <a href="/shshop/front_end/select_page.html" class="nav-item">商店</a>
+            <a th:href="@{/news}" class="nav-item">最新消息</a>
+            <a th:href="@{/shakemate/chat}" class="nav-item" style="text-decoration: none;">客服</a> 
+            <a th:href="@{/}" class="search-btn">搜尋</a>
         </div>
-        <div class="icon-card shape-circle" onclick="startMatch()">
-          <span>開始配對</span>
+        <div class="nav-right">
+            <a th:href="@{/login}" class="login-btn">登入</a>
+            <a th:href="@{/shakemate/manage}" class="login-btn">後台管理</a>
+            <div th:href="@{/testlogin}" class="user-icon">👤</div>
         </div>
-        <div class="icon-card shape-square" onclick="visitEvents()">
-          <span>活動</span>
+    </header>
+    <section class="hero">
+        <div class="slides">
+            <!-- 圖片在這裡可直接替換 -->
+            <div class="slide" th:style="|background-image:url(@{/servicecase/img/home1.jpeg});|"></div>
+            <div class="slide" th:style="|background-image:url(@{/servicecase/img/home2.jpeg});|"></div>
+            <div class="slide" th:style="|background-image:url(@{/servicecase/img/home3.jpeg});|"></div>
         </div>
-      </div>
-    </div>
-  </section>
-  <script>
-    function startMatch() { alert('🎉 開始您的交友之旅!'); }
-    function visitShop() { alert('🛍️ 前往商店...'); }
-    function visitEvents() { alert('🎯 前往活動...'); }
-  </script>
+
+        <!-- 圓點指示器 -->
+        <div class="dots">
+            <span class="dot" data-index="0"></span>
+            <span class="dot" data-index="1"></span>
+            <span class="dot" data-index="2"></span>
+        </div>
+
+        <div class="hero-content">
+            <h1>Shakemates</h1>
+            <p>深度連結，分享時刻</p>
+            <br>
+            <div class="cta-icons">
+                <div class="icon-card shape-circle" onclick="visitShop()">
+                    <span>商店</span>
+                </div>
+                <div class="triangle-wrapper">
+                    <div class="icon-card triangle" onclick="startMatch()">
+                        <span>開始配對</span>
+                    </div>
+                </div>
+                <div class="icon-card shape-square" onclick="visitEvents()">
+                    <span>活動</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        function startMatch() {
+            alert('開始配對!');
+        }
+        function visitShop() {
+            alert('前往商店...');
+        }
+        function visitEvents() {
+            alert('前往活動...');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const slidesEl = document.querySelector('.slides');
+            const dots = document.querySelectorAll('.dot');
+            const total = dots.length;
+            let index = 0;
+            let timer;
+
+            function showSlide(i) {
+                // wrap-around
+                index = (i + total) % total;
+                // 平移 slides
+                slidesEl.style.transform = `translateX(-${index * 100}vw)`;
+                // 更新 active dot
+                dots.forEach(dot => dot.classList.remove('active'));
+                dots[index].classList.add('active');
+            }
+
+            // 自動播放
+            function startAutoplay() {
+                timer = setInterval(() => showSlide(index + 1), 5000);
+            }
+
+            function stopAutoplay() {
+                clearInterval(timer);
+            }
+
+            // 點擊圓點跳轉
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    stopAutoplay();
+                    showSlide(Number(dot.dataset.index));
+                    startAutoplay();
+                });
+            });
+
+            // 滑鼠進入暫停、離開再啟動
+            slidesEl.addEventListener('mouseenter', stopAutoplay);
+            slidesEl.addEventListener('mouseleave', startAutoplay);
+
+            // 初始化
+            showSlide(0);
+            startAutoplay();
+        });
+
+    </script>
 </body>
 
 </html>
-
-
-

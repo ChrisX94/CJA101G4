@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 //import java.util.List;
 import com.shakemate.servicecase.model.ServiceCase;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "casetype")
 public class CaseType implements Serializable {
 

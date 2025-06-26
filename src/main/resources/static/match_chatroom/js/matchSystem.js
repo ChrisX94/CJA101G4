@@ -12,6 +12,16 @@ fetch(`${MATCH_API_BASE}/currentUserId`)
 		currentUserId = data.currentUserId;
 		console.log(data);
 		console.log("✅ currentUserId 抓到了：", currentUserId);
+		
+		const urlParams = new URLSearchParams(window.location.search);
+		const fromSuccess = urlParams.get("fromSuccess") === "1";
+
+		// ✅ 如果不是從成功頁面跳回來（沒有參數 fromSuccess=1）→ 再確認是否需要清除
+		if (!fromSuccess) {
+		  localStorage.removeItem(`matchFilters_${currentUserId}`);
+		  localStorage.removeItem(`matchedList_${currentUserId}`);
+		}
+
 
 		// ⏬ 把你原本的初始化邏輯、篩選綁定、按鈕綁定都放進來 ⏬
 		startMatchPage(); // ← 你原本的主邏輯全寫這裡
@@ -19,13 +29,13 @@ fetch(`${MATCH_API_BASE}/currentUserId`)
 
 
 function startMatchPage() {
+	console.log(localStorage);
 	// nav 漢堡選單收合
 	const hamburgerBtn = document.querySelector(".hamburger");
 	const menuBody = document.querySelector(".header__nav");
 	hamburgerBtn.addEventListener("click", () => {
 		menuBody.classList.toggle('open');
 	});
-
 
 	// ✅ 頁面一開始，檢查是否有 localStorage 暫存的 matchList（來自 matchSuccess.html）
 	const savedList = localStorage.getItem(`matchedList_${currentUserId}`);
@@ -97,6 +107,13 @@ function startMatchPage() {
 			interests: interests,
 			personality: personality
 		};
+		
+		// 儲存篩選資料
+		localStorage.setItem(`matchFilters_${currentUserId}`, JSON.stringify({
+			gender,
+			interests,
+			personality
+		}));
 
 		// 👉 發送 POST 請求
 		fetch(`${MATCH_API_BASE}/getFiltered`, {
@@ -118,11 +135,7 @@ function startMatchPage() {
 
 				// ✅ 儲存篩選資料與結果
 				localStorage.setItem(`matchedList_${currentUserId}`, JSON.stringify(matchList));
-				localStorage.setItem(`matchFilters_${currentUserId}`, JSON.stringify({
-					gender,
-					interests,
-					personality
-				}));
+
 			})
 			.catch(err => {
 				console.error("❌ 發送失敗：", err);
@@ -216,7 +229,13 @@ function startMatchPage() {
 
 			const p = document.createElement("p");
 			p.className = "match__field-content";
-			p.textContent = f.content;
+			
+			// 👇 加入 highlight 判斷
+			if (f.title === "人格特質" || f.title === "興趣專長") {
+				p.innerHTML = getHighlightedText(f.title, f.content);
+			} else {
+				p.textContent = f.content;
+			}
 
 			field.appendChild(h3);
 			field.appendChild(p);
@@ -278,7 +297,7 @@ function startMatchPage() {
 						matchList.splice(currentIndex, 1);
 						localStorage.setItem(`matchedList_${currentUserId}`, JSON.stringify(matchList));
 						// 對方也按過你：跳轉成功配對頁面
-						window.location.href = `matchSuccess.html?roomId=${data.roomId}`;
+						window.location.href = `matchSuccess.html?fromSuccess=1&roomId=${data.roomId}`;
 						return; // 不切換下一位，直接跳頁
 					}
 				}
@@ -331,8 +350,8 @@ function goToChat() {
 	fetch(`${MATCH_API_BASE}/currentUserId`)
 		.then(res => res.json())
 		.then(data => {
-			const currentUserId = data.currentUserId;
-			window.location.href = `chatroom.html?currentRoomId=${roomId}&currentUserId=${currentUserId}`;
+//			const currentUserId = data.currentUserId;
+			window.location.href = `chatroom.html?roomId=${roomId}`;
 		})
 		.catch(() => alert("⚠️ 無法取得使用者 ID"));
 }
@@ -341,8 +360,37 @@ function goToMatch() {
 	fetch(`${MATCH_API_BASE}/currentUserId`)
 		.then(res => res.json())
 		.then(data => {
-			const currentUserId = data.currentUserId;
-			window.location.href = `match.html?currentUserId=${currentUserId}&fromSuccess=1`;
+//			const currentUserId = data.currentUserId;
+			window.location.href = `match.html?fromSuccess=1`;
 		})
 		.catch(() => alert("⚠️ 無法取得使用者 ID"));
 }
+
+// 符合條件篩選的條件加上highlight樣式
+function getHighlightedText(title, content) {
+	const filters = JSON.parse(localStorage.getItem(`matchFilters_${currentUserId}`));
+	
+	// 沒有篩選條件：一樣顯示、分隔，但不標記
+	if (!filters) {
+		return content.split(/[、,，]/).map(item => item.trim()).join('、');
+	}
+
+	let selected = [];
+
+	// 根據欄位標題來決定要比對哪一個勾選條件
+	if (title === "人格特質") {
+		selected = filters.personality || [];
+	} else if (title === "興趣專長") {
+		selected = filters.interests || [];
+	} else {
+		return content; // 其他欄位直接原樣顯示
+	}
+
+	const items = content.split(/[、,，]/); // 處理不同分隔符
+	return items.map(item => {
+		return selected.includes(item.trim())
+			? `<span class="highlight">${item.trim()}</span>`
+			: item.trim();
+	}).join('、'); // ✅ 改用「、」更自然
+}
+

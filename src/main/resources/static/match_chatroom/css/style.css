@@ -168,6 +168,7 @@ html {
 }
 
 .chatroom__bar-menu {
+  display: none;
   position: absolute;
   top: 30px;
   right: 0;
@@ -178,6 +179,11 @@ html {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 999;
 }
+
+.chatroom__bar-menu.show {
+	display: block;
+}
+
 .chatroom__bar-menu button {
   display: block;
   width: 100%;
@@ -190,6 +196,10 @@ html {
 }
 .chatroom__bar-menu button:hover {
   background-color: #f2f2f2;
+}
+
+.chatroom__bar-avatar, .chatroom__bar-name {
+  cursor: pointer;
 }
 
 .chat-content {
@@ -665,15 +675,29 @@ html {
   /* ✅ 主要新增：卡片包裹成 swiper */
 }
 
+@media (min-width: 769px) and (max-width: 1199px) {
+  .match__wrap {
+    width: 90%;
+  }
+}
+
 .match__header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin: 2.5rem 0;
+  position: relative;
+}
+@media (min-width: 769px) and (max-width: 1199px) {
+  .match__header {
+    margin: 2.5rem auto;
+    max-width: 75rem;
+  }
 }
 .match__header .match__name {
   font-size: 2.6rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   color: #0097a7;
+  line-height: 1;
 }
 .match__header .match__info {
   font-size: 1.6rem;
@@ -709,6 +733,26 @@ html {
   margin-bottom: 4rem;
   /* 稍微跟按鈕區拉開一點 */
 }
+@media (min-width: 769px) and (max-width: 1199px) {
+  .match__body {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .match__body {
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+@media (max-width: 480px) {
+  .match__body {
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
 
 .match__avatar-box {
   flex-shrink: 0;
@@ -716,6 +760,16 @@ html {
   height: 25rem;
   border-radius: 1rem;
   overflow: hidden;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .match__avatar-box {
+    width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .match__avatar-box {
+    width: 100%;
+  }
 }
 .match__avatar-box .match__avatar {
   width: 100%;
@@ -883,21 +937,20 @@ html {
 /* 篩選按鈕區塊 */
 .filter-btn-wrapper {
   text-align: center;
-  display: flex;
-  justify-content: flex-end;
-  width: 62rem;
-  margin: 1rem auto;
+  width: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .filterBtn {
   background-color: #0097a7;
   color: #fff;
   border: none;
-  padding: 0.6rem 1.2rem;
+  padding: 5px 10px;
   border-radius: 1.2rem;
   font-size: 1.6rem;
   cursor: pointer;
-  margin: 0 0.5rem;
 }
 
 #filterModal {
@@ -906,7 +959,7 @@ html {
 
 /* 彈窗背景遮罩 */
 .modal-overlay {
-  display: none;
+  display: block;
   /* 預設隱藏 */
   position: fixed;
   top: 0;
@@ -1018,5 +1071,54 @@ html {
   background-color: #aaa;
   border-radius: 3px;
 }
+
+.highlight {
+	color: #fff;
+	background-color: #0097a7;
+	border-radius: 5px;
+	padding: 0 4px;
+}
+
+
+
+/* 未開通會員權限的透明遮罩+按鈕 */
+.lock-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.8); /* 半透明白 */
+	backdrop-filter: blur(5px); /* 毛玻璃效果 */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 999;
+}
+
+.lock-content {
+	display: flex;
+	text-align: center;
+	flex-direction: column;
+}
+
+.lock-content i.fa-lock {
+	font-size: 6.5rem;
+	margin-bottom: 3rem;
+	color: white;
+}
+
+.lock-content button {
+	padding: 1rem 2rem;
+	font-size: 1.6rem;
+	border: none;
+	border-radius: 0.5rem;
+	background-color: white;
+	color: #0097a7;
+	cursor: pointer;
+}
+
+
 
 /*# sourceMappingURL=style.css.map */
