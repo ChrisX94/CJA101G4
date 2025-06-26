@@ -7,6 +7,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -158,40 +161,12 @@ public class ShShopRedisUtil {
         return Boolean.TRUE.equals(redisTemplate.delete(key));
     }
 
-    /**
-     * 將物件加入 key:resultHistory
-     */
-    public void addHistoryTime(String key) {
-        String historyKey = key + ":history";
-        String now = java.time.LocalDateTime.now().toString();
-        redisTemplate.opsForList().rightPush(historyKey, now);
-    }
-    /**
-     * 將物件加入 key:resultHistory
-     */
-    public void addResultToHistory(String key, Object value) {
-        String historyKey = key + ":resultHistory";
-        redisTemplate.opsForList().rightPush(historyKey, value);
-    }
-
-    /**
-     * 取得 key:history 中的所有時間紀錄
-     */
-    public List<Object> getHistoryTime(String key) {
-        return redisTemplate.opsForList().range(key + ":history", 0, -1);
-    }
-
-    /**
-     * 取得 key:resultHistory 中的所有結果紀錄
-     */
-    public List<Object> getResultHistory(String key) {
-        return redisTemplate.opsForList().range(key + ":resultHistory", 0, -1);
-    }
 
 
-
+    // 存取紀錄到redis
     public void saveAuditResult(String key, List<ProdAuditResult> resultList) {
-        String timestamp = java.time.LocalDateTime.now().toString();
+        LocalDateTime now = LocalDateTime.now();
+        String timestamp = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         // 1. 最新結果
         redisTemplate.opsForValue().set(key + ":latest", resultList);
@@ -202,4 +177,44 @@ public class ShShopRedisUtil {
         // 3. 時間清單
         redisTemplate.opsForList().rightPush(key + ":timeList", timestamp);
     }
+
+
+    /** 查詢最新一次 */
+    public List<ProdAuditResult> getLatestAudit(String key) {
+        Object obj = redisTemplate.opsForValue().get(key + ":latest");
+        if (obj == null) return List.of();
+        return (List<ProdAuditResult>) obj;
+    }
+
+    /** 查詢全部歷史（時間分組） */
+    public Map<String, List<ProdAuditResult>> getAllAuditHistory() {
+        Map<Object, Object> raw = redisTemplate.opsForHash().entries( "auditResult:record");
+        Map<String, List<ProdAuditResult>> result = new LinkedHashMap<>();
+        raw.forEach((k, v) -> {
+            result.put(k.toString(), (List<ProdAuditResult>) v);
+        });
+        return result;
+    }
+
+    /** 查詢指定時間的審核紀錄 */
+    public List<ProdAuditResult> getAuditByTime(String key, String time) {
+        Object obj = redisTemplate.opsForHash().get(key + ":record", time);
+        if (obj == null) return List.of();
+        return (List<ProdAuditResult>) obj;
+    }
+
+    /** 查詢時間清單 */
+    public List<String> getAuditTimeList(String key) {
+        List<Object> raw = redisTemplate.opsForList().range(key + ":timeList", 0, -1);
+        return raw.stream().map(Object::toString).toList();
+    }
+
+    /** 查詢所有歷史（攤平） */
+    public List<ProdAuditResult> getAuditHistoryFlat(String key) {
+        Map<Object, Object> raw = redisTemplate.opsForHash().entries(key + ":record");
+        return raw.values().stream()
+                .flatMap(obj -> ((List<ProdAuditResult>) obj).stream())
+                .toList();
+    }
+
 }

@@ -87,9 +87,7 @@
             function loadProductData() {
                 fetch("http://localhost:8080/api/ShShop/reviewProd", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: new URLSearchParams({ id: productId })
                 })
                     .then(response => {
@@ -120,14 +118,14 @@
                         // 狀態標籤
                         const prodStatusElement = document.getElementById("prodStatus");
                         prodStatusElement.textContent = data.prodStatusStr;
-                        prodStatusElement.className = 'status-tag'; // Reset
+                        prodStatusElement.className = 'status-tag';
 
                         if (data.prodStatus === 0) {
-                            prodStatusElement.classList.add('status-down');    // 待審核
+                            prodStatusElement.classList.add('status-down'); // 待審核
                         } else if (data.prodStatus === 1) {
-                            prodStatusElement.classList.add('status-rejected'); // 審核不通過（紅色）
+                            prodStatusElement.classList.add('status-rejected'); // 審核不通過
                         } else if (data.prodStatus === 2) {
-                            prodStatusElement.classList.add('status-up');      // 上架
+                            prodStatusElement.classList.add('status-up'); // 上架
                         } else {
                             prodStatusElement.classList.add('status-pending'); // 其他
                         }
@@ -172,6 +170,37 @@
                             toggleStatusBtn.textContent = '上架商品';
                             toggleStatusBtn.dataset.action = 'list';
                         }
+
+                        // ✅ 顯示審核不通過原因
+                        const oldRejectBox = document.getElementById('rejectReasonBox');
+                        if (oldRejectBox) oldRejectBox.remove(); // 先移除舊的
+
+                        if (data.prodStatus === 1) {
+                            const rejectReasonBox = document.createElement('div');
+                            rejectReasonBox.id = 'rejectReasonBox';
+                            rejectReasonBox.style = 'margin-top: 15px; padding: 10px; background-color: #f8d7da; border-radius: 6px; color: #a94442; font-weight: bold;';
+                            rejectReasonBox.textContent = '審核不通過原因：載入中...';
+
+                            prodStatusElement.parentElement.appendChild(rejectReasonBox);
+
+                            fetch('http://localhost:8080/api/ShShop/getRejectReason', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: new URLSearchParams({ id: productId })
+                            })
+                                .then(res => res.json())
+                                .then(resData => {
+                                    if (resData.status === 200 && resData.data) {
+                                        rejectReasonBox.textContent = '審核不通過原因：' + resData.data;
+                                    } else {
+                                        rejectReasonBox.textContent = '審核不通過原因：無法取得原因。';
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('取得審核不通過原因失敗', err);
+                                    rejectReasonBox.textContent = '審核不通過原因：載入失敗。';
+                                });
+                        }
                     })
                     .catch(err => {
                         console.error("載入商品資料失敗：", err);
@@ -180,23 +209,22 @@
 
             loadProductData();
 
-            // 狀態切換按鈕功能
+            // 狀態切換
             toggleStatusBtn.addEventListener("click", function () {
                 const action = this.dataset.action;
                 const newStatus = action === 'approve' ? "approve" : "delist";
-                console.log(`切換商品狀態：${action} -> ${newStatus}`);
+
                 fetch("http://localhost:8080/api/ShShop/changeStatus", {
                     method: "POST",
                     headers: { "Content-Type": "application/x-www-form-urlencoded" },
                     body: new URLSearchParams({ prodId: productId, status: newStatus })
                 })
                     .then(async response => {
-                        const data = await response.json(); //
+                        const data = await response.json();
 
                         if (!response.ok) {
-                            // 從後端自定義格式抓 message
                             alert(`操作失敗: ${data.message || '未知錯誤'}`);
-                            throw new Error(data.message); // 讓 catch 能接住
+                            throw new Error(data.message);
                         }
 
                         return data;
@@ -215,7 +243,7 @@
                     });
             });
 
-            // 審核不通過按鈕功能
+            // 審核不通過
             rejectBtn.addEventListener("click", function () {
                 const reason = prompt("請輸入審核不通過的原因：");
                 if (reason) {
@@ -246,6 +274,7 @@
             });
         });
     </script>
+
 
 
 </body>

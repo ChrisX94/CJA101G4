@@ -320,3 +320,11 @@ th {
     font-weight: bold;
     display: inline-block;
 }
+#rejectReasonBox {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #f8d7da;
+  border-radius: 6px;
+  color: #a94442;
+  font-weight: bold;
+}

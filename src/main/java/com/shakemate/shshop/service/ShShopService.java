@@ -13,11 +13,13 @@ import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdPic;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.util.CompositeQueryForShshop;
+import com.shakemate.shshop.util.ExcelHandler;
 import com.shakemate.shshop.util.OpenAiAPI;
 import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.dto.UserDto;
 import com.shakemate.user.model.Users;
+
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.devtools.classpath.ClassPathFileSystemWatcher;
@@ -25,15 +27,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 @Service("ShShop")
 public class ShShopService {
@@ -60,6 +68,8 @@ public class ShShopService {
     private OpenAiAPI openAiAPI;
     @Autowired
     private ClassPathFileSystemWatcher classPathFileSystemWatcher;
+    @Autowired
+    private ExcelHandler excelHandler;
 
 
     // 找尋朋友清單
@@ -476,12 +486,13 @@ public class ShShopService {
             String status = re.getStatus();
 
             if ("approve".equalsIgnoreCase(status)) {
-                // 呼叫審核通過的 API，例如上架商品
+                // 呼叫審核通過的 API
                 restTemplate.postForEntity(
                         baseUrl + "changeStatus?prodId=" + prodId + "&status=approve",
                         null,
                         ApiResponse.class
                 );
+                // 呼叫審核不通過的 API
             } else if ("reject".equalsIgnoreCase(status)) {
                 String reason = re.getReason();
                 restTemplate.postForEntity(
@@ -494,28 +505,35 @@ public class ShShopService {
         return resultList;
     }
 
-    // 取得AI 審核紀錄
+    // 取得AI最新審核紀錄
     public List<ProdAuditResult> aiAuditHistory() {
-        List<Object> rawList = redisUtil.getResultHistory("auditResult");
-        if (rawList == null || rawList.isEmpty()) {
-            return List.of();
-        }
-        Gson gson = new Gson();
-        // 轉換
-        List<ProdAuditResult> resultList = rawList.stream()
-                .flatMap(obj -> {
-                    try {
-                        // 每一筆是一個 JSON 字串陣列
-                        ProdAuditResult[] parsed = gson.fromJson(obj.toString(), ProdAuditResult[].class);
-                        return List.of(parsed).stream();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return Stream.empty();
-                    }
-                })
-                .toList();
+        return redisUtil.getLatestAudit("auditResult");
+    }
 
-        return resultList;
+    // 取得AI所有審核紀錄
+    public Map<String, List<ProdAuditResult>> aiAuditHistoryAll() {
+        return redisUtil.getAllAuditHistory();
+    }
+
+    // 取得商品的審核不通過紀錄
+    public String getRejectReason(Integer prodId) {
+        String rejectionId = "RejectionProdId_" + prodId;
+        return redisUtil.get(rejectionId);
+    }
+
+    // 輸出所有的審核紀錄
+    public byte[] generateAuditExcel() throws IOException {
+        Map<String, List<ProdAuditResult>> data = redisUtil.getAllAuditHistory();
+        if (data == null || data.isEmpty()) {
+            throw new RuntimeException("沒有審核紀錄可以匯出。");
+        } else {
+            return excelHandler.generateAuditExcel(data);
+        }
+    }
+
+    /** 檔案名稱 */
+    public String generateFileName() {
+        return excelHandler.generateFileName();
     }
 
 

@@ -41,7 +41,7 @@ public class OpenAiAPI {
             System.out.println(key);
             List<MessageForOpenAi> messages = new ArrayList<>();
             messages.add(new MessageForOpenAi("system", systemRole)); // 設定gpt角色
-            messages.add(new MessageForOpenAi("user", content)); // 輸入要翻譯的內容
+            messages.add(new MessageForOpenAi("user", content)); // 輸入要審核的內容
             Gson gson = new Gson();
             JsonObject json = new JsonObject();
             json.addProperty("model", "gpt-4o-mini"); // 選擇模型(demo時改成gpt-4o)
@@ -56,12 +56,10 @@ public class OpenAiAPI {
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString()); // 取的HttpResponse 的物件
             JsonObject jsonRes = gson.fromJson(res.body(), JsonObject.class); // 取得res.body()中的json物件，並轉成JsonObject.class
-//            System.out.println(jsonRes.toString());
             String result = jsonRes.getAsJsonArray("choices")
                     .get(0).getAsJsonObject()
                     .getAsJsonObject("message")
                     .get("content").getAsString();
-//            System.out.println(result);
             return result;
 
         } catch (Exception e) {
