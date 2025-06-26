@@ -323,6 +323,18 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+		<!--	POI 輸出成office套件 只支援 .xls 	-->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.4.1</version>
+		</dependency>
+		<!--	POI 輸出成office套件支援 .xlsx 格式（XSSF）	-->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.4.1</version>
+		</dependency>
 
 
     </dependencies>

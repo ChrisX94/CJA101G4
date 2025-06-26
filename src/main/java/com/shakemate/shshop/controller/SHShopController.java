@@ -12,12 +12,16 @@ import com.shakemate.util.PostImageUploader;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -335,7 +339,6 @@ public class SHShopController {
     }
 
 
-
     /* ======================================== Back-End ========================================== */
 
     // 用id 找商品，管理員用
@@ -428,8 +431,7 @@ public class SHShopController {
         }
     }
 
-
-
+    // Open AI 審核
     @PostMapping("/aiAudit")
     public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAudit(){
         List<ShProdDto> pendingList = shShopService.pending();
@@ -441,9 +443,9 @@ public class SHShopController {
         }
     }
 
-
-    @PostMapping("/aiAuditHistory")
-    public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAuditHistory(){
+    // 取的最新的AI審紀錄
+    @PostMapping("/aiAuditLatest")
+    public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAuditLatest(){
         List<ProdAuditResult> data = shShopService.aiAuditHistory();
         if (data == null || data.isEmpty()) {
             return ResponseEntity.ok(ApiResponseFactory.success("目前沒有AI審核紀錄", data));
@@ -452,6 +454,36 @@ public class SHShopController {
         }
     }
 
+    // 取得所有AI審紀錄
+    @PostMapping("/aiAuditHistoryAll")
+    public ResponseEntity<ApiResponse<Map<String, List<ProdAuditResult>>>> getAuditHistoryAll() {
+        Map<String, List<ProdAuditResult>> data = shShopService.aiAuditHistoryAll();
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+
+    // 取得商品的審核不通過紀錄
+    @PostMapping("/getRejectReason")
+    public ResponseEntity<ApiResponse<String>> getRejectReason(@RequestParam Integer id) {
+        String returnMsg = shShopService.getRejectReason(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(returnMsg));
+    }
+
+    @GetMapping("/downloadAuditHistory")
+    public ResponseEntity<byte[]> downloadAuditHistory(){
+        try {
+            byte[] file = shShopService.generateAuditExcel();
+            String fileName = URLEncoder.encode(shShopService.generateFileName(), StandardCharsets.UTF_8);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(file);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(("❌ 沒有審核紀錄可以匯出").getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(("❌ 沒有審核紀錄可以匯出").getBytes(StandardCharsets.UTF_8));
+        }
+    }
 
     /* ======================================== General ========================================== */
     // 全部的類別，用於於前端顯示頁面
@@ -476,6 +508,5 @@ public class SHShopController {
             return ResponseEntity.ok(ApiResponseFactory.success("success", list));
         }
     }
-
 
 }
