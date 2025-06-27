@@ -46,11 +46,10 @@ function loadChatRooms() {
 				li.dataset.peerid = room.peerId;
 				li.dataset.name = room.peerName;
 				li.dataset.avatar = room.peerAvatar;
-				li.onclick = () => handleRoomClick(room.roomId, room.peerName, room.peerId, room.peerAvatar);
 
 				let previewText;
 				if (!room.lastMessage) {
-					previewText = "開始跟抖友聊天吧！==";
+					previewText = "開始跟抖友聊天吧！";
 				} else if (room.lastMessage.startsWith("image:")) {
 					previewText = "[圖圖]";
 				} else {
@@ -402,8 +401,7 @@ function connectWebSocket(userId) {
 		if (li) {
 			// 更新 preview 文本
 			const preview = li.querySelector("p");
-			//			preview.textContent = contentRaw.startsWith("image:") ? "[圖圖]" : contentRaw.slice(0, 10) + (contentRaw.length > 10 ? "..." : "");
-
+			
 			preview.textContent = type === "image" ? "[圖圖]" : content.slice(0, 10) + (content.length > 10 ? "..." : "");
 			// 更新訊息傳送時間			
 			const time = li.querySelector(".chat-time");
@@ -411,7 +409,7 @@ function connectWebSocket(userId) {
 				time.textContent = getTimeString(); // 或 formatTime(new Date())
 			}
 			// ✅ 如果這不是目前開啟的聊天室 → 顯示紅點
-			if (parseInt(roomId) !== currentRoomId) {
+			if (roomId !== currentRoomId) {
 				const dot = li.querySelector(".unread-dot");
 				if (dot) {
 					dot.classList.add("show");
@@ -425,12 +423,14 @@ function connectWebSocket(userId) {
 			li.classList.add("fade-in"); // 重新加上動畫 class，達到「聊天室列表往上跳」的效果			
 		}
 		// ✅ 如果剛好正在看這個聊天室，就顯示訊息氣泡
-		console.log(senderId);
-		if (parseInt(roomId) === currentRoomId) {
+		console.log("💬 roomId（後端傳來）:", roomId, typeof roomId);
+		console.log("🟢 currentRoomId（目前聊天室）:", currentRoomId, typeof currentRoomId);
+		console.log("🟡 相等嗎？", parseInt(roomId) === currentRoomId);
+		if (parseInt(roomId) === parseInt(currentRoomId)) {
 			console.log("對方正在這間聊天室!");
 			if (type === "image") {
 				renderIncomingMessage(senderId, "", content);
-			} else {
+			} else {	
 				renderIncomingMessage(senderId, content);
 			}
 
