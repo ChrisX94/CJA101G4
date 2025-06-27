@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News CRUD 管理介面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        form { margin-top: 20px; }
+        form input, form textarea, form button, form select { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }
+        .actions button { margin-right: 5px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>News CRUD 管理介面</h1>
+
+    <!-- 新增 / 編輯表單 -->
+    <form id="newsForm">
+        <h2 id="formTitle">新增 News</h2>
+        <input type="hidden" id="newsId" />
+        <label>標題：</nlabel>
+        <input type="text" id="title" placeholder="輸入標題" required />
+        <label>內容：</label>
+        <textarea id="content" rows="4" placeholder="輸入內容" required></textarea>
+        <label>類別 ID：</label>
+        <input type="number" id="typeId" placeholder="輸入類別 ID" required />
+        <button type="submit" id="submitBtn">新增</button>
+        <button type="button" id="cancelEditBtn" class="hidden">取消編輯</button>
+    </form>
+
+    <!-- 資料列表 -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>標題</th>
+                <th>內容</th>
+                <th>類別 ID</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="newsTableBody">
+            <!-- JavaScript 動態產生 -->
+        </tbody>
+    </table>
+
+    <script>
+        const apiUrl = '/api/news';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNews();
+
+            const form = document.getElementById('newsForm');
+            form.addEventListener('submit', handleFormSubmit);
+            document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+        });
+
+        function loadNews() {
+            fetch(apiUrl)
+                .then(res => res.json())
+                .then(data => renderTable(data))
+                .catch(err => console.error('載入失敗', err));
+        }
+
+        function renderTable(newsList) {
+            const tbody = document.getElementById('newsTableBody');
+            tbody.innerHTML = '';
+
+            newsList.forEach(news => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${news.newsId}</td>
+                    <td>${news.title}</td>
+                    <td>${news.content}</td>
+                    <td>${news.typeId}</td>
+                    <td class="actions">
+                        <button onclick="editNews(${news.newsId})">編輯</button>
+                        <button onclick="deleteNews(${news.newsId})">刪除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('newsId').value;
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const typeId = document.getElementById('typeId').value;
+
+            const payload = { title, content, typeId: parseInt(typeId) };
+
+            if (id) {
+                // 更新
+                fetch(`${apiUrl}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(() => {
+                    resetForm();
+                    loadNews();
+                })
+                .catch(err => console.error('更新失敗', err));
+            } else {
+                // 新增
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(() => {
+                    resetForm();
+                    loadNews();
+                })
+                .catch(err => console.error('新增失敗', err));
+            }
+        }
+
+        function editNews(id) {
+            fetch(`${apiUrl}/${id}`)
+                .then(res => {
+                    if (!res.ok) throw new Error('找不到該筆資料');
+                    return res.json();
+                })
+                .then(news => {
+                    document.getElementById('formTitle').textContent = '編輯 News';
+                    document.getElementById('newsId').value = news.newsId;
+                    document.getElementById('title').value = news.title;
+                    document.getElementById('content').value = news.content;
+                    document.getElementById('typeId').value = news.typeId;
+                    document.getElementById('submitBtn').textContent = '更新';
+                    document.getElementById('cancelEditBtn').classList.remove('hidden');
+                })
+                .catch(err => alert(err));
+        }
+
+        function deleteNews(id) {
+            if (!confirm('確定要刪除這筆 News 嗎？')) return;
+            fetch(`${apiUrl}/${id}`, { method: 'DELETE' })
+                .then(res => {
+                    if (res.status === 204) loadNews();
+                    else throw new Error('刪除失敗');
+                })
+                .catch(err => alert(err));
+        }
+
+        function resetForm() {
+            document.getElementById('formTitle').textContent = '新增 News';
+            document.getElementById('newsId').value = '';
+            document.getElementById('title').value = '';
+            document.getElementById('content').value = '';
+            document.getElementById('typeId').value = '';
+            document.getElementById('submitBtn').textContent = '新增';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
