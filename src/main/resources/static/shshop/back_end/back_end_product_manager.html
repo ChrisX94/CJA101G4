@@ -29,48 +29,75 @@
     </header>
 
     <div class="content-section">
-      <h3>📦 商品清單</h3>
-      <div class="search-filter">
-        <input type="text" id="searchInput" placeholder="搜尋商品名稱、品牌或會員名稱...">
-        <div class="filter-buttons">
-          <button class="filter-btn active" data-status="all">全部</button>
-          <button class="filter-btn" data-status="2">上架</button>
-          <button class="filter-btn" data-status="3">下架</button>
-          <button class="filter-btn" data-status="0">審核中</button>
+        <div class="search-filter">
+          <h3>📦 商品清單</h3>
+          <!-- 左側區塊：搜尋 + 狀態按鈕 -->
+          <div class="left-group">
+            <input type="text" id="searchInput" placeholder="搜尋商品名稱、品牌或會員名稱...">
+            <div class="filter-buttons">
+              <button class="filter-btn active" data-status="all">全部</button>
+              <button class="filter-btn" data-status="2">上架</button>
+              <button class="filter-btn" data-status="3">下架</button>
+              <button class="filter-btn" data-status="0">審核中</button>
+            </div>
+          </div>
         </div>
-        <!-- AI 審核按鈕 -->
+
+
+      <!-- 右側按鈕 -->
+      <div class="btn-group">
         <button id="aiReviewBtn" class="ai-review-btn">🤖 使用 AI 審核</button>
+        <button id="aiRecordBtn" class="ai-review-btn">📄 AI 審核紀錄(最新)</button>
+        <button id="downloadAuditBtn" class="ai-review-btn">📥 下載審核紀錄</button>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>ID</th>
-            <th>商品名稱</th>
-            <th>類別</th>
-            <th>品牌</th>
-            <th>價格</th>
-            <th>數量</th>
-            <th>會員</th>
-            <th>狀態</th>
-            <th>更新時間</th>
-          </tr>
-        </thead>
-        <tbody id="productTableBody">
-          <tr>
-            <td colspan="10" style="text-align:center;">載入中...</td>
-          </tr>
-        </tbody>
-      </table>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>ID</th>
+          <th>商品名稱</th>
+          <th>類別</th>
+          <th>品牌</th>
+          <th>價格</th>
+          <th>數量</th>
+          <th>會員</th>
+          <th>狀態</th>
+          <th>更新時間</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <tr>
+          <td colspan="10" style="text-align:center;">載入中...</td>
+        </tr>
+      </tbody>
+    </table>
     </div>
   </main>
+
+  <!-- AI審核紀錄 Modal -->
+  <div id="aiRecordModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>📄 AI 審核紀錄</h2>
+      <div id="aiRecordContainer">
+        <p>載入中...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 這裡放 Loading 動畫 -->
+  <div id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p>AI審核中，請稍候...</p>
+  </div>
 
   <script>
     let allProducts = [];
     let currentStatusFilter = "all";
 
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("http://localhost:8087/api/ShShop/all")
+      fetch("http://localhost:8080/api/ShShop/all")
         .then(res => res.json())
         .then(json => {
           if (!json || !json.data || !Array.isArray(json.data)) {
@@ -172,9 +199,14 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      const loading = document.getElementById("loadingOverlay");
+
       document.getElementById("aiReviewBtn").addEventListener("click", () => {
         if (confirm("確定要啟動 AI 商品審核嗎？")) {
-          fetch("http://localhost:8087/api/ShShop/aiAudit", { method: "POST" })
+          // 顯示 Loading
+          loading.style.display = "flex";
+
+          fetch("http://localhost:8080/api/ShShop/aiAudit", { method: "POST" })
             .then(res => res.json())
             .then(data => {
               alert("審核完成：" + data.message);
@@ -183,11 +215,112 @@
             .catch(err => {
               console.error("審核錯誤", err);
               alert("AI 審核失敗，請稍後再試");
+            })
+            .finally(() => {
+              // 無論成功或失敗，都關閉 Loading
+              loading.style.display = "none";
             });
         }
       });
     });
+  </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("aiRecordModal");
+  const closeBtn = document.querySelector(".close-btn");
+  const recordContainer = document.getElementById("aiRecordContainer");
+
+  // 打開 Modal
+  document.getElementById("aiRecordBtn").addEventListener("click", () => {
+    modal.style.display = "block";
+    recordContainer.innerHTML = "<p>載入中...</p>";
+
+    fetch("http://localhost:8080/api/ShShop/aiAuditLatest", { method: "POST" })
+      .then(res => res.json())
+      .then(response => {
+        const data = response.data;
+
+        if (!data || data.length === 0) {
+          recordContainer.innerHTML = "<p>目前沒有AI審核紀錄。</p>";
+          return;
+        }
+
+        let html = `
+          <table border="1" style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+            <thead>
+              <tr>
+                <th>商品ID</th>
+                <th>商品名稱</th>
+                <th>狀態</th>
+                <th>原因</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach(item => {
+          html += `
+            <tr>
+              <td>${item.prodId}</td>
+              <td>${item.prodName}</td>
+              <td>${item.status === 'approve' ? '✅ 通過' : '❌ 不通過'}</td>
+              <td>${item.reason || ''}</td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table>`;
+        recordContainer.innerHTML = html;
+      })
+      .catch(err => {
+        console.error("取得紀錄失敗", err);
+        recordContainer.innerHTML = "<p>無法載入資料，請稍後再試。</p>";
+      });
+  });
+
+  // 關閉 Modal
+  closeBtn.onclick = function () {
+    modal.style.display = "none";
+  };
+
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+});
+</script>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("downloadAuditBtn").addEventListener("click", () => {
+        fetch("http://localhost:8080/api/ShShop/downloadAuditHistory")
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("下載失敗");
+            }
+            return response.blob();
+          })
+          .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            // 檔案名稱可以固定，或後端有傳Content-Disposition可自動抓
+            a.download = "AI_Audit_History.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+          })
+          .catch(err => {
+            console.error("下載出錯：", err);
+            alert("下載失敗，請稍後再試！");
+          });
+      });
+    });
   </script>
 
 

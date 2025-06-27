@@ -49,7 +49,6 @@ public class LoginController {
         // 登入成功
         HttpSession session = request.getSession();
         session.setAttribute("account", user.getUserId());
-        System.out.println(session.getAttribute("account"));
         String location = (String) session.getAttribute("location");
         return "redirect:" + (location != null ? location : "testlogin");
     }

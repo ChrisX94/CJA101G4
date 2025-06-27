@@ -1,15 +1,109 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <title>管理員首頁</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<title>管理員首頁</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		.card-header.bg-lightblue {
+			background-color: #d0e7ff;
+			/* 淡藍色 */
+			color: #0d6efd;
+			/* Bootstrap primary 藍色字 */
+			font-weight: bold;
+		}
+	</style>
 </head>
-<body>
-    <h1 th:if="${loggedInAdm != null}">
-        歡迎回來，<span th:text="${loggedInAdm.admName}">管理員</span>
-    </h1>
-    <h1 th:unless="${loggedInAdm != null}">
-        歡迎回來，管理員
-    </h1>
+
+<body class="bg-light">
+
+	<div class="container mt-5">
+		<!-- 登出按鈕 -->
+		<div class="text-end mb-3">
+			<a th:href="@{/adm/logout}" class="btn btn-outline-danger">
+				🚪 登出
+			</a>
+		</div>
+
+		<div class="text-center mb-4">
+			<h1 class="fw-bold text-primary" th:if="${loggedInAdm != null}">
+				歡迎回來，<span th:text="${loggedInAdm.admName}">管理員</span> 👋
+			</h1>
+			<h1 class="fw-bold text-secondary" th:unless="${loggedInAdm != null}">
+				歡迎回來，管理員 👋
+			</h1>
+		</div>
+
+		<div class="row justify-content-center">
+			<div class="col-md-8">
+
+				<!-- 最高管理員區塊 -->
+				<div class="card shadow-sm border-primary mb-4" th:if="${isSuperAdmin}">
+					<div class="card-header bg-lightblue">
+						<h4 class="mb-0">您是最高管理員 ✨</h4>
+					</div>
+					<div class="card-body">
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item">
+								<a th:href="@{/adm/select_page}" class="text-decoration-none">🔍 管理所有帳號</a>
+							</li>
+							<li class="list-group-item">
+								<a th:href="@{/adm/addAdm}" class="text-decoration-none">➕ 新增管理員</a>
+							</li>
+							<li class="list-group-item">
+								<a th:href="@{/report/list}" class="text-decoration-none">📄 檢舉管理</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<!-- 一般管理員區塊 -->
+				<div class="card shadow-sm border-primary" th:unless="${isSuperAdmin}">
+					<div class="card-header bg-primary text-white">
+						<h4 class="mb-0">您是一般管理員 🧑‍💼</h4>
+					</div>
+					<div class="card-body">
+						<ul class="list-group list-group-flush">
+							<li class="list-group-item">
+								<a th:href="@{/report/list}" class="text-decoration-none">📄 檢舉管理</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- 防止瀏覽器返回按鈕顯示快取內容的 JavaScript -->
+	<script>
+		// 防止瀏覽器快取
+		window.onpageshow = function (event) {
+			if (event.persisted) {
+				window.location.reload();
+			}
+		};
+
+		// 防止瀏覽器返回按鈕
+		window.addEventListener('pageshow', function (event) {
+			if (event.persisted) {
+				window.location.reload();
+			}
+		});
+
+		// 當頁面隱藏時清除快取
+		window.addEventListener('pagehide', function (event) {
+			if (!event.persisted) {
+				window.location.replace(window.location.href);
+			}
+		});
+	</script>
+
 </body>
+
 </html>

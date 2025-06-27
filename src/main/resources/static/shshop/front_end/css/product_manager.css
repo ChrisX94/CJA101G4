@@ -392,3 +392,20 @@ body {
     --primary-color-rgb: 98, 0, 238;
     /* RGB for #6200ee */
 }
+/* 商品管理表格樣式 */
+th:nth-child(1), td:nth-child(1) { width: 80px; }    /* 商品圖片 */
+th:nth-child(2), td:nth-child(2) { width: 100px; }   /* 商品名稱 */
+th:nth-child(3), td:nth-child(3) { width: 80px; }    /* 價格 */
+th:nth-child(4), td:nth-child(4) { width: 60px; }    /* 數量 */
+th:nth-child(5), td:nth-child(5) { width: 150px; }   /* 描述 */
+th:nth-child(6), td:nth-child(6) { width: 60px; }   /* 商品狀態 */
+th:nth-child(7), td:nth-child(7) { width: 80px; }    /* 操作 */
+ /* 審核拒絕原因 */
+th:nth-child(8), td:nth-child(8) {
+    cursor: help;
+    width: 250px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}  
+

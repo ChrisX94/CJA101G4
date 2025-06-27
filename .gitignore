@@ -44,3 +44,5 @@ bin/
 *.idea
 ImgbbAK.java
 KeyForOA.java
+application.properties
+TestApp.java
