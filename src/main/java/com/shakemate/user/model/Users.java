@@ -1,12 +1,15 @@
 package com.shakemate.user.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.shakemate.ordermaster.model.ShOrder;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -74,7 +77,6 @@ public class Users implements Serializable {
     @Column(name = "PERSONALITY", length = 300)
     private String personality;
 
-
     @Column(name = "UPDATED_TIME", nullable = false)
     private Timestamp updatedTime;
 
@@ -89,6 +91,15 @@ public class Users implements Serializable {
 
     @Column(name = "SELL_STATUS", nullable = false)
     private Boolean sellStatus;
+
+    @OneToMany(mappedBy = "buyer")
+    @JsonIgnore
+    private List<ShOrder> buyerOrders;
+
+    @OneToMany(mappedBy = "seller")
+    @JsonIgnore
+    private List<ShOrder> sellerOrders;
+
 
     public Users() {
     }
@@ -278,6 +289,22 @@ public class Users implements Serializable {
 
     public void setSellStatus(Boolean sellStatus) {
         this.sellStatus = sellStatus;
+    }
+
+    public List<ShOrder> getBuyerOrders() {
+        return buyerOrders;
+    }
+
+    public void setBuyerOrders(List<ShOrder> buyerOrders) {
+        this.buyerOrders = buyerOrders;
+    }
+
+    public List<ShOrder> getSellerOrders() {
+        return sellerOrders;
+    }
+
+    public void setSellerOrders(List<ShOrder> sellerOrders) {
+        this.sellerOrders = sellerOrders;
     }
 
     @Override

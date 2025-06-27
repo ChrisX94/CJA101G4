@@ -531,7 +531,7 @@ public class ShShopService {
         }
     }
 
-    /** 檔案名稱 */
+    // 輸出所有的審核紀錄的檔案名稱
     public String generateFileName() {
         return excelHandler.generateFileName();
     }
