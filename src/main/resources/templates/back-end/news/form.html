@@ -1,0 +1,51 @@
+
+<!-- test -->
+<!-- back-end/news/form.html -->
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${#strings.isEmpty(news.id) ? '新增新聞' : '編輯新聞'}">表單</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+</head>
+<body>
+<div class="container mt-4">
+    <h2 th:text="${#strings.isEmpty(news.id) ? '新增新聞' : '編輯新聞'}"></h2>
+    <form th:action="@{/news/save}" th:object="${news}" method="post">
+        <!-- 隱藏 id 欄位（編輯時帶入，新增時為空） -->
+        <input type="hidden" th:field="*{id}"/>
+
+        <div class="mb-3">
+            <label for="title" class="form-label">標題</label>
+            <input type="text" id="title" th:field="*{title}" class="form-control" placeholder="請輸入標題" required/>
+        </div>
+
+        <div class="mb-3">
+            <label for="content" class="form-label">內容</label>
+            <textarea id="content" th:field="*{content}" class="form-control" rows="5"
+                      placeholder="請輸入內容" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="type" class="form-label">新聞類型</label>
+            <select id="type" th:field="*{type.id}" class="form-select" required>
+                <option value="" disabled th:text="${#strings.isEmpty(news.type)? '請選擇類型' : ''}"></option>
+                <option th:each="t : ${allTypes}"
+                        th:value="${t.id}"
+                        th:text="${t.name}"
+                        th:selected="${news.type != null} && ${t.id} == ${news.type.id}">
+                </option>
+            </select>
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="status" th:field="*{newsStatus}"/>
+            <label class="form-check-label" for="status">已發布</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">儲存</button>
+        <a th:href="@{/news}" class="btn btn-secondary">取消</a>
+    </form>
+</div>
+</body>
+</html>
