@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>管理員資料新增</title>
+	<!-- 之後這裡可以用 th:replace 引入 header fragment -->
+</head>
+
+<style type="text/css">
+	button {
+		padding: 5px;
+	}
+
+	form {
+		display: table;
+	}
+
+	form div {
+		display: table-row;
+	}
+
+	label,
+	input,
+	span,
+	select {
+		display: table-cell;
+		margin: 5px;
+		text-align: left;
+	}
+
+	input[type=text],
+	input[type=password],
+	select,
+	textarea {
+		width: 200px;
+		margin: 5px;
+	}
+
+	form div div {
+		display: table-cell;
+	}
+
+	.center {
+		margin-left: auto;
+		margin-right: auto;
+	}
+</style>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-expand-md navbar-dark bg-success fixed-top justify-content-center">
+		<div align="center">
+			<h2>管理員資料新增</h2>
+			<h3>
+				<a class="navbar-brand" th:href="@{/adm/select_page}"><span style="font-size:1.5em;">🔙</span> 回查詢頁</a>
+				<a class="navbar-brand" th:href="@{/adm/adminHome}" style="margin-left: 20px;">🏠 回管理員首頁</a>
+			</h3>
+		</div>
+	</nav>
+
+	<div align="center">
+		<h3>
+			<b>所有欄位皆為必填欄位</b>
+		</h3>
+
+		<div th:if="${error}" style="color: red; font-weight: bold;">
+			<p th:text="${error}"></p>
+		</div>
+
+		<form th:action="@{insert}" method="post" th:object="${admVO}" enctype="multipart/form-data">
+
+			<div>
+				<label>管理員姓名:</label> <input type="text" th:field="*{admName}"
+					onclick="hideContent('admName.errors');" /><br /> <span th:if="${#fields.hasErrors('admName')}"
+					th:errors="*{admName}" class="error" id="admName.errors"></span>
+			</div>
+
+			<div>
+				<label>管理員帳號:</label> <input type="text" th:field="*{admAcc}"
+					onclick="hideContent('admAcc.errors');" /><br /> <span th:if="${#fields.hasErrors('admAcc')}"
+					th:errors="*{admAcc}" class="error" id="admAcc.errors"></span> <span
+					th:if="${#fields.hasErrors('admAcc')}" th:errors="*{admAcc}" class="error"></span>
+
+			</div>
+
+			<div>
+				<label>管理員密碼:</label> <input type="password" th:field="*{inputPwd}"
+					onclick="hideContent('inputPwd.errors');" /><br /> <span th:if="${#fields.hasErrors('inputPwd')}"
+					th:errors="*{inputPwd}" class="error" id="inputPwd.errors"></span>
+			</div>
+
+
+
+
+			<div>
+				<div></div>
+				<div>
+					<button type="submit" id="submit">送出新增</button>
+				</div>
+				<div></div>
+			</div>
+		</form>
+
+	</div>
+
+</body>
+
+</html>

@@ -1,163 +1,131 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>管理員資料修改</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	<title>管理員資料修改</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+	<style type="text/css">
+		.error {
+			color: red;
+			font-size: 12px;
+		}
 
-<style type="text/css">
-	
-	button {
-		padding: 5px;
-	}
-	form {
-		display: table;
-	}
-	form div {
-		display: table-row;
-	}
-	label, input, span, select {
-		display: table-cell;
-		margin: 5px;
-		text-align: left;		
-	}
-	input[type=text], input[type=password], select, textarea {
-		width: 200px;
-		margin: 5px;
-	}
-	form div div {
-		display: table-cell;
-	}
-	.center {
-        margin-left: auto;
-        margin-right: auto;
-    }
-</style>
+		.form-container {
+			max-width: 600px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+
+		.auth-checkbox {
+			margin: 5px 10px;
+		}
+	</style>
 </head>
-<body>
 
-<nav class="navbar navbar-expand-md navbar-dark bg-success fixed-top justify-content-center">
-		 <div align="center"> <h2>員工資料修改 - update_emp_input.html</h2>
-		 <h3><a class="navbar-brand" th:href="@{/emp/select_page}"><img th:src="@{/images/back1.gif}">回查詢頁</a></h3></div>
-</nav>
+<body class="bg-light">
 
-	<div align="center">
-		<h3><b>所有欄位皆為必填欄位</b></h3>
-		<form th:action="@{update}" method="post" th:object="${empVO}" enctype="multipart/form-data">
-			<div>
-			<label>員工編號:</label>
-			<input type="text" th:field="*{empno}" style="border:0px ; font-weight: bold;" readonly /><br/>
+	<nav class="navbar navbar-expand-md navbar-dark bg-success fixed-top justify-content-center">
+		<div align="center">
+			<h2>管理員資料修改</h2>
+			<h3>
+				<a class="navbar-brand" th:href="@{/adm/select_page}"><span style="font-size:1.5em;">🔙</span> 回查詢頁</a>
+				<a class="navbar-brand" th:href="@{/adm/adminHome}" style="margin-left: 20px;">🏠 回管理員首頁</a>
+			</h3>
+		</div>
+	</nav>
 
-			</div>
-			
-			<div>
-			<label>員工姓名:</label>
-			<input type="text" th:field="*{ename}" onclick="hideContent('ename.errors');" /><br/>
-			<span  th:if="${#fields.hasErrors('ename')}" th:errors="*{ename}" class="error" id="ename.errors"></span>
-			</div>
-			
-			<div>
-			<label>職位:</label>
-			<input type="text" th:field="*{job}" onclick="hideContent('job.errors');" /><br/>
-			<span  th:if="${#fields.hasErrors('job')}" th:errors="*{job}" class="error" id="job.errors"></span>
-			</div>
-			
-			<div>
-			<label>雇用日期:</label>
-			<input type="date" th:field="*{hiredate}" onclick="hideContent('hiredate.errors');" /><br/>
-			<span  th:if="${#fields.hasErrors('hiredate')}" th:errors="*{hiredate}" class="error" id="hiredate.errors"></span>
-			</div>
+	<div class="container mt-5 pt-5">
+		<div class="form-container">
+			<div class="card shadow-sm">
+				<div class="card-header bg-warning text-dark">
+					<h4 class="mb-0">✏️ 修改管理員資料</h4>
+				</div>
+				<div class="card-body">
+					<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-			<div>
-			<label>薪水:</label>
-			<input type="text" th:field="*{sal}" onclick="hideContent('sal.errors');" /><br/>
-			<span  th:if="${#fields.hasErrors('sal')}" th:errors="*{sal}" class="error" id="sal.errors"></span>
+					<form th:action="@{update}" method="post" th:object="${admVO}">
+						<!-- 管理員ID (唯讀) -->
+						<div class="mb-3">
+							<label class="form-label">管理員ID:</label>
+							<input type="text" th:field="*{admId}" class="form-control" readonly
+								style="background-color: #f8f9fa;">
+						</div>
+
+						<!-- 管理員姓名 -->
+						<div class="mb-3">
+							<label class="form-label">管理員姓名: <span class="text-danger">*</span></label>
+							<input type="text" th:field="*{admName}" class="form-control"
+								onclick="hideContent('admName.errors');" />
+							<span th:if="${#fields.hasErrors('admName')}" th:errors="*{admName}" class="error"
+								id="admName.errors"></span>
+						</div>
+
+						<!-- 管理員帳號 -->
+						<div class="mb-3">
+							<label class="form-label">管理員帳號: <span class="text-danger">*</span></label>
+							<input type="text" th:field="*{admAcc}" class="form-control"
+								onclick="hideContent('admAcc.errors');" />
+							<span th:if="${#fields.hasErrors('admAcc')}" th:errors="*{admAcc}" class="error"
+								id="admAcc.errors"></span>
+						</div>
+
+						<!-- 管理員密碼 -->
+						<div class="mb-3">
+							<label class="form-label">新密碼: <small class="text-muted">(可選，留空表示不修改密碼)</small></label>
+							<input type="password" th:field="*{inputPwd}" class="form-control"
+								onclick="hideContent('inputPwd.errors');" placeholder="輸入新密碼或留空保持原密碼" />
+							<span th:if="${#fields.hasErrors('inputPwd')}" th:errors="*{inputPwd}" class="error"
+								id="inputPwd.errors"></span>
+						</div>
+
+						<!-- 權限選擇 -->
+						<div class="mb-3">
+							<label class="form-label">權限設定: <span class="text-danger">*</span></label>
+							<div class="border rounded p-3" style="background-color: #f8f9fa;">
+								<div th:each="auth : ${authFuncListData}" class="auth-checkbox">
+									<input type="checkbox" name="authFuncIds" th:value="${auth.authId}"
+										th:checked="${admVO.authFuncs != null and admVO.authFuncs.contains(auth)}"
+										class="form-check-input" id="auth_${auth.authId}">
+									<label th:for="'auth_' + ${auth.authId}" class="form-check-label"
+										th:text="${auth.authName}"></label>
+								</div>
+							</div>
+						</div>
+
+						<!-- 按鈕區域 -->
+						<div class="d-flex justify-content-between">
+							<a th:href="@{/adm/listAllAdm}" class="btn btn-secondary">🔙 返回列表</a>
+							<button type="submit" class="btn btn-warning">💾 送出修改</button>
+						</div>
+					</form>
+				</div>
 			</div>
-			
-			<div>
-			<label>獎金:</label>
-			<input type="text" th:field="*{comm}" onclick="hideContent('comm.errors');" /><br/>
-			<span  th:if="${#fields.hasErrors('comm')}" th:errors="*{comm}" class="error" id="comm.errors"></span>
-			</div>
-			
-			<div>
-			<label>部門:</label>
-			<select th:field="*{deptVO.deptno}">
-				<option th:each="deptVO : ${deptListData}" th:value="${deptVO.deptno}" th:text="${deptVO.dname}" />
-			</select>
-       <!-- <span th:if="${#fields.hasErrors('deptVO.deptno')}" th:errors="*{deptVO.deptno}" class="error" id="deptVO.deptno.errors"></span> -->
-			</div>
-				
-			
-			
-			<div>
-			<label>照片:</label>
-			<input type="file" th:field="*{upFiles}" onclick="previewImage()" />
-            <!-- 可以不修改圖片 <span class="error" th:utext="${errorMessage}" id="upFiles.errors"></span> -->
-			<div id="blob_holder"><img th:src="@{/emp/DBGifReader} + '?empno=' + ${empVO.empno}" width="100px"></div>
-			</div>
-			
-			<div>
-				<div></div>
-				<div><button type="submit" id="submit"> 送出修改 </button></div>
-				<div></div>
-			</div>		
-		</form>
-	
+		</div>
 	</div>
 
-
-<!-- JavaScript part -->
-<script type="text/javascript">
-//清除提示信息
-function hideContent(d) {
-     document.getElementById(d).style.display = "none";
-}
-
-//照片上傳-預覽用
-var filereader_support = typeof FileReader != 'undefined';
-if (!filereader_support) {
-	alert("No FileReader support");
-}
-acceptedTypes = {
-		'image/png' : true,
-		'image/jpeg' : true,
-		'image/gif' : true
-};
-function previewImage() {
-	var upfile1 = document.getElementById("upFiles");
-	upfile1.addEventListener("change", function(event) {
-		var files = event.target.files || event.dataTransfer.files;
-		for (var i = 0; i < files.length; i++) {
-			previewfile(files[i])
-		}
-	}, false);
-}
-function previewfile(file) {
-	if (filereader_support === true && acceptedTypes[file.type] === true) {
-		var reader = new FileReader();
-		reader.onload = function(event) {
-			var image = new Image();
-			image.src = event.target.result;
-			image.width = 100;
-			image.height = 75;
-			image.border = 2;
-			if (blob_holder.hasChildNodes()) {
-				blob_holder.removeChild(blob_holder.childNodes[0]);
+	<!-- JavaScript -->
+	<script type="text/javascript">
+		// 清除提示信息
+		function hideContent(elementId) {
+			var element = document.getElementById(elementId);
+			if (element) {
+				element.style.display = "none";
 			}
-			blob_holder.appendChild(image);
+		}
+
+		// 防止瀏覽器快取
+		window.onpageshow = function (event) {
+			if (event.persisted) {
+				window.location.reload();
+			}
 		};
-		reader.readAsDataURL(file);
-		document.getElementById('submit').disabled = false;
-	} else {
-		blob_holder.innerHTML = "<div  style='text-align: left;'>" + "● filename: " + file.name
-				+ "<br>" + "● ContentTyp: " + file.type
-				+ "<br>" + "● size: " + file.size + "bytes"
-				+ "<br>" + "● 上傳ContentType限制: <b> <font color=red>image/png、image/jpeg、image/gif </font></b></div>";
-		document.getElementById('submit').disabled = true;
-	}
-}
-</script>
+	</script>
 
 </body>
+
 </html>
