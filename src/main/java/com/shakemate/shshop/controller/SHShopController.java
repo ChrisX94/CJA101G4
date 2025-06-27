@@ -41,8 +41,6 @@ public class SHShopController {
     @Autowired
     private ShShopRedisUtil redisUtil;
 
-    @Autowired
-    private OpenAiAPI openAiAPI;
 
 
 
@@ -417,7 +415,7 @@ public class SHShopController {
         }
         return ResponseEntity.ok(ApiResponseFactory.success(returnMsg));
     }
-
+    // 取得所有的審核記錄(Excel檔)
     // 審核不通過 (尚未導入adm session)
     @PostMapping("/reject")
     public ResponseEntity<ApiResponse<ShProdDto>> rejection(@RequestParam("id") Integer prodId,
