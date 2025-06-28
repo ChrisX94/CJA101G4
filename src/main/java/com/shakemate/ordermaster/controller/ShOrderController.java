@@ -2,10 +2,13 @@ package com.shakemate.ordermaster.controller;
 
 
 import com.shakemate.ordermaster.dto.ShOrderDto;
+import com.shakemate.ordermaster.dto.ShOrderRequestDto;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.ordermaster.service.ShOrderService;
 import com.shakemate.shshop.dto.ApiResponse;
 import com.shakemate.shshop.dto.ApiResponseFactory;
+import com.shakemate.user.model.Users;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +37,18 @@ public class ShOrderController {
 
     // 下單
     @PostMapping("/create")
-    public ShOrder createOrder(@RequestBody ShOrder order) {
-        return orderService.createOrder(order);
+    public ResponseEntity<ApiResponse<ShOrderDto>> createOrder(@RequestBody ShOrderRequestDto orderInfo,
+                                                               HttpSession session) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Integer userId = Integer.parseInt(userIdObj.toString());
+        orderInfo.setBuyerUserId(userId);
+        ShOrderDto data = orderService.createOrder(orderInfo);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
     // 查詢單一訂單

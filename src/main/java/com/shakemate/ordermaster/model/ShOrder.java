@@ -16,22 +16,21 @@ import java.sql.Timestamp;
 public class ShOrder implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    // 主鍵
+    // PK
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SH_ORDER_ID")
     private Integer shOrderId;
 
-    // 買家
+    // Buyer
     @ManyToOne
     @JoinColumn(name = "BUYER_USER_ID", nullable = false)
     private Users buyer;
 
-    // 賣家
+    // Seller
     @ManyToOne
     @JoinColumn(name = "SELLER_USER_ID", nullable = false)
     private Users seller;
-
 
     // 商品
     @ManyToOne

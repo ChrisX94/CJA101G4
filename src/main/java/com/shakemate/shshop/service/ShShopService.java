@@ -278,6 +278,8 @@ public class ShShopService {
         return dto;
     }
 
+
+
     // 查一個給更新商品用
     @Transactional(readOnly = true)
     public ShProdDto getByIdForUpdate(int id) {
@@ -359,6 +361,19 @@ public class ShShopService {
             }
         }
         return returnStr;
+    }
+
+    //查一個給商品頁面用
+    @Transactional(readOnly = true)
+    public void orderCreated(int id) {
+        ShProd prod = repo.getByID(id);
+        if (prod != null) {
+            prod.setProdCount(prod.getProdCount() - 1);
+            if(prod.getProdCount() == 0){
+                prod.setProdStatus((byte) 3);
+            }
+            repo.save(prod);
+        }
     }
 
     // 用類別取得商品

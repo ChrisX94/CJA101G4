@@ -1,6 +1,7 @@
 package com.shakemate.ordermaster.service;
 
 import com.shakemate.ordermaster.dto.ShOrderDto;
+import com.shakemate.ordermaster.dto.ShOrderRequestDto;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.shshop.dto.ShProdDto;
 
@@ -22,7 +23,7 @@ public interface ShOrderService {
 
     List<ShOrderDto> getAllOrders();
 
-    ShOrder createOrder(ShOrder order);
+    ShOrderDto createOrder(ShOrderRequestDto orderInfo);
 
     ShOrderDto getOrderById(Integer orderId);
 

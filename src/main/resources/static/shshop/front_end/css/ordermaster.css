@@ -1,0 +1,288 @@
+        /* CSS 變數定義 */
+        :root {
+            --primary-color: #6200ee; /* 主要顏色 */
+            --primary-light-color: #bb86fc; /* 主要顏色較淺 */
+            --primary-dark-color: #3700b3; /* 主要顏色較深 */
+            --secondary-color: #03dac6; /* 次要顏色 (強調色) */
+            --background-color: #f5f5f5; /* 背景色 */
+            --surface-color: #ffffff; /* 表面顏色 (卡片、表格背景) */
+            --on-primary: #ffffff; /* 主要顏色上的文字顏色 */
+            --on-surface: #212121; /* 表面顏色上的文字顏色 */
+            --text-light-gray: #757575; /* 淺灰色文字 */
+            --header-height: 64px; /* 導覽列高度 */
+            --primary-color-rgb: 98, 0, 238; /* RGB for #6200ee for rgba() */
+        }
+
+        /* 全局樣式 */
+        body {
+            font-family: 'Roboto', 'Inter', Arial, sans-serif; /* 使用 Roboto 字體或備用字體 */
+            margin: 0;
+            display: flex; /* Flexbox for layout (header, sidebar, main-content) */
+            min-height: 100vh;
+            background-color: var(--background-color);
+            color: var(--on-surface);
+            overflow-x: hidden; /* 防止水平滾動條 */
+            flex-direction: column; /* Ensure header is on top of main content/sidebar */
+        }
+
+        /* Header 導覽列 (整合原 header.css 樣式並 Material Design 化) */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background-color: var(--primary-color); /* Material Design Primary Color */
+            color: var(--on-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+                        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+                        0px 1px 10px 0px rgba(0, 0, 0, 0.12); /* Material Design 陰影 */
+            z-index: 1000;
+        }
+
+        .header__logo img {
+            height: 40px; /* 調整 Logo 大小 */
+            vertical-align: middle;
+        }
+
+        .header__nav {
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .header__list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px; /* 增加導覽項目間距 */
+        }
+
+        .header__item a {
+            color: var(--on-primary);
+            text-decoration: none;
+            font-weight: 500; /* Medium 字重 */
+            padding: 8px 0;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .header__item a:hover {
+            color: var(--secondary-color); /* hover 時使用強調色 */
+        }
+
+        /* 下拉選單 */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: var(--surface-color); /* 背景色使用表面顏色 */
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); /* Material Design 陰影 */
+            z-index: 1;
+            border-radius: 4px; /* 圓角 */
+            padding: 8px 0;
+            top: calc(100% + 5px); /* 距離父元素下方一些 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dropdown-menu li a {
+            color: var(--on-surface);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            transition: background-color 0.2s ease;
+        }
+
+        .dropdown-menu li a:hover {
+            background-color: var(--background-color); /* hover 時背景色 */
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        /* 子下拉選單 */
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-left: 5px;
+        }
+
+        .dropdown-submenu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .header__user {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--on-primary);
+        }
+
+        /* Sidebar and Main Content Layout */
+        .app-layout {
+            display: flex;
+            flex: 1; /* Take remaining space after header */
+            padding-top: var(--header-height); /* Push content below the fixed header */
+        }
+
+        /* 側邊欄 */
+        .sidebar {
+            width: 250px; /* 調整寬度 */
+            background-color: var(--surface-color);
+            box-shadow: 2px 0px 4px -1px rgba(0, 0, 0, 0.1); /* 輕微陰影 */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 500; /* Medium 字重 */
+            color: var(--text-light-gray);
+            padding: 20px 24px 10px 24px;
+            margin: 0;
+            text-transform: uppercase; /* 大寫 */
+        }
+
+        .sidebar-item {
+            display: block;
+            padding: 12px 24px; /* 增加內邊距 */
+            margin: 4px 8px; /* 增加外邊距 */
+            text-decoration: none;
+            color: var(--on-surface);
+            border-radius: 4px; /* 輕微圓角 */
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 400; /* Regular 字重 */
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(var(--primary-color-rgb), 0.08); /* 使用主色調的輕微透明背景 */
+        }
+
+        .sidebar-item.active {
+            background-color: var(--primary-light-color); /* 選中時使用淺色主色 */
+            color: var(--on-primary);
+            font-weight: 500; /* 加粗 */
+            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+                        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+                        0px 1px 10px 0px rgba(0, 0, 0, 0.12); /* 選中項目的陰影 */
+        }
+
+        /* 主內容 */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* 訂單查詢頁面特定樣式 (從之前的代碼複製) */
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+        }
+        .header-section {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .order-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #fdfdfd;
+            transition: transform 0.2s ease-in-out;
+        }
+        .order-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+        .section-title {
+            color: #4f46e5; /* Deeper indigo for titles */
+        }
+        /* Style for active status button */
+        .status-button.active {
+            background-color: #4f46e5; /* Indigo-700 */
+            color: white;
+            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+            border-color: #4f46e5;
+        }
+
+        /* Material Design 按鈕基礎樣式 (從範例 CSS 複製) */
+        .material-button {
+            background-color: var(--primary-color);
+            color: var(--on-primary);
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.02857em;
+            transition: box-shadow 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+                        0px 3px 1px -2px rgba(0, 0, 0, 0.12),
+                        0px 1px 5px 0px rgba(0, 0, 0, 0.2);
+            outline: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .material-button:hover {
+            background-color: var(--primary-dark-color);
+            box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+                        0px 1px 10px 0px rgba(0, 0, 0, 0.12),
+                        0px 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        .material-button:active {
+            box-shadow: 0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+                        0px 3px 14px 2px rgba(0, 0, 0, 0.12),
+                        0px 5px 5px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .app-layout {
+                flex-direction: column; /* On smaller screens, stack sidebar and main content */
+            }
+            .sidebar {
+                width: 100%;
+                padding-top: 0; /* No need for padding-top when stacked below header */
+                box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.1); /* Shadow at bottom */
+            }
+            .sidebar-item {
+                margin: 4px; /* Adjust margin for smaller screens */
+            }
+            .main-content {
+                padding: 16px; /* Adjust padding for smaller screens */
+            }
+            .header__nav {
+                display: none; /* Hide nav on small screens, can add a hamburger menu */
+            }
+            .header__logo {
+                flex-grow: 1; /* Allow logo to take more space when nav is hidden */
+            }
+        }
+        
+        /* For the specific product_manager.html table styling that was provided, not directly used here but kept for reference if needed */
+        /* th:nth-child(1), td:nth-child(1) { width: 80px; } */
+        /* etc. */
