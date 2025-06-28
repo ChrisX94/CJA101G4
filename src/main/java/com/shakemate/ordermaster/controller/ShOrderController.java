@@ -1,19 +1,33 @@
 package com.shakemate.ordermaster.controller;
 
 
+import com.shakemate.ordermaster.dto.ShOrderDto;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.ordermaster.service.ShOrderService;
+import com.shakemate.shshop.dto.ApiResponse;
+import com.shakemate.shshop.dto.ApiResponseFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
+@CrossOrigin(origins = "http://127.0.0.1:5500")
+// only for testing purpose, remove this line before deploy to production server
 
 @RestController
 @RequestMapping("/api/shorder")
 public class ShOrderController {
     @Autowired
     private ShOrderService orderService;
+
+    // 查全部
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getAllOrders() {
+        List<ShOrderDto> data = orderService.getAllOrders();
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
 
     // 下單
     @PostMapping("/create")
@@ -23,26 +37,30 @@ public class ShOrderController {
 
     // 查詢單一訂單
     @GetMapping("/{id}")
-    public Optional<ShOrder> getOrder(@PathVariable Integer id) {
-        return orderService.getOrderById(id);
+    public ResponseEntity<ApiResponse<ShOrderDto>> getOrder(@PathVariable Integer id) {
+        ShOrderDto data = orderService.getOrderById(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
     // 查詢買家的所有訂單
     @GetMapping("/buyer/{buyerId}")
-    public List<ShOrder> getOrdersByBuyer(@PathVariable Integer buyerId) {
-        return orderService.getOrdersByBuyer(buyerId);
+    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getOrdersByBuyer(@PathVariable Integer buyerId) {
+        List<ShOrderDto> data = orderService.getOrdersByBuyer(buyerId);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
     // 查詢賣家的所有訂單
     @GetMapping("/seller/{sellerId}")
-    public List<ShOrder> getOrdersBySeller(@PathVariable Integer sellerId) {
-        return orderService.getOrdersBySeller(sellerId);
+    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getOrdersBySeller(@PathVariable Integer sellerId) {
+        List<ShOrderDto> data = orderService.getOrdersBySeller(sellerId);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
     // 查詢某個商品的訂單
     @GetMapping("/prod/{prodId}")
-    public List<ShOrder> getOrdersByProd(@PathVariable Integer prodId) {
-        return orderService.getOrdersByProd(prodId);
+    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getOrdersByProd(@PathVariable Integer prodId) {
+        List<ShOrderDto> data = orderService.getOrdersByProd(prodId);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
     // 更新訂單（例如付款、出貨、取消）

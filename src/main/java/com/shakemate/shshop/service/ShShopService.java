@@ -454,7 +454,6 @@ public class ShShopService {
         return prodDto;
     }
 
-
     // 複合查詢
     public List<ShProdDto> getProdsByCompositeQuery(Map<String, String> paraMap) {
         List<Integer> friendIds = matchRepo.findFriendIdsByUserId(Integer.parseInt(paraMap.get("userId")));

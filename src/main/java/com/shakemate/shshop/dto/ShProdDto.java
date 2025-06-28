@@ -84,6 +84,7 @@ public class ShProdDto {
             case 1 -> "審核不通過";
             case 2 -> "已上架";
             case 3 -> "已下架";
+            case 4 -> "已售出";
             default -> "審核中";
         };
         return result;
