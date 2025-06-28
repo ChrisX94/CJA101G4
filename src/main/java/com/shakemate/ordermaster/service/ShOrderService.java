@@ -5,12 +5,22 @@ import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.shshop.dto.ShProdDto;
 
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
 public interface ShOrderService {
 
-    public List<ShOrderDto> getAllOrders();
+    List<ShOrderDto> searchOrders(
+            Integer shOrderId,
+            String buyerName,
+            String sellerName,
+            String prodName,
+            Byte orderStatus,
+            Timestamp startDate,
+            Timestamp endDate);
+
+    List<ShOrderDto> getAllOrders();
 
     ShOrder createOrder(ShOrder order);
 
