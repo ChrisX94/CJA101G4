@@ -1,6 +1,8 @@
 package com.shakemate.ordermaster.service;
 
+import com.shakemate.ordermaster.dto.ShOrderDto;
 import com.shakemate.ordermaster.model.ShOrder;
+import com.shakemate.shshop.dto.ShProdDto;
 
 
 import java.util.List;
@@ -8,15 +10,17 @@ import java.util.Optional;
 
 public interface ShOrderService {
 
+    public List<ShOrderDto> getAllOrders();
+
     ShOrder createOrder(ShOrder order);
 
-    Optional<ShOrder> getOrderById(Integer orderId);
+    ShOrderDto getOrderById(Integer orderId);
 
-    List<ShOrder> getOrdersByBuyer(Integer buyerUserId);
+    List<ShOrderDto> getOrdersByBuyer(Integer buyerUserId);
 
-    List<ShOrder> getOrdersBySeller(Integer sellerUserId);
+    List<ShOrderDto> getOrdersBySeller(Integer sellerUserId);
 
-    List<ShOrder> getOrdersByProd(Integer prodId);
+    List<ShOrderDto> getOrdersByProd(Integer prodId);
 
     ShOrder updateOrder(ShOrder order);
 
