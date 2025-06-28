@@ -289,6 +289,17 @@ public class ShShopService {
         return dto;
     }
 
+    // 查一個給更新商品用
+    @Transactional(readOnly = true)
+    public ShProdDto getByIdForBuy(int id) {
+        ShProd prod = repo.getByID(id);
+        ShProdDto dto = null;
+        if (prod != null) {
+            dto = new ShProdDto().forUpdatePurchase(prod);
+        }
+        return dto;
+    }
+
     // 計數器
     @Transactional
     public void addViews(int id) {

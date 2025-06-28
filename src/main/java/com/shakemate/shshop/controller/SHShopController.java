@@ -226,6 +226,15 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
+    // 用PK找商品(post)用於新增及修改不會計數
+    @PostMapping("/checkout")
+    public ResponseEntity<ApiResponse<ShProdDto>> getProdForBuy(@RequestParam("id") String idStr) {
+        Integer id = Integer.parseInt(idStr);
+        ShProdDto data = shShopService.getByIdForBuy(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+
+
     // 新增商品
     @PostMapping("/addNewProd")
     public ResponseEntity<ApiResponse<ShProdDto>> addNewProd(
