@@ -72,7 +72,7 @@ public class ShOrderServiceImpl implements ShOrderService{
         ShOrderDto dto = null;
         if(savedOrder != null) {
             dto= new ShOrderDto(savedOrder);
-            shShopService.orderCreated(savedOrder.getShProd().getProdId());
+            shShopService.orderCreated(savedOrder.getShProd().getProdId(), savedOrder.getProductQuantity());
 
         }
 
