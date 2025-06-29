@@ -3,9 +3,15 @@ package com.shakemate.ordermaster.service;
 
 import com.shakemate.ordermaster.dao.ShOrderRepository;
 import com.shakemate.ordermaster.dto.ShOrderDto;
+import com.shakemate.ordermaster.dto.ShOrderRequestDto;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.ordermaster.util.ShOrderSpecifications;
+import com.shakemate.shshop.dao.ShShopRepository;
 import com.shakemate.shshop.dto.ShProdDto;
+import com.shakemate.shshop.model.ShProd;
+import com.shakemate.shshop.service.ShShopService;
+import com.shakemate.user.dao.UsersRepository;
+import com.shakemate.user.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -22,6 +28,12 @@ public class ShOrderServiceImpl implements ShOrderService{
 
     @Autowired
     private ShOrderRepository orderRepository;
+    @Autowired
+    private ShShopService shShopService;
+    @Autowired
+    private UsersRepository usersRepository;
+    @Autowired
+    ShShopRepository shShopRepository;
 
 
     //  getAll
@@ -31,8 +43,40 @@ public class ShOrderServiceImpl implements ShOrderService{
     }
 
     @Override
-    public ShOrder createOrder(ShOrder order) {
-        return orderRepository.save(order);
+    public ShOrderDto createOrder(ShOrderRequestDto orderInfo) {
+        ShOrder order = new ShOrder();
+        Users buyer = usersRepository.getOne(orderInfo.getBuyerUserId());
+        Users seller = usersRepository.getOne(orderInfo.getSellerUserId());
+        ShProd prod = shShopRepository.getById(orderInfo.getProdId());
+        buyer.setUserId(orderInfo.getBuyerUserId());
+        seller.setUserId(orderInfo.getSellerUserId());
+        prod.setProdId(orderInfo.getProdId());
+        order.setShProd(prod);
+        order.setBuyer(buyer);
+        order.setSeller(seller);
+        order.setProductPrice(orderInfo.getProductPrice());
+        order.setProductQuantity(orderInfo.getProductQuantity());
+        order.setShippingFee(orderInfo.getShippingFee());
+        order.setPlatformFee(orderInfo.getPlatformFee());
+        order.setShippingAddress(orderInfo.getShippingAddress());
+        order.setPaymentMethod(orderInfo.getPaymentMethod());
+        order.setOrderNote(orderInfo.getOrderNote());
+        int amount = calculateTotalAmount(orderInfo.getProductPrice(), orderInfo.getProductQuantity(), orderInfo.getShippingFee());
+        order.setTotalAmount(amount);
+        order.setOrderStatus((byte) 0);
+        order.setOrderDate(new Timestamp(System.currentTimeMillis()));
+        order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+
+
+        ShOrder savedOrder = orderRepository.save(order);
+        ShOrderDto dto = null;
+        if(savedOrder != null) {
+            dto= new ShOrderDto(savedOrder);
+            shShopService.orderCreated(savedOrder.getShProd().getProdId());
+
+        }
+
+        return dto;
     }
 
     @Override
@@ -86,4 +130,12 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
+
+
+
+    public int calculateTotalAmount(int productPrice, int productQuantity, int shippingFee) {
+        int subtotal = productPrice * productQuantity;
+        int platformFee = (int) Math.ceil(subtotal * 0.01);
+        return subtotal + shippingFee + platformFee;
+    }
 }

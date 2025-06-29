@@ -78,6 +78,26 @@ public class ShProdDto {
         return this;
     }
 
+    public ShProdDto forUpdatePurchase(ShProd p) {
+        this.prodId = p.getProdId();
+        this.prodName = p.getProdName();
+        this.prodPrice = p.getProdPrice();
+        this.prodBrand = p.getProdBrand();
+        this.prodCount = p.getProdCount();
+        this.userName = p.getUser().getUsername();
+        this.user = p.getUser().getUserId();
+        this.prodDesc = p.getProdStatusDesc();
+        this.prodContent = p.getProdContent();
+        this.prodStatus = p.getProdStatus();
+        this.prodStatusStr = getProdStatusStr(prodStatus);
+        this.prodTypeId = p.getShProdType().getProdTypeId();
+        this.picUrls = new ArrayList<>();
+        for (ShProdPic pic : p.getProdPics()) {
+            this.picUrls.add(pic.getProdPic());
+        }
+        return this;
+    }
+
 
     public  String getProdStatusStr(byte prodStatus) {
         String result = switch (prodStatus) {
