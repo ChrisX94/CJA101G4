@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>付款成功 | MatchMarket</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: "Noto Sans TC", sans-serif;
+            background: linear-gradient(to bottom, #e0f7fa, #ffffff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .success-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #27ae60;
+            margin: 16px 0;
+        }
+
+        .checkmark {
+            font-size: 64px;
+            color: #27ae60;
+        }
+
+        .info {
+            margin: 20px 0;
+            text-align: left;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .btn {
+            display: block;
+            background-color: #27ae60;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #219150;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="success-container">
+        <div class="checkmark">✔️</div>
+        <h1>付款成功！</h1>
+        <div class="info">
+            <div>訂單編號：<span id="orderId">--</span></div>
+            <div>付款金額：$<span id="amount">--</span></div>
+            <div>付款方式：<span id="payment">--</span></div>
+        </div>
+
+        <a href="order_list.html" class="btn">查看訂單</a>
+        <a href="index.html" class="btn">回首頁</a>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId') || '--';
+        const amount = urlParams.get('amount') || '--';
+        const payment = urlParams.get('payment') || '--';
+
+        document.getElementById('orderId').textContent = orderId;
+        document.getElementById('amount').textContent = amount;
+        document.getElementById('payment').textContent = payment;
+    </script>
+
+</body>
+
+</html>

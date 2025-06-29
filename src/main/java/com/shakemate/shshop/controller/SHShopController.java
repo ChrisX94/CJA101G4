@@ -233,7 +233,13 @@ public class SHShopController {
         ShProdDto data = shShopService.getByIdForBuy(id);
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
-
+    // 用user找商品(會員用)
+    @PostMapping("/getProdsByUser")
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> getAvailableProdsByUser(@RequestParam("userId") String userIdStr) {
+        Integer userId = Integer.parseInt(userIdStr.toString());
+        List<ShProdDto> data = shShopService.getAvailableProdsByUser(userId);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
 
     // 新增商品
     @PostMapping("/addNewProd")
@@ -374,8 +380,8 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success("success", data));
     }
 
-    // 用user找商品(會員、管理員共用)
-    @PostMapping("/getProdsByUser")
+    // 用user找商品(管理員用)
+    @PostMapping("/getProdsByUserAdm")
     public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("userId") String userIdStr) {
         Integer userId = Integer.parseInt(userIdStr.toString());
         List<ShProdDto> data = shShopService.getProdsByUser(userId);

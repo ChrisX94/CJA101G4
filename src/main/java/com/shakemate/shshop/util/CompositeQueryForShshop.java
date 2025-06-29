@@ -78,6 +78,7 @@ public class CompositeQueryForShshop {
             Root<ShProd> root = cq.from(ShProd.class);
             cq.select(root).distinct(true); // 避免JOIN重複資料
             List<Predicate> predicateList = new ArrayList<Predicate>();
+            predicateList.add(builder.equal(root.get("prodStatus"), (byte) 2));
             Set<String> keys = inputMap.keySet();
             for (String key : keys) {
                 String value = inputMap.get(key);

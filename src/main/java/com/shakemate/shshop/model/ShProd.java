@@ -75,7 +75,7 @@ public class ShProd implements Serializable {
     private String prodBrand;
 
     @NotNull(message = "商品數量: 請勿空白")
-    @Min(value = 1, message = "商品數量: 不能小於 {value}")
+    @Min(value = 0, message = "商品數量: 不能小於 {value}")
     @Max(value = 10, message = "商品數量: 不能超過 {value}")
     @Column(name = "PROD_COUNT")
     private Integer prodCount;
