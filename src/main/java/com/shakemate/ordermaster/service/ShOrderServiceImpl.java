@@ -99,6 +99,8 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
+//    public ShOrderDto markAsPaid()
+
     @Override
     public List<ShOrderDto> getOrdersByProd(Integer prodId) {
         List<ShOrder> orders= orderRepository.findBySellerUserId(prodId);
@@ -109,6 +111,16 @@ public class ShOrderServiceImpl implements ShOrderService{
     public ShOrder updateOrder(ShOrder order) {
         return orderRepository.save(order);
     }
+
+    @Override
+    public void markedAsPaid(Integer orderId) {
+        Optional<ShOrder> rowOrder = orderRepository.findById(orderId);
+        ShOrder order = rowOrder.orElseThrow(() -> new IllegalArgumentException("訂單不存在"));;
+        order.setPaymentStatus((byte) 1);
+        order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+        orderRepository.save(order);
+    }
+
 
     @Transactional(readOnly = true)
     public List<ShOrderDto> searchOrders(

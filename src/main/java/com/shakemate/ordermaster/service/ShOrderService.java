@@ -35,4 +35,6 @@ public interface ShOrderService {
 
     ShOrder updateOrder(ShOrder order);
 
+    void markedAsPaid(Integer orderId);
+
 }

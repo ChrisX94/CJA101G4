@@ -127,7 +127,7 @@
             let thumbnails = [];
             let currentImgIndex = 0;
 
-            fetch(`http://localhost:8080/api/ShShop/getProd?id=${productId}`)
+            fetch(`/api/ShShop/getProd?id=${productId}`)
                 .then(response => {
                     if (!response.ok) throw new Error("後端回傳錯誤");
                     return response.json();
