@@ -41,8 +41,6 @@ public class SHShopController {
     @Autowired
     private ShShopRedisUtil redisUtil;
 
-    @Autowired
-    private OpenAiAPI openAiAPI;
 
 
 
@@ -228,6 +226,21 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
+    // 用PK找商品(post)用於新增及修改不會計數
+    @PostMapping("/checkout")
+    public ResponseEntity<ApiResponse<ShProdDto>> getProdForBuy(@RequestParam("id") String idStr) {
+        Integer id = Integer.parseInt(idStr);
+        ShProdDto data = shShopService.getByIdForBuy(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+    // 用user找商品(會員用)
+    @PostMapping("/getProdsByUser")
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> getAvailableProdsByUser(@RequestParam("userId") String userIdStr) {
+        Integer userId = Integer.parseInt(userIdStr.toString());
+        List<ShProdDto> data = shShopService.getAvailableProdsByUser(userId);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+
     // 新增商品
     @PostMapping("/addNewProd")
     public ResponseEntity<ApiResponse<ShProdDto>> addNewProd(
@@ -367,8 +380,8 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success("success", data));
     }
 
-    // 用user找商品(會員、管理員共用)
-    @PostMapping("/getProdsByUser")
+    // 用user找商品(管理員用)
+    @PostMapping("/getProdsByUserAdm")
     public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("userId") String userIdStr) {
         Integer userId = Integer.parseInt(userIdStr.toString());
         List<ShProdDto> data = shShopService.getProdsByUser(userId);
@@ -417,7 +430,7 @@ public class SHShopController {
         }
         return ResponseEntity.ok(ApiResponseFactory.success(returnMsg));
     }
-
+    // 取得所有的審核記錄(Excel檔)
     // 審核不通過 (尚未導入adm session)
     @PostMapping("/reject")
     public ResponseEntity<ApiResponse<ShProdDto>> rejection(@RequestParam("id") Integer prodId,

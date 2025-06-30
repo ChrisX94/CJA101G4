@@ -7,29 +7,23 @@
     <title>Product details｜MatchMarket</title>
     <link rel="stylesheet" href="css/header.css" />
     <link rel="stylesheet" href="css/product_page.css" />
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 
 <body>
 
     <header class="header">
-        <!-- Logo 區 -->
         <div class="header__logo">
             <a href="/">
                 <img src="../../img/logoText.png" alt="Logo" />
             </a>
         </div>
-
-        <!-- 導覽列 -->
         <nav class="header__nav">
             <ul class="header__list">
                 <li class="header__item"><a href="#">配對</a></li>
                 <li class="header__item"><a href="#">聊天室</a></li>
                 <li class="header__item"><a href="#">活動</a></li>
                 <li class="header__item"><a href="#">討論區</a></li>
-
-                <!-- 🔽 MatchMarket Dropdown -->
                 <li class="header__item dropdown">
                     <a href="select_page.html">MatchMarket</a>
                     <ul class="dropdown-menu">
@@ -43,18 +37,13 @@
                         </li>
                     </ul>
                 </li>
-
                 <li class="header__item"><a href="#">會員專區</a></li>
             </ul>
         </nav>
-
-        <!-- 使用者圖示 -->
         <div class="header__user">
             <i class="fa-solid fa-user"></i>
         </div>
     </header>
-
-
 
     <main class="main-detail">
         <div class="product-page">
@@ -63,8 +52,6 @@
                     <div class="main-img">
                         <img src="https://placehold.co/300x300" alt="主圖" id="mainImage">
                     </div>
-
-
                     <div class="thumbnail-bar-wrapper">
                         <button class="nav-arrow" id="prevBtn">←</button>
                         <div class="thumbnail-track"></div>
@@ -72,7 +59,7 @@
                     </div>
                 </div>
 
-                <form class="right-info-box" id="buyForm" action="/buy" method="post">
+                <div class="right-info-box">
                     <h1 class="prodName">商品名稱：</h1>
                     <h1 class="price">價格：<span class="price_info">$175</span></h1>
                     <div class="info-grid">
@@ -89,7 +76,7 @@
                                 <input type="number" id="buyQty" name="buyQty" min="1" value="1">
                                 <button type="button" class="qty-btn" id="increaseBtn">+</button>
                             </div>
-                            <button type="submit" class="buy-btn">購買</button>
+                            <button type="button" class="buy-btn" id="buyBtn">購買</button>
                         </div>
 
                         <div class="chat-row">
@@ -98,7 +85,7 @@
                             </button>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
 
             <div class="product-description-sections">
@@ -117,13 +104,13 @@
             </div>
         </div>
     </main>
+
     <div id="imgModal"
         style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center;">
         <span class="close-modal"
             style="position:absolute; top:20px; right:30px; font-size:2.5rem; color:#fff; cursor:pointer;">&times;</span>
         <img id="modalImg" src="" alt="放大圖片" style="max-width:90%; max-height:90%;">
     </div>
-
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -140,7 +127,6 @@
             let thumbnails = [];
             let currentImgIndex = 0;
 
-            // 從後端取得商品資料
             fetch(`http://localhost:8080/api/ShShop/getProd?id=${productId}`)
                 .then(response => {
                     if (!response.ok) throw new Error("後端回傳錯誤");
@@ -149,12 +135,10 @@
                 .then(responseData => {
                     const data = responseData.data;
 
-                    // 設定主圖
                     if (data.picUrls && data.picUrls.length > 0) {
                         mainImg.src = data.picUrls[0];
                         mainImg.alt = data.prodName;
 
-                        // 建立縮圖列
                         data.picUrls.forEach((url, index) => {
                             const thumb = document.createElement("img");
                             thumb.src = url;
@@ -168,13 +152,11 @@
                         });
                     }
 
-                    // 點主圖放大
                     mainImg.addEventListener("click", () => {
                         document.getElementById("modalImg").src = mainImg.src;
                         document.getElementById("imgModal").style.display = "flex";
                     });
 
-                    // 商品資訊
                     document.querySelector(".prodName").textContent = `商品名稱：${data.prodName}`;
                     document.querySelector(".price").innerHTML = `價格：<strong class='price_info'>$${data.prodPrice}</strong>`;
                     document.querySelector(".brand").innerHTML = `<strong>商品品牌：</strong>${data.prodBrand}`;
@@ -186,7 +168,6 @@
                     document.querySelectorAll(".product-section")[1].querySelector("p").textContent = data.prodDesc;
                     document.querySelectorAll(".product-section")[2].querySelector("p").textContent = `上架者：${data.userName}`;
 
-                    // 數量控制
                     const qtyInput = document.getElementById("buyQty");
                     if (qtyInput && data.prodCount) {
                         qtyInput.max = data.prodCount;
@@ -207,12 +188,20 @@
                             if (current > 1) qtyInput.value = current - 1;
                         };
                     }
+
+                    // ✅ 購買按鈕邏輯
+                    const buyButton = document.getElementById('buyBtn');
+                    buyButton.addEventListener('click', () => {
+                        const qty = document.getElementById('buyQty').value;
+                        localStorage.setItem('checkoutProdId', productId);
+                        localStorage.setItem('checkoutBuyQty', qty);
+                        window.location.href = 'checkout.html';
+                    });
                 })
                 .catch(err => {
                     console.error("載入商品資料失敗：", err);
                 });
 
-            // 左右箭頭切換主圖
             document.querySelectorAll(".nav-arrow")[0].addEventListener("click", () => {
                 if (thumbnails.length > 0) {
                     currentImgIndex = (currentImgIndex - 1 + thumbnails.length) % thumbnails.length;
@@ -227,29 +216,11 @@
                 }
             });
 
-            // 關閉圖片 Modal
             document.querySelector(".close-modal").addEventListener("click", () => {
                 document.getElementById("imgModal").style.display = "none";
             });
-
-            // 顯示後端回傳的錯誤訊息（如果有）
-            const serverErrorDiv = document.getElementById('serverErrorContainer');
-            const backendErrorMessage = serverErrorDiv?.getAttribute('data-error-message-th');
-            const pwdMismatchMessage = serverErrorDiv?.getAttribute('data-pwd-mismatch-th');
-
-            if (backendErrorMessage && backendErrorMessage.trim() !== 'null' && backendErrorMessage.trim() !== '') {
-                showMessage(backendErrorMessage, 'error');
-            }
-            if (pwdMismatchMessage && pwdMismatchMessage.trim() !== 'null' && pwdMismatchMessage.trim() !== '') {
-                showMessage(pwdMismatchMessage, 'error');
-            }
         });
     </script>
-
-
-
-
-
 
 </body>
 

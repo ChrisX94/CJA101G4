@@ -1,6 +1,7 @@
 package com.shakemate.shshop.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -22,6 +23,7 @@ public class ShProdType implements Serializable {
     private String prodTypeName;
 
     @OneToMany(mappedBy = "shProdType")
+    @JsonIgnore
     private List<ShProd> shProds = new ArrayList<>();
 
 
