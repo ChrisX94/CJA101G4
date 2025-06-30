@@ -7,9 +7,12 @@ import com.shakemate.ordermaster.service.ShOrderService;
 import com.shakemate.shshop.dto.ApiResponse;
 import com.shakemate.shshop.dto.ApiResponseFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,5 +72,30 @@ public class ShOrderController {
         return orderService.updateOrder(order);
     }
 
+
+    // 複合條件查詢 (orderId, buyerName, sellerName, prodName, orderStatus, date range)
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ShOrderDto>>> searchOrders(
+            @RequestParam(value = "shOrderId", required = false) Integer shOrderId,
+            @RequestParam(value = "buyerName", required = false) String buyerName,
+            @RequestParam(value = "sellerName", required = false) String sellerName,
+            @RequestParam(value = "prodName", required = false) String prodName,
+            @RequestParam(value = "orderStatus", required = false) Byte orderStatus,
+            @RequestParam(value = "startDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(value = "endDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
+    ) {
+        List<ShOrderDto> orders = orderService.searchOrders(
+                shOrderId,
+                buyerName,
+                sellerName,
+                prodName,
+                orderStatus,
+                startDate != null ? Timestamp.valueOf(startDate) : null,
+                endDate != null ? Timestamp.valueOf(endDate) : null
+        );
+        return ResponseEntity.ok(ApiResponseFactory.success(orders));
+    }
 
 }

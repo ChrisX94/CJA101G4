@@ -12,34 +12,49 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice(basePackages = "com.shakemate.shshop.controller")
+import com.shakemate.notification.exception.ResourceNotFoundException;
+
+@RestControllerAdvice(basePackages = {"com.shakemate.shshop.controller", "com.shakemate.notification.controller"})
 public class GlobalExceptionHandler {
 
-    // 處理一般錯誤
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception e) {
-        return ResponseEntity
-                .status(500)
-                .body(ApiResponseFactory.error(500, "系統錯誤：" + e.getMessage()));
+    /**
+     * 處理資源未找到異常
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponseFactory.error(404, ex.getMessage()));
     }
 
-    // 處理 @Valid 驗證錯誤
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Object>> handleValidationException(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(field ->
-                errors.put(field.getField(), field.getDefaultMessage())
-        );
-
-        return ResponseEntity
-                .badRequest()
-                .body(ApiResponseFactory.error(400, "validation_failed", errors));
-    }
-    // 處理404路徑錯誤
+    /**
+     * 處理404錯誤
+     */
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<String> handle404(NoHandlerFoundException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body("找不到你要的資源 😢：請確認路徑是否正確！");
+    public ResponseEntity<ApiResponse<Object>> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponseFactory.error(404, "請求的API路徑不存在: " + ex.getRequestURL()));
+    }
+
+    /**
+     * 處理驗證異常
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> 
+            errors.put(error.getField(), error.getDefaultMessage())
+        );
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponseFactory.error(400, "輸入驗證失敗", errors));
+    }
+
+    /**
+     * 處理一般異常
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Object>> handleGeneralException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponseFactory.error(500, ex.getMessage()));
     }
 }
