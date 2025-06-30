@@ -59,15 +59,29 @@ public class ShOrderController {
     }
 
     // 查詢買家的所有訂單
-    @GetMapping("/buyer/{buyerId}")
-    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getOrdersByBuyer(@PathVariable Integer buyerId) {
+    @GetMapping("/buyer")
+    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getOrdersByBuyer(HttpSession session) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Integer buyerId = Integer.parseInt(userIdObj.toString());
         List<ShOrderDto> data = orderService.getOrdersByBuyer(buyerId);
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
     // 查詢賣家的所有訂單
-    @GetMapping("/seller/{sellerId}")
-    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getOrdersBySeller(@PathVariable Integer sellerId) {
+    @GetMapping("/seller")
+    public ResponseEntity<ApiResponse<List<ShOrderDto>>> getOrdersBySeller(HttpSession session) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Integer sellerId = Integer.parseInt(userIdObj.toString());
         List<ShOrderDto> data = orderService.getOrdersBySeller(sellerId);
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }

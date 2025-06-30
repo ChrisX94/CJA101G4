@@ -25,12 +25,13 @@ public class EcpayService {
         return generateCheckMacValue(params, paymentConfig.getHashKey(), paymentConfig.getHashIv());
     }
 
-    // ✅ 物流專用 CheckMacValue
-    public String generateCheckMacValueForLogistics(Map<String, String> params) {
-        return generateCheckMacValue(params, logisticsConfig.getHashKey(), logisticsConfig.getHashIv());
+    // 物流專用（MD5, 32 字）
+    public String generateCheckMacValueForLogistics(Map<String,String> params){
+        return generateCheckMacValueMd5(params,
+                logisticsConfig.getHashKey(), logisticsConfig.getHashIv());
     }
 
-    // ✅ 通用 CheckMacValue 產生器
+    // ✅ 金流專用 CheckMacValue 產生器
     private String generateCheckMacValue(Map<String, String> params, String hashKey, String hashIv) {
 
         // 1. 排序、去掉 CheckMacValue
@@ -85,4 +86,32 @@ public class EcpayService {
             throw new RuntimeException("Ecpay URL Encoding Error", e);
         }
     }
+
+
+    // 物流專用 CheckMacValue：MD5 版
+    private String generateCheckMacValueMd5(Map<String,String> params,
+                                            String hashKey, String hashIv){
+        // 1. 排序（忽略 CheckMacValue）
+        Map<String,String> sorted = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        params.forEach((k,v)->{ if(!"CheckMacValue".equalsIgnoreCase(k)) sorted.put(k,v); });
+
+        // 2. 拼接
+        StringBuilder raw = new StringBuilder("HashKey=").append(hashKey);
+        sorted.forEach((k,v)->raw.append('&').append(k).append('=').append(v));
+        raw.append("&HashIV=").append(hashIv);
+
+        // 3. 全字串 URL-Encode → toLowerCase
+        String enc = ecpayUrlEncode(raw.toString()).toLowerCase();
+
+        // 4. MD5 → Hex (大寫)
+        try{
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] d = md.digest(enc.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for(byte b:d) hex.append(String.format("%02X", b));
+            return hex.toString();
+        }catch(Exception e){ throw new RuntimeException(e); }
+    }
+
+
 }
