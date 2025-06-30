@@ -6,7 +6,9 @@ import com.shakemate.ordermaster.dto.ShOrderDto;
 import com.shakemate.ordermaster.dto.ShOrderRequestDto;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.ordermaster.util.ShOrderSpecifications;
+
 import com.shakemate.shshop.dao.ShShopRepository;
+
 import com.shakemate.shshop.dto.ShProdDto;
 import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.service.ShShopService;
@@ -34,6 +36,7 @@ public class ShOrderServiceImpl implements ShOrderService{
     private UsersRepository usersRepository;
     @Autowired
     ShShopRepository shShopRepository;
+
 
 
     //  getAll
@@ -130,12 +133,10 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
-
-
-
     public int calculateTotalAmount(int productPrice, int productQuantity, int shippingFee) {
         int subtotal = productPrice * productQuantity;
         int platformFee = (int) Math.ceil(subtotal * 0.01);
         return subtotal + shippingFee + platformFee;
     }
+
 }
