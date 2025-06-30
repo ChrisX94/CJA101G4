@@ -278,6 +278,8 @@ public class ShShopService {
         return dto;
     }
 
+
+
     // 查一個給更新商品用
     @Transactional(readOnly = true)
     public ShProdDto getByIdForUpdate(int id) {
@@ -285,6 +287,17 @@ public class ShShopService {
         ShProdDto dto = null;
         if (prod != null) {
             dto = new ShProdDto().forUpdateDisplay(prod);
+        }
+        return dto;
+    }
+
+    // 查一個給更新定單用
+    @Transactional(readOnly = true)
+    public ShProdDto getByIdForBuy(int id) {
+        ShProd prod = repo.getByID(id);
+        ShProdDto dto = null;
+        if (prod != null) {
+            dto = new ShProdDto().forUpdatePurchase(prod);
         }
         return dto;
     }
@@ -350,6 +363,19 @@ public class ShShopService {
         return returnStr;
     }
 
+    //查一個給商品頁面用
+    @Transactional
+    public void orderCreated(Integer id, Integer qty) {
+        ShProd prod = repo.getByID(id);
+        if (prod != null) {
+            prod.setProdCount(prod.getProdCount() - qty);
+            if(prod.getProdCount() == 0){
+                prod.setProdStatus((byte) 4);
+            }
+            repo.save(prod);
+        }
+    }
+
     // 用類別取得商品
     @Transactional(readOnly = true)
     public List<ShProdDto> getProdsByType(Integer typeId) {
@@ -372,6 +398,17 @@ public class ShShopService {
             ShProdDto dto = new ShProdDto(p);
             dtos.add(dto);
         }
+        return dtos;
+    }
+
+    // 用user id 取得商品
+    @Transactional(readOnly = true)
+    public List<ShProdDto> getAvailableProdsByUser(Integer userId) {
+        List<ShProd> list = repo.getByUserId(userId);
+        List<ShProdDto> dtos = list.stream()
+                .filter(p -> p.getProdStatus() == (byte) 2)
+                .map(ShProdDto::new)
+                .collect(Collectors.toList());
         return dtos;
 
     }
