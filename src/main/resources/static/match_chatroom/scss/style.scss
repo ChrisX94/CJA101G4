@@ -700,6 +700,12 @@
     @include laptop() {
       width: 90%;
     }
+    @include pad() {
+      width: 350px;
+    }
+    @include mobile() {
+      width: 90%;
+    }
   }
   
   .match__header {
