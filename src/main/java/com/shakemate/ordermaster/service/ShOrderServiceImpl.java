@@ -6,7 +6,9 @@ import com.shakemate.ordermaster.dto.ShOrderDto;
 import com.shakemate.ordermaster.dto.ShOrderRequestDto;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.ordermaster.util.ShOrderSpecifications;
+
 import com.shakemate.shshop.dao.ShShopRepository;
+
 import com.shakemate.shshop.dto.ShProdDto;
 import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.service.ShShopService;
@@ -34,6 +36,7 @@ public class ShOrderServiceImpl implements ShOrderService{
     private UsersRepository usersRepository;
     @Autowired
     ShShopRepository shShopRepository;
+
 
 
     //  getAll
@@ -99,6 +102,8 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
+//    public ShOrderDto markAsPaid()
+
     @Override
     public List<ShOrderDto> getOrdersByProd(Integer prodId) {
         List<ShOrder> orders= orderRepository.findBySellerUserId(prodId);
@@ -109,6 +114,16 @@ public class ShOrderServiceImpl implements ShOrderService{
     public ShOrder updateOrder(ShOrder order) {
         return orderRepository.save(order);
     }
+
+    @Override
+    public void markedAsPaid(Integer orderId) {
+        Optional<ShOrder> rowOrder = orderRepository.findById(orderId);
+        ShOrder order = rowOrder.orElseThrow(() -> new IllegalArgumentException("訂單不存在"));;
+        order.setPaymentStatus((byte) 1);
+        order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+        orderRepository.save(order);
+    }
+
 
     @Transactional(readOnly = true)
     public List<ShOrderDto> searchOrders(
@@ -130,12 +145,10 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
-
-
-
     public int calculateTotalAmount(int productPrice, int productQuantity, int shippingFee) {
         int subtotal = productPrice * productQuantity;
         int platformFee = (int) Math.ceil(subtotal * 0.01);
         return subtotal + shippingFee + platformFee;
     }
+
 }

@@ -127,7 +127,7 @@ searchButton.addEventListener('click', () => {
         return;
     }
 
-    fetch(`http://localhost:8080/api/shorder/${orderId}`)
+    fetch(`/api/shorder/${orderId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

@@ -6,39 +6,41 @@
     <title>結帳 | MatchMarket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./css/checkout.css">
-    <style>
-        .cvs-select-group {
-            display: none;
-            margin: 10px 0;
-        }
-    </style>
+
 </head>
 
 <body>
     <div class="container">
         <h2>🛒 結帳</h2>
 
+        <!-- 商品資訊 -->
         <div class="product-info">
-            <img src="https://via.placeholder.com/120" id="productImage" alt="商品圖片">
+            <img id="productImage" src="https://via.placeholder.com/120" alt="商品圖片">
             <div class="product-details">
                 <div class="product-title">
                     <strong id="productName">商品名稱</strong>
                     <span class="price">$<span id="productPrice">0</span></span>
                 </div>
                 <div>品牌：<span id="productBrand">品牌名</span></div>
-                <label>購買數量
-                    <input type="number" id="quantity" value="1" min="1" max="10">
-                </label>
+                <label>購買數量 <input type="number" id="quantity" value="1" min="1" max="10"></label>
             </div>
-            <div class="product-desc-right">
-                <div class="content" id="productContent"></div>
-                <div class="desc" id="productDesc"></div>
+            <!-- 商品描述 -->
+            <div class="section">
+                <h3>商品描述</h3>
+                <div id="productContent">商品內容載入中...</div>
+                <div id="productDesc">商品詳細說明載入中...</div>
             </div>
         </div>
 
         <!-- 收件資訊 -->
         <div class="section">
             <h3>收件資訊</h3>
+            <label>收件人姓名
+                <input id="receiverName" type="text" placeholder="請輸入真實姓名">
+            </label>
+            <label>收件人手機
+                <input id="receiverPhone" type="tel" placeholder="09xxxxxxxx">
+            </label>
             <label>運送方式
                 <select id="shippingMethod">
                     <option value="0">宅配</option>
@@ -46,8 +48,8 @@
                 </select>
             </label>
 
-            <!-- 超商選擇區 -->
-            <div class="cvs-select-group" id="cvsGroup">
+            <!-- 超商取貨 -->
+            <div id="cvsGroup" class="cvs-select-group">
                 <label>選擇超商
                     <select id="cvsType">
                         <option value="FAMIC2C">全家</option>
@@ -55,13 +57,27 @@
                         <option value="OKMARTC2C">OK</option>
                         <option value="HILIFEC2C">萊爾富</option>
                     </select>
-                    <button type="button" id="selectCvsBtn" style="margin-left: 10px;">選擇超商門市</button>
+                    <button id="selectCvsBtn" type="button" onclick="selectStore()">選擇超商門市</button>
                 </label>
+
+                <!-- ✅ 超商資訊顯示區 -->
+                <div id="storeInfo" style="margin-top: 10px; display: none; padding: 10px; border: 1px solid #ccc;">
+                    <div><strong>門市名稱：</strong><span id="storeName">-</span></div>
+                    <div><strong>門市編號：</strong><span id="storeId">-</span></div>
+                    <div><strong>門市地址：</strong><span id="storeAddress">-</span></div>
+                    <div><strong>門市電話：</strong><span id="storeTelephone">-</span></div>
+                </div>
             </div>
 
-            <label>收件地址
-                <textarea id="shippingAddress" rows="3" placeholder="請填寫完整地址"></textarea>
-            </label>
+            <!-- 宅配 -->
+            <div id="homeGroup">
+                <label>收件人郵遞區號
+                    <input id="receiverZip" type="text" placeholder="例如：114">
+                </label>
+                <label>收件人地址
+                    <textarea id="receiverAddress" rows="2" placeholder="請填寫完整地址"></textarea>
+                </label>
+            </div>
         </div>
 
         <!-- 付款方式 -->
@@ -69,13 +85,11 @@
             <h3>付款方式</h3>
             <select id="paymentMethod">
                 <option value="0">貨到付款</option>
-                <option value="1">轉帳</option>
-                <option value="2">信用卡</option>
-                <option value="3">信用卡分期</option>
+                <option value="1">線上付款</option>
             </select>
         </div>
 
-        <!-- 訂單備註 -->
+        <!-- 備註 -->
         <div class="section">
             <h3>訂單備註</h3>
             <textarea id="orderNote" rows="3" placeholder="有任何備註可以填寫..."></textarea>
@@ -95,170 +109,233 @@
         <button class="btn" onclick="submitOrder()">確認下單</button>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const quantityInput = document.getElementById('quantity');
-        const shippingSelect = document.getElementById('shippingMethod');
-        const cvsGroup = document.getElementById('cvsGroup');
-        const cvsSelect = document.getElementById('cvsType');
-        const selectCvsBtn = document.getElementById('selectCvsBtn');
-        const addressField = document.getElementById('shippingAddress');
 
-        const prodId = localStorage.getItem('checkoutProdId');
-        const buyQty = localStorage.getItem('checkoutBuyQty') || 1;
-        quantityInput.value = buyQty;
+    <!-- 🔥 燈箱 -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>訂單確認</h3>
+            <div id="confirmDetails"></div>
+            <div class="modal-actions">
+                <button onclick="confirmSubmit()">確認送出</button>
+                <button onclick="closeModal()">取消</button>
+            </div>
+        </div>
+    </div>
 
-        // 🚀 讀取商品資料
-        fetch(`http://localhost:8080/api/ShShop/getProd?id=${prodId}`)
-            .then(res => res.json())
-            .then(json => {
-                const data = json.data;
-                document.getElementById('productName').textContent = data.prodName;
-                document.getElementById('productBrand').textContent = data.prodBrand;
-                document.getElementById('productPrice').textContent = data.prodPrice;
-                document.getElementById('productImage').src = data.picUrls?.[0] || 'https://via.placeholder.com/120';
-                document.getElementById('productContent').textContent = data.prodContent;
-                document.getElementById('productDesc').textContent = data.prodDesc;
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const prodId = localStorage.getItem('checkoutProdId');
+            const buyQty = localStorage.getItem('checkoutBuyQty') || 1;
 
-                quantityInput.max = data.prodCount;
-                calcSummary();
-
-                quantityInput.addEventListener('input', () => {
-                    let val = parseInt(quantityInput.value);
-                    if (val < 1) quantityInput.value = 1;
-                    if (val > parseInt(quantityInput.max)) quantityInput.value = quantityInput.max;
-                    calcSummary();
-                });
-            });
-
-        // 🚀 運送方式變化
-        shippingSelect.addEventListener('change', function () {
-            if (this.value === '1') {
-                cvsGroup.style.display = 'block';
-                addressField.placeholder = "請選擇超商門市";
-                addressField.disabled = true;
-                addressField.value = '';
-            } else {
-                cvsGroup.style.display = 'none';
-                addressField.placeholder = "請填寫完整地址";
-                addressField.disabled = false;
-                addressField.value = '';
-            }
-        });
-
-        // 🚀 點擊選擇超商門市 → 從後端打開綠界地圖
-        selectCvsBtn.addEventListener('click', () => {
-            if (shippingSelect.value !== '1') {
-                alert("請先選擇『超商取貨』作為運送方式");
+            if (!prodId) {
+                alert('❌ 找不到商品，請重新選擇商品');
+                window.location.href = 'select_page.html';
                 return;
             }
 
-            const cvsType = cvsSelect.value;
-            const mapWindow = window.open(`http://localhost:8080/ecpay/logisticsMap?cvsType=${cvsType}`, '_blank');
+            const prod = await fetch(`/api/ShShop/getProd?id=${prodId}`)
+                .then(r => r.json()).then(j => j.data);
+            document.getElementById('productName').textContent = prod.prodName;
+            document.getElementById('productBrand').textContent = prod.prodBrand;
+            document.getElementById('productPrice').textContent = prod.prodPrice;
+            document.getElementById('productContent').textContent = prod.prodContent || "";
+            document.getElementById('productDesc').textContent = prod.prodDesc || "";
+            document.getElementById('productImage').src = prod.picUrls?.[0] || 'https://via.placeholder.com/120';
 
-            if (!mapWindow) {
-                alert('請允許彈出視窗以選擇超商門市');
-            }
+            const qtyInput = document.getElementById('quantity');
+            qtyInput.value = buyQty;
+            qtyInput.max = prod.prodCount;
+            qtyInput.addEventListener('input', calcSummary);
+            calcSummary();
+
+            const shippingSelect = document.getElementById('shippingMethod');
+            const cvsGroup = document.getElementById('cvsGroup');
+            const homeGroup = document.getElementById('homeGroup');
+            const paymentSelect = document.getElementById('paymentMethod');
+
+            shippingSelect.addEventListener('change', () => {
+                const shipM = +shippingSelect.value;
+                if (shipM === 0) {
+                    paymentSelect.querySelector('option[value="0"]').disabled = true;
+                    if (paymentSelect.value === "0") paymentSelect.value = "1";
+                    cvsGroup.style.display = 'none';
+                    homeGroup.style.display = 'block';
+                } else {
+                    paymentSelect.querySelector('option[value="0"]').disabled = false;
+                    cvsGroup.style.display = 'block';
+                    homeGroup.style.display = 'none';
+                }
+            });
+            shippingSelect.dispatchEvent(new Event('change'));
         });
 
-        // 🚀 計算訂單
-        function calcSummary() {
-            const unitPrice = parseInt(document.getElementById('productPrice').textContent);
-            const qty = parseInt(quantityInput.value);
-            const subtotal = unitPrice * qty;
-            const shipping = 60;
-            const platformFee = Math.ceil(subtotal * 0.01);
-            const total = subtotal + shipping + platformFee;
+        function submitOrder() {
+            const prodId = localStorage.getItem('checkoutProdId');
+            if (!prodId) { alert('未選擇商品'); return; }
 
+            const qty = +document.getElementById('quantity').value;
+            const shipM = +document.getElementById('shippingMethod').value;
+            const payM = +document.getElementById('paymentMethod').value;
+            const note = document.getElementById('orderNote').value.trim();
+            const recvName = document.getElementById('receiverName').value.trim();
+            const recvPhone = document.getElementById('receiverPhone').value.trim();
+            const recvZip = document.getElementById('receiverZip').value.trim();
+            const recvAddr = document.getElementById('receiverAddress').value.trim();
+
+            if (!recvName) { alert('請填寫收件人姓名'); return; }
+            if (!recvPhone) { alert('請填寫收件人手機'); return; }
+            if (shipM === 0 && (!recvZip || !recvAddr)) {
+                alert('請填寫收件人郵遞區號和地址'); return;
+            }
+
+            const processData = {
+                prodId: prodId,
+                prodName: document.getElementById('productName').textContent,
+                prodPrice: +document.getElementById('productPrice').textContent,
+                sellerUserId: 1,
+                productQuantity: qty,
+                shippingMethod: shipM,
+                paymentMethod: payM,
+                shippingAddress: `${recvZip} ${recvAddr}`,
+                receiverZip: recvZip,
+                receiverAddress: recvAddr,
+                receiverName: recvName,
+                receiverPhone: recvPhone,
+                orderNote: note,
+                totalAmount: calcTotal(+document.getElementById('productPrice').textContent, qty),
+
+                // ⬇⬇⬇ 門市資訊從 localStorage 讀
+                cvsType: localStorage.getItem('cvsType') || '',
+                storeId: localStorage.getItem('storeId') || '',
+                storeName: localStorage.getItem('storeName') || '',
+                storeAddress: localStorage.getItem('storeAddress') || '',
+                storeTelephone: localStorage.getItem('storeTelephone') || ''
+            };
+
+            // Save to orderData (自己資料庫用)
+            const orderData = {
+                prodId: processData.prodId,
+                sellerUserId: 1,
+                productPrice: processData.prodPrice,
+                productQuantity: processData.productQuantity,
+                platformFee: Math.ceil(processData.prodPrice * processData.productQuantity * 0.01),
+                shippingFee: 60,
+                shippingAddress: processData.shippingAddress,
+                shippingMethod: processData.shippingMethod,
+                paymentMethod: processData.paymentMethod,
+                orderNote: processData.orderNote,
+                totalAmount: processData.totalAmount,
+            };
+            localStorage.setItem('orderData', JSON.stringify(orderData));
+
+            showConfirmModal(processData);
+        }
+
+        function calcSummary() {
+            const price = +document.getElementById('productPrice').textContent;
+            const qty = +document.getElementById('quantity').value;
+            const subtotal = price * qty;
+            const ship = 60;
+            const fee = Math.ceil(subtotal * 0.01);
+            const total = subtotal + ship + fee;
             document.getElementById('subtotal').textContent = subtotal;
-            document.getElementById('shippingFee').textContent = shipping;
-            document.getElementById('platformFee').textContent = platformFee;
+            document.getElementById('shippingFee').textContent = ship;
+            document.getElementById('platformFee').textContent = fee;
             document.getElementById('totalAmount').textContent = total;
         }
 
-        window.calcSummary = calcSummary;
-    });
-
-    // 🚀 提交訂單
-    function submitOrder() {
-        const prodId = localStorage.getItem('checkoutProdId');
-        if (!prodId) {
-            alert('未選擇商品，請返回商品頁面重新選擇');
-            return;
+        function calcTotal(price, qty) {
+            const subtotal = price * qty;
+            const ship = 60;
+            const fee = Math.ceil(subtotal * 0.01);
+            return subtotal + ship + fee;
         }
 
-        const buyQty = parseInt(document.getElementById('quantity').value);
-        const shippingAddress = document.getElementById('shippingAddress').value.trim();
-        const shippingMethod = parseInt(document.getElementById('shippingMethod').value);
-        const paymentMethod = parseInt(document.getElementById('paymentMethod').value);
-        const orderNote = document.getElementById('orderNote').value.trim();
-        const platformFee = parseInt(document.getElementById('platformFee').textContent);
-
-        if (!shippingAddress) {
-            alert('請填寫收件地址');
-            return;
+        function showConfirmModal(data) {
+            const modal = document.getElementById('confirmModal');
+            const details = document.getElementById('confirmDetails');
+            details.innerHTML = `
+            <p>商品名稱：${data.prodName}</p>
+            <p>數量：${data.productQuantity}</p>
+            <p>運送方式：${data.shippingMethod === 0 ? '宅配' : '超商取貨'}</p>
+            <p>付款方式：${data.paymentMethod === 0 ? '貨到付款' : '線上付款'}</p>
+            <p>收件人：${data.receiverName}</p>
+            <p>手機：${data.receiverPhone}</p>
+            <p>地址：${data.shippingAddress}</p>
+            <p>訂單備註：${data.orderNote || '無'}</p>
+            <hr>
+            <p><strong>總金額：$${data.totalAmount}</strong></p>
+        `;
+            modal.style.display = 'block';
+            window._orderProcessData = data;
         }
 
-        fetch(`http://localhost:8080/api/ShShop/getProd?id=${prodId}`)
-            .then(res => res.json())
-            .then(json => {
-                const data = json.data;
+        function closeModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
 
-                const orderData = {
-                    sellerUserId: data.user,  
-                    prodId: data.prodId,
-                    productQuantity: buyQty,
-                    productPrice: data.prodPrice,
-                    shippingFee: 60,
-                    platformFee: platformFee,
-                    paymentMethod: paymentMethod,
-                    shippingMethod: shippingMethod,
-                    shippingAddress: shippingAddress,
-                    orderNote: orderNote,
-                    totalAmount: parseInt(document.getElementById('totalAmount').textContent),
-                };
+        function confirmSubmit() {
+            const data = window._orderProcessData;
+            if (!data) return;
+            localStorage.setItem('orderProcessData', JSON.stringify(data));
+            window.location.href = 'order_process.html';
+            localStorage.removeItem('checkoutProdId');
+            localStorage.removeItem('checkoutBuyQty');
+            localStorage.removeItem('LogisticsSubType');
+            localStorage.removeItem('storeId');
+            localStorage.removeItem('storeName');
+            localStorage.removeItem('storeAddress');
+            localStorage.removeItem('storeTelephone');
+        }
 
-                return fetch('http://localhost:8080/api/shorder/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                });
-            })
-            .then(res => res.json())
-            .then(json => {
-                if (json.status === 200) {
-                    const orderId = json.data.shOrderId;
-                    const orderAmount = json.data.totalAmount;
-                    console.log('訂單建立成功，訂單ID:', orderId);
-                    alert('下單成功！即將前往付款頁面');
+        // ====================== 超商選擇 ========================
+        function selectStore() {
+            const cvsType = document.getElementById('cvsType').value;
 
-                    localStorage.removeItem('checkoutProdId');
-                    localStorage.removeItem('checkoutBuyQty');
+            if (!cvsType) {
+                alert("請選擇超商取貨方式");
+                return;
+            }
 
-                    // ✔️ 導向後端產生綠界付款
-                    window.location.href = `http://localhost:8080/ecpay/checkout?orderId=${orderId}&totalAmount=${orderAmount}`;
-                } else {
-                    alert('下單失敗：' + json.message);
+            const url = `/ecpay/logisticsMap?cvsType=${cvsType}`;
+            const windowOptions = 'width=800,height=600,scrollbars=yes,resizable=yes';
+            const logisticsWindow = window.open(url, 'LogisticsMap', windowOptions);
+
+            const handleMessage = (event) => {
+                if (event.origin !== window.location.origin) return;
+
+                const data = event.data;
+                if (data && data.storeId && data.storeName && data.storeAddress) {
+                    console.log('👉 收到門市資料：', data);
+
+                    // 顯示在地址欄
+                    document.getElementById('receiverAddress').value =
+                        `${data.storeName}（${data.storeId}）\n${data.storeAddress}\n${data.storeTelephone || ''}`;
+
+                    // 顯示在超商資訊區塊
+                    document.getElementById('storeName').textContent = data.storeName;
+                    document.getElementById('storeId').textContent = data.storeId;
+                    document.getElementById('storeAddress').textContent = data.storeAddress;
+                    document.getElementById('storeTelephone').textContent = data.storeTelephone || '無';
+                    document.getElementById('storeInfo').style.display = 'block';
+
+                    // 更新到 orderProcessData
+                    localStorage.setItem('cvsType', cvsType);
+                    localStorage.setItem('storeId', data.storeId);
+                    localStorage.setItem('storeName', data.storeName);
+                    localStorage.setItem('storeAddress', data.storeAddress);
+                    localStorage.setItem('storeTelephone', data.storeTelephone || '');
+                    // 關閉地圖視窗
+                    logisticsWindow.close();
+
+                    // 一次性監聽 → 用完移除
+                    window.removeEventListener('message', handleMessage);
                 }
-            })
-            .catch(err => {
-                console.error('下單失敗', err);
-                alert('下單失敗，請稍後再試');
-            });
-    }
+            };
 
-    // ✅ 監聽綠界超商地圖的回傳資料
-    window.addEventListener('message', (event) => {
-        console.log('👉 收到門市資料：', event.data);
-        const data = event.data;
-
-        if (data && data.storeName && data.storeAddress) {
-            const shippingAddressField = document.getElementById('shippingAddress');
-            shippingAddressField.value = `${data.storeName}（${data.storeId}）\n${data.storeAddress}\n${data.storeTelephone || ''}`;
+            window.addEventListener('message', handleMessage);
         }
-    });
-</script>
-
+    </script>
 
 
 </body>

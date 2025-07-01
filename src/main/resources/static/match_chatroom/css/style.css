@@ -176,7 +176,8 @@ html {
   width: 5rem;
   height: 5rem;
   border-radius: 50%;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .chatroom__bar-userInfo span {
   font-size: 1.6rem;
@@ -498,7 +499,8 @@ html {
 .popup-avatar-swiper .swiper-slide img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .popup-avatar-swiper .swiper-pagination {
   bottom: 0;
@@ -754,6 +756,16 @@ html {
     width: 90%;
   }
 }
+@media (min-width: 481px) and (max-width: 768px) {
+  .match__wrap {
+    width: 350px;
+  }
+}
+@media (max-width: 480px) {
+  .match__wrap {
+    width: 90%;
+  }
+}
 
 .match__header {
   text-align: center;
@@ -934,6 +946,7 @@ html {
   align-items: center;
   justify-content: center;
 }
+
 
 /* ✅ 淡出動畫 */
 .fade-out {

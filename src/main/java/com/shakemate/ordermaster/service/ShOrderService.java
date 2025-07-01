@@ -21,6 +21,7 @@ public interface ShOrderService {
             Timestamp startDate,
             Timestamp endDate);
 
+
     List<ShOrderDto> getAllOrders();
 
     ShOrderDto createOrder(ShOrderRequestDto orderInfo);
@@ -34,5 +35,7 @@ public interface ShOrderService {
     List<ShOrderDto> getOrdersByProd(Integer prodId);
 
     ShOrder updateOrder(ShOrder order);
+
+    void markedAsPaid(Integer orderId);
 
 }
