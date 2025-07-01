@@ -85,7 +85,7 @@
 							<td th:text="${admVO.admAcc}"></td>
 							<td><span th:each="auth : ${admVO.authFuncs}" th:text="${auth.authName + ' '}" /></td>
 							<td>
-								<span th:text="${admVO.status} ? '可登入' : '停權'"></span>
+								<span th:text="${admVO.admSta} ? '可登入' : '停權'"></span>
 							</td>
 							<td>
 								<form method="post" th:action="@{/adm/getOne_For_Update}" class="mb-0">

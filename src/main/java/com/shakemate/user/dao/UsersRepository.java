@@ -10,4 +10,5 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UsersRepository extends JpaRepository<Users, Integer> {
     @Transactional
     Users findByEmail(String email);
+    boolean existsByEmail(String email);
 }

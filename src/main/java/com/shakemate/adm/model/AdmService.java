@@ -62,20 +62,16 @@ public class AdmService {
 	// 新增管理員（含權限）時根據權限決定 status
 	@Transactional
 	public void addAdmWithAuth(AdmVO admVO, List<Integer> authFuncIds) {
-		// 密碼加密（如有需要）
+		Set<AuthFuncVO> authFuncs = new HashSet<>();
 
 		if (authFuncIds != null && !authFuncIds.isEmpty()) {
-			admVO.setStatus(true); // 有權限才啟用
-		} else {
-			admVO.setStatus(false); // 沒權限預設停用
-		}
-		repository.save(admVO);
-		if (authFuncIds != null && !authFuncIds.isEmpty()) {
-			Set<AuthFuncVO> authFuncs = authFuncRepository.findAllById(authFuncIds).stream()
+			authFuncs = authFuncRepository.findAllById(authFuncIds).stream()
 					.collect(Collectors.toSet());
-			admVO.setAuthFuncs(authFuncs);
-			repository.save(admVO);
 		}
+
+		admVO.setAuthFuncs(authFuncs); // ✅ 先設好權限
+		admVO.setStatus(!authFuncs.isEmpty()); // ✅ 再用實際權限數量來決定啟用或停權
+		repository.save(admVO); // ✅ 最後再 save 一次就好
 	}
 
 	public void updateAdmWithAuth(AdmVO admVO, List<Integer> authFuncIds) {
@@ -139,6 +135,9 @@ public class AdmService {
 	public void updateAdmBasicWithAuth(AdmVO admVO, List<Integer> authFuncIds) {
 		updateAdmBasic(admVO); // 先更新基本資料
 		updateAdmAuths(admVO.getAdmId(), authFuncIds); // 再更新權限
+		boolean hasAuths = (authFuncIds != null && !authFuncIds.isEmpty());
+		admVO.setStatus(hasAuths);
+		repository.save(admVO);
 	}
 
 	public List<AdmVO> findByName(String name) {
