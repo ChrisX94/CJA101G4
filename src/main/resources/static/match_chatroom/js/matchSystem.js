@@ -1,6 +1,7 @@
 let roomId = null;
 let currentUserId = null;
 let currentTargetId = null;
+let currentProfile = null;
 let matchList = [];
 let currentIndex = 0;
 const MATCH_API_BASE = "/api/match";
@@ -157,6 +158,7 @@ function startMatchPage() {
 
 	// 渲染會員卡片畫面
 	function renderMatchCard(profile) {
+		currentProfile = profile;
 		currentTargetId = profile.userId;
 
 		const card = document.querySelector(".match__card");
@@ -293,9 +295,18 @@ function startMatchPage() {
 					if (data.alreadyActed) {
 						alert("⚠️ 你已經按過這個人囉");
 					} else if (data.matched) {
-						// ✅ 如果是配對成功 → 把目前這筆從 matchList 移除
-						matchList.splice(currentIndex, 1);
-						localStorage.setItem(`matchedList_${currentUserId}`, JSON.stringify(matchList));
+						// ✅ 儲存 matchedProfile：有 matchList 就用它，沒有就用 currentProfile
+						const matchedProfile =
+							(matchList && matchList.length > 0) ? matchList[currentIndex] : currentProfile;
+
+						localStorage.setItem("matchedProfile", JSON.stringify(matchedProfile));
+
+						// ✅ 如果是來自 matchList，要記得把它移除
+						if (matchList && matchList.length > 0) {
+							matchList.splice(currentIndex, 1);
+							localStorage.setItem(`matchedList_${currentUserId}`, JSON.stringify(matchList));
+						}
+						
 						// 對方也按過你：跳轉成功配對頁面
 						window.location.href = `matchSuccess.html?fromSuccess=1&roomId=${data.roomId}`;
 						return; // 不切換下一位，直接跳頁
@@ -394,3 +405,61 @@ function getHighlightedText(title, content) {
 	}).join('、'); // ✅ 改用「、」更自然
 }
 
+// ✅ 如果在 matchSuccess.html，就塞配對成功對象的資訊跟照片
+if (window.location.pathname.includes("matchSuccess.html")) {
+	const profile = JSON.parse(localStorage.getItem("matchedProfile"));
+
+	if (profile) {
+		// ✅ 名稱與年齡星座
+		const nameEl = document.querySelector(".match__name");
+		if (nameEl) nameEl.textContent = profile.username;
+
+		const infoEl = document.querySelector(".match__info");
+		if (infoEl) infoEl.textContent = `${profile.age}歲・${profile.zodiac}`;
+
+		// ✅ 清除舊 DOM
+		const avatarBox = document.querySelector(".matchSuccess__avatar-box");
+		if (avatarBox) avatarBox.innerHTML = "";
+
+		// ✅ 建立 swiper-container
+		const swiperContainer = document.createElement("div");
+		swiperContainer.className = "swiper avatar-swiper";
+
+		// ✅ 建立 swiper-wrapper
+		const avatarWrapper = document.createElement("div");
+		avatarWrapper.className = "swiper-wrapper";
+
+		// ✅ 建立每張頭貼
+		profile.avatarList.forEach(url => {
+			const avatarSlide = document.createElement("div");
+			avatarSlide.className = "swiper-slide";
+
+			const img = document.createElement("img");
+			img.className = "match__avatar";
+			img.src = url;
+
+			avatarSlide.appendChild(img);
+			avatarWrapper.appendChild(avatarSlide);
+		});
+
+		// ✅ 建立 pagination（點點）
+		const avatarPagination = document.createElement("div");
+		avatarPagination.className = "swiper-pagination";
+
+		// ✅ 組裝 DOM
+		swiperContainer.appendChild(avatarWrapper);
+		swiperContainer.appendChild(avatarPagination);
+		avatarBox.appendChild(swiperContainer);
+
+		// ✅ 初始化 Swiper
+		new Swiper(".avatar-swiper", {
+			pagination: {
+				el: ".avatar-swiper .swiper-pagination",
+				clickable: true,
+			},
+			loop: true,
+		});
+	} else {
+		alert("⚠️ 無法取得配對成功資料");
+	}
+}
