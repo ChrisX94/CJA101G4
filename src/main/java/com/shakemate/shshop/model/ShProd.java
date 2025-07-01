@@ -1,6 +1,8 @@
 package com.shakemate.shshop.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.user.model.Users;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -26,6 +28,7 @@ public class ShProd implements Serializable {
 
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "USER_ID", nullable = false)
     private Users user;
 
@@ -72,7 +75,7 @@ public class ShProd implements Serializable {
     private String prodBrand;
 
     @NotNull(message = "商品數量: 請勿空白")
-    @Min(value = 1, message = "商品數量: 不能小於 {value}")
+    @Min(value = 0, message = "商品數量: 不能小於 {value}")
     @Max(value = 10, message = "商品數量: 不能超過 {value}")
     @Column(name = "PROD_COUNT")
     private Integer prodCount;
@@ -95,8 +98,10 @@ public class ShProd implements Serializable {
     @OneToMany(mappedBy = "shProd", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ShProdPic> prodPics;
 
-    @OneToMany(mappedBy = "shProd", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<ShProdRp> prodRps;
+
+    @OneToMany(mappedBy = "shProd", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<ShOrder> orders;
 
     public ShProd() {
         super();
@@ -242,17 +247,20 @@ public class ShProd implements Serializable {
     public List<ShProdPic> getProdPics() {
         return prodPics;
     }
-
     public void setProdPics(List<ShProdPic> prodPics) {
         this.prodPics = prodPics;
     }
 
-    public List<ShProdRp> getProdRps() {
-        return prodRps;
+    public void setShProdType(ShProdType shProdType) {
+        this.shProdType = shProdType;
     }
 
-    public void setProdRps(List<ShProdRp> prodRps) {
-        this.prodRps = prodRps;
+    public List<ShOrder> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<ShOrder> orders) {
+        this.orders = orders;
     }
 
     @Override

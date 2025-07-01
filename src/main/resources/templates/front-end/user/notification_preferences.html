@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>通知偏好設定 - ShakeMate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* 基礎樣式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 動態漸變背景 */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 浮動設定圖標 */
+        .floating-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-icon:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-icon:nth-child(2) {
+            top: 20%;
+            right: 15%;
+            animation-delay: 1s;
+        }
+
+        .floating-icon:nth-child(3) {
+            top: 60%;
+            left: 5%;
+            animation-delay: 2s;
+        }
+
+        .floating-icon:nth-child(4) {
+            bottom: 20%;
+            right: 10%;
+            animation-delay: 3s;
+        }
+
+        .floating-icon:nth-child(5) {
+            bottom: 10%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .floating-icon:nth-child(6) {
+            top: 50%;
+            right: 5%;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        /* 主容器樣式 */
+        .container {
+            position: relative;
+            z-index: 10;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 主卡片樣式 */
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 15px 12px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            background-size: 300% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* 卡片標題 */
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: sparkle 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes sparkle {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.8rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-header .gear-icon {
+            animation: spin 4s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 表單容器 */
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* 載入動畫容器 */
+        .loading-container {
+            background: linear-gradient(45deg, #f0f8ff, #e6f3ff);
+            border-radius: 15px;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: loading-shimmer 2s infinite;
+        }
+
+        @keyframes loading-shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* 偏好設定區塊 */
+        .preferences-section {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(129, 199, 132, 0.1));
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 2px solid rgba(76, 175, 80, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .preferences-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.2);
+            border-color: rgba(76, 175, 80, 0.4);
+        }
+
+        .preferences-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4caf50, #81c784, #66bb6a);
+            background-size: 200% 100%;
+            animation: progress-flow 3s ease-in-out infinite;
+        }
+
+        @keyframes progress-flow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* 勿擾時段樣式 */
+        .dnd-section {
+            background: linear-gradient(135deg, rgba(103, 58, 183, 0.1), rgba(156, 39, 176, 0.1));
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid rgba(103, 58, 183, 0.2);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .dnd-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(103, 58, 183, 0.2);
+        }
+
+        .dnd-section h4 {
+            color: #673ab7;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .bed-icon {
+            animation: bounce 2s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-3px); }
+        }
+
+        /* 開關樣式 */
+        .form-check-input {
+            width: 3rem;
+            height: 1.5rem;
+            border-radius: 50px;
+            border: 2px solid #ddd;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .form-check-input:checked {
+            background: linear-gradient(135deg, #4caf50, #81c784);
+            border-color: #4caf50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+        }
+
+        /* 標籤樣式 */
+        .form-check-label {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding-top: 2px;
+        }
+
+        .form-check-label:hover {
+            color: #4caf50;
+        }
+
+        /* 時間輸入框 */
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus {
+            border-color: #673ab7;
+            box-shadow: 0 0 0 0.25rem rgba(103, 58, 183, 0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 時間範圍容器 */
+        #dnd-time-range {
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                max-height: 200px;
+                transform: translateY(0);
+            }
+        }
+
+        /* 儲存按鈕 */
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .save-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .save-btn:hover::before {
+            left: 100%;
+        }
+
+        .save-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* 分隔線 */
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ddd, transparent);
+            margin: 2rem 0;
+        }
+
+        /* 分類行樣式 */
+        .category-row {
+            border-bottom: 1px solid rgba(221, 221, 221, 0.3);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .category-row:hover {
+            background: rgba(76, 175, 80, 0.05);
+            transform: translateX(5px);
+            border-radius: 8px;
+        }
+
+        .category-row:last-child {
+            border-bottom: none;
+        }
+
+        /* 載入動畫 */
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+            border-color: #667eea;
+            border-right-color: transparent;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .floating-icon {
+                font-size: 1.5rem;
+            }
+            
+            .main-card {
+                border-radius: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 浮動設定圖標 -->
+<div class="floating-icons">
+    <div class="floating-icon">⚙️</div>
+    <div class="floating-icon">🔔</div>
+    <div class="floating-icon">🌙</div>
+    <div class="floating-icon">📱</div>
+    <div class="floating-icon">✉️</div>
+    <div class="floating-icon">🔧</div>
+</div>
+
+<div class="container py-5">
+    <div class="main-card card shadow-lg">
+        <div class="card-header">
+            <h3><i class="fas fa-cog gear-icon"></i> 通知偏好設定</h3>
+        </div>
+        <div class="card-body">
+            <form id="preferences-form">
+                <!-- 偏好設定載入區域 -->
+                <div class="preferences-section">
+                    <div id="preferences-container">
+                        <div class="loading-container text-center p-5">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">載入中...</span>
+                            </div>
+                            <p class="mt-3 text-muted">正在載入您的通知偏好設定...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- 勿擾時段設定 -->
+                <div class="dnd-section">
+                    <h4><i class="fas fa-bed bed-icon"></i> 勿擾時段 (DND)</h4>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="dnd-enabled">
+                        <label class="form-check-label" for="dnd-enabled">啟用勿擾時段</label>
+                    </div>
+                    <div id="dnd-time-range" class="row" style="display: none;">
+                        <div class="col-md-6 mb-3">
+                            <label for="dnd-start" class="form-label">
+                                <i class="fas fa-moon"></i> 開始時間
+                            </label>
+                            <input type="time" class="form-control" id="dnd-start">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="dnd-end" class="form-label">
+                                <i class="fas fa-sun"></i> 結束時間
+                            </label>
+                            <input type="time" class="form-control" id="dnd-end">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="save-btn btn">
+                        <i class="fas fa-save"></i> 儲存變更
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script th:src="@{/js/notification-preferences.js}"></script>
+
+<script>
+    // 勿擾時段切換動畫
+    document.getElementById('dnd-enabled').addEventListener('change', function() {
+        const timeRange = document.getElementById('dnd-time-range');
+        if (this.checked) {
+            timeRange.style.display = 'block';
+            setTimeout(() => {
+                timeRange.style.animation = 'slideDown 0.5s ease-out';
+            }, 10);
+        } else {
+            timeRange.style.animation = 'slideUp 0.3s ease-out';
+            setTimeout(() => {
+                timeRange.style.display = 'none';
+            }, 300);
+        }
+    });
+
+    // 頁面載入完成動畫
+    document.addEventListener('DOMContentLoaded', function() {
+        // 延遲顯示浮動圖標
+        const icons = document.querySelectorAll('.floating-icon');
+        icons.forEach((icon, index) => {
+            setTimeout(() => {
+                icon.style.opacity = '0.15';
+            }, index * 200);
+        });
+    });
+</script>
+
+</body>
+</html> 

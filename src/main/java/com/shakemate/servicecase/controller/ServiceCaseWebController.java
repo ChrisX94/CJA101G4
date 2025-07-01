@@ -1,15 +1,19 @@
 package com.shakemate.servicecase.controller;
-
-import com.shakemate.casetype.model.*;
+//負責後台 HTML 頁面的 CRUD（Thymeleaf／JSP 等）。
+import com.shakemate.casetype.model.CaseType;
+import com.shakemate.casetype.model.CaseTypeRepository;
 import com.shakemate.servicecase.model.ServiceCase;
 import com.shakemate.servicecase.model.ServiceCaseService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 
 @Controller
 @RequestMapping("/servicecase")
@@ -27,7 +31,7 @@ public class ServiceCaseWebController {
 	}
 
 	// 顯示全部案件
-	@GetMapping
+	@GetMapping({"", "/list"})
 	public String list(Model model) {
 		model.addAttribute("cases", service.getAll());
 		return "back-end/servicecase/list";
@@ -62,4 +66,27 @@ public class ServiceCaseWebController {
 		service.delete(id);
 		return "redirect:/servicecase";
 	}
+	
+	
+
+	/**
+     * 查詢案件：支援 userId, caseTypeId, caseStatus, fromDate, toDate
+     * 前端 form 發 GET /servicecase/search?userId=...&caseTypeId=...&caseStatus=...&fromDate=yyyy-MM-dd&toDate=yyyy-MM-dd
+     */
+    @GetMapping("/search")
+    public String search(
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) Integer caseTypeId,
+            @RequestParam(required = false) Integer caseStatus,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            Model model
+    ) {
+        // 呼叫 Service 層的查詢方法，回傳符合條件的 List<ServiceCase>
+        List<ServiceCase> results = service.search(userId, caseTypeId, caseStatus, fromDate, toDate);
+
+        model.addAttribute("cases", results);
+        // allTypes 已由 @ModelAttribute 提供
+        return "back-end/servicecase/listone";
+    }
 }

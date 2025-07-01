@@ -41,7 +41,7 @@ public class LoginController {
             HttpServletRequest request,
             Model model) {
         Users user = userService.getUserByEmail(account);
-        if (user == null || !userService.login(user.getEmail(), password)) {
+        if (user == null || !userService.login(user.getEmail(), password) || user.getUserStatus() == (byte)4) {
             model.addAttribute("errorMsg", "登入失敗，請檢查帳號或密碼！");
             return "login"; // 回到 login.html
         }
