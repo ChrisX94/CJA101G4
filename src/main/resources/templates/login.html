@@ -3,48 +3,129 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>會員登入</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- 可替換成你自己的樣式路徑 -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .message {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .register-link a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
 
-<center>
-    <div th:if="${errorMsg != null}" style="color: red; margin: 10px;">
-        <p th:text="${errorMsg}"></p>
+    <div class="login-container">
+        <h2>會員登入</h2>
+
+        <div class="message error" th:if="${error}">
+            <p th:text="${error}"></p>
+        </div>
+
+        <div class="message success" th:if="${success}">
+            <p th:text="${success}"></p>
+        </div>
+
+        <form th:action="@{/login/loginHandler}" method="post">
+            <div class="form-group">
+                <label for="email">電子郵件</label>
+                <input type="email" id="email" name="account" required />
+            </div>
+
+            <div class="form-group">
+                <label for="pwd">密碼</label>
+                <input type="password" id="pwd" name="password" required />
+            </div>
+
+            <button type="submit">登入</button>
+        </form>
+
+        <div class="register-link">
+            還沒有帳號？<a th:href="@{/user/signup}">註冊新會員</a>
+        </div>
     </div>
-    <form th:action="@{/login/loginHandler}" method="post">
 
-        <table border="1">
-            <tr>
-                <td colspan="2" align="center">
-                    <p>
-                        輸入 <b>(測試登入)</b>:<br>
-                        帳號: <b>tomcat</b><br>
-                        密碼: <b>tomcat</b><br>
-                    </p>
-                </td>
-            </tr>
-
-            <tr>
-                <td align="right"><b>account:</b></td>
-                <td><input type="text" name="account" size="15" /></td>
-            </tr>
-
-            <tr>
-                <td align="right"><b>password:</b></td>
-                <td><input type="password" name="password" size="15" /></td>
-            </tr>
-
-            <tr>
-                <td colspan="2" align="center">
-                    <input type="submit" name="login" value="login" />
-                </td>
-            </tr>
-        </table>
-    </form>
-    <a th:href="@{/login/signup}" >Sing Up</a>
-</center>
 </body>
 
 </html>
