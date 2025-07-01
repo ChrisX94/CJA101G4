@@ -47,9 +47,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
-        Integer senderId = extractUserId(session);
         String msg = message.getPayload();
-
+        
+        // 建立 ObjectMapper 用來把 JSON 字串解析成 Java Map 或物件
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> data;
         try {

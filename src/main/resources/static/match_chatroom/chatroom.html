@@ -4,6 +4,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&display=swap" rel="stylesheet">
 <link
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 	rel="stylesheet">
@@ -17,186 +20,199 @@
 </head>
 
 <body>
-	<!-- 🔹 頂部選單 -->
-	<header class="header">
-		<div class="header__logo">
-			<a href="#"> <img src="img/logoText.png" alt="">
-			</a>
-		</div>
-
-		<section class="mobile__nav">
-			<a href="#">
-				<i class="fa-solid fa-user"></i>
-			</a>
-			<div class="hamburger">
-				<span></span>
-				<span></span>
-				<span></span>
+	<div class="bg">
+		
+		
+		<!-- 🔹 頂部選單 -->
+		<header class="header">
+			<div class="header__logo">
+			  <a class="header__logo-link" href="#">
+			  	<div class="header__logo-img">
+				    <img src="img/logo.png" alt="logo">
+				</div>
+			    <div class="header__logo-txt">
+			      <span class="ch">抖一下</span>
+			      <span class="en">ShakeMate</span>
+			    </div>
+			  </a>
 			</div>
-		</section>
-
-		<nav class="header__nav">
-			<ul class="header__list">
-				<li class="header__item"><a href="match.html">配對</a></li>
-				<li class="header__item"><a href="chatroom.html">聊天室</a></li>
-				<li class="header__item"><a href="#">活動</a></li>
-				<li class="header__item"><a href="#">討論區</a></li>
-				<li class="header__item"><a href="#">商城</a></li>
-				<li class="header__item"><a href="#">二手商城</a></li>
-				<li class="header__item"><a href="#">會員專區</a></li>
-			</ul>
-			<a href="#" class="member">
-				<i class="fa-solid fa-user"></i>
-			</a>
-		</nav>
-	</header>
-	<!-- ✅ 側邊選單區塊 HTML（漢堡選單移入 sidebar 中）
-    <div class="sidebar-wrapper">
-        <div class="sidebar" id="sidebar">
-            ✅ 漢堡選單按鈕，改為相對於 sidebar 包裹層定位
-            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            <ul>
-                <li><i class="fa-solid fa-user"></i> 會員中心</li>
-                <li><i class="fa-solid fa-store"></i> 聊聊商城</li>
-                <li><i class="fa-solid fa-headset"></i> 客服中心</li>
-                <li><i class="fa-solid fa-gear"></i> 設定</li>
-            </ul>
-        </div>
-    </div> -->
-	<!-- ✅ 聊天列表與聊天室整體布局 -->
-	<div class="chat-layout">
-		<!-- ✅ 聊天列表 -->
-		<div class="chat-list">
-			<ul>
-				<!--                 <li class="active" onclick="switchChat('油條')" data-name="油條"> -->
-				<!--                     <img src="img/amy.jpg" /> -->
-				<!--                     <div class="chat-list-txt"> -->
-				<!--                         <h3>油條</h3> -->
-				<!--                         <p>喵喵?</p> -->
-				<!--                     </div> -->
-				<!--                 </li> -->
-				<!--                 <li onclick="switchChat('黑糖')" data-name="黑糖"> -->
-				<!--                     <img src="img/tom.jpg" /> -->
-				<!--                     <div class="chat-list-txt"> -->
-				<!--                         <h3>黑糖</h3> -->
-				<!--                         <p>我是一隻貓嗎??</p> -->
-				<!--                     </div> -->
-				<!--                 </li> -->
-				<!--                 <li onclick="switchChat('大福')" data-name="大福"> -->
-				<!--                     <img src="img/dafu.jpg" /> -->
-				<!--                     <div class="chat-list-txt"> -->
-				<!--                         <h3>大福</h3> -->
-				<!--                         <p>汪汪</p> -->
-				<!--                     </div> -->
-				<!--                 </li> -->
-			</ul>
-		</div>
-
-		<!-- ✅ 原本聊天室區塊，移到右側 -->
-		<div class="chatroom">
-			<div class="chatroom__bar">
-				<div class="chatroom__bar-content">
-					<div class="chatroom__bar-userInfo">
-						<img class="chatroom__bar-avatar" src="" alt="對方頭貼" />
-						<span class="chatroom__bar-name"></span>
-					</div>
-					<div class="chatroom__options">
-						<i class="fa-solid fa-ellipsis-vertical"></i>
-						<div class="chatroom__bar-menu">
-							<button onclick="reportUser()">檢舉</button>
-							<button onclick="unmatchUser()">解除配對</button>
+	
+			<section class="mobile__nav">
+				<a href="#">
+					<i class="fa-solid fa-user"></i>
+				</a>
+				<div class="hamburger">
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+			</section>
+	
+			<nav class="header__nav">
+				<ul class="header__list">
+					<li class="header__item"><a href="match.html">配對</a></li>
+					<li class="header__item"><a href="chatroom.html">聊天室</a></li>
+					<li class="header__item"><a href="#">活動</a></li>
+					<li class="header__item"><a href="#">討論區</a></li>
+					<li class="header__item"><a href="#">商城</a></li>
+					<li class="header__item"><a href="#">二手商城</a></li>
+					<li class="header__item"><a href="#">會員專區</a></li>
+				</ul>
+				<a href="#" class="member">
+					<i class="fa-solid fa-user"></i>
+				</a>
+			</nav>
+		</header>
+		<!-- ✅ 側邊選單區塊 HTML（漢堡選單移入 sidebar 中）
+	    <div class="sidebar-wrapper">
+	        <div class="sidebar" id="sidebar">
+	            ✅ 漢堡選單按鈕，改為相對於 sidebar 包裹層定位
+	            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+	                <i class="fa-solid fa-bars"></i>
+	            </button>
+	            <ul>
+	                <li><i class="fa-solid fa-user"></i> 會員中心</li>
+	                <li><i class="fa-solid fa-store"></i> 聊聊商城</li>
+	                <li><i class="fa-solid fa-headset"></i> 客服中心</li>
+	                <li><i class="fa-solid fa-gear"></i> 設定</li>
+	            </ul>
+	        </div>
+	    </div> -->
+		<!-- ✅ 聊天列表與聊天室整體布局 -->
+		<div class="chat-layout">
+			<!-- ✅ 聊天列表 -->
+			<div class="chat-list">
+				<ul>
+					<!--                 <li class="active" onclick="switchChat('油條')" data-name="油條"> -->
+					<!--                     <img src="img/amy.jpg" /> -->
+					<!--                     <div class="chat-list-txt"> -->
+					<!--                         <h3>油條</h3> -->
+					<!--                         <p>喵喵?</p> -->
+					<!--                     </div> -->
+					<!--                 </li> -->
+					<!--                 <li onclick="switchChat('黑糖')" data-name="黑糖"> -->
+					<!--                     <img src="img/tom.jpg" /> -->
+					<!--                     <div class="chat-list-txt"> -->
+					<!--                         <h3>黑糖</h3> -->
+					<!--                         <p>我是一隻貓嗎??</p> -->
+					<!--                     </div> -->
+					<!--                 </li> -->
+					<!--                 <li onclick="switchChat('大福')" data-name="大福"> -->
+					<!--                     <img src="img/dafu.jpg" /> -->
+					<!--                     <div class="chat-list-txt"> -->
+					<!--                         <h3>大福</h3> -->
+					<!--                         <p>汪汪</p> -->
+					<!--                     </div> -->
+					<!--                 </li> -->
+				</ul>
+			</div>
+	
+			<!-- ✅ 原本聊天室區塊，移到右側 -->
+			<div class="chatroom">
+				<div class="chatroom__bar">
+					<div class="chatroom__bar-content">
+						<div class="chatroom__bar-userInfo">
+							<img class="chatroom__bar-avatar" src="" alt="對方頭貼" />
+							<span class="chatroom__bar-name"></span>
+						</div>
+						<div class="chatroom__options">
+							<i class="fa-solid fa-ellipsis-vertical"></i>
+							<div class="chatroom__bar-menu">
+								<button onclick="reportUser()">檢舉</button>
+								<button onclick="unmatchUser()">解除配對</button>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="chat-content" id="chatContent">
-				<!-- <div class="message left">
-                    <div class="avatar">
-                        <div class="pic">
-                            <img src="/practice/images/amy.jpg" alt="Amy">
-                        </div>
-                    </div>
-                    <div class="bubble-block">
-                        <div class="name">油條</div>
-                        <div class="bubble">你有沒有興趣跟臘腸狗交朋友?</div>
-                    </div>
-                </div>
-
-                <div class="message right">
-                    <div class="avatar">
-                        <div class="pic">
-                            <img src="/practice/images/tom.jpg" alt="Tom">
-                        </div>
-                    </div>
-                    <div class="bubble-block">
-                        <div class="bubble">喵喵?</div>
-                    </div>
-                </div> -->
-			</div>
-
-			<div class="chat-input">
-				<div class="input-icons">
-					<button class="icon-btn" title="album">
-						<i id="uploadImageBtn" class="fa-regular fa-image"></i>
-					</button>
-					<input type="file" id="imageInput" name="img" accept="image/*"
-						style="display: none;">
-
-					<button class="icon-btn" title="stickers">
-						<i class="fa-regular fa-face-smile"></i>
-					</button>
+				<div class="chat-content" id="chatContent">
+					<!-- <div class="message left">
+	                    <div class="avatar">
+	                        <div class="pic">
+	                            <img src="/practice/images/amy.jpg" alt="Amy">
+	                        </div>
+	                    </div>
+	                    <div class="bubble-block">
+	                        <div class="name">油條</div>
+	                        <div class="bubble">你有沒有興趣跟臘腸狗交朋友?</div>
+	                    </div>
+	                </div>
+	
+	                <div class="message right">
+	                    <div class="avatar">
+	                        <div class="pic">
+	                            <img src="/practice/images/tom.jpg" alt="Tom">
+	                        </div>
+	                    </div>
+	                    <div class="bubble-block">
+	                        <div class="bubble">喵喵?</div>
+	                    </div>
+	                </div> -->
 				</div>
-				<input type="text" id="msgInput" placeholder="輸入訊息..." />
-				<button class="send-btn" onclick="sendMessage()">送出</button>
-			</div>
-		</div>
-	</div>
-	<!-- 個人資訊彈出框 -->
-	<div class="profile-popup" id="profilePopup">
-		<div class="profile-card">
-			<div class="profile__header">
-				<h2 id="popupName" class="profile__name"></h2>
-				<p id="popupAge" class="profile__info"></p>
-			</div>
-			<div class="profile-avatar">
-				<div class="swiper popup-avatar-swiper">
-					<div class="swiper-wrapper" id="popupAvatarWrapper"></div>
-					<div class="swiper-pagination"></div>
+	
+				<div class="chat-input">
+					<div class="input-icons">
+						<button class="icon-btn" title="album">
+							<i id="uploadImageBtn" class="fa-regular fa-image"></i>
+						</button>
+						<input type="file" id="imageInput" name="img" accept="image/*"
+							style="display: none;">
+	
+						<button class="icon-btn" title="stickers">
+							<i class="fa-regular fa-face-smile"></i>
+						</button>
+					</div>
+					<input type="text" id="msgInput" placeholder="輸入訊息..." />
+					<button class="send-btn" onclick="sendMessage()">送出</button>
 				</div>
 			</div>
-
-			<div class="profile-row">
-				<h5 class="label">人格特質</h5>
-				<p class="value" id="popupPersonality">--</p>
-			</div>
-
-			<div class="profile-row">
-				<h5 class="label">興趣專長</h5>
-				<p class="value" id="popupInterests">--</p>
-			</div>
-
-			<div class="profile-row">
-				<h5 class="label">自我介紹</h5>
-				<p class="value" id="popupIntro">--</p>
+		</div>
+		<!-- 個人資訊彈出框 -->
+		<div class="profile-popup" id="profilePopup">
+			<div class="profile-card">
+				<div class="profile__header">
+					<h2 id="popupName" class="profile__name"></h2>
+					<p id="popupAge" class="profile__info"></p>
+				</div>
+				<div class="profile-avatar">
+					<div class="swiper popup-avatar-swiper">
+						<div class="swiper-wrapper" id="popupAvatarWrapper"></div>
+						<div class="swiper-pagination"></div>
+					</div>
+				</div>
+	
+				<div class="profile-row">
+					<h5 class="label">人格特質</h5>
+					<p class="value" id="popupPersonality">--</p>
+				</div>
+	
+				<div class="profile-row">
+					<h5 class="label">興趣專長</h5>
+					<p class="value" id="popupInterests">--</p>
+				</div>
+	
+				<div class="profile-row">
+					<h5 class="label">自我介紹</h5>
+					<p class="value" id="popupIntro">--</p>
+				</div>
 			</div>
 		</div>
+	
+		<!-- 	<div class="profile-popup" id="profilePopup"> -->
+		<!-- 		<div class="profile-card"> -->
+		<!-- 			<span class="close-btn">&times;</span> -->
+		<!-- 			<div class="profile-avatar"> -->
+		<!-- 				<img id="popupAvatar" src="" alt="頭像"> -->
+		<!-- 			</div> -->
+		<!-- 			<h3 id="popupName">名字</h3> -->
+		<!-- 			<p id="popupAge">年齡：-- 歲</p> -->
+		<!-- 			<p id="popupPersonality">人格特質：--</p> -->
+		<!-- 			<p id="popupInterests">興趣專長：--</p> -->
+		<!-- 			<p id="popupIntro">自我介紹：--</p> -->
+		<!-- 		</div> -->
+		<!-- 	</div> -->
+		<div class="bg-shape top-left"></div>
+		<div class="bg-shape bottom-right"></div>
 	</div>
-
-	<!-- 	<div class="profile-popup" id="profilePopup"> -->
-	<!-- 		<div class="profile-card"> -->
-	<!-- 			<span class="close-btn">&times;</span> -->
-	<!-- 			<div class="profile-avatar"> -->
-	<!-- 				<img id="popupAvatar" src="" alt="頭像"> -->
-	<!-- 			</div> -->
-	<!-- 			<h3 id="popupName">名字</h3> -->
-	<!-- 			<p id="popupAge">年齡：-- 歲</p> -->
-	<!-- 			<p id="popupPersonality">人格特質：--</p> -->
-	<!-- 			<p id="popupInterests">興趣專長：--</p> -->
-	<!-- 			<p id="popupIntro">自我介紹：--</p> -->
-	<!-- 		</div> -->
-	<!-- 	</div> -->
 	<script src="js/chatroom.js"></script>
 	<script src="js/authCheck.js"></script>
 </body>

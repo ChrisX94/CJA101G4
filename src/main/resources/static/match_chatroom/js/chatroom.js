@@ -51,7 +51,7 @@ function loadChatRooms() {
 				if (!room.lastMessage) {
 					previewText = "開始跟抖友聊天吧！";
 				} else if (room.lastMessage.startsWith("image:")) {
-					previewText = "[圖圖]";
+					previewText = "【圖片】";
 				} else {
 					previewText = room.lastMessage.slice(0, 10) + (room.lastMessage.length > 10 ? "..." : "");
 				}
@@ -238,10 +238,12 @@ async function sendMessage() {
 			content
 		}));
 	}
+	
 	// 主動更新自己聊天室列表（preview + 時間）
 	const li = document.querySelector(`.chat-list li[data-roomid="${currentRoomId}"]`);
 	if (li) {
-		li.querySelector(".chat-preview").textContent = content;
+		const previewContent = content.slice(0, 10) + (content.length > 10 ? "..." : "");
+		li.querySelector(".chat-preview").textContent = previewContent;
 		li.querySelector(".chat-time").textContent = getTimeString(); // 使用你自己寫好的時間函式
 		document.querySelector(".chat-list").prepend(li);
 
@@ -402,7 +404,7 @@ function connectWebSocket(userId) {
 			// 更新 preview 文本
 			const preview = li.querySelector("p");
 			
-			preview.textContent = type === "image" ? "[圖圖]" : content.slice(0, 10) + (content.length > 10 ? "..." : "");
+			preview.textContent = type === "image" ? "【圖片】" : content.slice(0, 10) + (content.length > 10 ? "..." : "");
 			// 更新訊息傳送時間			
 			const time = li.querySelector(".chat-time");
 			if (time) {
@@ -528,7 +530,7 @@ document.getElementById("imageInput").addEventListener("change", function(event)
 	// 主動更新自己聊天室列表（preview + 時間）
 	const li = document.querySelector(`.chat-list li[data-roomid="${currentRoomId}"]`);
 	if (li) {
-		li.querySelector(".chat-preview").textContent = "[圖圖]";
+		li.querySelector(".chat-preview").textContent = "【圖片】";
 		li.querySelector(".chat-time").textContent = getTimeString(); // 使用你自己寫好的時間函式
 		document.querySelector(".chat-list").prepend(li);
 
