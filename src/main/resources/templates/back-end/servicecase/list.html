@@ -138,6 +138,7 @@ td.actions a:hover { color: black; opacity: 0.8; }
                     <th>編號</th>
                     <th onclick="sortTableByColumn(1)" style="cursor: pointer;">類別編號 ▲▼</th>
                     <th onclick="sortTableByColumn(2)" style="cursor: pointer;">使用者編號 ▲▼</th>
+                    <th>Email</th>
                     <th>標題</th>
                     <th>狀態</th>
                     <th>建立時間</th>
@@ -150,6 +151,7 @@ td.actions a:hover { color: black; opacity: 0.8; }
                     <td th:text="${sc.caseId}">1</td>
                     <td th:text="${sc.caseTypeId}">1</td>
                     <td th:text="${sc.userId}">123</td>
+                    <td th:text="${sc.email}">email@example.com</td>
                     <td th:text="${sc.title}">範例標題</td>
 <!--                     <td th:text="${sc.caseStatus}">0</td> -->
 					<td th:text="${sc.statusName}"></td>
