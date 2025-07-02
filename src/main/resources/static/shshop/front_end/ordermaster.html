@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>訂單查詢 - MatchMarket</title>
     <!-- 引入 Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <!-- 引入 Font Awesome 和 Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="./css/ordermaster.css">
 </head>
+
 <body>
     <!-- Header 導覽列 -->
     <header class="header">
@@ -79,21 +83,34 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label for="orderIdInput" class="block text-gray-700 text-sm font-bold mb-2">訂單編號:</label>
-                            <input type="text" id="orderIdInput" placeholder="請輸入訂單編號" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500">
+                            <input type="text" id="orderIdInput" placeholder="請輸入訂單編號"
+                                class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-indigo-500">
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-gray-700 text-sm font-bold mb-2">訂單狀態:</label>
-                            <div id="orderStatusButtons" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-5 gap-3">
-                                <button class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out" data-status="">所有狀態</button>
-                                <button class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out" data-status="0">待處理</button>
-                                <button class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out" data-status="1">處理中</button>
-                                <button class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out" data-status="2">已完成</button>
-                                <button class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out" data-status="3">已取消</button>
+                            <div id="orderStatusButtons"
+                                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-5 gap-3">
+                                <button
+                                    class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                                    data-status="">所有狀態</button>
+                                <button
+                                    class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                                    data-status="0">待處理</button>
+                                <button
+                                    class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                                    data-status="1">處理中</button>
+                                <button
+                                    class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                                    data-status="2">已完成</button>
+                                <button
+                                    class="status-button bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                                    data-status="3">已取消</button>
                             </div>
                         </div>
                     </div>
                     <div class="flex justify-end">
-                        <button id="searchButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 w-full md:w-auto">
+                        <button id="searchButton"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 w-full md:w-auto">
                             查詢訂單
                         </button>
                     </div>
@@ -114,44 +131,44 @@
     </div>
 
     <script>
- const searchButton = document.getElementById('searchButton');
-const orderIdInput = document.getElementById('orderIdInput');
-const searchResultsDiv = document.getElementById('searchResults');
-const noResultsMessage = document.getElementById('noResultsMessage');
+        const searchButton = document.getElementById('searchButton');
+        const orderIdInput = document.getElementById('orderIdInput');
+        const searchResultsDiv = document.getElementById('searchResults');
+        const noResultsMessage = document.getElementById('noResultsMessage');
 
-searchButton.addEventListener('click', () => {
-    const orderId = orderIdInput.value.trim();
+        searchButton.addEventListener('click', () => {
+            const orderId = orderIdInput.value.trim();
 
-    if (!orderId) {
-        alert("請輸入訂單編號");
-        return;
-    }
-
-    fetch(`/api/shorder/${orderId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            if (!orderId) {
+                alert("請輸入訂單編號");
+                return;
             }
-            return response.json();
-        })
-        .then(result => {
-            if (result.status === 200 && result.data) {
-                renderOrder(result.data);
-            } else {
-                renderNoResults(`查無訂單編號：${orderId}`);
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            renderNoResults(`查詢失敗：${error.message}`);
+
+            fetch(`/api/shorder/${orderId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.status === 200 && result.data) {
+                        renderOrder(result.data);
+                    } else {
+                        renderNoResults(`查無訂單編號：${orderId}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    renderNoResults(`查詢失敗：${error.message}`);
+                });
         });
-});
 
-function renderOrder(order) {
-    searchResultsDiv.innerHTML = ''; // 清空
-    noResultsMessage.classList.add('hidden');
+        function renderOrder(order) {
+            searchResultsDiv.innerHTML = ''; // 清空
+            noResultsMessage.classList.add('hidden');
 
-    const html = `
+            const html = `
         <div class="order-item border rounded-lg p-4 shadow">
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4">
                 <img src="${order.shProd.picUrls?.[0] || 'https://placehold.co/80x80/E0E0E0/808080?text=無圖'}" 
@@ -176,58 +193,59 @@ function renderOrder(order) {
         </div>
     `;
 
-    searchResultsDiv.innerHTML = html;
-}
+            searchResultsDiv.innerHTML = html;
+        }
 
-function renderNoResults(message) {
-    searchResultsDiv.innerHTML = '';
-    noResultsMessage.textContent = message;
-    noResultsMessage.classList.remove('hidden');
-}
+        function renderNoResults(message) {
+            searchResultsDiv.innerHTML = '';
+            noResultsMessage.textContent = message;
+            noResultsMessage.classList.remove('hidden');
+        }
 
-// 工具：格式化日期
-function formatDateTime(dateStr) {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleString('zh-TW', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
+        // 工具：格式化日期
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
-// 工具：訂單狀態
-function getOrderStatus(status) {
-    switch (status) {
-        case 0: return '待處理';
-        case 1: return '處理中';
-        case 2: return '已完成';
-        case 3: return '已取消';
-        default: return '未知狀態';
-    }
-}
+        // 工具：訂單狀態
+        function getOrderStatus(status) {
+            switch (status) {
+                case 0: return '待處理';
+                case 1: return '處理中';
+                case 2: return '已完成';
+                case 3: return '已取消';
+                default: return '未知狀態';
+            }
+        }
 
-// 工具：付款狀態
-function getPaymentStatus(status) {
-    switch (status) {
-        case 0: return '未付款';
-        case 1: return '已付款';
-        default: return '未知';
-    }
-}
+        // 工具：付款狀態
+        function getPaymentStatus(status) {
+            switch (status) {
+                case 0: return '未付款';
+                case 1: return '已付款';
+                default: return '未知';
+            }
+        }
 
-// 工具：運送狀態
-function getShippingStatus(status) {
-    switch (status) {
-        case 0: return '尚未出貨';
-        case 1: return '運送中';
-        case 2: return '已送達';
-        default: return '未知';
-    }
-}
+        // 工具：運送狀態
+        function getShippingStatus(status) {
+            switch (status) {
+                case 0: return '尚未出貨';
+                case 1: return '運送中';
+                case 2: return '已送達';
+                default: return '未知';
+            }
+        }
 
     </script>
 </body>
+
 </html>
