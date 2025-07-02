@@ -22,6 +22,7 @@ import com.shakemate.util.PasswordConvert;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.List;
 
 @Controller
 @RequestMapping("/user")
@@ -74,11 +75,23 @@ public class UserController {
     // 顯示會員個人資料
     @GetMapping("/profile")
     public String showProfile(HttpSession session, Model model) {
-        Users user = (Users) session.getAttribute("loggedInUser");
-        if (user == null)
+        Users sessionUser = (Users) session.getAttribute("loggedInUser");
+        if (sessionUser == null)
             return "redirect:/user/login";
+        // 這裡用 userId 再去資料庫撈一次最新資料
+        Users user = userService.getUserById(sessionUser.getUserId());
         model.addAttribute("user", user);
-        return "front-end/user/profile";
+
+        List<String> allInterests = List.of(
+                "打籃球", "旅遊", "烹飪", "閱讀", "健身", "看電影", "聽音樂", "攝影", "登山", "衝浪", "游泳", "瑜伽",
+                "繪畫", "寫作", "遊戲", "美食", "咖啡", "貓奴", "狗奴", "逛街", "動漫", "園藝", "樂器", "唱歌", "跳舞", "志工");
+        List<String> allTraits = List.of(
+                "外向", "樂觀", "開朗", "內向", "沈穩", "細心", "幽默", "有耐心", "有活力", "隨和", "獨立", "創意",
+                "負責", "認真", "友善", "善良", "熱情", "冷靜");
+        model.addAttribute("allInterests", allInterests);
+        model.addAttribute("allTraits", allTraits);
+
+        return "profile";
     }
 
     // 顯示修改個人資料頁面
@@ -87,7 +100,16 @@ public class UserController {
         Users user = (Users) session.getAttribute("loggedInUser");
         if (user == null)
             return "redirect:/user/login";
+        List<String> allInterests = List.of(
+                "打籃球", "旅遊", "烹飪", "閱讀", "健身", "看電影", "聽音樂", "攝影", "登山", "衝浪", "游泳", "瑜伽",
+                "繪畫", "寫作", "遊戲", "美食", "咖啡", "貓奴", "狗奴", "逛街", "動漫", "園藝", "樂器", "唱歌", "跳舞", "志工");
+        List<String> allTraits = List.of(
+                "外向", "樂觀", "開朗", "內向", "沈穩", "細心", "幽默", "有耐心", "有活力", "隨和", "獨立", "創意",
+                "負責", "認真", "友善", "善良", "熱情", "冷靜");
+
         model.addAttribute("user", user);
+        model.addAttribute("allInterests", allInterests);
+        model.addAttribute("allTraits", allTraits);
         return "front-end/user/update_profile";
     }
 
@@ -156,7 +178,7 @@ public class UserController {
 
         // userService.deleteUser(user.getUserId());
         session.invalidate();
-        return "redirect:/";
+        return "redirect:/login";
     }
 
     @Transactional

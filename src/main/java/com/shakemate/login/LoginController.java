@@ -41,7 +41,7 @@ public class LoginController {
             HttpServletRequest request,
             Model model) {
         Users user = userService.getUserByEmail(account);
-        if (user == null || !userService.login(user.getEmail(), password) || user.getUserStatus() == (byte)4) {
+        if (user == null || !userService.login(user.getEmail(), password) || user.getUserStatus() == (byte) 4) {
             model.addAttribute("errorMsg", "登入失敗，請檢查帳號或密碼！");
             return "login"; // 回到 login.html
         }
@@ -49,7 +49,7 @@ public class LoginController {
         HttpSession session = request.getSession();
         session.setAttribute("account", user.getUserId());
         String location = (String) session.getAttribute("location");
-        return "redirect:" + (location != null ? location : "testlogin");
+        return "redirect:/";
     }
 
     // 處理登出
