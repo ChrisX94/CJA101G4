@@ -44,5 +44,6 @@ bin/
 *.idea
 ImgbbAK.java
 
-src/main/resources/application.properties
 TestApp.java
+src/main/resources/application.properties
+

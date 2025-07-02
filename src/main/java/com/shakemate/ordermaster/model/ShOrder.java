@@ -32,6 +32,7 @@ public class ShOrder implements Serializable {
     @JoinColumn(name = "SELLER_USER_ID", nullable = false)
     private Users seller;
 
+
     // 商品
     @ManyToOne
     @JoinColumn(name = "PROD_ID", nullable = false)

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔔 我的通知 - ShakeMate</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --notification-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --unread-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --read-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .floating-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.08;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .floating-icon:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { top: 25%; right: 15%; animation-delay: 1.5s; }
+        .floating-icon:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 3s; }
+        .floating-icon:nth-child(4) { bottom: 20%; right: 25%; animation-delay: 4.5s; }
+        .floating-icon:nth-child(5) { top: 50%; left: 50%; animation-delay: 6s; }
+        .floating-icon:nth-child(6) { top: 70%; right: 10%; animation-delay: 7.5s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(-15px) rotate(3deg); }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header-section {
+            background: var(--notification-gradient);
+            border-radius: 0 0 50px 50px;
+            padding: 3rem 0 4rem;
+            margin-bottom: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .header-title {
+            color: white;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .header-icon {
+            font-size: 3.5rem;
+            animation: bellRing 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+        
+        @keyframes bellRing {
+            0%, 90%, 100% { transform: rotate(0deg); }
+            5% { transform: rotate(15deg); }
+            10% { transform: rotate(-10deg); }
+            15% { transform: rotate(5deg); }
+            20% { transform: rotate(-5deg); }
+            25% { transform: rotate(0deg); }
+        }
+        
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 2rem;
+            margin: -2rem auto 0;
+            box-shadow: var(--card-shadow);
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .unread-badge {
+            background: var(--unread-gradient);
+            color: white;
+            border-radius: 20px;
+            padding: 0.5rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4); }
+            to { box-shadow: 0 5px 25px rgba(240, 147, 251, 0.6); }
+        }
+        
+        .refresh-btn {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 15px;
+            padding: 0.6rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .refresh-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+        
+        .refresh-btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.4);
+        }
+        
+        .notification-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: none;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .notification-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--read-gradient);
+            transition: all 0.3s ease;
+        }
+        
+        .notification-card.unread::before {
+            background: var(--unread-gradient);
+            width: 6px;
+            box-shadow: 0 0 10px rgba(240, 147, 251, 0.5);
+        }
+        
+        .notification-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .notification-card.unread {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.05) 0%, rgba(245, 87, 108, 0.05) 100%);
+        }
+        
+        .notification-title {
+            font-weight: 700;
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .notification-message {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 15px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .notification-status {
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-read {
+            background: var(--read-gradient);
+            color: white;
+        }
+        
+        .status-unread {
+            background: var(--unread-gradient);
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .notification-time {
+            color: #888;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .mark-read-btn {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 15px;
+            padding: 0.4rem 1rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .mark-read-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 4rem 0;
+            color: #667eea;
+        }
+        
+        .loading-spinner .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 4px;
+        }
+        
+        .no-notifications {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+        
+        .no-notifications i {
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+        
+        .pagination {
+            --bs-pagination-border-radius: 15px;
+        }
+        
+        .pagination .page-link {
+            border-radius: 10px;
+            margin: 0 0.2rem;
+            border: 2px solid transparent;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: var(--notification-gradient);
+            border-color: transparent;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .pagination .page-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-light {
+            border-radius: 15px;
+            border-width: 2px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .animate-slide-in {
+            animation: slideInLeft 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .header-icon {
+                font-size: 2.5rem;
+            }
+            
+            .stats-container {
+                margin: -1rem 1rem 0;
+                padding: 1.5rem;
+            }
+            
+            .notification-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-icons">
+        <div class="floating-icon">🔔</div>
+        <div class="floating-icon">📢</div>
+        <div class="floating-icon">💌</div>
+        <div class="floating-icon">🔊</div>
+        <div class="floating-icon">📣</div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="header-title animate-fade-in">
+                    <i class="fas fa-bell header-icon"></i>
+                    我的通知中心
+                </h1>
+                <p class="header-subtitle animate-fade-in">
+                    📮 查看最新的訊息與重要通知
+                </p>
+                <div class="d-flex justify-content-center">
+                    <a th:href="@{/testlogin/testlogin.html}" class="btn btn-outline-light animate-fade-in">
+                        <i class="fas fa-arrow-left me-2"></i>返回首頁
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 統計信息區 -->
+        <div class="stats-container animate-slide-in">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span id="unreadCount" class="unread-badge">
+                        <i class="fas fa-envelope"></i>
+                        <span>0</span> 未讀通知
+                    </span>
+                </div>
+                <div>
+                    <button id="refreshBtn" class="refresh-btn">
+                        <i class="fas fa-sync-alt me-1"></i>重新整理
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 載入中顯示 -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">載入中...</span>
+            </div>
+            <p class="mt-2">🔍 正在載入通知...</p>
+        </div>
+
+        <!-- 通知列表 -->
+        <div id="notificationsList" class="row mt-4"></div>
+
+        <!-- 無通知顯示 -->
+        <div id="noNotifications" class="no-notifications" style="display: none;">
+            <i class="fas fa-bell-slash fa-5x mb-3"></i>
+            <h4>✨ 暫無通知</h4>
+            <p>目前沒有任何通知訊息，請稍後再來查看！</p>
+        </div>
+
+        <!-- 分頁控制 -->
+        <div id="paginationContainer" class="d-flex justify-content-center mt-5 mb-4">
+            <nav>
+                <ul id="pagination" class="pagination">
+                    <!-- 分頁按鈕將由 JavaScript 動態生成 -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            let currentPage = 0;
+            const pageSize = 10;
+            
+            // 載入通知列表
+            function loadNotifications(page = 0) {
+                $('#loadingSpinner').show();
+                $('#notificationsList').empty();
+                
+                $.ajax({
+                    url: '/notifications/api',
+                    method: 'GET',
+                    data: {
+                        page: page,
+                        size: pageSize
+                    },
+                    success: function(data) {
+                        $('#loadingSpinner').hide();
+                        
+                        if (data.content && data.content.length > 0) {
+                            displayNotifications(data.content);
+                            updatePagination(data);
+                            $('#noNotifications').hide();
+                        } else {
+                            $('#noNotifications').show();
+                        }
+                        
+                        updateUnreadCount();
+                    },
+                    error: function(xhr, status, error) {
+                        $('#loadingSpinner').hide();
+                        console.error('載入通知失敗:', error);
+                        alert('載入通知失敗，請稍後再試');
+                    }
+                });
+            }
+            
+            // 顯示通知列表
+            function displayNotifications(notifications) {
+                const container = $('#notificationsList');
+                
+                notifications.forEach(function(notification, index) {
+                    const isRead = notification.isRead || false;
+                    const readStatus = isRead ? 'read' : 'unread';
+                    const statusText = isRead ? '已讀' : '未讀';
+                    const statusClass = isRead ? 'status-read' : 'status-unread';
+                    
+                    // 修復時間格式處理
+                    let readTime = '';
+                    let createdTime = '';
+                    
+                    try {
+                        if (notification.readTime) {
+                            readTime = new Date(notification.readTime).toLocaleString('zh-TW');
+                        }
+                        if (notification.createdTime) {
+                            createdTime = new Date(notification.createdTime).toLocaleString('zh-TW');
+                        }
+                    } catch (e) {
+                        console.warn('時間格式化錯誤:', e);
+                        createdTime = '時間格式錯誤';
+                    }
+                    
+                    // 處理訊息內容 - 變數已在後端替換完成
+                    let processedMessage = notification.message || '無內容';
+                    
+                    const markReadButton = !isRead ? 
+                        `<button class="mark-read-btn" data-id="${notification.notificationId}">
+                            <i class="fas fa-check me-1"></i>標為已讀
+                        </button>` : '';
+                    
+                    const notificationHtml = `
+                        <div class="col-12 mb-3">
+                            <div class="card notification-card ${readStatus} animate-slide-in" style="animation-delay: ${index * 0.1}s">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h6 class="notification-title mb-0">${notification.title || '📮 無標題'}</h6>
+                                        <span class="notification-status ${statusClass}">${statusText}</span>
+                                    </div>
+                                    
+                                    <div class="notification-message">
+                                        ${processedMessage}
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="notification-time">
+                                            <i class="fas fa-clock me-1"></i>
+                                            發送時間: ${createdTime || '未知'}
+                                            ${readTime ? `<br><small class="text-muted">📖 已讀時間: ${readTime}</small>` : ''}
+                                        </div>
+                                        <div>
+                                            ${markReadButton}
+                                            ${notification.link ? `<a href="${notification.link}" class="btn btn-sm btn-outline-primary ms-2" target="_blank"><i class="fas fa-external-link-alt me-1"></i>查看詳情</a>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.append(notificationHtml);
+                });
+            }
+            
+            // 更新分頁
+            function updatePagination(data) {
+                const pagination = $('#pagination');
+                pagination.empty();
+                
+                if (data.totalPages <= 1) return;
+                
+                // 上一頁
+                if (data.number > 0) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${data.number - 1}">
+                                <i class="fas fa-chevron-left me-1"></i>上一頁
+                            </a>
+                        </li>
+                    `);
+                }
+                
+                // 頁碼
+                for (let i = 0; i < data.totalPages; i++) {
+                    const activeClass = i === data.number ? 'active' : '';
+                    pagination.append(`
+                        <li class="page-item ${activeClass}">
+                            <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
+                        </li>
+                    `);
+                }
+                
+                // 下一頁
+                if (data.number < data.totalPages - 1) {
+                    pagination.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${data.number + 1}">
+                                下一頁<i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                    `);
+                }
+            }
+            
+            // 更新未讀數量
+            function updateUnreadCount() {
+                $.ajax({
+                    url: '/notifications/api/unread',
+                    method: 'GET',
+                    success: function(data) {
+                        const unreadCount = data.totalElements || 0;
+                        $('#unreadCount span').text(unreadCount);
+                        
+                        // 動畫效果
+                        if (unreadCount > 0) {
+                            $('#unreadCount').addClass('animate__animated animate__bounce');
+                            setTimeout(() => {
+                                $('#unreadCount').removeClass('animate__animated animate__bounce');
+                            }, 1000);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('更新未讀數量失敗:', error);
+                    }
+                });
+            }
+            
+            // 標記已讀
+            $(document).on('click', '.mark-read-btn', function() {
+                const notificationId = $(this).data('id');
+                const button = $(this);
+                const card = button.closest('.notification-card');
+                
+                $.ajax({
+                    url: `/notifications/api/${notificationId}/mark-read`,
+                    method: 'POST',
+                    success: function() {
+                        // 更新 UI
+                        card.removeClass('unread').addClass('read');
+                        card.find('.notification-status')
+                            .removeClass('status-unread')
+                            .addClass('status-read')
+                            .text('已讀');
+                        
+                        // 移除按鈕
+                        button.addClass('animate__animated animate__fadeOut');
+                        setTimeout(() => {
+                            button.remove();
+                        }, 500);
+                        
+                        // 更新未讀數量
+                        updateUnreadCount();
+                        
+                        // 添加已讀時間
+                        const currentTime = new Date().toLocaleString('zh-TW');
+                        const timeElement = card.find('.notification-time');
+                        timeElement.append(`<br><small class="text-muted">📖 已讀時間: ${currentTime}</small>`);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('標記已讀失敗:', error);
+                        alert('標記已讀失敗，請稍後再試');
+                    }
+                });
+            });
+            
+            // 分頁點擊事件
+            $(document).on('click', '.page-link', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page !== undefined) {
+                    currentPage = page;
+                    loadNotifications(page);
+                    
+                    // 滾動到頂部
+                    $('html, body').animate({
+                        scrollTop: $('.stats-container').offset().top - 100
+                    }, 500);
+                }
+            });
+            
+            // 重新整理按鈕
+            $('#refreshBtn').click(function() {
+                // 添加轉圈動畫
+                const icon = $(this).find('i');
+                icon.addClass('fa-spin');
+                
+                loadNotifications(currentPage);
+                
+                setTimeout(() => {
+                    icon.removeClass('fa-spin');
+                }, 1000);
+            });
+            
+            // 初始載入
+            loadNotifications();
+        });
+    </script>
+</body>
+</html>

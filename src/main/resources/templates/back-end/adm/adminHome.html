@@ -58,6 +58,15 @@
 							<li class="list-group-item">
 								<a th:href="@{/report/list}" class="text-decoration-none">📄 檢舉管理</a>
 							</li>
+							<li class="list-group-item">
+                                <a th:href="@{/api/admin/notifications/templates-page}" class="text-decoration-none">🔔 通知範本管理</a>
+                            </li>
+                            <li class="list-group-item">
+                                <a th:href="@{/api/admin/notifications/manage-page}" class="text-decoration-none">🚀 通知發送管理</a>
+                            </li>
+                            <li class="list-group-item">
+                                <a th:href="@{/api/admin/notifications/report/page}" class="text-decoration-none">📊 通知成效報告</a>
+                            </li>
 						</ul>
 					</div>
 				</div>
@@ -82,26 +91,34 @@
 
 	<!-- 防止瀏覽器返回按鈕顯示快取內容的 JavaScript -->
 	<script>
+		console.log('adminHome.html loaded');
+		
 		// 防止瀏覽器快取
 		window.onpageshow = function (event) {
+			console.log('pageshow event:', event.persisted);
 			if (event.persisted) {
+				console.log('Reloading due to persisted cache');
 				window.location.reload();
 			}
 		};
 
 		// 防止瀏覽器返回按鈕
 		window.addEventListener('pageshow', function (event) {
+			console.log('pageshow listener:', event.persisted);
 			if (event.persisted) {
+				console.log('Reloading due to persisted cache in listener');
 				window.location.reload();
 			}
 		});
 
-		// 當頁面隱藏時清除快取
-		window.addEventListener('pagehide', function (event) {
-			if (!event.persisted) {
-				window.location.replace(window.location.href);
-			}
-		});
+		// 修改：移除可能導致意外跳轉的pagehide事件
+		// window.addEventListener('pagehide', function (event) {
+		// 	if (!event.persisted) {
+		// 		window.location.replace(window.location.href);
+		// 	}
+		// });
+		
+		console.log('adminHome.html scripts loaded successfully');
 	</script>
 
 </body>

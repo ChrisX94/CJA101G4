@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>查詢服務案件</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+  <style>
+    /* 全局 */
+    html { font-size: 62.5%; font-family: "Noto Sans TC", sans-serif; }
+    body { margin: 0; background: rgba(170,198,202,1); color: #333; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    /* 容器 */
+    .container {
+      max-width: 80rem;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 0.8rem;
+      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.1);
+    }
+
+    h2 { font-size: 2.4rem; margin-bottom: 1.6rem; text-align: center; }
+
+    /* 搜尋表單 */
+    .search-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .search-form .field {
+      flex: 1 1 20rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .search-form label { font-size: 1.6rem; margin-bottom: 0.4rem; }
+    .search-form input,
+    .search-form select {
+      padding: 0.8rem 1rem;
+      font-size: 1.6rem;
+      border: 0.1rem solid #ccc;
+      border-radius: 0.4rem;
+    }
+
+    .search-button {
+      padding: 0.8rem 2rem;
+      font-size: 1.6rem;
+      border: none;
+      border-radius: 2rem;
+      background: #03a9f4;
+      color: #fff;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: transform 0.3s, box-shadow 0.3s;
+      align-self: flex-end;
+      margin-top: 1.2rem;
+    }
+    .search-button:hover { transform: translateY(-0.2rem); box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1); }
+
+    /* 結果表格 */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+      background: #fff;
+      border-radius: 0.8rem;
+      overflow: hidden;
+      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.1);
+      font-size: 1.6rem;
+    }
+    th, td { padding: 0.8rem 1.2rem; text-align: center; border: 0.1rem solid #ddd; }
+    th { background: #f7f7f7; font-weight: bold; }
+    tbody tr:nth-child(odd)  { background: rgba(91,58,54,1); color: white; }
+    tbody tr:nth-child(even) { background: rgba(91,58,54,1); opacity: 0.8; color: white; }
+    tbody tr:hover          { background: #f1f1f1; color: black; opacity:1; }
+
+    /* 操作按鈕 */
+    .actions a {
+      padding: 0.6rem 1rem;
+      font-size: 1.6rem;
+      border-radius: 2rem;
+      color: #fff;
+      text-decoration: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0.4rem;
+    }
+    .actions .edit { background: lightskyblue; }
+    .actions .delete { background: lightcoral; }
+    .actions a:hover { transform: translateY(-0.1rem); box-shadow: 0 0.3rem 0.6rem rgba(0,0,0,0.1); color: black; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>查詢服務案件</h2>
+    <form th:action="@{/servicecase/search}" method="get" class="search-form">
+      <div class="field">
+        <label for="userId">使用者 ID</label>
+        <input type="number" id="userId" name="userId" placeholder="輸入使用者 ID" />
+      </div>
+      <div class="field">
+        <label for="caseType">案件類型</label>
+        <select id="caseType" name="caseTypeId">
+          <option value="">全部</option>
+          <option th:each="type: ${allTypes}" th:value="${type.caseTypeId}" th:text="${type.typeName}"></option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="status">狀態</label>
+        <select id="status" name="caseStatus">
+          <option value="">全部</option>
+          <option value="0">未處理</option>
+          <option value="1">處理中</option>
+          <option value="2">已完成</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="from">起始日期</label>
+        <input type="date" id="from" name="fromDate" />
+      </div>
+      <div class="field">
+        <label for="to">結束日期</label>
+        <input type="date" id="to" name="toDate" />
+      </div>
+      <button type="submit" class="search-button">查  詢</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>編號</th>
+          <th>類別</th>
+          <th>使用者</th>
+          <th>標題</th>
+          <th>狀態</th>
+          <th>建立時間</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="sc : ${cases}">
+          <td th:text="${sc.caseId}"></td>
+          <td th:text="${sc.caseType.typeName}"></td>
+          <td th:text="${sc.userId}"></td>
+          <td th:text="${sc.title}"></td>
+<!--           <td th:text="${#lists.arrayList('未處理','處理中','已完成')[sc.caseStatus]}"></td> -->
+          <td th:text="${sc.statusName}"></td>
+          <td th:text="${#dates.format(sc.createTime,'yyyy-MM-dd')}"></td>
+          <td class="actions">
+            <a th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
+            <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}" class="delete"
+               th:onclick="|return confirm('確定刪除 ID=${sc.caseId}?');|">刪除</a>
+          </td>
+        </tr>
+        <tr th:if="${cases.empty}"><td colspan="7">無符合條件的案件</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

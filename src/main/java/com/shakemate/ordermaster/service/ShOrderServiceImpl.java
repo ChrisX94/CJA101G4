@@ -9,7 +9,9 @@ import com.shakemate.ordermaster.eum.PaymentStatus;
 import com.shakemate.ordermaster.eum.ShippingStatus;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.ordermaster.util.ShOrderSpecifications;
+
 import com.shakemate.shshop.dao.ShShopRepository;
+
 import com.shakemate.shshop.dto.ShProdDto;
 import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.service.ShShopService;
@@ -37,6 +39,7 @@ public class ShOrderServiceImpl implements ShOrderService{
     private UsersRepository usersRepository;
     @Autowired
     ShShopRepository shShopRepository;
+
 
 
     //  getAll
@@ -188,10 +191,10 @@ public class ShOrderServiceImpl implements ShOrderService{
     }
 
 
-
     public int calculateTotalAmount(int productPrice, int productQuantity, int shippingFee) {
         int subtotal = productPrice * productQuantity;
         int platformFee = (int) Math.ceil(subtotal * 0.01);
         return subtotal + shippingFee + platformFee;
     }
+
 }
