@@ -1,6 +1,5 @@
 package com.shakemate.user.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.shakemate.ordermaster.model.ShOrder;
 import jakarta.persistence.*;
@@ -30,7 +29,6 @@ public class Users implements Serializable {
     @NotEmpty(message = "請輸入Email")
     @Column(name = "EMAIL", nullable = false, length = 50, unique = true)
     private String email;
-
 
     @NotEmpty(message = "請輸入密碼")
     @Column(name = "PWD", nullable = false, length = 255)
@@ -100,11 +98,12 @@ public class Users implements Serializable {
     @JsonIgnore
     private List<ShOrder> sellerOrders;
 
-
     public Users() {
     }
 
-    public Users(Integer userId, String username, String email, String pwd, byte gender, Date birthday, String location, String intro, Timestamp createdTime, String interests, String personality, Timestamp updatedTime, byte userStatus, Boolean postStatus, Boolean atAcStatus, Boolean sellStatus) {
+    public Users(Integer userId, String username, String email, String pwd, byte gender, Date birthday, String location,
+            String intro, Timestamp createdTime, String interests, String personality, Timestamp updatedTime,
+            byte userStatus, Boolean postStatus, Boolean atAcStatus, Boolean sellStatus) {
         this.userId = userId;
         this.username = username;
         this.email = email;
@@ -331,7 +330,8 @@ public class Users implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Users users)) return false;
+        if (!(o instanceof Users users))
+            return false;
         return Objects.equals(userId, users.userId);
     }
 
@@ -340,4 +340,3 @@ public class Users implements Serializable {
         return Objects.hashCode(userId);
     }
 }
-
