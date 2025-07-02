@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 @Getter
 @NoArgsConstructor
 public class ShOrderRequestDto {
+    private Integer shOrderId;
     private Integer prodId;
     private Integer buyerUserId;
     private Integer sellerUserId;
@@ -22,8 +23,13 @@ public class ShOrderRequestDto {
     private byte paymentMethod;
     private String orderNote;
     private Integer totalAmount;
+    private byte orderStatus;
+    private byte paymentStatus;
+    private byte shippingStatus;
 
-    public ShOrderRequestDto(Integer prodId, Integer buyerUserId, Integer sellerUserId, Integer productPrice, Integer productQuantity, Integer platformFee, Integer shippingFee, String shippingAddress, String shippingMethod, byte paymentMethod, String orderNote ) {
+
+    public ShOrderRequestDto(Integer shOrderId, Integer prodId, Integer buyerUserId, Integer sellerUserId, Integer productPrice, Integer productQuantity, Integer platformFee, Integer shippingFee, String shippingAddress, String shippingMethod, byte paymentMethod, String orderNote ) {
+        this.shOrderId = shOrderId;
         this.prodId = prodId;
         this.buyerUserId = buyerUserId;
         this.sellerUserId = sellerUserId;

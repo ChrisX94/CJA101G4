@@ -2,6 +2,8 @@ package com.shakemate.ordermaster.controller;
 
 import com.shakemate.ordermaster.config.EcpayLogisticsConfig;
 import com.shakemate.ordermaster.config.EcpayPaymentConfig;
+import com.shakemate.ordermaster.eum.PaymentStatus;
+import com.shakemate.ordermaster.eum.ShippingStatus;
 import com.shakemate.ordermaster.service.EcpayService;
 import com.shakemate.ordermaster.service.ShOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +76,7 @@ public class EcpayController {
         return html.toString();
     }
 
-    /**
+    /*
      * ✔ 綠界物流選店完成，ServerReplyURL回傳資料
      * https://developers.ecpay.com.tw/?p=2856
      */
@@ -112,7 +114,7 @@ public class EcpayController {
     public String checkout(@RequestParam("orderId") Integer orderId,
                            @RequestParam("totalAmount") String totalAmount) {
         String orderDesc = "MatchMarketOrder";
-        String merchantTradeNo = "SMMM" + System.currentTimeMillis();
+        String merchantTradeNo = "SMP" + System.currentTimeMillis();
         String merchantTradeDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
 
         Map<String, String> form = new LinkedHashMap<>();
@@ -163,7 +165,7 @@ public class EcpayController {
             @RequestParam(value = "remarks", required = false) String remarks,
             @RequestParam("isCod") boolean isCod // ✅ true=貨到付款，false=線上付款
     ) {
-        String merchantTradeNo = "MM" + orderId + "OD" + System.currentTimeMillis();
+        String merchantTradeNo = "SML" + System.currentTimeMillis();
         String tradeDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"));
 
         Map<String, String> param = new LinkedHashMap<>();
@@ -295,9 +297,7 @@ public class EcpayController {
                 response.append(inputLine);
             }
             in.close();
-
             return ResponseEntity.ok(response.toString());
-
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("建立物流失敗：" + e.getMessage());
@@ -344,62 +344,46 @@ public class EcpayController {
             for (String key : params.keySet()) {
                 System.out.println(key + " = " + params.get(key));
             }
-            // 👉 這裡寫你的業務邏輯：
-            // 例如：更新訂單狀態為「已付款」
-            orderService.markedAsPaid(Integer.parseInt(orderId));
-
-
+            orderService.paymentStatus(Integer.parseInt(orderId), PaymentStatus.PAID);
         } else {
             log.warn("⚠️ 付款失敗！RtnCode = {}", rtnCode);
-            // ➜ 可以記錄失敗原因 params.get("RtnMsg")
         }
-
-        // 4️⃣ 務必回傳「1|OK」告知綠界你已收到，否則綠界會持續重送
         return "1|OK";
     }
 
-    // 物流狀態回傳
+    // 物流狀態回傳(綠界物流找不到模擬出貨)
     @PostMapping("/logisticsReply")
     public String logisticsReply(@RequestParam Map<String, String> params) {
         log.info("📦 綠界物流回傳：{}", params);
-
         String checkMac = params.get("CheckMacValue");
         String validateMac = ecpayService.generateCheckMacValueForLogistics(params);
-
         if (!checkMac.equalsIgnoreCase(validateMac)) {
             log.error("Logistics CheckMac 驗證失敗！");
             return "0|Fail";
         }
-
         String rtnCode = params.get("RtnCode");
         String orderId = params.get("MerchantTradeNo");
         for (String key : params.keySet()) {
             System.out.println(key + " = " + params.get(key));
         }
-
         if ("300".equals(rtnCode)) {
             log.info("✅ 超商取貨成功，訂單：{}", orderId);
-            // 👉 這裡寫更新訂單狀態
         } else {
             log.warn("⚠️ 物流異常：{}", params.get("RtnMsg"));
         }
-
         return "1|OK";
     }
 
-
+    // 物流狀態回傳(綠界物流找不到模擬出貨)
     @PostMapping("/ecpay/logisticsC2CReply")
     public String logisticsC2CReply(@RequestParam Map<String, String> params) {
         log.info("📦 [LogisticsC2CReply] 回傳資料：{}", params);
-
-        // 1️⃣ CheckMac 驗證
         String checkMac = params.get("CheckMacValue");
         String calculatedMac = ecpayService.generateCheckMacValueForLogistics(params);
         if (!checkMac.equalsIgnoreCase(calculatedMac)) {
-            log.error("❌ CheckMac 驗證失敗！");
+            log.error(" CheckMac 驗證失敗！");
             return "0|Fail";
         }
-
         // 2️⃣ 取得重要參數
         String merchantTradeNo = params.get("MerchantTradeNo"); // 你的訂單編號
         String rtnCode = params.get("RtnCode");
@@ -407,8 +391,7 @@ public class EcpayController {
         for (String key : params.keySet()) {
             System.out.println(key + " = " + params.get(key));
         }
-        log.info("📦 訂單編號：{}，狀態碼：{}，訊息：{}", merchantTradeNo, rtnCode, rtnMsg);
-
+        log.info("訂單編號：{}，狀態碼：{}，訊息：{}", merchantTradeNo, rtnCode, rtnMsg);
         // 3️⃣ 根據狀態更新訂單
         switch (rtnCode) {
             case "2067":
@@ -432,5 +415,55 @@ public class EcpayController {
         }
 
         return "1|OK"; // 務必回傳，否則綠界會重送
+    }
+
+
+    @PostMapping("/mockLogistic")
+    public String mockLogistic(@RequestParam Map<String, String> params) {
+        String orderIdStr = params.get("orderId");
+        String shipmentStatus = params.get("shipmentStatus"); // 0 processing, 1 shipped, 2 delivered
+        String StatusDescription = params.get("statusDescription"); // description of the shipment status
+        String isCollect = params.get("isCollect");  // 0 no, 1 yes, 2 refound, Only for pay on delivered
+
+        Integer orderId = Integer.parseInt(orderIdStr);
+        switch (shipmentStatus) {
+            case "0":
+                orderService.logisticStatus(orderId, ShippingStatus.PREPARING);
+                break;
+            case "1":
+                orderService.logisticStatus(orderId, ShippingStatus.SHIPPED);
+                break;
+            case "2":
+                orderService.logisticStatus(orderId, ShippingStatus.DELIVERED);
+                break;
+            case "3":
+                orderService.logisticStatus(orderId, ShippingStatus.RETURN);
+                break;
+            case "4":
+                orderService.logisticStatus(orderId, ShippingStatus.CANCELLED);
+                break;
+            default:
+                break;
+        }
+        if (isCollect != null) {
+            switch (isCollect) {
+                case "0":
+                    orderService.paymentStatus(orderId, PaymentStatus.UNPAID);
+                    break;
+                case "1":
+                    orderService.paymentStatus(orderId, PaymentStatus.PAID);
+                    break;
+                case "2":
+                    orderService.paymentStatus(orderId, PaymentStatus.REFUNDED);
+                    break;
+                case "3":
+                    orderService.paymentStatus(orderId, PaymentStatus.CANCELLED);
+                default:
+                    break;
+            }
+
+            orderService.checkingStatus(orderId);
+        }
+        return "1|OK";
     }
 }

@@ -43,6 +43,6 @@ build/
 bin/
 *.idea
 ImgbbAK.java
-KeyForOA.java
-application.properties
+
+src/main/resources/application.properties
 TestApp.java

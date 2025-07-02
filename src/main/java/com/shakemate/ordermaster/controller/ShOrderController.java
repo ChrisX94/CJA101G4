@@ -94,9 +94,15 @@ public class ShOrderController {
     }
 
     // 更新訂單（例如付款、出貨、取消）
-    @PutMapping("/update")
-    public ShOrder updateOrder(@RequestBody ShOrder order) {
-        return orderService.updateOrder(order);
+    @PostMapping("/update")
+    public ShOrderDto updateOrder(@RequestBody ShOrderRequestDto requestDto) {
+        return orderService.updateOrder(requestDto);
+    }
+
+    // 取消訂單
+    @PostMapping("/cancel")
+    public void cancelOrder(@RequestParam Integer shOrderId){
+        orderService.cancelOrder(shOrderId);
     }
 
 

@@ -95,104 +95,111 @@
             <div>物流方式：<span id="logistics">--</span></div>
         </div>
         <div class="error" id="errorMsg"></div>
-        <a href="order_list.html" class="btn">查看訂單</a>
-        <a href="index.html" class="btn">回首頁</a>
+        <a href="my_order_manager.html" class="btn">查看訂單</a>
+        <a href="/" class="btn">回首頁</a>
+        <button id="payButton" class="btn" style="display: none;">立即付款</button>
     </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const orderData = JSON.parse(localStorage.getItem('orderData'));
-        const processData = JSON.parse(localStorage.getItem('orderProcessData'));
 
-        if (!orderData || !processData) {
-            alert('❌ 找不到訂單資料或物流資料，請重新下單');
-            window.location.href = 'checkout.html';
-            return;
-        }
+    <script>
 
-        try {
-            /* ================= ✔ 建立訂單 ================= */
-            const createRes = await fetch('/api/shorder/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
 
-            const createResult = await createRes.json();
 
-            if (createResult.status !== 200) {
-                document.getElementById('errorMsg').textContent =
-                    '❌ 建立訂單失敗：' + createResult.message;
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const orderData = JSON.parse(localStorage.getItem('orderData'));
+            const processData = JSON.parse(localStorage.getItem('orderProcessData'));
+
+            if (!orderData || !processData) {
+                alert('❌ 找不到訂單資料或物流資料，請重新下單');
+                window.location.href = 'checkout.html';
                 return;
             }
 
-            const orderId = createResult.data.shOrderId;
-            const totalAmount = createResult.data.totalAmount;
+            try {
+                /* ================= ✔ 建立訂單 ================= */
+                const createRes = await fetch('/api/shorder/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
 
-            console.log('✅ 訂單建立成功', orderId, totalAmount);
+                const createResult = await createRes.json();
 
-            // ✅ 存入 processData
-            processData.orderId = orderId;
-            processData.totalAmount = totalAmount;
-            localStorage.setItem('orderProcessData', JSON.stringify(processData));
+                if (createResult.status !== 200) {
+                    document.getElementById('errorMsg').textContent =
+                        '❌ 建立訂單失敗：' + createResult.message;
+                    return;
+                }
 
-            // ✅ 畫面顯示
-            document.getElementById('orderId').textContent = orderId;
-            document.getElementById('receiver').textContent = processData.receiverName;
-            document.getElementById('logistics').textContent =
-                processData.shippingMethod === 0 ? '宅配' : '超商取貨';
+                const orderId = createResult.data.shOrderId;
+                const totalAmount = createResult.data.totalAmount;
 
-            /* ================= ✔ 建立物流 ================= */
-            const logisticsUrl =
-                processData.shippingMethod === 0
-                    ? '/ecpay/logisticsPost'
-                    : '/ecpay/logisticsCvs';
+                console.log('✅ 訂單建立成功', orderId, totalAmount);
 
-            const logisticsParams =
-                processData.shippingMethod === 0
-                    ? {
-                        orderId: orderId,
-                        totalAmount: totalAmount,
-                        receiverName: processData.receiverName,
-                        receiverPhone: processData.receiverPhone,
-                        ReceiverZipCode: processData.receiverZip,
-                        ReceiverAddress: processData.receiverAddress,
-                        remarks: processData.orderNote || ''
-                    }
-                    : {
-                        orderId: orderId,
-                        totalAmount: totalAmount,
-                        receiverName: processData.receiverName,
-                        receiverPhone: processData.receiverPhone,
-                        cvsType: processData.cvsType,
-                        storeId: processData.storeId,
-                        storeName: processData.storeName,
-                        storeAddress: processData.storeAddress,
-                        remarks: processData.orderNote || '',
-                        isCod: processData.paymentMethod === 0
-                    };
+                // ✅ 存入 processData
+                processData.orderId = orderId;
+                processData.totalAmount = totalAmount;
+                localStorage.setItem('orderProcessData', JSON.stringify(processData));
 
-            const resp = await fetch(logisticsUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams(logisticsParams)
-            });
+                // ✅ 畫面顯示
+                document.getElementById('orderId').textContent = orderId;
+                document.getElementById('receiver').textContent = processData.receiverName;
+                document.getElementById('logistics').textContent =
+                    processData.shippingMethod === 0 ? '宅配' : '超商取貨';
 
-            const logisticsResult = await resp.text();
+                /* ================= ✔ 建立物流 ================= */
+                const logisticsUrl =
+                    processData.shippingMethod === 0
+                        ? '/ecpay/logisticsPost'
+                        : '/ecpay/logisticsCvs';
 
-            console.log('🚚 物流結果：', logisticsResult);
+                const logisticsParams =
+                    processData.shippingMethod === 0
+                        ? {
+                            orderId: orderId,
+                            totalAmount: totalAmount,
+                            receiverName: processData.receiverName,
+                            receiverPhone: processData.receiverPhone,
+                            ReceiverZipCode: processData.receiverZip,
+                            ReceiverAddress: processData.receiverAddress,
+                            remarks: processData.orderNote || ''
+                        }
+                        : {
+                            orderId: orderId,
+                            totalAmount: totalAmount,
+                            receiverName: processData.receiverName,
+                            receiverPhone: processData.receiverPhone,
+                            cvsType: processData.cvsType,
+                            storeId: processData.storeId,
+                            storeName: processData.storeName,
+                            storeAddress: processData.storeAddress,
+                            remarks: processData.orderNote || '',
+                            isCod: processData.paymentMethod === 0
+                        };
 
-            // ================= ✔ 物流結果解析 & 顯示 =================
-            const dataStr = logisticsResult.split('|')[1] || '';
-            const params = new URLSearchParams(dataStr);
+                const resp = await fetch(logisticsUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(logisticsParams)
+                });
 
-            const resultObj = {};
-            params.forEach((v, k) => resultObj[k] = v);
+                const logisticsResult = await resp.text();
 
-            const logisticsDiv = document.createElement('div');
-            logisticsDiv.style.cssText = 'margin-top:20px; padding:10px; background:#f0f0f0; border-radius:8px;';
+                console.log('🚚 物流結果：', logisticsResult);
 
-            logisticsDiv.innerHTML = `
+                // ================= ✔ 物流結果解析 & 顯示 =================
+                const dataStr = logisticsResult.split('|')[1] || '';
+                const params = new URLSearchParams(dataStr);
+
+                const resultObj = {};
+                params.forEach((v, k) => resultObj[k] = v);
+
+                const logisticsDiv = document.createElement('div');
+                logisticsDiv.style.cssText = 'margin-top:20px; padding:10px; background:#f0f0f0; border-radius:8px;';
+
+                logisticsDiv.innerHTML = `
                 <h3>📦 物流資訊</h3>
                 <p><strong>物流狀態：</strong>${resultObj.RtnMsg || '無'}（代碼 ${resultObj.RtnCode || '-'}）</p>
                 <p><strong>訂單編號：</strong>${resultObj.MerchantTradeNo || '-'}</p>
@@ -205,50 +212,56 @@
                 <p><strong>物流單號：</strong>${resultObj.AllPayLogisticsID || '-'}</p>
             `;
 
-            document.body.appendChild(logisticsDiv);
+                document.body.appendChild(logisticsDiv);
 
-        } catch (err) {
-            document.getElementById('errorMsg').textContent =
-                '❌ 發生錯誤：' + err.message;
-            console.error(err);
+            } catch (err) {
+                document.getElementById('errorMsg').textContent =
+                    '❌ 發生錯誤：' + err.message;
+                console.error(err);
+            }
+
+                    const payButton = document.getElementById('payButton');
+
+        if (processData.paymentMethod === 1) {
+            payButton.style.display = 'inline-block'; // 顯示付款按鈕
         }
-    });
-</script>
 
+                payButton.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/ecpay/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        orderId: processData.orderId,
+                        totalAmount: processData.totalAmount,
+                        receiverName: processData.receiverName,
+                        receiverPhone: processData.receiverPhoneol
+                    })
+                });
 
+                const html = await res.text();
 
+                // ✔️ 將返回的付款表單插入並自動提交
+                const payFormDiv = document.createElement('div');
+                payFormDiv.innerHTML = html;
+                document.body.appendChild(payFormDiv);
 
-
-
-    <!-- <script>
-        // 從 localStorage 取得 orderData
-        const orderData = JSON.parse(localStorage.getItem('orderData'));
-        if (!orderData) {
-            alert('❌ 找不到訂單資料，請重新下單');
-            window.location.href = 'checkout.html';
-            throw new Error('無訂單資料');
-        }
-        fetch('/api/shorder/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(orderData)
-        })
-            .then(r => r.json())
-            .then(res => {
-                if (res.status === 200) {
-                    console.log('✅ 建立訂單成功', res.data);
-                    const orderId = res.data.orderId;
-                    const totalAmount = res.data.totalAmount;
+                const payForm = payFormDiv.querySelector('form');
+                if (payForm) {
+                    payForm.submit();
                 } else {
-                    alert('❌ 建立訂單失敗：' + res.message);
+                    alert('❌ 金流表單產生失敗');
                 }
-            })
-            .catch(err => {
+
+            } catch (err) {
+                console.error('❌ 金流錯誤', err);
                 alert('❌ 發生錯誤：' + err.message);
-            });
-    </script> -->
+            }
+        });
+
+
+        });
+    </script>
 
 
 </body>
