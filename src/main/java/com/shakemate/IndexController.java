@@ -19,6 +19,11 @@ public class IndexController {
 	public String showLoginForm() {
 		return "login"; // 對應 resources/templates/login.html
 	}
+	
+	@GetMapping("/signup")
+	public String showuserForm() {
+		return "front-end/user/signup"; // 對應 resources/templates/login.html
+	}
 
 	// 用來導向頁面 adminHome.html
 	//	@GetMapping("/admin")
