@@ -2,13 +2,13 @@ package com.shakemate.ordermaster.service;
 
 import com.shakemate.ordermaster.dto.ShOrderDto;
 import com.shakemate.ordermaster.dto.ShOrderRequestDto;
+import com.shakemate.ordermaster.eum.PaymentStatus;
+import com.shakemate.ordermaster.eum.ShippingStatus;
 import com.shakemate.ordermaster.model.ShOrder;
-import com.shakemate.shshop.dto.ShProdDto;
 
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 
 public interface ShOrderService {
 
@@ -34,8 +34,13 @@ public interface ShOrderService {
 
     List<ShOrderDto> getOrdersByProd(Integer prodId);
 
-    ShOrder updateOrder(ShOrder order);
+    ShOrderDto updateOrder(ShOrderRequestDto requestDto);
 
-    void markedAsPaid(Integer orderId);
+    void logisticStatus(Integer orderId, ShippingStatus status);
 
+    void paymentStatus(Integer orderId, PaymentStatus status);
+
+    void checkingStatus(Integer orderId);
+
+    void cancelOrder(Integer orderId);
 }

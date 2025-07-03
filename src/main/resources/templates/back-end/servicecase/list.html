@@ -48,7 +48,7 @@ body {
 .top-bar .right-links a.home { background: darkkhaki; }
 .top-bar .right-links a:hover { color: black; opacity: 0.8; }
 .container {
-    max-width: 120rem;
+    max-width: 140rem;
     margin: 1.6rem auto;
     padding: 0 1.6rem;
 }
@@ -117,6 +117,28 @@ td.actions a {
 td.actions a.edit { background: #2196f3; }
 td.actions a.del  { background: #f44336; }
 td.actions a:hover { color: black; opacity: 0.8; }
+
+
+
+  .pagination-controls {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  .page-btn {
+    margin: 0 0.3rem;
+    padding: 0.5rem 1rem;
+    font-size: 1.4rem;
+    border: 1px solid #ccc;
+    background: #eee;
+    cursor: pointer;
+    border-radius: 0.4rem;
+  }
+  .page-btn.active {
+    background-color: #03a9f4;
+    color: #fff;
+    font-weight: bold;
+  }
+
 </style>
 </head>
 <body>
@@ -137,7 +159,8 @@ td.actions a:hover { color: black; opacity: 0.8; }
                 <tr class="thead">
                     <th>編號</th>
                     <th onclick="sortTableByColumn(1)" style="cursor: pointer;">類別編號 ▲▼</th>
-                    <th onclick="sortTableByColumn(2)" style="cursor: pointer;">使用者編號 ▲▼</th>
+                    <th onclick="sortTableByColumn(2)" style="cursor: pointer;">用戶編號 ▲▼</th>
+                    <th>Email</th>
                     <th>標題</th>
                     <th>狀態</th>
                     <th>建立時間</th>
@@ -145,11 +168,12 @@ td.actions a:hover { color: black; opacity: 0.8; }
                     <th>操作</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tableBody">
                 <tr th:each="sc : ${cases}">
                     <td th:text="${sc.caseId}">1</td>
                     <td th:text="${sc.caseTypeId}">1</td>
                     <td th:text="${sc.userId}">123</td>
+                    <td th:text="${sc.email}">email@example.com</td>
                     <td th:text="${sc.title}">範例標題</td>
 <!--                     <td th:text="${sc.caseStatus}">0</td> -->
 					<td th:text="${sc.statusName}"></td>
@@ -158,26 +182,115 @@ td.actions a:hover { color: black; opacity: 0.8; }
                     <td class="actions"><a
                         th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
                         <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}"
-                        th:onclick="|return confirm('確定刪除 ID=${sc.caseId}？');|"
+                        th:onclick="|return confirm('確定刪除此案件？');|"
                         class="del">刪除</a></td>
                 </tr>
                 <tr th:if="${cases.empty}"><td colspan="8">目前沒有任何案件</td></tr>
             </tbody>
         </table>
+        
+        <!-- 分頁資訊與控制器 -->
+<div class="pagination-controls">
+  <div id="pagination-info" style="margin-bottom: 0.8rem; font-size: 1.6rem;"></div>
+  <div id="pagination"></div>
+</div>
+     
     </div>
-    <script>
-    let sortState = { column: null, ascending: true };
-    window.addEventListener("DOMContentLoaded", () => { sortTableByColumn(1); sortTableByColumn(2); });
-    function sortTableByColumn(columnIndex) {
-        const tbody = document.querySelector("table tbody");
-        const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
-        sortState.column === columnIndex ? sortState.ascending = !sortState.ascending : (sortState.column = columnIndex, sortState.ascending = true);
-        rows.sort((a,b)=>{
-            const aT=a.children[columnIndex].innerText.trim(), bT=b.children[columnIndex].innerText.trim();
-            const aV=isNaN(aT)?aT:parseFloat(aT), bV=isNaN(bT)?bT:parseFloat(bT);
-            return (aV < bV ? -1 : aV > bV ? 1 : 0) * (sortState.ascending?1:-1);
-        }); rows.forEach(r=>tbody.appendChild(r));
-    }
-    </script>
+<script>
+let sortState = { column: null, ascending: true };
+
+window.addEventListener("DOMContentLoaded", () => {
+  sortTableByColumn(1); // 預設排序可保留
+});
+
+function sortTableByColumn(columnIndex) {
+  const tbody = document.getElementById("tableBody");
+  const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
+
+  // 切換排序狀態
+  if (sortState.column === columnIndex) {
+    sortState.ascending = !sortState.ascending;
+  } else {
+    sortState.column = columnIndex;
+    sortState.ascending = true;
+  }
+
+  // 排序資料
+  rows.sort((a, b) => {
+    const aT = a.children[columnIndex].innerText.trim();
+    const bT = b.children[columnIndex].innerText.trim();
+    const aV = isNaN(aT) ? aT : parseFloat(aT);
+    const bV = isNaN(bT) ? bT : parseFloat(bT);
+    return (aV < bV ? -1 : aV > bV ? 1 : 0) * (sortState.ascending ? 1 : -1);
+  });
+
+  // 重新插入排序後資料
+  rows.forEach(row => tbody.appendChild(row));
+
+
+}
+
+const rowsPerPage = 5;
+const tbody = document.getElementById("tableBody");
+const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
+const pagination = document.getElementById("pagination");
+const pageInfo = document.getElementById("pagination-info");
+
+let currentPage = 1;
+let totalPages = Math.ceil(rows.length / rowsPerPage);
+
+function showPage(page) {
+  currentPage = page;
+  totalPages = Math.ceil(rows.length / rowsPerPage);
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+
+  rows.forEach((row, index) => {
+    row.style.display = index >= start && index < end ? "" : "none";
+  });
+
+  renderPagination();
+  updatePageInfo();
+}
+
+function updatePageInfo() {
+  pageInfo.innerText = `共 ${rows.length} 筆，頁數 ${currentPage} / ${totalPages}`;
+}
+
+function renderPagination() {
+  pagination.innerHTML = "";
+
+  // 上一頁
+  if (currentPage > 1) {
+    const prevBtn = document.createElement("button");
+    prevBtn.innerText = "上一頁";
+    prevBtn.className = "page-btn";
+    prevBtn.onclick = () => showPage(currentPage - 1);
+    pagination.appendChild(prevBtn);
+  }
+
+  // 頁碼按鈕
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.innerText = i;
+    btn.className = "page-btn";
+    if (i === currentPage) btn.classList.add("active");
+    btn.onclick = () => showPage(i);
+    pagination.appendChild(btn);
+  }
+
+  // 下一頁
+  if (currentPage < totalPages) {
+    const nextBtn = document.createElement("button");
+    nextBtn.innerText = "下一頁";
+    nextBtn.className = "page-btn";
+    nextBtn.onclick = () => showPage(currentPage + 1);
+    pagination.appendChild(nextBtn);
+  }
+}
+
+showPage(currentPage); // 初始顯示
+</script>
+
 </body>
 </html>

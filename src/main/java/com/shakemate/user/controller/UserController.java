@@ -29,6 +29,7 @@ import com.shakemate.util.PasswordConvert;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.List;
 
 @Controller
 @RequestMapping("/user")
@@ -81,6 +82,7 @@ public class UserController {
     // 顯示會員個人資料
     @GetMapping("/profile")
     public String showProfile(HttpSession session, Model model) {
+
         // 從 session 中獲取用戶ID
         Integer userId = (Integer) session.getAttribute("account");
         if (userId == null)
@@ -121,6 +123,7 @@ public class UserController {
         user.setPhotos(photoList); // 這要你在 Users.java 裡有 photos 屬性和 setter
 
         return "/front-end/user/profile";
+
     }
 
     // 顯示修改個人資料頁面
@@ -130,6 +133,7 @@ public class UserController {
         Integer userId = (Integer) session.getAttribute("account");
         if (userId == null)
             return "redirect:/user/login";
+
         Users user = userService.getUserById(userId);
 
         // 把原本資料庫的字串欄位，轉成 list
@@ -145,6 +149,7 @@ public class UserController {
                 "打籃球", "旅遊", "烹飪", "閱讀", "健身", "看電影", "聽音樂", "攝影", "登山", "衝浪", "游泳", "瑜伽",
                 "繪畫", "寫作", "遊戲", "美食", "咖啡", "貓奴", "狗奴", "逛街", "動漫", "園藝", "樂器", "唱歌", "跳舞", "志工");
 
+
         List<String> allTraits = List.of(
                 "外向", "樂觀", "開朗", "內向", "沈穩", "細心", "幽默", "有耐心", "有活力", "隨和", "獨立", "創意",
                 "負責", "認真", "友善", "善良", "熱情", "冷靜");
@@ -152,6 +157,7 @@ public class UserController {
         model.addAttribute("user", user);
         model.addAttribute("allInterests", allInterests);
         model.addAttribute("allTraits", allTraits);
+
 
         MultipartFile[] files = user.getUploadedImages();
 
@@ -177,6 +183,7 @@ public class UserController {
                 }
             }
         }
+
 
         return "front-end/user/update_profile";
     }

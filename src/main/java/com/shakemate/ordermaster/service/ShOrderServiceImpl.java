@@ -4,6 +4,9 @@ package com.shakemate.ordermaster.service;
 import com.shakemate.ordermaster.dao.ShOrderRepository;
 import com.shakemate.ordermaster.dto.ShOrderDto;
 import com.shakemate.ordermaster.dto.ShOrderRequestDto;
+import com.shakemate.ordermaster.eum.OrderStatus;
+import com.shakemate.ordermaster.eum.PaymentStatus;
+import com.shakemate.ordermaster.eum.ShippingStatus;
 import com.shakemate.ordermaster.model.ShOrder;
 import com.shakemate.ordermaster.util.ShOrderSpecifications;
 
@@ -45,6 +48,17 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
+    public void cancelOrder(Integer orderId){
+        Optional<ShOrder> rowOrder = orderRepository.findById(orderId);
+        ShOrder order = rowOrder.orElseThrow(() -> new IllegalArgumentException("訂單不存在"));
+        order.setOrderStatus(OrderStatus.CANCELLED.getCode());
+        order.setPaymentStatus(PaymentStatus.CANCELLED.getCode());
+        order.setShippingStatus(ShippingStatus.CANCELLED.getCode());
+        order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+        orderRepository.save(order);
+
+    }
+
     @Override
     public ShOrderDto createOrder(ShOrderRequestDto orderInfo) {
         ShOrder order = new ShOrder();
@@ -69,17 +83,26 @@ public class ShOrderServiceImpl implements ShOrderService{
         order.setOrderStatus((byte) 0);
         order.setOrderDate(new Timestamp(System.currentTimeMillis()));
         order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
-
-
         ShOrder savedOrder = orderRepository.save(order);
         ShOrderDto dto = null;
         if(savedOrder != null) {
             dto= new ShOrderDto(savedOrder);
             shShopService.orderCreated(savedOrder.getShProd().getProdId(), savedOrder.getProductQuantity());
-
         }
-
         return dto;
+    }
+
+    @Override
+    public ShOrderDto updateOrder(ShOrderRequestDto requestDto) {
+        Optional<ShOrder> rowOrder = orderRepository.findById(requestDto.getShOrderId());
+        ShOrder order = rowOrder.orElseThrow(() -> new IllegalArgumentException("訂單不存在"));;
+        order.setOrderStatus(requestDto.getOrderStatus());
+        order.setPaymentStatus(requestDto.getPaymentStatus());
+        order.setShippingAddress(requestDto.getShippingAddress());
+        order.setShippingStatus(requestDto.getShippingStatus());
+        order.setOrderNote(requestDto.getOrderNote());
+        order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+        return new ShOrderDto(orderRepository.save(order));
     }
 
     @Override
@@ -102,7 +125,7 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
-//    public ShOrderDto markAsPaid()
+
 
     @Override
     public List<ShOrderDto> getOrdersByProd(Integer prodId) {
@@ -110,19 +133,41 @@ public class ShOrderServiceImpl implements ShOrderService{
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
 
+
+
     @Override
-    public ShOrder updateOrder(ShOrder order) {
-        return orderRepository.save(order);
+    @Transactional
+    public void checkingStatus(Integer orderId) {
+        Optional<ShOrder> rowOrder = orderRepository.findById(orderId);
+        ShOrder order = rowOrder.orElseThrow(() -> new IllegalArgumentException("訂單不存在"));
+        if(order.getPaymentStatus() == PaymentStatus.PAID.getCode() && order.getShippingStatus() == ShippingStatus.DELIVERED.getCode()) {
+            order.setOrderStatus(OrderStatus.COMPLETED.getCode());
+            orderRepository.save(order);
+        }
+
     }
 
     @Override
-    public void markedAsPaid(Integer orderId) {
+    @Transactional
+    public void logisticStatus(Integer orderId, ShippingStatus status) {
         Optional<ShOrder> rowOrder = orderRepository.findById(orderId);
         ShOrder order = rowOrder.orElseThrow(() -> new IllegalArgumentException("訂單不存在"));;
-        order.setPaymentStatus((byte) 1);
+        order.setShippingStatus(status.getCode());
         order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
         orderRepository.save(order);
     }
+
+    @Override
+    @Transactional
+    public void paymentStatus(Integer orderId, PaymentStatus status) {
+        Optional<ShOrder> rowOrder = orderRepository.findById(orderId);
+        ShOrder order = rowOrder.orElseThrow(() -> new IllegalArgumentException("訂單不存在"));;
+        order.setPaymentStatus(status.getCode());
+        order.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+        orderRepository.save(order);
+    }
+
+
 
 
     @Transactional(readOnly = true)
@@ -144,6 +189,7 @@ public class ShOrderServiceImpl implements ShOrderService{
         List<ShOrder> orders =  orderRepository.findAll(spec);
         return orders.stream().map(ShOrderDto::new).collect(Collectors.toList());
     }
+
 
     public int calculateTotalAmount(int productPrice, int productQuantity, int shippingFee) {
         int subtotal = productPrice * productQuantity;

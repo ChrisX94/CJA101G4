@@ -52,6 +52,7 @@
                     <div class="action-buttons">
                         <button class="btn-action btn-edit" id="toggleStatusBtn" style="display: none;">狀態切換</button>
                         <button class="btn-action btn-toggle" id="rejectBtn" style="display: none;">審核不通過</button>
+                        <button class="btn-action btn-back" onclick="window.history.back()">返回上一頁</button>
                     </div>
                 </div>
             </div>
@@ -166,9 +167,12 @@
                         } else if (data.prodStatus === 2) {
                             toggleStatusBtn.textContent = '下架商品';
                             toggleStatusBtn.dataset.action = 'delist';
-                        } else {
+                        }else if(data.prodStatus === 3 && data.prodCount > 0) {
                             toggleStatusBtn.textContent = '上架商品';
                             toggleStatusBtn.dataset.action = 'list';
+                        } else {
+                            toggleStatusBtn.style.display = "none";
+                            rejectBtn.style.display = "none";
                         }
 
                         // ✅ 顯示審核不通過原因

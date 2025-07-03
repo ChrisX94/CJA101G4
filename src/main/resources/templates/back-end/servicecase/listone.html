@@ -15,7 +15,7 @@
 
     /* 容器 */
     .container {
-      max-width: 80rem;
+      max-width: 100rem;
       margin: 2rem auto;
       padding: 1rem;
       background: #fff;
@@ -94,6 +94,28 @@
     .actions .edit { background: lightskyblue; }
     .actions .delete { background: lightcoral; }
     .actions a:hover { transform: translateY(-0.1rem); box-shadow: 0 0.3rem 0.6rem rgba(0,0,0,0.1); color: black; }
+ 
+ 
+  
+    .pagination-controls {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  .page-btn {
+    margin: 0 0.3rem;
+    padding: 0.5rem 1rem;
+    font-size: 1.4rem;
+    border: 1px solid #ccc;
+    background: #eee;
+    cursor: pointer;
+    border-radius: 0.4rem;
+  }
+  .page-btn.active {
+    background-color: #03a9f4;
+    color: #fff;
+    font-weight: bold;
+  }
+  
   </style>
 </head>
 <body>
@@ -136,18 +158,20 @@
         <tr>
           <th>編號</th>
           <th>類別</th>
-          <th>使用者</th>
+          <th>用戶</th>
+          <th>Email</th> <!-- 新增 -->
           <th>標題</th>
           <th>狀態</th>
           <th>建立時間</th>
           <th>操作</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="tableBody">
         <tr th:each="sc : ${cases}">
           <td th:text="${sc.caseId}"></td>
           <td th:text="${sc.caseType.typeName}"></td>
           <td th:text="${sc.userId}"></td>
+          <td th:text="${sc.email}"></td> <!-- 新增 -->
           <td th:text="${sc.title}"></td>
 <!--           <td th:text="${#lists.arrayList('未處理','處理中','已完成')[sc.caseStatus]}"></td> -->
           <td th:text="${sc.statusName}"></td>
@@ -158,9 +182,80 @@
                th:onclick="|return confirm('確定刪除 ID=${sc.caseId}?');|">刪除</a>
           </td>
         </tr>
-        <tr th:if="${cases.empty}"><td colspan="7">無符合條件的案件</td></tr>
+        <tr th:if="${cases.empty}"><td colspan="8">無符合條件的案件</td></tr>
       </tbody>
     </table>
+        
+                  <!-- 分頁資訊與控制器 -->
+<div class="pagination-controls">
+  <div id="pagination-info" style="margin-bottom: 0.8rem; font-size: 1.6rem;"></div>
+  <div id="pagination"></div>
+</div>
+        
   </div>
+
+  <script defer>
+  const rowsPerPage = 5;
+  const tbody = document.getElementById("tableBody");
+  const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
+  const pagination = document.getElementById("pagination");
+  const pageInfo = document.getElementById("pagination-info");
+
+  let currentPage = 1;
+  let totalPages = Math.ceil(rows.length / rowsPerPage);
+
+  function showPage(page) {
+    currentPage = page;
+    totalPages = Math.ceil(rows.length / rowsPerPage);
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    rows.forEach((row, index) => {
+      row.style.display = index >= start && index < end ? "" : "none";
+    });
+
+    renderPagination();
+    updatePageInfo();
+  }
+
+  function updatePageInfo() {
+    pageInfo.innerText = `共 ${rows.length} 筆，頁數 ${currentPage} / ${totalPages}`;
+  }
+
+  function renderPagination() {
+    pagination.innerHTML = "";
+
+    // 上一頁
+    if (currentPage > 1) {
+      const prevBtn = document.createElement("button");
+      prevBtn.innerText = "上一頁";
+      prevBtn.className = "page-btn";
+      prevBtn.onclick = () => showPage(currentPage - 1);
+      pagination.appendChild(prevBtn);
+    }
+
+    // 頁碼按鈕
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement("button");
+      btn.innerText = i;
+      btn.className = "page-btn";
+      if (i === currentPage) btn.classList.add("active");
+      btn.onclick = () => showPage(i);
+      pagination.appendChild(btn);
+    }
+
+    // 下一頁
+    if (currentPage < totalPages) {
+      const nextBtn = document.createElement("button");
+      nextBtn.innerText = "下一頁";
+      nextBtn.className = "page-btn";
+      nextBtn.onclick = () => showPage(currentPage + 1);
+      pagination.appendChild(nextBtn);
+    }
+  }
+
+  showPage(currentPage); // 初始顯示
+</script>
+  
 </body>
 </html>
