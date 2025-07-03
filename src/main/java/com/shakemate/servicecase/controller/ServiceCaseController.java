@@ -5,7 +5,8 @@ import com.shakemate.servicecase.dto.ServiceCaseDTO;
 import com.shakemate.servicecase.mapper.ServiceCaseMapper;
 
 import com.shakemate.servicecase.model.ServiceCase;
-import com.shakemate.servicecase.model.ServiceCaseService;
+import com.shakemate.servicecase.service.ServiceCaseService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

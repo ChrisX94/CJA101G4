@@ -12,8 +12,28 @@
 
 body {
     font-family: "Noto Sans TC", sans-serif;
-    background: linear-gradient(to top, #84c2db, #beebf4, #e9feff);
     color: #333;
+}
+
+.bg {
+    position: relative;
+    min-height: 100vh;
+    z-index: 0;
+    background: linear-gradient(185deg,
+            #DCFF61 0%,
+            #DCFF61 55%,
+            #2EC4B6 55%,
+            #2EC4B6 100%);
+    overflow: hidden;
+}
+
+.bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.35);
+    z-index: 0;
+    pointer-events: none;
 }
 
 img {
@@ -50,15 +70,24 @@ img {
     height: 3.6rem;
     padding: 0 1.2rem;
     border: none;
-    background-color: #3e92cc;
+    background-color: #26A79A;
     color: white;
-    border-radius: 4px;
+    border-radius: 2rem;
     cursor: pointer;
+
 }
 
 .sort-buttons {
     display: flex;
     gap: 0.8rem;
+    transition: background 0.3s;
+}
+
+.sort-btn:hover {
+    background-color: #fff;
+    color: gray;
+    font-weight: 700;
+    border: 2px solid gray;
 }
 
 aside.aside {
@@ -67,7 +96,7 @@ aside.aside {
     left: 0;
     width: var(--aside-width);
     height: 100vh;
-    background-color: lightblue;
+    background-color: #2EC4B6;
     padding: 2rem 1rem;
     overflow-y: auto;
     z-index: 800;
@@ -149,7 +178,7 @@ main.main {
 .prod-type {
     color: #555;
     font-size: 0.8rem;
-    
+
 }
 
 .prod-price {
@@ -159,7 +188,7 @@ main.main {
     text-align: right;
 }
 
-.owner{
+.owner {
     display: flex;
     align-items: center;
     gap: 0.5rem;
