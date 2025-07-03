@@ -2,6 +2,7 @@ package com.shakemate.login;
 
 import com.shakemate.user.model.Users;
 import com.shakemate.user.service.UserService;
+import com.shakemate.user.service.UserService.LoginResult;
 import com.shakemate.user.util.UserPostMultipartFileUploader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -41,7 +42,8 @@ public class LoginController {
             HttpServletRequest request,
             Model model) {
         Users user = userService.getUserByEmail(account);
-        if (user == null || !userService.login(user.getEmail(), password) || user.getUserStatus() == (byte) 4) {
+        if (user == null || userService.login(user.getEmail(), password) != LoginResult.SUCCESS
+                || user.getUserStatus() == (byte) 4) {
             model.addAttribute("errorMsg", "登入失敗，請檢查帳號或密碼！");
             return "login"; // 回到 login.html
         }

@@ -30,9 +30,17 @@ public class UserService {
         return usersRepo.findByEmail(email);
     }
 
-    public boolean login(String email, String inputPassword) {
+    public enum LoginResult {
+        SUCCESS, WRONG_PASSWORD, USER_NOT_FOUND
+    }
+
+    public LoginResult login(String email, String inputPassword) {
         Users user = usersRepo.findByEmail(email);
-        return user != null && pc.passwordVerify(user.getPwd(), inputPassword);
+        if (user == null)
+            return LoginResult.USER_NOT_FOUND;
+        if (!pc.passwordVerify(user.getPwd(), inputPassword))
+            return LoginResult.WRONG_PASSWORD;
+        return LoginResult.SUCCESS;
     }
 
     @Transactional
