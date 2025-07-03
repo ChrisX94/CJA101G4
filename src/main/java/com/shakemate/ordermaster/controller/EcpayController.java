@@ -424,7 +424,6 @@ public class EcpayController {
         String shipmentStatus = params.get("shipmentStatus"); // 0 processing, 1 shipped, 2 delivered
         String StatusDescription = params.get("statusDescription"); // description of the shipment status
         String isCollect = params.get("isCollect");  // 0 no, 1 yes, 2 refound, Only for pay on delivered
-
         Integer orderId = Integer.parseInt(orderIdStr);
         switch (shipmentStatus) {
             case "0":

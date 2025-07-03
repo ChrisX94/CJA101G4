@@ -160,3 +160,28 @@ button.discard {
   align-items: center;
   justify-content: center;
 }
+.bg {
+  position: relative;
+  min-height: 100vh;
+  z-index: 0;
+
+  /* 背景拼接色塊（亮綠 + 藍綠） */
+  background: linear-gradient(
+    185deg,
+    #DCFF61 0%,
+    #DCFF61 55%,
+    #2EC4B6 55%,
+    #2EC4B6 100%
+  );
+  overflow: hidden;
+}
+
+/* 背景上方有再加一層帶透明度的白色 */
+.bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
+  z-index: 0;
+  pointer-events: none;
+}
