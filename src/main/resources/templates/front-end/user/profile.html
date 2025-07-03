@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user.username} + ' 會員自介編輯'"></title>
+    <style>
+        /* 全局字體和背景 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+            box-sizing: border-box;
+            background-color: #f0f2f5;
+            /* Fallback */
+        }
+
+        /* 背景拼接色塊（亮綠 + 藍綠） */
+        .bg {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            z-index: 0;
+            background: linear-gradient(185deg,
+                    #DCFF61 0%,
+                    #DCFF61 55%,
+                    #2EC4B6 55%,
+                    #2EC4B6 100%);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 背景上方帶透明度的白色疊層 */
+        .bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.35);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 主容器 - 白色背景 */
+        .profile-container {
+            position: relative;
+            z-index: 1;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 750px;
+            padding: 30px;
+            box-sizing: border-box;
+            margin-top: 40px;
+            color: #333;
+            text-align: center;
+        }
+
+        /* 頂部標題 */
+        .main-title {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #2EC4B6;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* 照片區塊 */
+        .photo-section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .photo-section h3 {
+            font-size: 1.4em;
+            color: #4CAF50;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .photo-gallery-editor {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .photo-item {
+            position: relative;
+            padding-bottom: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .photo-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-item .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: background-color 0.2s;
+        }
+
+        .photo-item .remove-btn:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        /* 新增照片框 */
+        .add-photo-box {
+            border: 3px dashed #777;
+            background-color: #f9f9f9;
+            color: #777;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            position: relative;
+        }
+
+        .add-photo-box:hover {
+            border-color: #2EC4B6;
+            background-color: #eafbf9;
+        }
+
+        .add-photo-box .plus-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #E24F6C;
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            line-height: 1;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-photo-box input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* 隱藏當圖片滿5張時的新增框 */
+        .add-photo-box.hidden {
+            display: none;
+        }
+
+        /* 資料編輯區塊 */
+        .data-edit-section {
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .data-edit-section h3 {
+            font-size: 1.4em;
+            color: #4CAF50;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 1.05em;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group textarea {
+            width: calc(100% - 24px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            color: #333;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group textarea:focus {
+            border-color: #2EC4B6;
+            box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.2);
+            outline: none;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group .note {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .form-group .disabled-input {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            color: #777;
+        }
+
+        .form-group .email-note {
+            color: #e24f6c;
+            font-weight: bold;
+        }
+
+        /* 勾選框共同樣式 */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .checkbox-group label {
+            background-color: #f0f0f0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+            font-weight: normal;
+            /* Override form-group label bold */
+            font-size: 0.95em;
+            border: 1px solid #ddd;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            display: none;
+            /* 隱藏原生 checkbox */
+        }
+
+        .checkbox-group input[type="checkbox"]+span {
+            /* 自定義勾選框的樣式 */
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            margin-right: 8px;
+            vertical-align: middle;
+            transition: background-color 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .checkbox-group input[type="checkbox"]:checked+span {
+            background-color: #2EC4B6;
+            /* 勾選後的背景色 */
+            border-color: #2EC4B6;
+        }
+
+        .checkbox-group input[type="checkbox"]:checked+span::after {
+            content: '✔';
+            /* 勾選符號 */
+            color: white;
+            font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checkbox-group input[type="checkbox"]:checked+span+.checkbox-text {
+            color: #fff;
+            /* 勾選後文字變白 */
+        }
+
+        .checkbox-group label:has(input[type="checkbox"]:checked) {
+            background-color: #2EC4B6;
+            /* 勾選後標籤背景色 */
+            color: #fff;
+            /* 勾選後標籤文字顏色 */
+            box-shadow: 0 2px 5px rgba(46, 196, 182, 0.2);
+        }
+
+        .checkbox-group label:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+
+        /* 底部操作按鈕區塊 */
+        .action-buttons {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            /* 垂直排列 */
+            gap: 20px;
+            /* 按鈕間距 */
+            align-items: center;
+            /* 居中 */
+        }
+
+        .save-button,
+        .delete-account-button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            /* 讓按鈕佔用較多寬度 */
+            max-width: 300px;
+            /* 最大寬度限制 */
+        }
+
+        .save-button {
+            background-color: #DCFF61;
+            /* 亮綠色按鈕 */
+            color: #333;
+        }
+
+        .save-button:hover {
+            background-color: #c7ed48;
+            transform: translateY(-2px);
+        }
+
+        .delete-account-button {
+            background-color: #e24f6c;
+            /* 紅色按鈕 */
+            color: #fff;
+        }
+
+        .delete-account-button:hover {
+            background-color: #c83d58;
+            transform: translateY(-2px);
+        }
+
+        /* RWD 調整 */
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 15px;
+                margin-top: 20px;
+            }
+
+            .main-title {
+                font-size: 1.8em;
+            }
+
+            .photo-gallery-editor {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 15px;
+            }
+
+            .photo-section h3,
+            .data-edit-section h3 {
+                font-size: 1.2em;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                width: calc(100% - 20px);
+                padding: 10px;
+            }
+
+            .save-button,
+            .delete-account-button {
+                padding: 12px 25px;
+                font-size: 1.1em;
+                width: 90%;
+                /* 小螢幕下佔用更多寬度 */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg">
+        <div class="profile-container">
+            <h1 class="main-title">編輯個人自介</h1>
+
+            <div class="photo-section">
+                <h3>我的照片</h3>
+                <div class="photo-gallery-editor" id="photoGallery">
+                    <div class="photo-item" th:each="photoUrl, iterStat : ${user.photos}"
+                        th:data-index="${iterStat.index}">
+                        <img th:src="${photoUrl}" th:alt="'個人照片 ' + ${iterStat.index + 1}">
+                        <button type="button" class="remove-btn"
+                            th:data-photo-id="${'photo-' + iterStat.index}">×</button>
+                    </div>
+
+                    <div class="photo-item add-photo-box" th:if="${user.photos.size() < 5}">
+                        <input type="file" id="add-photo-input" accept="image/*">
+                        <span class="plus-icon">+</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-edit-section">
+                <h3>基本資料</h3>
+                <div class="form-group">
+                    <label for="username">使用者名稱:</label>
+                    <input type="text" id="username" th:value="${user.username}">
+                </div>
+                <div class="form-group">
+                    <label for="email">電子郵件:</label>
+                    <input type="email" id="email" th:value="${user.email}" class="disabled-input" readonly>
+                    <p class="note email-note">若需更換 Email，請聯繫客服或前往設定頁面重新驗證。</p>
+                </div>
+                <div class="form-group">
+                    <label for="birthdate">出生日期:</label>
+                    <input type="text" id="birthdate" th:value="${#temporals.format(user.birthdate, 'yyyy-MM-dd')}"
+                        class="disabled-input" readonly>
+                    <p class="note">生日一經設定，不可更改。</p>
+                </div>
+                <div class="form-group">
+                    <label for="location">居住地:</label>
+                    <input type="text" id="location" th:value="${user.location}">
+                </div>
+                <div class="form-group">
+                    <label for="bio">關於我:</label>
+                    <textarea id="bio" th:text="${user.bio}"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>興趣:</label>
+                    <div class="checkbox-group" id="interestsCheckboxes">
+                        <label th:each="interest : ${user.allAvailableInterests}">
+                            <input type="checkbox" name="interests" th:value="${interest}"
+                                th:checked="${user.interests.contains(interest)}">
+                            <span></span>
+                            <span class="checkbox-text" th:text="${interest}"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>個性特徵:</label>
+                    <div class="checkbox-group" id="personalityTraitsCheckboxes">
+                        <label th:each="trait : ${user.allAvailablePersonalityTraits}">
+                            <input type="checkbox" name="personality_traits" th:value="${trait}"
+                                th:checked="${user.personalityTraits.contains(trait)}">
+                            <span></span>
+                            <span class="checkbox-text" th:text="${trait}"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="save-button">儲存變更</button>
+                <button class="delete-account-button" id="deleteAccountBtn">刪除帳號</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const photoGallery = document.getElementById('photoGallery');
+            const MAX_PHOTOS = 5; // 最大照片數量
+
+            // 從 Thymeleaf 獲取圖片 URL
+            let currentPhotoUrls = /*[[${user.photos}]]*/[];
+
+            // 從 Thymeleaf 獲取用戶已選擇的興趣 (Thymeleaf 會將 List<String> 轉換為 JavaScript 陣列)
+            let userSelectedInterests = /*[[${user.interests}]]*/[];
+
+            // 從 Thymeleaf 獲取用戶已選擇的個性特徵
+            let userSelectedPersonalityTraits = /*[[${user.personalityTraits}]]*/[];
+
+            // 圖片相關功能不需要太大改動，因為它會操作 DOM，但需要確保初始渲染是正確的。
+            // Thymeleaf 已經在 HTML 中初始渲染了圖片，所以 JS 只需要處理新增和刪除。
+
+            // 處理圖片移除 - 當點擊 remove-btn 時
+            photoGallery.addEventListener('click', function (event) {
+                if (event.target.classList.contains('remove-btn')) {
+                    const photoItemToRemove = event.target.closest('.photo-item');
+                    if (photoItemToRemove) {
+                        const indexToRemove = parseInt(photoItemToRemove.getAttribute('data-index'));
+
+                        // 在前端資料陣列中移除圖片
+                        currentPhotoUrls.splice(indexToRemove, 1);
+
+                        // 重新渲染照片牆 (這裡簡化，直接移除 DOM 元素並更新新增框顯示狀態)
+                        photoItemToRemove.remove();
+                        updateAddPhotoBoxVisibility(); // 更新新增框的顯示狀態
+
+                        console.log('圖片已在前端移除 (實際刪除需後端支援)');
+                        // 實際應用中，你會在這裡發送 AJAX 請求到後端刪除圖片
+                        // fetch(`/api/profile/photo/${event.target.dataset.photoId}`, { method: 'DELETE' })
+                        //   .then(response => response.json())
+                        //   .then(data => {
+                        //     if (data.success) {
+                        //       console.log("圖片已從後端刪除");
+                        //     } else { alert('刪除失敗'); }
+                        //   })
+                        //   .catch(error => console.error('Error deleting photo:', error));
+                    }
+                }
+            });
+
+            // 處理新增照片預覽
+            function handleAddPhoto(event) {
+                const files = event.target.files;
+                if (files.length > 0 && currentPhotoUrls.length < MAX_PHOTOS) {
+                    const file = files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        // 將新圖片加入陣列
+                        currentPhotoUrls.push(e.target.result);
+
+                        // 在 DOM 中創建新的 photo-item 並插入到加號框之前
+                        const newPhotoItem = document.createElement('div');
+                        newPhotoItem.classList.add('photo-item');
+                        newPhotoItem.setAttribute('data-index', currentPhotoUrls.length - 1); // 新增索引
+
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = `個人照片 ${currentPhotoUrls.length}`;
+                        newPhotoItem.appendChild(img);
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.classList.add('remove-btn');
+                        removeBtn.textContent = '×';
+                        removeBtn.setAttribute('data-photo-id', `new-photo-${Date.now()}`); // 新增圖片使用時間戳作為ID，實際應由後端返回
+                        newPhotoItem.appendChild(removeBtn);
+
+                        // 找到 add-photo-box，並在其之前插入新圖片
+                        const addPhotoBox = document.querySelector('.add-photo-box');
+                        if (addPhotoBox) {
+                            photoGallery.insertBefore(newPhotoItem, addPhotoBox);
+                        } else {
+                            photoGallery.appendChild(newPhotoItem); // 如果沒有加號框，直接追加
+                        }
+
+                        updateAddPhotoBoxVisibility(); // 更新新增框的顯示狀態
+                        console.log('新圖片已在前端預覽 (實際需上傳後端)');
+
+                        // 實際應用中，你會在這裡發送 AJAX 請求上傳圖片
+                        // const formData = new FormData();
+                        // formData.append('file', file);
+                        // fetch('/api/profile/photo/upload', {
+                        //     method: 'POST',
+                        //     body: formData
+                        // })
+                        // .then(response => response.json())
+                        // .then(data => {
+                        //     if (data.success && data.imageUrl) {
+                        //         // 更新 currentPhotoUrls 中的預覽 URL 為實際的伺服器 URL
+                        //         // (這需要您在後端處理上傳並返回圖片 URL)
+                        //         // 或者，每次儲存時一起上傳新的圖片
+                        //     } else {
+                        //         alert('圖片上傳失敗');
+                        //     }
+                        // })
+                        // .catch(error => console.error('Error uploading photo:', error));
+                    };
+                    reader.readAsDataURL(file);
+                }
+                event.target.value = ''; // 清空 input value
+            }
+
+            // 動態監聽 add-photo-input 的 change 事件
+            // 由於 add-photo-box 可能會動態出現，這裡需要更穩健的綁定方式，
+            // 或者確保 DOM 已經準備好，例如在 renderPhotos() 裡綁定。
+            // 在此 Thymeleaf 模板中，我們假設 add-photo-box 是初始就有的 (如果照片數量未滿)。
+            // 如果 add-photo-box 是後續動態生成，需要在生成後重新綁定事件。
+            // 由於Thymeleaf已經處理了初始顯示/隱藏，我們只需要在照片增刪後調用此函數。
+            function updateAddPhotoBoxVisibility() {
+                const addPhotoBox = document.querySelector('.add-photo-box');
+                if (addPhotoBox) {
+                    if (currentPhotoUrls.length >= MAX_PHOTOS) {
+                        addPhotoBox.classList.add('hidden');
+                    } else {
+                        addPhotoBox.classList.remove('hidden');
+                        // 確保文件輸入框的事件監聽器仍然存在
+                        const fileInput = addPhotoBox.querySelector('#add-photo-input');
+                        if (fileInput && !fileInput.dataset.listenerAttached) {
+                            fileInput.addEventListener('change', handleAddPhoto);
+                            fileInput.dataset.listenerAttached = 'true'; // 標記已綁定
+                        }
+                    }
+                }
+            }
+            updateAddPhotoBoxVisibility(); // 初始檢查一次，確保正確顯示
+
+            // 確保每次 DOM 更新後，如果 add-photo-box 存在，都綁定事件
+            const initialAddPhotoInput = document.getElementById('add-photo-input');
+            if (initialAddPhotoInput) {
+                initialAddPhotoInput.addEventListener('change', handleAddPhoto);
+                initialAddAddPhotoInput.dataset.listenerAttached = 'true';
+            }
+
+
+            // 儲存按鈕的邏輯
+            const saveButton = document.querySelector('.save-button');
+            saveButton.addEventListener('click', function () {
+                const selectedInterests = Array.from(document.querySelectorAll('#interestsCheckboxes input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+
+                const selectedPersonalityTraits = Array.from(document.querySelectorAll('#personalityTraitsCheckboxes input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+
+                const updatedProfile = {
+                    username: document.getElementById('username').value,
+                    email: document.getElementById('email').value,
+                    // birthdate 是 readonly，直接取值即可，或者從後端傳過來的原始值
+                    birthdate: document.getElementById('birthdate').value,
+                    location: document.getElementById('location').value,
+                    bio: document.getElementById('bio').value,
+
+                    interests: selectedInterests,
+                    personality_traits: selectedPersonalityTraits,
+
+                    // photos 這裡包含的是當前在前端顯示的所有圖片 URL
+                    // 在實際應用中，您可能需要區分「已上傳的現有圖片」和「新上傳但尚未保存的圖片」
+                    // 並將新圖片通過 FormData 等方式單獨發送給後端處理。
+                    photos: currentPhotoUrls
+                };
+
+                console.log('--- 準備儲存的資料 ---');
+                console.log(updatedProfile);
+                alert('資料已在前端控制台顯示 (實際需發送至後端)');
+
+                // 在實際應用中，你會在這裡發送 AJAX 請求到後端
+                // fetch('/api/profile/save', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify(updatedProfile)
+                // })
+                // .then(response => response.json())
+                // .then(data => {
+                //     if (data.success) {
+                //         alert('個人資料儲存成功！');
+                //         // 如果有圖片上傳，且是分開上傳的，這裡可能需要更新圖片狀態
+                //     } else {
+                //         alert('儲存失敗：' + data.message);
+                //     }
+                // })
+                // .catch(error => console.error('Error saving profile:', error));
+            });
+
+            // 刪除帳號功能
+            const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+            deleteAccountBtn.addEventListener('click', function () {
+                const isConfirmed = confirm('您確定要永久刪除此帳號嗎？此操作不可逆轉！');
+
+                if (isConfirmed) {
+                    console.log('用戶已確認刪除帳號');
+                    alert('帳號刪除請求已發送 (實際操作需後端處理)。您將被導向首頁或登出。');
+
+                    // 在實際應用中，這裡會發送一個請求到後端 API 來刪除帳號。
+                    // fetch('/api/profile/delete-account', { method: 'POST' })
+                    // .then(response => {
+                    //    if (response.ok) {
+                    //       window.location.href = '/logout'; // 或 /homepage
+                    //    } else {
+                    //       alert('帳號刪除失敗');
+                    //    }
+                    // })
+                    // .catch(error => console.error('Error deleting account:', error));
+                } else {
+                    console.log('用戶取消了帳號刪除操作。');
+                }
+            });
+        });
+        /*]]>*/
+    </script>
+</body>
+
+</html>
