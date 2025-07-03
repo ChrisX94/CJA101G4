@@ -48,7 +48,7 @@ body {
 .top-bar .right-links a.home { background: darkkhaki; }
 .top-bar .right-links a:hover { color: black; opacity: 0.8; }
 .container {
-    max-width: 120rem;
+    max-width: 140rem;
     margin: 1.6rem auto;
     padding: 0 1.6rem;
 }
@@ -137,7 +137,7 @@ td.actions a:hover { color: black; opacity: 0.8; }
                 <tr class="thead">
                     <th>編號</th>
                     <th onclick="sortTableByColumn(1)" style="cursor: pointer;">類別編號 ▲▼</th>
-                    <th onclick="sortTableByColumn(2)" style="cursor: pointer;">使用者編號 ▲▼</th>
+                    <th onclick="sortTableByColumn(2)" style="cursor: pointer;">用戶編號 ▲▼</th>
                     <th>Email</th>
                     <th>標題</th>
                     <th>狀態</th>
@@ -160,7 +160,7 @@ td.actions a:hover { color: black; opacity: 0.8; }
                     <td class="actions"><a
                         th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
                         <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}"
-                        th:onclick="|return confirm('確定刪除 ID=${sc.caseId}？');|"
+                        th:onclick="|return confirm('確定刪除此案件？');|"
                         class="del">刪除</a></td>
                 </tr>
                 <tr th:if="${cases.empty}"><td colspan="8">目前沒有任何案件</td></tr>
