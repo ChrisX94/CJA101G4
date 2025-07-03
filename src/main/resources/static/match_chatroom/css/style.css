@@ -826,11 +826,14 @@ html {
     width: 90%;
   }
 }
-
+.match__container {
+  width: 62rem;
+  position: relative;
+  margin-top: 2.5rem;
+}
 .match__header {
   text-align: center;
-  margin: 2.5rem 0;
-  position: relative;
+  margin-bottom: 2.5rem;
   z-index:1;
 }
 @media (min-width: 769px) and (max-width: 1199px) {
@@ -875,8 +878,7 @@ html {
   background: #fff;
   padding: 3rem;
   border-radius: 1.5rem;
-  border: 2px solid gray;
-  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  border: 0.26rem solid gray;
   justify-content: center;
   margin-bottom: 4rem;
   /* 稍微跟按鈕區拉開一點 */
@@ -959,6 +961,8 @@ html {
   display: flex;
   gap: 2rem;
   z-index: 1;
+  position: absolute;
+  bottom: 4.5rem;
 }
 .match__actions .match__button,
 .success-btn {
