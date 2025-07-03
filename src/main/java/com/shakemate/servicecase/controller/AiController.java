@@ -3,10 +3,12 @@ package com.shakemate.servicecase.controller;
 import java.util.Map;
 import java.util.List;
 
-import com.shakemate.servicecase.model.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import com.shakemate.servicecase.service.OpenAiService;
+
 import reactor.core.publisher.Mono;
 
 @RestController
