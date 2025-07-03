@@ -23,46 +23,8 @@
 	<div class="bg">
 		
 		
-		<!-- 🔹 頂部選單 -->
-		<header class="header">
-			<div class="header__logo">
-			  <a class="header__logo-link" href="#">
-			  	<div class="header__logo-img">
-				    <img src="img/logo.png" alt="logo">
-				</div>
-			    <div class="header__logo-txt">
-			      <span class="ch">抖一下</span>
-			      <span class="en">ShakeMate</span>
-			    </div>
-			  </a>
-			</div>
-	
-			<section class="mobile__nav">
-				<a href="#">
-					<i class="fa-solid fa-user"></i>
-				</a>
-				<div class="hamburger">
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-			</section>
-	
-			<nav class="header__nav">
-				<ul class="header__list">
-					<li class="header__item"><a href="match.html">配對</a></li>
-					<li class="header__item"><a href="chatroom.html">聊天室</a></li>
-					<li class="header__item"><a href="#">活動</a></li>
-					<li class="header__item"><a href="#">討論區</a></li>
-					<li class="header__item"><a href="#">商城</a></li>
-					<li class="header__item"><a href="#">二手商城</a></li>
-					<li class="header__item"><a href="#">會員專區</a></li>
-				</ul>
-				<a href="#" class="member">
-					<i class="fa-solid fa-user"></i>
-				</a>
-			</nav>
-		</header>	
+		<!-- ✅ W3Schools 標準：引入 header 區塊 -->
+  		<div w3-include-html="../header1.html"></div>
 	
 	
 		<!-- 🔹 配對主內容區 -->
@@ -194,7 +156,8 @@
 	</div>	
 	<script src="js/matchSystem.js"></script>
 	<script src="js/authCheck.js"></script>
-	
+	 <!-- ✅ 引入 includeHTML 功能 -->
+    <script src="../js/header.js"></script>
 </body>
 
 </html>

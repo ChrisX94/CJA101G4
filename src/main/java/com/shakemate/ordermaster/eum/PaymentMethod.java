@@ -2,7 +2,7 @@ package com.shakemate.ordermaster.eum;
 
 public enum PaymentMethod {
     COD((byte) 0, "貨到付款"),
-    TRANSFER((byte) 1, "綠界");
+    TRANSFER((byte) 1, "線上付款");
 
     private final byte code;
     private final String label;

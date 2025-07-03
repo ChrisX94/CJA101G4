@@ -1,0 +1,152 @@
+/* =================== 全域 =================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Noto Sans TC", sans-serif;
+}
+
+body {
+    background-color: #f4f6f8;
+}
+
+/* =================== 主內容 =================== */
+.main-content {
+    padding: 40px 5%;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* =================== 狀態篩選器 =================== */
+.status-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    padding: 6px 16px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.filter-btn.active {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+/* =================== 表格 =================== */
+.table-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1200px;
+}
+
+th, td {
+    padding: 12px 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+th {
+    background-color: #2c3e50;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+td img.prod-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* =================== 按鈕 =================== */
+.material-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.3s;
+}
+
+.material-button:hover {
+    background-color: #217dbb;
+}
+
+/* =================== 響應式 =================== */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 20px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .status-filter {
+        gap: 6px;
+    }
+
+    .filter-btn {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+
+    td img.prod-img {
+        width: 50px;
+        height: 50px;
+    }
+}
+.multi-filter {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.multi-filter label {
+    font-weight: bold;
+}
+
+select {
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}

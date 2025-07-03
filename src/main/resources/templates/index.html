@@ -2,677 +2,788 @@
 <html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&display=swap" rel="stylesheet">
-
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <title>Shakemates</title>
-  <style>
-    html {
-      font-size: 62.5%;
-      font-family: "Noto Sans TC", sans-serif;
-      /* 更新為 #fdfc47 → #24fe41 的上下方向漸層 */
-      background: linear-gradient(to bottom, #E7FF33, #17AB96);
-    }
-
-    body {
-      margin: 0;
-    }
-
-
-    /* 🔹 頂部選單區 */
-    .header {
-      width: 100%;
-      height: 6.5rem;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 4rem 0 2rem;
-      box-sizing: border-box;
-      position: fixed;
-      z-index: 1000;
-      /* box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294); */
-
-      /* box-shadow: none; */
-      /* optional: 移除陰影 */
-
-      backdrop-filter: blur(10px);
-      /* 可加可不加，看你要不要玻璃感 */
-
-    }
-
-    .header.scrolled {
-      background: #fff;
-      box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294);
-      transition: background 0.3s, box-shadow 0.3s;
-    }
-
-    .headerlogo {
-      height: 4.5rem;
-    }
-
-    .headerlogo img {
-      height: 100%;
-    }
-
-    .headernav {
-      display: flex;
-      align-items: center;
-      box-sizing: border-box;
-      gap: 4rem;
-      transition: all 0.3s ease;
-    }
-
-    .headerlist {
-      display: flex;
-      gap: 2.9rem;
-      list-style: none;
-    }
-
-
-    .hamburger {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 2.5rem;
-      height: 1.8rem;
-      cursor: pointer;
-    }
-
-    .hamburger span {
-      height: 0.3rem;
-      background: #333;
-      border-radius: 3px;
-    }
-
-    .headernav-item {
-      font-size: 1.6rem;
-      color: #333;
-      cursor: pointer;
-    }
-
-    .headernav-item:hover {
-      color: #3e92cc;
-    }
-
-    .headerlogo {
-      font-size: 2.4rem;
-      font-weight: bold;
-      color: #3e92cc;
-    }
-
-    .headernav ul {
-      display: flex;
-      list-style: none;
-      gap: 3rem;
-    }
-
-    .headeritem a {
-      text-decoration: none;
-      font-size: 1.6rem;
-      color: #555;
-      transition: color 0.3s, transform 0.3s ease;
-
-      /* 必須加這個，才能正確應用 transform */
-      display: inline-block;
-    }
-
-    .headeritem a:hover {
-      color: #3e92cc;
-      transform: translate(0.5rem, -0.5rem);
-      text-shadow: -0.5rem 0.5rem 0.2rem lightblue;
-    }
-
-    .fa-user {
-      font-size: 2rem;
-      color: #555;
-      transition: color 0.3s;
-    }
-
-    .fa-user:hover {
-      color: #3e92cc;
-    }
-
-    .mobilenav {
-      display: none;
-    }
-
-    .hero-section {
-      display: flex;
-      justify-content: center;
-      gap: 15rem;
-      padding: 15rem 4rem 8rem;
-      position: relative;
-    }
-
-    .hero-section h1 {
-      font-size: 3rem;
-      margin: 1rem 0;
-
-      font-family: "LXGW Marker Gothic", sans-serif;
-      font-weight: 400;
-      font-style: normal;
-    }
-
-    .shake {
-      animation: shake 0.6s infinite;
-    }
-
-    @keyframes shake {
-
-      0%,
-      100% {
-        transform: translateX(0);
-      }
-
-      20% {
-        transform: translateX(-3px);
-      }
-
-      40% {
-        transform: translateX(3px);
-      }
-
-      60% {
-        transform: translateX(-3px);
-      }
-
-      80% {
-        transform: translateX(3px);
-      }
-    }
-
-    .hero-section p {
-      margin: 1rem 0 3rem;
-      font-size: 1.6rem;
-    }
-
-    .hero-section button {
-      background-color: #fff;
-      color: #222;
-      padding: 1rem 2.4rem;
-      border: 0.1rem solid #ccc;
-      border-radius: 5rem;
-      cursor: pointer;
-      font-size: 1.6rem;
-
-      /* 基礎樣式 */
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      /* 讓 transform 生效 */
-      display: inline-block;
-    }
-
-    .hero-section div {
-      width: 100%;
-      max-width: 300px;
-      text-align: center;
-    }
-
-    .service-section {
-      color: white;
-      padding: 20rem 2rem 6rem;
-      position: relative;
-    }
-
-    .service-section h2 {
-      text-align: center;
-      margin-bottom: 4rem;
-      font-size: 2.4rem;
-    }
-
-    .services {
-      display: flex;
-      justify-content: space-evenly;
-      flex-wrap: wrap;
-    }
-
-    .service:hover {
-      box-shadow: 0.2rem 0.2rem 0.5rem rgba(0, 0, 0, 0.7);
-      color: #333;
-      border-color: turquoise;
-      border-width: 0.13rem;
-      transform: scale(1.1);
-    }
-
-    .service {
-      background: white;
-      color: #333;
-      padding: 8rem 2rem;
-      border-radius: 1.5rem;
-      width: 28rem;
-      text-align: center;
-      transition: transform 0.5s ease;
-    }
-
-    .service i {
-      font-size: 3rem;
-      color: #76ff03;
-      margin-bottom: 1rem;
-    }
-
-    .service h3 {
-      color: #00bfa6;
-      font-size: 2rem;
-    }
-
-    .service p {
-      font-size: 1.4rem;
-    }
-
-    .service button {
-      margin-top: 1.5rem;
-      background-color: transparent;
-      border: 0.1rem solid #00bfa6;
-      padding: 0.5rem 1.5rem;
-      border-radius: 2rem;
-      color: #00bfa6;
-      cursor: pointer;
-      font-size: 1.4rem;
-    }
-
-    .hero-section button:hover,
-    .service button:hover {
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-      background-color: #E7FF33;
-      color: gray;
-      border-color: turquoise;
-      border-width: 0.13rem;
-      animation: pulse 2s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.05);
-      }
-    }
-
-    .Cuba {
-      width: 100%;
-      max-width: 300px;
-    }
-
-    .Cuba img {
-      width: 100%;
-      /* 圖片隨容器寬度縮放 */
-      display: block;
-      /* 消除圖片底部空白（inline 元素的特性） */
-    }
-
-    /* 🔹 浮動按鈕樣式 */
-    .floating-buttons {
-      position: fixed;
-      left: 2rem;
-      top: 60%;
-      transform: translateY(50%);
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .floating-btn {
-      width: 5.5rem;
-      height: 5.5rem;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
-    }
-
-    .floating-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .news-btn {
-      background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
-      color: white;
-    }
-
-    .news-btn:hover {
-      background: linear-gradient(135deg, #FF5252, #FF7979);
-    }
-
-    .support-btn {
-      background: linear-gradient(135deg, #4ECDC4, #44A08D);
-      color: white;
-    }
-
-    .support-btn:hover {
-      background: linear-gradient(135deg, #26D0CE, #2A9D8F);
-    }
-
-    /* 🔹 滾動到 service-section 時的白色樣式 */
-    .floating-btn.white-mode {
-      background: white !important;
-      color: #666 !important;
-      border: 2px solid #e0e0e0;
-    }
-
-    .floating-btn.white-mode:hover {
-      background: #f5f5f5 !important;
-      color: #333 !important;
-      border-color: #ccc;
-    }
-
-    /* 浮動按鈕文字提示 */
-    .floating-btn::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 7rem;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 0.8rem 1.2rem;
-      border-radius: 0.5rem;
-      font-size: 1.3rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      transform: translateY(-50%);
-      top: 50%;
-    }
-
-    .floating-btn:hover::after {
-      opacity: 1;
-    }
-
-    /* 響應式設計調整 */
-    @media (max-width: 768px) {
-      .floating-buttons {
-        left: 1rem;
-        gap: 1rem;
-      }
-
-      .floating-btn {
-        width: 4.5rem;
-        height: 4.5rem;
-        font-size: 1.6rem;
-      }
-
-      .floating-btn::after {
-        left: 5.5rem;
-        font-size: 1.2rem;
-        padding: 0.6rem 1rem;
-      }
-    }
-
-
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      .headernav .member {
-        display: none;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .headernav .member {
-        display: none;
-      }
-    }
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      .headernav {
-        position: absolute;
-        top: 6.5rem;
-        right: 0;
-        flex-direction: column;
-        background: #fff;
-        width: 100%;
-        max-height: 0;
-        overflow: hidden;
-        gap: 2rem;
-        padding: 0;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    @media (max-width: 480px) {
-      .headernav {
-        position: absolute;
-        top: 6.5rem;
-        right: 0;
-        flex-direction: column;
-        background: #fff;
-        width: 100%;
-        max-height: 0;
-        overflow: hidden;
-        gap: 2rem;
-        padding: 0;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      .headernav.open {
-        padding: 2rem;
-        max-height: 500px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .headernav.open {
-        padding: 2rem;
-        max-height: 500px;
-      }
-    }
-
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      .headerlist {
-        flex-direction: column;
-        width: 100%;
-        gap: 1.5rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .headerlist {
-        flex-direction: column;
-        width: 100%;
-        gap: 1.5rem;
-      }
-    }
-
-    @media (min-width: 481px) and (max-width: 768px) {
-      .mobilenav {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .mobilenav {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-      }
-    }
-
-
-
-
-
-
-    footer {
-      text-align: center;
-      padding: 0.2rem;
-      font-size: 1.2rem;
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <title>Shakemates</title>
+    <style>
+        html {
+            font-size: 62.5%;
+            font-family: "Noto Sans TC", sans-serif;
+            /* 更新為 #fdfc47 → #24fe41 的上下方向漸層 */
+            background: linear-gradient(to bottom, #E7FF33, #17AB96);
+        }
+
+        body {
+            margin: 0;
+        }
+
+        /* 🔹 頂部選單區 */
+        .header {
+            width: 100%;
+            height: 6.5rem;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4rem 0 2rem;
+            box-sizing: border-box;
+            position: fixed;
+            z-index: 1000;
+            /* box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294); */
+
+            /* box-shadow: none; */
+            /* optional: 移除陰影 */
+
+            backdrop-filter: blur(10px);
+            /* 可加可不加，看你要不要玻璃感 */
+
+        }
+
+        .header.scrolled {
+            background: #fff;
+            /* box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294); */
+            transition: background 0.3s;
+            /* box-shadow 0.3s */
+        }
+
+        .headerlogo {
+            height: 4.5rem;
+        }
+
+        .headerlogo img {
+            height: 100%;
+        }
+
+        .headernav {
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            gap: 4rem;
+            transition: all 0.3s ease;
+        }
+
+        .headerlist {
+            display: flex;
+            gap: 2.9rem;
+            list-style: none;
+        }
+
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 2.5rem;
+            height: 1.8rem;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            height: 0.3rem;
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .headernav-item {
+            font-size: 1.6rem;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .headernav-item:hover {
+            color: #3e92cc;
+        }
+
+        .headerlogo {
+            font-size: 2.4rem;
+            font-weight: bold;
+            color: #3e92cc;
+        }
+
+        .headernav ul {
+            display: flex;
+            list-style: none;
+            gap: 3rem;
+        }
+
+        .headeritem a {
+            text-decoration: none;
+            font-size: 1.6rem;
+            color: #555;
+            transition: color 0.3s, transform 0.3s ease;
+
+            /* 必須加這個，才能正確應用 transform */
+            display: inline-block;
+        }
+
+        .headeritem a:hover {
+            color: #17AB96;
+            transform: translate(0.5rem, -0.5rem);
+            /* text-shadow: -0.5rem 0.5rem 0.2rem lightblue; */
+        }
+
+        .fa-user {
+            font-size: 2rem;
+            color: #555;
+            transition: color 0.3s;
+        }
+
+        .fa-user:hover {
+            color: #17AB96;
+        }
+
+        .mobilenav {
+            display: none;
+        }
+
+        .hero-section {
+            height: 30rem;
+            /* 固定高度 */
+            display: flex;
+            justify-content: center;
+            gap: 15rem;
+            padding: 20rem 5rem 50rem 1rem;
+            position: relative;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin: 1rem 0;
+
+            font-family: "LXGW Marker Gothic", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        .shake {
+            animation: shake 0.6s infinite;
+        }
+
+        .gradient {
+            background: linear-gradient(to bottom, #E7FF33, #17AB96);
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-3px);
+            }
+
+            40% {
+                transform: translateX(3px);
+            }
+
+            60% {
+                transform: translateX(-3px);
+            }
+
+            80% {
+                transform: translateX(3px);
+            }
+        }
+
+        .hero-section p {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .hero-section button {
+            background-color: #fff;
+            color: gray;
+            padding: 1rem 2.4rem;
+            border: 0.3rem solid #ccc;
+            border-radius: 5rem;
+            cursor: pointer;
+            font-size: 2rem;
+
+            /* 基礎樣式 */
+            transition: transform 0.2s ease;
+            /* , box-shadow 0.2s ease; */
+            /* 讓 transform 生效 */
+            display: inline-block;
+            /* border-width: 0.3rem; */
+        }
+
+        /* 🔹 textpic 對齊圖片的水平中線 */
+        .hero-section .textpic {
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* 讓文字內容垂直置中，對齊圖片中線 */
+            align-items: center;
+            /* 水平置中 */
+        }
+
+        .hero-section .Cuba {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .service-section {
+            color: white;
+            padding: 10rem 15rem;
+            position: relative;
+        }
+
+        .service-section h2 {
+            text-align: center;
+            margin-bottom: 4rem;
+            font-size: 2.4rem;
+        }
+
+        .services {
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+        }
+
+        .service:hover {
+            /* box-shadow: 0.2rem 0.2rem 0.5rem rgba(0, 0, 0, 0.7); */
+            color: #333;
+            border-color: turquoise;
+            transform: scale(1.1);
+        }
+
+        .service {
+            background: white;
+            color: #333;
+            padding: 8rem 2rem 3rem;
+            border-radius: 1.5rem;
+            width: 28rem;
+            text-align: center;
+
+            /* 1) box-sizing 保證 padding + border 算在 width 內 */
+            box-sizing: border-box;
+            /* 2) 一開始就給透明邊框，寬度跟 hover 時一樣 */
+            border: 0.13rem solid transparent;
+            /* 3) 讓 scale 動畫平滑 */
+            transition: transform 0.5s ease, border-color 0.3s ease;
+        }
+
+        .service i {
+            font-size: 3rem;
+            color: #76ff03;
+            margin-bottom: 1rem;
+        }
+
+        .service h3 {
+            color: #00bfa6;
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .service p {
+            width: 75%;
+            font-size: 1.6rem;
+            /* line-height: 2rem; */
+            margin: 0 auto 3rem;
+        }
+
+        .toggle-clamp {
+            width: 75%;
+            font-size: 1.6rem;
+            /* line-height: 2rem; */
+            margin: 0 auto 3rem;
+
+            /* ── 以下是多行省略符設定 ── */
+            /* ── 多行省略設定 ── */
+            display: -webkit-box;
+            /* 啟用 WebKit */
+            -webkit-box-orient: vertical;
+            /* 垂直排列 */
+
+            /* 標準屬性（未來瀏覽器將會原生支援） */
+            line-clamp: 3;
+            /* WebKit 專屬前綴 */
+            -webkit-line-clamp: 3;
+
+            overflow: hidden;
+            /* 隱藏多餘文字 */
+            text-overflow: ellipsis;
+            /* 顯示「…」 */
+            cursor: pointer;
+            /* 提示可點擊 */
+            transition: max-height 0.3s ease;
+        }
+
+        /* ─── 點擊展開後，移除 clamp ─── */
+        .toggle-clamp.expanded {
+            display: block;
+            /* 顯示全部 */
+            -webkit-line-clamp: unset;
+            line-clamp: unset;
+            overflow: visible;
+            max-height: none;
+        }
+
+        .service button {
+            margin-top: 1.5rem;
+            background-color: transparent;
+            border: 0.2rem solid #00bfa6;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            color: gray;
+            cursor: pointer;
+            font-size: 2.5rem;
+
+        }
+
+        .hero-section button:hover {
+            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); */
+            background-color: #17AB96;
+            color: white;
+            border-color: turquoise;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .service button:hover {
+            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); */
+            background-color: #17AB96;
+            color: white;
+            border-color: turquoise;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .Cuba img {
+            width: 150%;
+            /* 圖片隨容器寫度縮放 */
+            display: block;
+            /* 消除圖片底部空白（inline 元素的特性） */
+        }
+
+        /* 🔹 浮動按鈕樣式 */
+        .floating-buttons {
+            position: fixed;
+            left: 2rem;
+            top: 60%;
+            transform: translateY(50%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .floating-btn {
+            width: 5.5rem;
+            height: 5.5rem;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            transition: all 0.3s ease;
+            /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); */
+            backdrop-filter: blur(10px);
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            /* box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); */
+        }
+
+        .news-btn {
+            background: linear-gradient(135deg, #d7aa2d, orange);
+            color: white;
+        }
+
+        .news-btn:hover {
+            background: linear-gradient(135deg, orange, #d7aa2d);
+        }
+
+        .support-btn {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+        }
+
+        .support-btn:hover {
+            background: linear-gradient(135deg, #26D0CE, #2A9D8F);
+        }
+
+        /* 🔹 滾動到 service-section 時的白色樣式 */
+        .floating-btn.white-mode {
+            background: white !important;
+            color: #666 !important;
+            border: 2px solid #e0e0e0;
+        }
+
+        .floating-btn.white-mode:hover {
+            background: #f5f5f5 !important;
+            color: #333 !important;
+            border-color: #ccc;
+        }
+
+        /* 浮動按鈕文字提示 */
+        .floating-btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 7rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.5rem;
+            font-size: 1.3rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            transform: translateY(-50%);
+            top: 50%;
+        }
+
+        .floating-btn:hover::after {
+            opacity: 1;
+        }
+
+        /* 讓 h1 寬度剛好包住最長那行 */
+        #shaky-text {
+            display: inline-block;
+            font-family: "LXGW Marker Gothic", sans-serif;
+            font-size: 5rem;
+            line-height: 0.3;
+            margin: 1rem 0;
+        }
+
+        /* 每一行都做「兩端對齊」 */
+        #shaky-text .line {
+            display: block;
+            /* 變成塊級，才能 justify */
+            text-align: justify;
+            /* 啟用兩端對齊 */
+            text-justify: distribute;
+            /* 分散對齊，適用中文字 */
+            /* 最新的 CSS 屬性，讓最後一行也強制 justify */
+            text-align-last: justify;
+            /* 如果瀏覽器不支援 text-align-last，也可以用下面的偽元素 hack */
+        }
+
+        #shaky-text .line::after {
+            content: "";
+            display: inline-block;
+            width: 100%;
+            height: 0;
+        }
+
+        /* 響應式設計調整 */
+        @media (max-width: 768px) {
+            .floating-buttons {
+                left: 1rem;
+                gap: 1rem;
+            }
+
+            .floating-btn {
+                width: 4.5rem;
+                height: 4.5rem;
+                font-size: 1.6rem;
+            }
+
+            .floating-btn::after {
+                left: 5.5rem;
+                font-size: 1.2rem;
+                padding: 0.6rem 1rem;
+            }
+
+            /* 🔹 手機版響應式調整 */
+            .hero-section {
+                flex-direction: column;
+                height: auto;
+                padding: 15rem 1rem 5rem;
+                gap: 5rem;
+            }
+
+            .hero-section .textpic,
+            .hero-section .Cuba {
+                max-width: 90%;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headernav .member {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headernav .member {
+                display: none;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headernav {
+                position: absolute;
+                top: 6.5rem;
+                right: 0;
+                flex-direction: column;
+                background: #fff;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                gap: 2rem;
+                padding: 0;
+                /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headernav {
+                position: absolute;
+                top: 6.5rem;
+                right: 0;
+                flex-direction: column;
+                background: #fff;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                gap: 2rem;
+                padding: 0;
+                /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headernav.open {
+                padding: 2rem;
+                max-height: 500px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headernav.open {
+                padding: 2rem;
+                max-height: 500px;
+            }
+        }
+
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headerlist {
+                flex-direction: column;
+                width: 100%;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headerlist {
+                flex-direction: column;
+                width: 100%;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .mobilenav {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mobilenav {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+        }
+
+
+        footer {
+            text-align: center;
+            padding: 0.2rem;
+            font-size: 1.2rem;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
-  <header class="header">
-    <div class="headerlogo">
-      <a href="#">
-        <img src="/img/logoText.png" alt="">
-      </a>
+    <header class="header">
+        <div class="headerlogo">
+            <a href="/">
+                <img src="/img/logoText.png" alt="Logo">
+            </a>
+        </div>
+
+        <section class="mobilenav">
+            <a href="#">
+                <i class="fa-solid fa-user"></i>
+            </a>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </section>
+
+        <nav class="headernav">
+            <ul class="headerlist">
+                <li class="headeritem"><a href="/match_chatroom/match.html">配對</a></li>
+                <li class="headeritem"><a href="/match_chatroom/chatroom.html">聊天室</a></li>
+                <li class="headeritem"><a href="#">活動</a></li>
+                <li class="headeritem"><a href="#">討論區</a></li>
+                <li class="headeritem"><a href="/shshop/front_end/select_page.html">二手商城</a></li>
+                <li class="headeritem"><a href="/login">會員專區</a></li>
+            </ul>
+            <a href="/signup" class="member">
+                <i class="fa-solid fa-user"></i>
+            </a>
+        </nav>
+    </header>
+
+    <!-- 🔹 浮動按鈕 -->
+    <div class="floating-buttons">
+        <button class="floating-btn news-btn" data-tooltip="最新消息" onclick="handleNewsClick()">
+            <i class="fa-solid fa-newspaper"></i>
+        </button>
+        <button class="floating-btn support-btn" data-tooltip="客服中心" onclick="handleSupportClick()">
+            <i class="fa-solid fa-headset"></i>
+        </button>
     </div>
 
-    <section class="mobilenav">
-      <a href="#">
-        <i class="fa-solid fa-user"></i>
-      </a>
-      <div class="hamburger">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+
+    <section class="hero-section">
+        <div class="textpic">
+            <h1 id="shaky-text">
+                <span class="line">抖一下</span>
+                <br>
+                <span class="line">ShakeMate</span>
+            </h1>
+            <p>在這裡抖出屬於你的他！</p>
+            <br>
+            <button onclick="window.location.href='/match_chatroom/match.html'">抖起來！</button>
+        </div>
+        <div class="Cuba">
+            <img src="/img/bodylogo.png" alt="Cubaimg">
+        </div>
     </section>
 
-    <nav class="headernav">
-      <ul class="headerlist">
-        <li class="headeritem"><a href="match.html">配對</a></li>
-        <li class="headeritem"><a href="chatroom.html">聊天室</a></li>
-        <li class="headeritem"><a href="#">活動</a></li>
-        <li class="headeritem"><a href="#">討論區</a></li>
-        <li class="headeritem"><a href="#">商城</a></li>
-        <li class="headeritem"><a href="#">二手商城</a></li>
-        <li class="headeritem"><a href="#">會員專區</a></li>
-      </ul>
-      <a href="#" class="member">
-        <i class="fa-solid fa-user"></i>
-      </a>
-    </nav>
-  </header>
 
-  <!-- 🔹 浮動按鈕 -->
-  <div class="floating-buttons">
-    <button class="floating-btn news-btn" data-tooltip="最新消息" onclick="handleNewsClick()">
-      <i class="fa-solid fa-newspaper"></i>
-    </button>
-    <button class="floating-btn support-btn" data-tooltip="客服中心" onclick="handleSupportClick()">
-      <i class="fa-solid fa-headset"></i>
-    </button>
-  </div>
+    <section class="service-section">
+        <h2>Our Service</h2>
+        <div class="services">
+            <div class="service">
+                <i class="fa-solid fa-heart"></i>
+                <h3>條件篩選配對</h3>
+                <p class="toggle-clamp">別再亂槍打鳥了！讓條件幫你篩住屬於你的那一款，立馬抖一下，抖出你的愛～</p>
+                <button onclick="window.location.href='/match_chatroom/match.html'">MORE</button>
+            </div>
+            <div class="service">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <h3>好友二手商城</h3>
+                <p class="toggle-clamp">買錯尺寸？送錯禮物？透過上架舊有物品讓對方二次找到他真正的歸屬！</p>
+                <button onclick="window.location.href='/shshop/front_end/select_page.html'">MORE</button>
+            </div>
+            <div class="service">
+                <i class="fa-solid fa-people-group"></i>
+                <h3>揪團活動</h3>
+                <p class="toggle-clamp">一起唱歌、爬山、打桌遊，認識朋友不怕尷尬！專屬活動為你開團～</p>
+                <button onclick="window.location.href='/shshop/front_end/select_page.html'">MORE</button>
+            </div>
+        </div>
+    </section>
 
-  <section class="hero-section">
-    <div>
-      <h1 id="shaky-text">抖一下<br>ShakeMate</h1>
-      <p>在這裡抖出屬於你的他！</p>
-      <br>
-      <button>抖起來！</button>
-    </div>
-    <div class="Cuba">
-      <img src="/img/bodylogo.png" alt="Cubaimg">
-    </div>
-  </section>
-
-  <section class="service-section">
-    <h2>Our Service</h2>
-    <div class="services">
-      <div class="service">
-        <i class="fa-solid fa-heart"></i>
-        <h3>條件篩選配對</h3>
-        <p>別再亂槍打鳥了！讓條件幫你篩住屬於你的那一款，立馬抖一下，抖出你的愛～</p>
-        <button>MORE</button>
-      </div>
-      <div class="service">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <h3>好友二手商城</h3>
-        <p>買錯尺寸？送錯禮物？透過上架舊有物品讓對方二次找到他真正的歸屬！</p>
-        <button>MORE</button>
-      </div>
-      <div class="service">
-        <i class="fa-solid fa-people-group"></i>
-        <h3>揪團活動</h3>
-        <p>一起唱歌、爬山、打桌遊，認識朋友不怕尷尬！專屬活動為你開團～</p>
-        <button>MORE</button>
-      </div>
-    </div>
-  </section>
+    <footer>
+        © 2025 ShakeMate. All rights reserved.
+    </footer>
 
 
-  <footer>
-    © 2025 ShakeMate. All rights reserved.
-  </footer>
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.headernav');
+        const header = document.querySelector('.header');
+        const floatingButtons = document.querySelectorAll('.floating-btn');
 
-
-
-  <script>
-    const hamburger = document.querySelector('.hamburger');
-    const nav = document.querySelector('.headernav');
-    const header = document.querySelector('.header');
-    const floatingButtons = document.querySelectorAll('.floating-btn');
-
-    hamburger.addEventListener('click', () => {
-      nav.classList.toggle('open');
-    });
-
-    window.addEventListener('scroll', () => {
-      const triggerSection = document.querySelector('.service-section');
-      const triggerPosition = triggerSection.offsetTop;
-
-      // 原本的 header 樣式變更
-      if (window.scrollY >= triggerPosition - 80) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
-
-      // 🔹 新增：浮動按鈕樣式變更
-      if (window.scrollY >= triggerPosition - 200) {
-        floatingButtons.forEach(btn => {
-          btn.classList.add('white-mode');
+        hamburger.addEventListener('click', () => {
+            nav.classList.toggle('open');
         });
-      } else {
-        floatingButtons.forEach(btn => {
-          btn.classList.remove('white-mode');
+
+        window.addEventListener('scroll', () => {
+            const triggerSection = document.querySelector('.service-section');
+            const triggerPosition = triggerSection.offsetTop;
+
+            // 原本的 header 樣式變更
+            if (window.scrollY >= triggerPosition - 80) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            // 🔹 新增：浮動按鈕樣式變更
+            if (window.scrollY >= triggerPosition - 200) {
+                floatingButtons.forEach(btn => {
+                    btn.classList.add('white-mode');
+                });
+            } else {
+                floatingButtons.forEach(btn => {
+                    btn.classList.remove('white-mode');
+                });
+            }
         });
-      }
-    });
 
+        const text = document.getElementById("shaky-text");
 
+        function toggleShake() {
+            text.classList.add("shake"); // 開始抖
+            setTimeout(() => {
+                text.classList.remove("shake"); // 停止抖
+            }, 500); // 抖0.5秒
+        }
 
-    const text = document.getElementById("shaky-text");
+        // 每6秒執行一次：抖0.5秒 → 停5秒
+        toggleShake();
+        setInterval(toggleShake, 5500);
 
-    function toggleShake() {
-      text.classList.add("shake"); // 開始抖
-      setTimeout(() => {
-        text.classList.remove("shake"); // 停止抖
-      }, 500); // 抖0.5秒
-    }
+        // 🔹 浮動按鈕功能
+        function handleNewsClick() {
+            alert('即將進入最新消息...');
+            window.location.href = 'nindex'
+            // 可以改為: window.location.href = 'news.html';
+        }
 
-    // 每6秒執行一次：抖0.5秒 → 停5秒
-    toggleShake();
-    setInterval(toggleShake, 5500);
+        function handleSupportClick() {
+            alert('即將進入客服中心...');
+            window.location.href = 'sindex'
+            // 可以改為開啟客服對話框或跳轉到客服頁面
+        }
 
-    // 🔹 浮動按鈕功能
-    function handleNewsClick() {
-      alert('即將進入最新消息...');
-      window.location.href = 'nindex'
-      // 可以改為: window.location.href = 'news.html';
-    }
+        document.querySelectorAll('.toggle-clamp').forEach(p => {
+            p.addEventListener('click', () => {
+                p.classList.toggle('expanded');
+            });
+        });
 
-    function handleSupportClick() {
-      alert('即將進入客服中心...');
-      window.location.href = 'sindex'
-      // 可以改為開啟客服對話框或跳轉到客服頁面
-    }
-  </script>
-
+    </script>
 
 </body>
 

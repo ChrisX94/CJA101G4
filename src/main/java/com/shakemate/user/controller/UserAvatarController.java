@@ -18,18 +18,23 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/avatar")
 public class UserAvatarController {
 	
-    @GetMapping("/userAvatar")
-    public Map<String, Object> getCurrentUserId(HttpSession session) {
-    	
-        Object userIdObj = session.getAttribute("account");
-        if (userIdObj == null) {
-            return null;
-        }
-        Integer id = (Integer) userIdObj;
-        String avatarUrl = (String) session.getAttribute("userAvatar");
-        Map<String, Object> result = new HashMap<>();
-        result.put("userAvatar", avatarUrl);
-        return result;
-    }
+	@GetMapping("/userAvatar")
+	public ResponseEntity<Map<String, Object>> getUserAvatar(HttpSession session) {
+	    Map<String, Object> response = new HashMap<>();
+
+	    Object userIdObj = session.getAttribute("account");
+	    if (userIdObj == null) {
+	        response.put("login", false);
+	        response.put("userAvatar", null);
+	        return ResponseEntity.ok(response);
+	    }
+
+	    String avatarUrl = (String) session.getAttribute("userAvatar");
+
+	    response.put("login", true);
+	    response.put("userAvatar", avatarUrl);
+	    return ResponseEntity.ok(response);
+	}
+
     
 }

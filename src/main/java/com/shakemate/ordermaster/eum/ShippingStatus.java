@@ -4,7 +4,9 @@ package com.shakemate.ordermaster.eum;
 public enum ShippingStatus {
     PREPARING((byte) 0, "備貨中"),
     SHIPPED((byte) 1, "已出貨"),
-    DELIVERED((byte) 2, "已送達");
+    DELIVERED((byte) 2, "已送達"),
+    RETURN((byte) 3, "退貨"),
+    CANCELLED((byte) 4, "取消");
 
     private final byte code;
     private final String label;
