@@ -1,67 +1,608 @@
 <!DOCTYPE html>
 <html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="UTF-8" />
-<title>客服系統</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <title>客服系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- 載入CSS -->
-<link rel="stylesheet" th:href="@{/servicecase/css/chat.css}" />
+    <!-- 字體與圖示 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        /* —— 全站基礎 —— */
+        html {
+            font-size: 62.5%;
+            
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Noto Sans TC", sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to bottom, #E7FF33, #17AB96);
+        }
+
+        .container {
+            max-width: 120rem;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 0 1rem;
+            box-sizing: border-box;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* —— Header —— */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4rem 0 2rem;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .headerlogo img {
+            height: 4.5rem;
+        }
+
+        .headernav {
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+        }
+
+        .mobilenav {
+            display: none;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 2.5rem;
+            height: 1.8rem;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            height: .3rem;
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .headerlist {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .headeritem a {
+            display: inline-block;
+            font-size: 1.6rem;
+            color: #555;
+            text-decoration: none;
+            transition: color .3s, transform .3s ease;
+        }
+
+        .headeritem a:hover {
+            color: #17AB96;
+            transform: translate(0.5rem, -0.5rem);
+        }
+
+        .headernav .member i,
+        .fa-user {
+            font-size: 2rem;
+            color: #555;
+            transition: color .3s;
+        }
+
+        .headernav .member i:hover,
+        .fa-user:hover {
+            color: #17AB96;
+        }
+
+        /* —— 主要內容 —— */
+        .main-content {
+            display: flex;
+            flex: 1;
+            margin-top: 6.5rem;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 25rem;
+            /* 固定寬度 250px，高度由 main-content 決定 */
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            /* 內部間距，改放到 list 上 */
+        }
+
+        .category-list {
+            color: gray;
+            font-size: 1.6rem;
+            align-items: stretch;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            /* 撐滿 sidebar */
+            margin: 0;
+            padding: 0;
+        }
+
+        .category-item {
+
+
+            flex: 1;
+            /* 平均分配可用高度 */
+            display: flex;
+            /* 內部做 flex 置中 */
+            align-items: center;
+            /* 垂直置中 */
+            justify-content: center;
+            /* 水平置中 */
+            padding: 0 1.5rem;
+            /* 左右內距 */
+            border-bottom: 1px solid #d0d0d0;
+            cursor: pointer;
+            transition: background-color .2s;
+        }
+
+        .category-item:last-child {
+            border-bottom: none;
+            /* 最後一筆不用底線 */
+        }
+
+        .category-item:hover {
+            background: #f0f7ff;
+        }
+
+        .category-item.active {
+            background: #e3f2fd;
+            font-weight: bold;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* —— 標題與「無法解決」按鈕 —— */
+        .title-input {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            background: orange;
+            color: #fff;
+        }
+
+        .title-input h1 {
+            font-family: "LXGW Marker Gothic", sans-serif;
+            font-size: 3rem;
+            margin: 0;
+            color: #fff;
+        }
+
+        .title-input .add-question {
+            background: #fff;
+            color: gray;
+            border: 2px solid #fff;
+            border-radius: 2.5rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 1.4rem;
+            text-align: center;
+            text-decoration: none;
+            transition: opacity .2s;
+        }
+        
+        .title-input{
+        opacity: 0.8;
+        }
+
+         .add-question:hover {
+        	background: #17AB96;
+        	color: white;
+        }
+
+        /* —— 打字指示 —— */
+        .typing-indicator {
+            display: none;
+            padding: 1rem 2rem;
+            background: #fff;
+            border-radius: 1.5rem;
+            align-self: flex-start;
+            border: 1px solid #d0d0d0;
+            margin: 1rem 2rem 0;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .typing-indicator.hidden {
+            display: none;
+        }
+
+        .typing-indicator.visible {
+            display: flex;
+        }
+
+        .typing-bubble {
+            width: .8rem;
+            height: .8rem;
+            border-radius: 50%;
+            background: #6b8cae;
+            animation: bubble 1s infinite alternate;
+        }
+
+        @keyframes bubble {
+            from {
+                opacity: .5;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        /* —— 訊息區 —— */
+        .chat-messages {
+            font-size: 1.6rem;
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: .4rem 2.5rem 1.5rem;
+            border-radius: 1.5rem;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .message-user {
+            background: #e3f2fd;
+            align-self: flex-end;
+            border-bottom-right-radius: .5rem;
+        }
+
+        .message-bot {
+            background: #fff;
+            align-self: flex-start;
+            border: 1px solid #d0d0d0;
+            border-bottom-left-radius: .5rem;
+        }
+
+        .message-time {
+            position: absolute;
+            bottom: .5rem;
+            right: 1.5rem;
+            font-size: 1rem;
+            color: #888;
+        }
+
+        /* —— 輸入區 —— */
+        .chat-input-container {
+            display: flex;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #d0d0d0;
+            background: #fff;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1.2rem 1.5rem;
+            font-size: 1.6rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 2.5rem;
+        }
+
+        .send-button {
+            background: #fff;
+            color: orange;
+            border: 2px solid gray;
+            border-radius: 2.5rem;
+            padding: 0 2rem;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .send-button:hover {
+        background: orange;
+        color: white;
+        }
+
+        .feedback-button {
+            background: none;
+            /* 取消預設底色 */
+            border: none;
+            /* 取消邊框 */
+            padding: 0;
+            /* 如有需要也可以把內距清掉 */
+            cursor: pointer;
+            /* 保留手形游標提示可點擊 */
+        }
+
+        .feedback-button:focus {
+            outline: none;
+            /* 如果還想去掉 focus 時的虛線框 */
+        }
+
+
+
+        /* 響應式 */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                margin-bottom: 1.5rem;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .mobilenav {
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            .headernav {
+                position: absolute;
+                top: 6.5rem;
+                right: 0;
+                flex-direction: column;
+                background: #fff;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height .3s ease;
+                padding: 0;
+            }
+
+            .headernav.open {
+                padding: 2rem;
+                max-height: 50rem;
+            }
+
+            .headerlist {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .headernav .member {
+                display: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
-	<div class="container">
+    <div class="container">
 
-		<!-- Header -->
-		<header>
-			<h1>Yggdrasill</h1>
-		</header>
+        <!-- 固定 Header -->
+        <header class="header">
+            <div class="headerlogo">
+                <a href="/"><img src="/img/logoText.png" alt="Logo"></a>
+            </div>
+            <section class="mobilenav">
+                <a href="#"><i class="fa-solid fa-user"></i></a>
+                <div class="hamburger"><span></span><span></span><span></span></div>
+            </section>
+            <nav class="headernav">
+                <ul class="headerlist">
+                    <li class="headeritem"><a href="/match_chatroom/match.html">配對</a></li>
+                    <li class="headeritem"><a href="/match_chatroom/chatroom.html">聊天室</a></li>
+                    <li class="headeritem"><a href="#">活動</a></li>
+                    <li class="headeritem"><a href="#">討論區</a></li>
+                    <li class="headeritem"><a href="/shshop/front_end/select_page.html">MatchMarket</a></li>
+                    <li class="headeritem"><a href="/login">登入</a></li>
+                </ul>
+                <a href="/signup" class="member"><i class="fa-solid fa-user"></i></a>
+            </nav>
+        </header>
 
-		<div class="main-content">
+        <div class="main-content">
+            <!-- 側邊 -->
+            <aside class="sidebar">
+                <ul id="categoryList" class="category-list"></ul>
+            </aside>
 
-			<!-- Sidebar -->
-			<aside class="sidebar">
-				<ul id="categoryList" class="category-list">
-					<!-- JavaScript 動態產生 -->
-				</ul>
+            <!-- 聊天主區 -->
+            <main class="chat-container">
+                <!-- 標題 + 新增提問放右方 -->
+                <div class="title-input">
+                    <h1>Yggdrasill</h1>
+                    <a th:href="@{/servicecase/sadd}" class="add-question">
+                        無法解決嗎?<br>點此新增提問
+                    </a>
+                </div>
+                
+                <!-- 訊息區 -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message message-bot">
+                        <p>您好！請先選擇問題類別，AI 將會立即回應。</p>
+                        <span class="message-time"></span>
+                    </div>
+                </div>
+                
+                                <!-- 打字指示 -->
+                <div class="typing-indicator hidden" id="typingIndicator">
+                    <div class="typing-bubble"></div>
+                    <div class="typing-bubble"></div>
+                    <div class="typing-bubble"></div>
+                </div>
 
-			</aside>
+                <!-- 輸入與發送 -->
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="請輸入您的問題..." disabled>
+                    <button class="send-button" id="sendButton" disabled>發送</button>
+                </div>
+            </main>
+        </div>
+    </div>
 
-			<!-- Chat Container -->
-			<main class="chat-container">
+    <script defer>
+        document.addEventListener('DOMContentLoaded', function () {
+            let selectedCategoryId = null;
+            let categories = [];
 
-				<div class="chat-messages" id="chatMessages">
-					<div class="message message-bot">
-						<p>您好！請先選擇問題類別，AI 將會立即回應。</p>
-					<span class="message-time"></span>
-					</div>
-				</div>
+            const categoryList = document.getElementById('categoryList');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const sendButton = document.getElementById('sendButton');
+            const typingIndicator = document.getElementById('typingIndicator');
 
-				<div class="typing-indicator hidden" id="typingIndicator">
-					<div class="typing-bubble"></div>
-					<div class="typing-bubble"></div>
-					<div class="typing-bubble"></div>
-				</div>
+            // 載入並渲染類別
+            fetch('/api/casetype') // '/shakemate/api/casetype'
+                .then(res => res.json())
+                .then(data => {
+                    categories = data;
+                    categories.forEach(cat => {
+                        const li = document.createElement('li');
+                        li.className = 'category-item';
+                        li.dataset.id = cat.caseTypeId;
+                        li.textContent = cat.typeName;
+                        categoryList.appendChild(li);
 
-				<div class="chat-input-container">
-					<input type="text" class="chat-input" id="chatInput"
-						placeholder="請輸入您的問題..." disabled />
-					<button class="send-button" id="sendButton" disabled>發送</button>
-				</div>
+                        li.addEventListener('click', () => {
+                            // 切換樣式
+                            document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+                            li.classList.add('active');
+                            selectedCategoryId = cat.caseTypeId;
 
-			</main>
-		</div>
-	</div>
+                            // 啟用輸入
+                            chatInput.disabled = false;
+                            sendButton.disabled = false;
+                            chatInput.focus();
 
-  <!-- 浮動「我要提問」改到 CRUD 列表頁 -->
-  <a th:href="@{/servicecase/sadd}" 
-     style="background-color: skyblue; color: gray; text-align: center; position:fixed; top:10px; right:20px; z-index:1000;"
-     class="send-button">
-    無法解決嗎?
-    <br>
-    點此新增提問
-  </a>
-  
-	<!-- 載入JS -->
-	<script th:src="@{/servicecase/js/chat.js}" defer></script>
+                            // 清空聊天視窗（或保留歷史）
+                            chatMessages.innerHTML = '';
+                            addMessage(`您已選擇「${cat.typeName}」。請輸入問題：`, false);
+                        });
+                    });
+                })
+                .catch(err => console.error('載入類別失敗', err));
+
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            function sendMessage() {
+                const msg = chatInput.value.trim();
+                if (!msg || !selectedCategoryId) return;
+
+                addMessage(msg, true);
+                chatInput.value = '';
+                typingIndicator.classList.remove('hidden');
+
+                // 呼叫 AI API
+                fetch('/shakemate/api/ai/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categoryId: selectedCategoryId, question: msg })
+                })
+                    .then(res => res.text())
+                    .then(text => {
+                        typingIndicator.classList.add('hidden');
+                        addMessage(text, false, true);
+                    })
+                    .catch(err => {
+                        typingIndicator.classList.add('hidden');
+                        console.error(err);
+                        addMessage('抱歉，回覆失敗，請稍後再試。', false);
+                    });
+            }
+
+            function addMessage(content, isUser, showFeedback = false) {
+                const div = document.createElement('div');
+                div.className = isUser ? 'message message-user' : 'message message-bot';
+                div.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>
+	  <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+                chatMessages.appendChild(div);
+
+                if (showFeedback) {
+                    const feed = document.createElement('div');
+                    feed.className = 'feedback-container';
+                    feed.innerHTML = `
+	  <span>有幫助嗎？</span>
+	  <button class="feedback-button thumbs-up">👍</button>
+	  <button class="feedback-button thumbs-down">👎</button>
+	  `;
+                    div.appendChild(feed);
+
+                    // 找到時間元素
+                    const timeEl = div.querySelector('.message-time');
+
+                    // 點擊後將 feedback container 移除，並在 timeEl 之前插入感謝文字
+                    const thankSpan = document.createElement('span');
+                    thankSpan.className = 'feedback-thanks';
+                    thankSpan.textContent = '感謝您的回覆！';
+                    thankSpan.style.color = 'gray';
+                    thankSpan.style.marginRight = '8px'; // 與時間隔開一點
+
+                    // 綁定按鈕事件
+                    feed.querySelector('.thumbs-up').addEventListener('click', () => {
+                        alert('感謝您的正面回饋！'); // 你可以改為送出 API 等等
+                    });
+                    feed.querySelector('.thumbs-down').addEventListener('click', () => {
+                        alert('我們會持續改進，感謝您！');
+                    });
+
+
+                    // 點擊事件處理函式
+                    const handleFeedback = () => {
+                        feed.remove(); // 移除底下那整坨按鈕
+                        timeEl.parentNode.insertBefore(thankSpan, timeEl);
+                    };
+
+                    feed.querySelector('.thumbs-up').addEventListener('click', handleFeedback);
+                    feed.querySelector('.thumbs-down').addEventListener('click', handleFeedback);
+                }
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+    </script>
+
 </body>
+
 </html>
