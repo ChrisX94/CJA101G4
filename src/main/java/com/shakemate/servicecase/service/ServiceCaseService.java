@@ -1,4 +1,4 @@
-package com.shakemate.servicecase.model;
+package com.shakemate.servicecase.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -6,10 +6,14 @@ import org.springframework.stereotype.Service;
 
 import com.shakemate.casetype.model.CaseType;
 import com.shakemate.casetype.model.CaseTypeRepository;
+import com.shakemate.servicecase.model.ServiceCase;
+import com.shakemate.servicecase.model.ServiceCaseRepository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class ServiceCaseService {
@@ -91,5 +95,35 @@ public class ServiceCaseService {
 
 		return repository.findAll(spec);
 	}
+	
+	
+	
+	   public ServiceCaseService(ServiceCaseRepository repository) {
+	        this.repository = repository;
+	    }
+
+	    public ServiceCase findById(int id) {
+	        return repository.findById(id)
+	                .orElseThrow(() -> new RuntimeException("找不到案件編號：" + id));
+	    }
+
+	    public String formatStatus(int status) {
+	        return switch (status) {
+	            case 0 -> "您的案件尚未處理。";
+	            case 1 -> "您的案件目前處理中，請耐心等候。";
+	            case 2 -> "您的案件已完成，感謝您的配合。";
+	            default -> "案件狀態異常，請聯絡客服。";
+	        };
+	    }
+
+	    public Map<String, Object> getStatusResponse(int id) {
+	        ServiceCase serviceCase = findById(id);
+	        int caseStatus = serviceCase.getCaseStatus(); // 修正這裡
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("caseId", id);
+	        response.put("status", caseStatus);
+	        response.put("message", formatStatus(caseStatus));
+	        return response;
+	    }
 
 }

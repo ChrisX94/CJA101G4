@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.shakemate.ordermaster.model.ShOrder;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.sql.Date;
@@ -69,11 +70,39 @@ public class Users implements Serializable {
     @Column(name = "IMG5", length = 300)
     private String img5;
 
+    @Transient
+    private MultipartFile[] uploadedImages;
+
+    public MultipartFile[] getUploadedImages() {
+        return uploadedImages;
+    }
+
+    public void setUploadedImages(MultipartFile[] uploadedImages) {
+        this.uploadedImages = uploadedImages;
+    }
+
+    @Transient
+    private List<String> photos;
+
+    public List<String> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
+    }
+
     @Column(name = "INTERESTS", length = 300)
     private String interests;
 
     @Column(name = "PERSONALITY", length = 300)
     private String personality;
+
+    @Transient
+    private List<String> interestsList;
+
+    @Transient
+    private List<String> personalityList;
 
     @Column(name = "UPDATED_TIME", nullable = false)
     private Timestamp updatedTime;
@@ -248,6 +277,22 @@ public class Users implements Serializable {
 
     public void setPersonality(String personality) {
         this.personality = personality;
+    }
+
+    public List<String> getInterestsList() {
+        return interestsList;
+    }
+
+    public void setInterestsList(List<String> interestsList) {
+        this.interestsList = interestsList;
+    }
+
+    public List<String> getPersonalityList() {
+        return personalityList;
+    }
+
+    public void setPersonalityList(List<String> personalityList) {
+        this.personalityList = personalityList;
     }
 
     public Timestamp getUpdatedTime() {

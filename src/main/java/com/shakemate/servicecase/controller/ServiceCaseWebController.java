@@ -5,7 +5,7 @@ import com.shakemate.casetype.model.CaseTypeRepository;
 import com.shakemate.servicecase.dto.ServiceCaseDTO;
 import com.shakemate.servicecase.mapper.ServiceCaseMapper;
 import com.shakemate.servicecase.model.ServiceCase;
-import com.shakemate.servicecase.model.ServiceCaseService;
+import com.shakemate.servicecase.service.ServiceCaseService;
 
 import jakarta.servlet.http.HttpSession;
 
