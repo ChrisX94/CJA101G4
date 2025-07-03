@@ -23,103 +23,32 @@
 	<div class="bg">
 		
 		
-		<!-- 🔹 頂部選單 -->
-		<header class="header">
-			<div class="header__logo">
-			  <a class="header__logo-link" href="#">
-			  	<div class="header__logo-img">
-				    <img src="img/logo.png" alt="logo">
-				</div>
-			    <div class="header__logo-txt">
-			      <span class="ch">抖一下</span>
-			      <span class="en">ShakeMate</span>
-			    </div>
-			  </a>
-			</div>
-	
-			<section class="mobile__nav">
-				<a href="#">
-					<i class="fa-solid fa-user"></i>
-				</a>
-				<div class="hamburger">
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-			</section>
-	
-			<nav class="header__nav">
-				<ul class="header__list">
-					<li class="header__item"><a href="match.html">配對</a></li>
-					<li class="header__item"><a href="chatroom.html">聊天室</a></li>
-					<li class="header__item"><a href="#">活動</a></li>
-					<li class="header__item"><a href="#">討論區</a></li>
-					<li class="header__item"><a href="#">商城</a></li>
-					<li class="header__item"><a href="#">二手商城</a></li>
-					<li class="header__item"><a href="#">會員專區</a></li>
-				</ul>
-				<a href="#" class="member">
-					<i class="fa-solid fa-user"></i>
-				</a>
-			</nav>
-		</header>	
+		<!-- ✅ W3Schools 標準：引入 header 區塊 -->
+  		<div w3-include-html="../header1.html"></div>
 	
 	
 		<!-- 🔹 配對主內容區 -->
 		<main class="match">
-			<!-- 🔹 上方名字與基本資料 -->
-			<div class="match__wrap">
-				<div class="match__header">
-					<!-- 🔘 篩選條件按鈕 -->
-					<div class="filter-btn-wrapper">
-						<button class="filterBtn">條件篩選</button>
+			<div class="match__container">
+				<!-- 🔹 上方名字與基本資料 -->
+				<div class="match__wrap">
+					<div class="match__header">
+						<h2 class="match__name"></h2>
+						<p class="match__info"></p>
 					</div>
-					<h2 class="match__name"></h2>
-					<p class="match__info"></p>
+		
+					<!-- 配對卡片滑動容器 -->
+					<div class="swiper match__card">
+						<div class="swiper-wrapper">
+							<!-- 會員基本資料 js動態生成 -->
+						</div>
+					</div>
 				</div>
-	
-				<!-- 配對卡片滑動容器 -->
-				<div class="swiper match__card">
-					<div class="swiper-wrapper">
-	
-						<!-- 🧡 第一頁：油條的基本資料 -->
-						<!-- 				<div class="swiper-slide"> -->
-						<!-- 					<div class="match__body"> -->
-						<!-- 						<div class="match__avatar-box"> -->
-						<!-- 							<div class="swiper avatar-swiper"> -->
-						<!-- 								<div class="swiper-wrapper"> -->
-						<!-- 									<div class="swiper-slide"> -->
-						<!-- 										<img src="img/yo.jpg" class="match__avatar" /> -->
-						<!-- 									</div> -->
-						<!-- 									<div class="swiper-slide"> -->
-						<!-- 										<img src="img/yo2.jpg" class="match__avatar" /> -->
-						<!-- 									</div> -->
-						<!-- 									可以再加更多 slide -->
-						<!-- 								</div> -->
-						<!-- 								<div class="swiper-pagination"></div> -->
-						<!-- 							</div> -->
-						<!-- 						</div> -->
-						<!-- 						<div class="match__details"> -->
-						<!-- 							<div class="match__field"> -->
-						<!-- 								<h3 class="match__field-title">人格特質</h3> -->
-						<!-- 								<p class="match__field-content">活潑開朗、愛分享</p> -->
-						<!-- 							</div> -->
-						<!-- 							<div class="match__field"> -->
-						<!-- 								<h3 class="match__field-title">興趣專長</h3> -->
-						<!-- 								<p class="match__field-content">喜歡散步、愛吃肉乾的小臘腸🐶</p> -->
-						<!-- 							</div> -->
-						<!-- 							<div class="match__field"> -->
-						<!-- 								<h3 class="match__field-title">個人簡介</h3> -->
-						<!-- 								<p class="match__field-content">我是一隻小臘腸，希望找到一起曬太陽的人！</p> -->
-						<!-- 							</div> -->
-						<!-- 						</div> -->
-						<!-- 					</div> -->
-						<!-- 				</div> -->
-					</div>
-	
+				<!-- 🔘 篩選條件按鈕 -->
+				<div class="filter-btn-wrapper">
+					<button class="filterBtn">條件篩選</button>
 				</div>
 			</div>
-	
 			<!-- 🪟 篩選條件彈窗 -->
 			<div id="filterModal" class="modal-overlay">
 				<div class="modal-content">
@@ -194,7 +123,8 @@
 	</div>	
 	<script src="js/matchSystem.js"></script>
 	<script src="js/authCheck.js"></script>
-	
+	 <!-- ✅ 引入 includeHTML 功能 -->
+    <script src="../js/header.js"></script>
 </body>
 
 </html>

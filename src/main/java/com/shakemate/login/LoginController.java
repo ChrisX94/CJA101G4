@@ -52,6 +52,7 @@ public class LoginController {
         // 登入成功
         HttpSession session = request.getSession();
         session.setAttribute("account", user.getUserId());
+        session.setAttribute("userAvatar", user.getImg1()); 
         String location = (String) session.getAttribute("location");
         return "redirect:/";
     }

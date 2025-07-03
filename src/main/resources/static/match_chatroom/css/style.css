@@ -550,7 +550,6 @@ html {
   justify-content: space-between;
   padding: 0 4rem 0 2rem;
   box-sizing: border-box;
-  box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294);
   position: relative;
   z-index: 1000;
 }
@@ -581,7 +580,7 @@ html {
 .header__logo-txt {
   display: flex;
   flex-direction: column;
-  color: #14ac8b;
+  color: #2EC4B6;
   font-family: "LXGW Marker Gothic", sans-serif;
   font-style: normal;
 }
@@ -688,17 +687,19 @@ html {
 .header__nav ul {
   display: flex;
   list-style: none;
-  gap: 3rem;
 }
 
 .header__item a {
+  display: flex;
+  align-items: center;
+  height: 100%;
   text-decoration: none;
   font-size: 1.6rem;
   color: #555;
   transition: color 0.3s;
 }
 .header__item a:hover {
-  color: #14ac8b;
+  color: #2EC4B6;
 }
 
 .fa-user {
@@ -742,6 +743,65 @@ html {
   border-radius: 3px;
 }
 
+/* ▼ 下拉容器 */
+.header__item {
+  position: relative;
+  height: 6.5rem;
+}
+
+.header__item > .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  padding: 6px 0;
+  z-index: 999;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+/* ✅ hover 顯示 */
+.header__item:hover > .dropdown-menu {
+  display: block;
+}
+
+/* ▼ 下拉選單內的項目 */
+.dropdown-menu li {
+  list-style: none;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 10px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 15px;
+  transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+/* ✅ 滑過效果：背景變亮、文字內縮有動態感 */
+.dropdown-menu li a:hover {
+  background-color: #f5f5f5;
+  padding-left: 20px;
+  color: #0d9488; /* teal 色調，你可以改成你的主色 */
+}
+
+/* header 登入後頭像 */
+.avatar-img {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+
+
+
 /* 📌 配對頁面 SCSS (支援翻頁) */
 .match {
   display: flex;
@@ -766,11 +826,14 @@ html {
     width: 90%;
   }
 }
-
+.match__container {
+  width: 62rem;
+  position: relative;
+  margin-top: 2.5rem;
+}
 .match__header {
   text-align: center;
-  margin: 2.5rem 0;
-  position: relative;
+  margin-bottom: 2.5rem;
   z-index:1;
 }
 @media (min-width: 769px) and (max-width: 1199px) {
@@ -815,8 +878,7 @@ html {
   background: #fff;
   padding: 3rem;
   border-radius: 1.5rem;
-  border: 2px solid gray;
-  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+  border: 0.26rem solid gray;
   justify-content: center;
   margin-bottom: 4rem;
   /* 稍微跟按鈕區拉開一點 */
@@ -899,6 +961,8 @@ html {
   display: flex;
   gap: 2rem;
   z-index: 1;
+  position: absolute;
+  bottom: 4.5rem;
 }
 .match__actions .match__button,
 .success-btn {

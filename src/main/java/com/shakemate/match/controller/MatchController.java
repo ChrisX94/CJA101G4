@@ -34,7 +34,11 @@ public class MatchController {
 
     @GetMapping("/getNext")
     public UserProfileVO getNextUser(HttpSession session) throws Exception {
-        Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
+    	Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer currentUserId = Integer.parseInt(userIdObj.toString());
         UserProfileVO profile = userProfileDAO.getRandomUnmatchedUser(currentUserId);
         if (profile == null) {
             throw new NoSuchElementException("沒有更多會員");

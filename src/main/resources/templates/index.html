@@ -11,7 +11,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+	<link rel="stylesheet" href="/match_chatroom/css/style.css">
     <title>Shakemates</title>
     <style>
         html {
@@ -21,137 +21,15 @@
             background: linear-gradient(to bottom, #E7FF33, #17AB96);
         }
 
-        body {
-            margin: 0;
-        }
 
-        /* 🔹 頂部選單區 */
-        .header {
-            width: 100%;
-            height: 6.5rem;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 4rem 0 2rem;
-            box-sizing: border-box;
-            position: fixed;
-            z-index: 1000;
-            /* box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294); */
-
-            /* box-shadow: none; */
-            /* optional: 移除陰影 */
-
-            backdrop-filter: blur(10px);
-            /* 可加可不加，看你要不要玻璃感 */
-
-        }
-
-        .header.scrolled {
-            background: #fff;
-            /* box-shadow: 0 0 2rem rgba(77, 112, 134, 0.294); */
-            transition: background 0.3s;
-            /* box-shadow 0.3s */
-        }
-
-        .headerlogo {
-            height: 4.5rem;
-        }
-
-        .headerlogo img {
-            height: 100%;
-        }
-
-        .headernav {
-            display: flex;
-            align-items: center;
-            box-sizing: border-box;
-            gap: 4rem;
-            transition: all 0.3s ease;
-        }
-
-        .headerlist {
-            display: flex;
-            gap: 2.9rem;
-            list-style: none;
-        }
-
-
-        .hamburger {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 2.5rem;
-            height: 1.8rem;
-            cursor: pointer;
-        }
-
-        .hamburger span {
-            height: 0.3rem;
-            background: #333;
-            border-radius: 3px;
-        }
-
-        .headernav-item {
-            font-size: 1.6rem;
-            color: #333;
-            cursor: pointer;
-        }
-
-        .headernav-item:hover {
-            color: #3e92cc;
-        }
-
-        .headerlogo {
-            font-size: 2.4rem;
-            font-weight: bold;
-            color: #3e92cc;
-        }
-
-        .headernav ul {
-            display: flex;
-            list-style: none;
-            gap: 3rem;
-        }
-
-        .headeritem a {
-            text-decoration: none;
-            font-size: 1.6rem;
-            color: #555;
-            transition: color 0.3s, transform 0.3s ease;
-
-            /* 必須加這個，才能正確應用 transform */
-            display: inline-block;
-        }
-
-        .headeritem a:hover {
-            color: #17AB96;
-            transform: translate(0.5rem, -0.5rem);
-            /* text-shadow: -0.5rem 0.5rem 0.2rem lightblue; */
-        }
-
-        .fa-user {
-            font-size: 2rem;
-            color: #555;
-            transition: color 0.3s;
-        }
-
-        .fa-user:hover {
-            color: #17AB96;
-        }
-
-        .mobilenav {
-            display: none;
-        }
 
         .hero-section {
-            height: 30rem;
+            height: 57rem;
             /* 固定高度 */
             display: flex;
             justify-content: center;
-            gap: 15rem;
-            padding: 20rem 5rem 50rem 1rem;
             position: relative;
+            background: #DCFF61;
         }
 
         .hero-section h1 {
@@ -228,11 +106,13 @@
             /* 讓文字內容垂直置中，對齊圖片中線 */
             align-items: center;
             /* 水平置中 */
+            margin-right: 7rem;
         }
 
         .hero-section .Cuba {
             width: 100%;
-            max-width: 300px;
+            max-width: 35rem;
+    		margin-top: 10rem;
         }
 
         .service-section {
@@ -468,9 +348,16 @@
         #shaky-text {
             display: inline-block;
             font-family: "LXGW Marker Gothic", sans-serif;
-            font-size: 5rem;
-            line-height: 0.3;
-            margin: 1rem 0;
+            
+        }
+        
+        .shaky-text-ch {
+        	font-size: 7rem;
+        	color: #2EC4B6;
+        }
+        .shaky-text-en {
+        	font-size: 3.5rem;
+        	color: #2EC4B6;
         }
 
         /* 每一行都做「兩端對齊」 */
@@ -628,41 +515,10 @@
 </head>
 
 <body>
-    <header class="header">
-        <div class="headerlogo">
-            <a href="/">
-                <img src="/img/logoText.png" alt="Logo">
-            </a>
-        </div>
 
-        <section class="mobilenav">
-            <a href="#">
-                <i class="fa-solid fa-user"></i>
-            </a>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </section>
+   	<!-- ✅ W3Schools 標準：引入 header 區塊 -->
+	<div w3-include-html="/header1.html"></div>
 
-        <nav class="headernav">
-            <ul class="headerlist">
-                <li class="headeritem"><a href="/match_chatroom/match.html">配對</a></li>
-                <li class="headeritem"><a href="/match_chatroom/chatroom.html">聊天室</a></li>
-                <li class="headeritem"><a href="#">活動</a></li>
-                <li class="headeritem"><a href="#">討論區</a></li>
-
-
-                <li class="headeritem"><a href="/shshop/front_end/select_page.html">MatchMarket</a></li>
-                <li class="headeritem"><a href="/login">登入</a></li>
-
-            </ul>
-            <a href="/signup" class="member">
-                <i class="fa-solid fa-user"></i>
-            </a>
-        </nav>
-    </header>
 
     <!-- 🔹 浮動按鈕 -->
     <div class="floating-buttons">
@@ -678,9 +534,9 @@
     <section class="hero-section">
         <div class="textpic">
             <h1 id="shaky-text">
-                <span class="line">抖一下</span>
+                <span class="shaky-text-ch">抖一下</span>
                 <br>
-                <span class="line">ShakeMate</span>
+                <span class="shaky-text-en">ShakeMate</span>
             </h1>
             <p>在這裡抖出屬於你的他！</p>
             <br>
@@ -785,9 +641,9 @@
                 p.classList.toggle('expanded');
             });
         });
-
+	
     </script>
-
+	<script src="/js/header.js"></script>
 </body>
 
 </html>
