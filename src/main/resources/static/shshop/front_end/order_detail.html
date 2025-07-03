@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>訂單詳細資訊</title>
+    
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -156,6 +157,8 @@
     </style>
 </head>
 <body>
+
+
     <div class="order-container">
         <div id="loading">載入中，請稍候...</div>
         <div id="orderContent" style="display: none;">
@@ -235,6 +238,7 @@
     <div class="back-button-container">
         <button class="back-button" onclick="history.back()">返回上一頁</button>
     </div>
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const orderId = localStorage.getItem('viewOrderId'); // 從 localStorage 獲取 orderId

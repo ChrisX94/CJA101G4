@@ -54,69 +54,55 @@
     </div>
   </header>
 
+  <div class="bg">
+    <aside class="aside">
+      <nav class="nav">
+        <ul class="nav_list">
+          <li><a href="#">商品類別</a></li>
+        </ul>
+      </nav>
+      <form class="advanced-search" id="advSearchForm">
+        <h4>進階搜尋</h4>
 
-  <div class="sidebar-wrapper">
-    <div class="sidebar" id="sidebar">
-      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-      <ul>
-        <li><i class="fa-solid fa-user"></i> 會員中心</li>
-        <li><i class="fa-solid fa-store"></i> 聊聊商城</li>
-        <li><i class="fa-solid fa-headset"></i> 客服中心</li>
-        <li><i class="fa-solid fa-gear"></i> 設定</li>
-      </ul>
-    </div>
-  </div>
+        <input type="text" name="prodName" placeholder="商品名關鍵字" />
+        <input type="text" name="prodBrand" placeholder="品牌關鍵字" />
+        <input type="text" name="prodContent" placeholder="商品內容關鍵字" />
+        <select name="typeId" id="advTypeSelect">
+          <option value="">所有類別</option>
+          <!-- JS 動態載入 -->
+        </select>
 
-  <aside class="aside">
-    <nav class="nav">
-      <ul class="nav_list">
-        <li><a href="#">商品類別</a></li>
-      </ul>
-    </nav>
-    <form class="advanced-search" id="advSearchForm">
-      <h4>進階搜尋</h4>
+        <div class="price-range">
+          <input type="number" name="minPrice" placeholder="最低價" />
+          <span>~</span>
+          <input type="number" name="maxPrice" placeholder="最高價" />
+        </div>
 
-      <input type="text" name="prodName" placeholder="商品名關鍵字" />
-      <input type="text" name="prodBrand" placeholder="品牌關鍵字" />
-      <input type="text" name="prodContent" placeholder="商品內容關鍵字" />
-      <select name="typeId" id="advTypeSelect">
-        <option value="">所有類別</option>
-        <!-- JS 動態載入 -->
-      </select>
+        <input type="text" name="username" placeholder="上架者帳號" />
 
-      <div class="price-range">
-        <input type="number" name="minPrice" placeholder="最低價" />
-        <span>~</span>
-        <input type="number" name="maxPrice" placeholder="最高價" />
+        <button type="submit">搜尋</button>
+        <button type="button" id="clearBtn">清空</button>
+      </form>
+    </aside>
+
+    <div class="search-bar">
+      <input id="keywordInput" type="text" placeholder="輸入商品關鍵字" />
+      <button id="searchBtn"><i class="fa fa-search"></i></button>
+      <div class="sort-buttons">
+        <button class="sort-btn">價格 ↑</button>
+        <button class="sort-btn">價格 ↓</button>
+        <button class="sort-btn">最新</button>
+        <button class="sort-btn">最舊</button>
       </div>
-
-      <input type="text" name="username" placeholder="上架者帳號" />
-
-      <button type="submit">搜尋</button>
-      <button type="button" id="clearBtn">清空</button>
-    </form>
-  </aside>
-
-  <div class="search-bar">
-    <input id="keywordInput" type="text" placeholder="輸入商品關鍵字" />
-    <button id="searchBtn"><i class="fa fa-search"></i></button>
-    <div class="sort-buttons">
-      <button class="sort-btn">價格 ↑</button>
-      <button class="sort-btn">價格 ↓</button>
-      <button class="sort-btn">最新</button>
-      <button class="sort-btn">最舊</button>
     </div>
+
+    <main class="main">
+      <ul class="item_list">
+        目前沒有好友有商品，配對連結<a href="#"></a>
+      </ul>
+    </main>
+
   </div>
-
-  <main class="main">
-    <ul class="item_list">
-      目前沒有好友有商品，配對連結<a href="#"></a>
-    </ul>
-  </main>
-
-
 
   <!-- ✅ 浮動好友清單 -->
   <div class="friend-floating collapsed">
