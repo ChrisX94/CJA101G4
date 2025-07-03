@@ -17,20 +17,31 @@
         html {
             font-size: 62.5%;
             font-family: "Noto Sans TC", sans-serif;
-            /* 更新為 #fdfc47 → #24fe41 的上下方向漸層 */
-            background: linear-gradient(to bottom, #E7FF33, #17AB96);
         }
 
 
 
         .hero-section {
-            height: 57rem;
-            /* 固定高度 */
-            display: flex;
-            justify-content: center;
-            position: relative;
-            background: #DCFF61;
-        }
+			height: 57rem;
+			margin-top: 6.5rem;
+			/* 固定高度 */
+			display: flex;
+			justify-content: center;
+			position: relative;
+			background: #DCFF61;
+			z-index: 0;
+		}
+		
+		.hero-section::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
+			z-index: -1;
+			pointer-events: none;
+		}
+        
+        
 
         .hero-section h1 {
             font-size: 3rem;
@@ -74,31 +85,38 @@
         }
 
         .hero-section p {
-            margin: 0;
-            font-size: 2rem;
+          margin: 0;
+          font-size: 1.6rem;
+          color: #3D3D3D;
+          margin-bottom: 3.5rem;
         }
 
         .hero-section button {
-            background-color: #fff;
-            color: gray;
-            padding: 1rem 2.4rem;
-            border: 0.3rem solid #ccc;
-            border-radius: 5rem;
-            cursor: pointer;
-            font-size: 2rem;
-
-            /* 基礎樣式 */
-            transition: transform 0.2s ease;
-            /* , box-shadow 0.2s ease; */
-            /* 讓 transform 生效 */
-            display: inline-block;
-            /* border-width: 0.3rem; */
+          width: 12rem;
+		  height: 5rem;
+		  font-size: 1.6rem;
+		  border: none;
+		  border-radius: 2rem;
+		  cursor: pointer;
+		  transition: background 0.3s;
+		  background-color: #fff;
+		  color: gray;
+		  font-weight: 700;
+		  border: 2px solid gray;
+        }
+        
+        .hero-section button:hover {
+            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); */
+            background-color:  #DCFF61;
+			border: 2px solid gray;
+			color: #2EC4B6;
+            animation: pulse 2s infinite ease-in-out;
         }
 
         /* 🔹 textpic 對齊圖片的水平中線 */
         .hero-section .textpic {
             width: 100%;
-            max-width: 300px;
+            max-width: 450px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -106,7 +124,7 @@
             /* 讓文字內容垂直置中，對齊圖片中線 */
             align-items: center;
             /* 水平置中 */
-            margin-right: 7rem;
+            margin: -15px 3rem 0 -15rem;
         }
 
         .hero-section .Cuba {
@@ -117,14 +135,15 @@
 
         .service-section {
             color: white;
-            padding: 10rem 15rem;
+            padding: 8rem 14rem;
             position: relative;
+            background: #2EC4B6;
         }
 
         .service-section h2 {
             text-align: center;
             margin-bottom: 4rem;
-            font-size: 2.4rem;
+            font-size: 3.8rem;
         }
 
         .services {
@@ -143,9 +162,9 @@
         .service {
             background: white;
             color: #333;
-            padding: 8rem 2rem 3rem;
             border-radius: 1.5rem;
             width: 28rem;
+            height: 35rem;
             text-align: center;
 
             /* 1) box-sizing 保證 padding + border 算在 width 內 */
@@ -157,20 +176,20 @@
         }
 
         .service i {
-            font-size: 3rem;
-            color: #76ff03;
-            margin-bottom: 1rem;
+            font-size: 5rem;
+            color: #DCFF61;
+            margin:5rem 0 2.5rem 0;
         }
 
         .service h3 {
             color: #00bfa6;
             font-size: 2rem;
-            margin: 0;
+            margin-bottom: 0.8rem;
         }
 
         .service p {
             width: 75%;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             /* line-height: 2rem; */
             margin: 0 auto 3rem;
         }
@@ -213,30 +232,26 @@
         }
 
         .service button {
+        	width: 8.5rem;
+        	height: 4rem;
             margin-top: 1.5rem;
-            background-color: transparent;
-            border: 0.2rem solid #00bfa6;
-            padding: 0.5rem 1.5rem;
+            border: 0.2rem solid gray;
             border-radius: 2rem;
             color: gray;
+            background-color: transparent;
             cursor: pointer;
-            font-size: 2.5rem;
+            font-size: 1.6rem;
+            font-weight: 600;
 
         }
 
-        .hero-section button:hover {
-            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); */
-            background-color: #17AB96;
-            color: white;
-            border-color: turquoise;
-            animation: pulse 2s infinite ease-in-out;
-        }
+        
 
         .service button:hover {
             /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); */
-            background-color: #17AB96;
-            color: white;
-            border-color: turquoise;
+            background-color: #DCFF61;
+            color: #2EC4B6;
+            border-color: gray;
             animation: pulse 2s infinite ease-in-out;
         }
 
@@ -284,6 +299,7 @@
             transition: all 0.3s ease;
             /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); */
             backdrop-filter: blur(10px);
+            border: 2px solid #e0e0e0;
         }
 
         .floating-btn:hover {
@@ -291,23 +307,23 @@
             /* box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); */
         }
 
-        .news-btn {
-            background: linear-gradient(135deg, #d7aa2d, orange);
-            color: white;
-        }
+/*         .news-btn { */
+/*             background: linear-gradient(135deg, #d7aa2d, orange); */
+/*             color: white; */
+/*         } */
 
-        .news-btn:hover {
-            background: linear-gradient(135deg, orange, #d7aa2d);
-        }
+/*         .news-btn:hover { */
+/*             background: linear-gradient(135deg, orange, #d7aa2d); */
+/*         } */
 
-        .support-btn {
-            background: linear-gradient(135deg, #4ECDC4, #44A08D);
-            color: white;
-        }
+/*         .support-btn { */
+/*             background: linear-gradient(135deg, #4ECDC4, #44A08D); */
+/*             color: white; */
+/*         } */
 
-        .support-btn:hover {
-            background: linear-gradient(135deg, #26D0CE, #2A9D8F);
-        }
+/*         .support-btn:hover { */
+/*             background: linear-gradient(135deg, #26D0CE, #2A9D8F); */
+/*         } */
 
         /* 🔹 滾動到 service-section 時的白色樣式 */
         .floating-btn.white-mode {
@@ -348,6 +364,7 @@
         #shaky-text {
             display: inline-block;
             font-family: "LXGW Marker Gothic", sans-serif;
+            margin-bottom: 2rem;
             
         }
         
@@ -356,7 +373,8 @@
         	color: #2EC4B6;
         }
         .shaky-text-en {
-        	font-size: 3.5rem;
+        	font-size: 3.8rem;
+        	font-weight: 600;
         	color: #2EC4B6;
         }
 
@@ -506,10 +524,11 @@
 
 
         footer {
+        	background: #2EC4B6;
             text-align: center;
-            padding: 0.2rem;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             color: white;
+            padding-bottom: 1rem;
         }
     </style>
 </head>
@@ -536,7 +555,7 @@
                 <br>
                 <span class="shaky-text-en">ShakeMate</span>
             </h1>
-            <p>在這裡抖出屬於你的他！</p>
+            <p>孤單寂寞覺得冷嗎？趕快加入抖一下，在這裡抖出屬於你的他！</p>
             <br>
             <button onclick="window.location.href='/match_chatroom/match.html'">抖起來！</button>
         </div>
