@@ -24,32 +24,23 @@ public class ServiceCaseController {
 
 	@PostMapping
 	public ResponseEntity<ServiceCaseDTO> create(@RequestBody ServiceCaseDTO dto) {
-		ServiceCase sc = ServiceCaseMapper.toEntity(dto);
-		ServiceCase saved = serviceCaseService.create(sc);
-		return ResponseEntity.ok(ServiceCaseMapper.toDTO(saved));
+        // DTO 轉實體
+        ServiceCase sc = ServiceCaseMapper.toEntity(dto);
+        // 呼叫 Service 儲存
+        ServiceCase saved = serviceCaseService.create(sc);
+        // 將儲存結果再轉回 DTO 回傳
+        return ResponseEntity.ok(ServiceCaseMapper.toDTO(saved));
 	}
-
-	// @PostMapping
-	// public ResponseEntity<ServiceCase> create(@RequestBody ServiceCase sc) {
-	// ServiceCase created = serviceCaseService.create(sc);
-	// return ResponseEntity.ok(created);
-	// }
 
 	// 2. 取得所有 News (GET /api/servicecase)
 
 	@GetMapping
 	public ResponseEntity<List<ServiceCaseDTO>> getAll() {
+		System.out.println("/api/servicecase 被呼叫！");
 		List<ServiceCaseDTO> dtos = serviceCaseService.getAll().stream().map(ServiceCaseMapper::toDTO)
 				.collect(Collectors.toList());
 		return ResponseEntity.ok(dtos);
 	}
-
-	// @GetMapping
-	//	public ResponseEntity<List<ServiceCase>> getAll() {
-	//		System.out.println("/api/servicecase 被呼叫！");
-	//		List<ServiceCase> list = serviceCaseService.getAll();
-	//		return ResponseEntity.ok(list);
-	//	}
 
 	// 3. 根據 ID 取得單一 News (GET /api/servicecase/{id})
 
@@ -60,15 +51,6 @@ public class ServiceCaseController {
 			return ResponseEntity.notFound().build();
 		return ResponseEntity.ok(ServiceCaseMapper.toDTO(sc));
 	}
-
-	// @GetMapping("/{id}")
-	//	public ResponseEntity<ServiceCase> getById(@PathVariable Integer id) {
-	//		ServiceCase sc = serviceCaseService.findById(id);
-	//		if (sc == null) {
-	//			return ResponseEntity.notFound().build();
-	//		}
-	//		return ResponseEntity.ok(sc);
-	//	}
 
 	// 4. 更新一筆 News (PUT /api/servicecase/{id})
 

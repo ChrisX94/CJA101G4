@@ -8,10 +8,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
   <style>
+    /* 全局 */
     html { font-size: 62.5%; font-family: "Noto Sans TC", sans-serif; }
     body { margin: 0; background: rgba(170,198,202,1); color: #333; }
     *, *::before, *::after { box-sizing: border-box; }
 
+    /* 容器 */
     .container {
       max-width: 60rem;
       margin: 2rem auto;
@@ -31,31 +33,17 @@
     form label { display: block; font-size: 1.6rem; margin-bottom: 0.4rem; }
     form input,
     form select,
-    form textarea {
-      width: 100%;
-      padding: 0.8rem 1rem;
-      font-size: 1.6rem;
-      border: 0.1rem solid #ccc;
-      border-radius: 0.4rem;
-    }
+    form textarea { width: 100%; padding: 0.8rem 1rem; font-size: 1.6rem; border: 0.1rem solid #ccc; border-radius: 0.4rem; }
     form textarea { resize: vertical; }
 
-    .btn-group {
-      display: flex;
-      justify-content: flex-end;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    .btn {
-      padding: 0.8rem 2rem;
-      font-size: 1.6rem;
-      border: none;
-      border-radius: 2rem;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: transform 0.3s, box-shadow 0.3s;
-      color: #fff;
-    }
+    /* 配置多欄位同列 */
+    .flex-row { display: flex; gap: 2rem; }
+    .flex-row > div { flex: 1; }
+    .static-text { padding: 0.8rem 1rem; font-size: 1.6rem; background: #f5f5f5; border: 0.1rem solid #ccc; border-radius: 0.4rem; line-height: 1.6; }
+
+    /* 按鈕 */
+    .btn-group { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+    .btn { padding: 0.8rem 2rem; font-size: 1.6rem; border: none; border-radius: 2rem; cursor: pointer; text-transform: uppercase; transition: transform 0.3s, box-shadow 0.3s; color: #fff; }
     .btn.save { background: lightgreen; }
     .btn.save:hover { transform: translateY(-0.2rem); box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1); }
     .btn.cancel { background: lightcoral; }
@@ -65,41 +53,47 @@
 <body>
   <div class="container">
     <h2>新增服務案件</h2>
-    <form th:action="@{/servicecase/save}" th:object="${serviceCase}" method="post">
-      <div>
-        <label for="userId">使用者 ID：</label>
-        <input type="number" id="userId" th:field="*{userId}" placeholder="輸入使用者 ID" required />
-      </div>
-      <div>
-        <label for="admId">管理員 ID：</label>
-        <input type="number" id="admId" th:field="*{admId}" placeholder="輸入管理員 ID" />
-      </div>
+    <!-- onsubmit 彈出感謝訊息後提交 -->
+    <form th:action="@{/servicecase/sadd}" th:object="${serviceCaseDTO}" method="post" onsubmit="alert('感謝您的意見!客服人員將在3~7天內回覆您。');">
+      <!-- 使用者 ID：後端帶入，隱藏欄位，不顯示 -->
+      <input type="hidden" th:field="*{userId}" />
+
+      <!-- 新增 EMAIL 欄位 -->
       <div>
         <label for="email">Email：</label>
-        <input type="email" id="email" th:field="*{email}" placeholder="輸入 Email" required />
+        <input type="email" id="email" th:field="*{email}" placeholder="輸入Email" required />
       </div>
-      <div>
-        <label for="caseTypeId">案件類型：</label>
-        <select id="caseTypeId" th:field="*{caseTypeId}" required>
-          <option th:each="type : ${allTypes}" th:value="${type.caseTypeId}" th:text="${type.typeName}"></option>
-        </select>
+
+      <!-- 案件類型 & 狀態：固定值，隱藏欄位 + 顯示文字 -->
+      <div class="flex-row">
+        <div>
+          <label>案件類型：</label>
+          <!-- 後端預設為「客服意見填寫」，隱藏實際欄位 -->
+          <input type="hidden" th:field="*{caseTypeId}"  value="1" />
+          <div class="static-text">客服意見填寫</div>
+        </div>
+        <div>
+          <label>狀態：</label>
+          <!-- 固定未處理(0) -->
+          <input type="hidden" th:field="*{caseStatus}" value="0" />
+          <div class="static-text">未處理</div>
+        </div>
       </div>
+
+      <!-- 標題 -->
       <div>
         <label for="title">標題：</label>
         <input type="text" id="title" th:field="*{title}" placeholder="輸入標題" required />
       </div>
+
+      <!-- 內容 -->
       <div>
         <label for="content">內容：</label>
         <textarea id="content" th:field="*{content}" placeholder="輸入內容" rows="5" required></textarea>
       </div>
-      <div>
-        <label for="caseStatus">狀態：</label>
-        <select id="caseStatus" th:field="*{caseStatus}" required>
-          <option th:value="0">未處理</option>
-          <option th:value="1">處理中</option>
-          <option th:value="2">已完成</option>
-        </select>
-      </div>
+
+      <!-- 管理員 ID：後端自動帶入，不顯示於前端 -->
+      <input type="hidden" th:field="*{admId}" />
 
       <div class="btn-group">
         <button type="submit" class="btn save">儲存</button>

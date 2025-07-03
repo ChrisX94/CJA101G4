@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>案件提交結果</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  <style>
+    html { font-size: 62.5%; font-family: "Noto Sans TC", sans-serif; }
+    body { margin: 0; background: rgba(170,198,202,1); color: #333; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    .container {
+      max-width: 60rem;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 0.8rem;
+      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.1);
+    }
+
+    h2 { font-size: 2.4rem; margin-bottom: 1.6rem; text-align: center; }
+
+    .result-box {
+      margin-top: 2rem;
+      padding: 1.6rem;
+      border: 0.1rem solid #ccc;
+      border-radius: 0.4rem;
+      background: #f9f9f9;
+    }
+
+    .result-box p { font-size: 1.6rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <h2>案件提交結果</h2>
+    
+      <p th:if="${successMsg}" class="info" th:text="${successMsg}"
+   style="padding: 1rem; background: lightyellow; border: 1px solid #ccc; border-radius: 0.4rem; margin-bottom: 1.5rem;">
+</p>
+  
+
+    <div th:if="${serviceCase != null}" class="result-box">
+      <p><strong>案件編號：</strong><span th:text="${serviceCase.caseId}"></span></p>
+      <p><strong>案件類型：</strong><span th:text="${serviceCase.caseType.typeName}"></span></p>
+      <p><strong>使用者 ID：</strong><span th:text="${serviceCase.userId}"></span></p>
+      <p><strong>Email：</strong><span th:text="${serviceCase.email}"></span></p>
+      <p><strong>標題：</strong><span th:text="${serviceCase.title}"></span></p>
+      <p><strong>內容：</strong><span th:text="${serviceCase.content}"></span></p>
+      <p><strong>狀態：</strong><span th:text="${serviceCase.statusName}"></span></p>
+      <p><strong>建立時間：</strong><span th:text="${#dates.format(serviceCase.createTime,'yyyy-MM-dd HH:mm')}"></span></p>
+    </div>
+
+    <div th:if="${serviceCase == null}" class="result-box">
+      <p>提交失敗，請確認案件是否正確提交。</p>
+      
+      
+    </div>
+  </div>
+</body>
+</html>

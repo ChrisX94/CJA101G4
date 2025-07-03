@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.shakemate.casetype.model.CaseType;
+import com.shakemate.casetype.model.CaseTypeRepository;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -13,9 +16,22 @@ public class ServiceCaseService {
 
 	@Autowired
 	private ServiceCaseRepository repository;
+	
+    @Autowired
+    private CaseTypeRepository caseTypeRepo;
 
 	public ServiceCase create(ServiceCase sc) {
-		return repository.save(sc);
+        // 範例：若未提供 admId，就設定預設
+        if (sc.getAdmId() == null) sc.setAdmId(1);
+        // 同樣處理 userId, caseType 等
+        // 確認 caseTypeId 不為 null，並設定關聯物件
+        if (sc.getCaseTypeId() == null) {
+            throw new IllegalArgumentException("caseTypeId 不能為 null");
+        }
+        CaseType managed = caseTypeRepo.getReferenceById(sc.getCaseTypeId());
+        sc.setCaseType(managed);
+        // 儲存前 email 已透過 DTO 傳入，無需額外處理
+        return repository.save(sc);
 	}
 	// ... 其他呼叫 repo.findAll(), repo.findByUserId(...) 等方法
 
