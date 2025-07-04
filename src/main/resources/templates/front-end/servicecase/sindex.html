@@ -495,8 +495,8 @@
             fetch('/api/casetype') // '/shakemate/api/casetype'
                 .then(res => res.json())
                 .then(data => {
-                    categories = data;
-                    categories.forEach(cat => {
+                    category = data;
+                    category.forEach(cat => {
                         const li = document.createElement('li');
                         li.className = 'category-item';
                         li.dataset.id = cat.caseTypeId;

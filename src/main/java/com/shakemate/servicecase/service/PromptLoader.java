@@ -17,6 +17,7 @@ public class PromptLoader {
 
     private final String resourcePath;
     private final List<Map<String, String>> messages;
+    
 
     public PromptLoader(@Value("${prompt.resource.path:static/servicecase/otherResource/reg.txt}") String resourcePath) throws IOException {
         this.resourcePath = resourcePath;
@@ -50,6 +51,7 @@ public class PromptLoader {
                 list.add(createMessage(currentRole, sb.toString()));
             }
         }
+       
         return list;
     }
 
