@@ -540,279 +540,19 @@ html {
   word-break: break-word;
 }
 
-/* 🔹 頂部選單區 */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 6.5rem;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 4rem 0 2rem;
-  box-sizing: border-box;
-  z-index: 1000;
-}
-
-.header__logo {
-  display: flex;
-  align-items: center;
-}
-
-/* 讓 <a> 變成一整塊都可點 */
-.header__logo-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: inherit; /* 讓文字維持原本顏色 */
-}
-
-.header__logo-img {
-  height: 6.5rem;
-}
-
-.header__logo-link img {
-  height: 100%;
-  width: auto;
-  object-fit: contain;
-}
-
-.header__logo-txt {
-  display: flex;
-  flex-direction: column;
-  color: #2EC4B6;
-  font-family: "LXGW Marker Gothic", sans-serif;
-  font-style: normal;
-}
-
-.header__logo-txt .ch {
-  font-size: 2.4rem;
-  font-weight: 800;
-}
-
-.header__logo-txt .en {
-  font-size: 1.4rem;
-  font-weight: 800;
-}
-
-.header__nav {
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  gap: 4rem;
-  transition: all 0.3s ease;
-}
-@media (min-width: 481px) and (max-width: 768px) {
-  .header__nav .member {
-    display: none;
-  }
-}
-@media (max-width: 480px) {
-  .header__nav .member {
-    display: none;
-  }
-}
-@media (min-width: 481px) and (max-width: 768px) {
-  .header__nav {
-    position: absolute;
-    top: 6.5rem;
-    right: 0;
-    flex-direction: column;
-    background: #fff;
-    width: 100%;
-    max-height: 0;
-    overflow: hidden;
-    gap: 2rem;
-    padding: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-}
-@media (max-width: 480px) {
-  .header__nav {
-    position: absolute;
-    top: 6.5rem;
-    right: 0;
-    flex-direction: column;
-    background: #fff;
-    width: 100%;
-    max-height: 0;
-    overflow: hidden;
-    gap: 2rem;
-    padding: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-}
-@media (min-width: 481px) and (max-width: 768px) {
-  .header__nav.open {
-    padding: 2rem;
-    max-height: 500px;
-  }
-}
-@media (max-width: 480px) {
-  .header__nav.open {
-    padding: 2rem;
-    max-height: 500px;
-  }
-}
-
-.header__list {
-  display: flex;
-  gap: 2.9rem;
-  list-style: none;
-}
-@media (min-width: 481px) and (max-width: 768px) {
-  .header__list {
-    flex-direction: column;
-    width: 100%;
-    gap: 1.5rem;
-  }
-}
-@media (max-width: 480px) {
-  .header__list {
-    flex-direction: column;
-    width: 100%;
-    gap: 1.5rem;
-  }
-}
-
-.header__nav-item {
-  font-size: 1.6rem;
-  color: #333;
-  cursor: pointer;
-}
-.header__nav-item:hover {
-  color: #3e92cc;
-}
-
-.header__nav ul {
-  display: flex;
-  list-style: none;
-}
-
-.header__item a {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  text-decoration: none;
-  font-size: 1.6rem;
-  color: #555;
-  transition: color 0.3s;
-}
-.header__item a:hover {
-  color: #2EC4B6;
-}
-
-.fa-user {
-  font-size: 2rem;
-  color: #555;
-  transition: color 0.3s;
-}
-.fa-user:hover {
-  color: #14ac8b;
-}
-
-.mobile__nav {
-  display: none;
-}
-@media (min-width: 481px) and (max-width: 768px) {
-  .mobile__nav {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-}
-@media (max-width: 480px) {
-  .mobile__nav {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-}
-
-.hamburger {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 2.5rem;
-  height: 1.8rem;
-  cursor: pointer;
-}
-.hamburger span {
-  height: 0.3rem;
-  background: #333;
-  border-radius: 3px;
-}
-
-/* ▼ 下拉容器 */
-.header__item {
-  position: relative;
-  height: 6.5rem;
-}
-
-.header__item > .dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  min-width: 180px;
-  padding: 6px 0;
-  z-index: 999;
-  transition: all 0.2s ease;
-  overflow: hidden;
-}
-
-/* ✅ hover 顯示 */
-.header__item:hover > .dropdown-menu {
-  display: block;
-}
-
-/* ▼ 下拉選單內的項目 */
-.dropdown-menu li {
-  list-style: none;
-}
-
-.dropdown-menu li a {
-  display: block;
-  padding: 10px 16px;
-  color: #333;
-  text-decoration: none;
-  font-size: 15px;
-  transition: background-color 0.2s ease, padding-left 0.2s ease;
-}
-
-/* ✅ 滑過效果：背景變亮、文字內縮有動態感 */
-.dropdown-menu li a:hover {
-  background-color: #f5f5f5;
-  padding-left: 20px;
-  color: #0d9488; /* teal 色調，你可以改成你的主色 */
-}
-
-/* header 登入後頭像 */
-.avatar-img {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-
-
-
 /* 📌 配對頁面 SCSS (支援翻頁) */
 .match {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 7rem;
+  
   /* ✅ 主要新增：卡片包裹成 swiper */
 }
-
+/* @media (min-width: 481px) and (max-width: 768px) { */
+/*   .match { */
+/*     height: 80rem; */
+/*   } */
 @media (min-width: 769px) and (max-width: 1199px) {
   .match__wrap {
     width: 90%;
@@ -832,6 +572,11 @@ html {
   width: 62rem;
   position: relative;
   margin-top: 2.5rem;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .match__container {
+    width: 350px;
+  }
 }
 .match__header {
   text-align: center;
@@ -896,6 +641,7 @@ html {
     flex-direction: column;
     width: 100%;
     box-sizing: border-box;
+    margin-bottom: 13rem;
   }
 }
 @media (max-width: 480px) {
@@ -965,6 +711,11 @@ html {
   z-index: 1;
   position: absolute;
   bottom: 4.5rem;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .match__actions {
+    bottom: 5rem;
+  }
 }
 .match__actions .match__button,
 .success-btn {
@@ -1317,6 +1068,12 @@ html {
 
 .match-success-profile {
   text-align: center;
+}
+
+.matchSuccess__actions {
+  display: flex;
+  gap: 2rem;
+  z-index: 1;
 }
 
 

@@ -22,7 +22,7 @@ function includeHTML(callback) {
 }
 
 includeHTML(() => {
-  // ✅ header 載入完，這時候 hamburger 才真的存在
+  // ✅ hamburger 功能
   const hamburgerBtn = document.querySelector(".hamburger");
   const menuBody = document.querySelector(".header__nav");
   if (hamburgerBtn && menuBody) {
@@ -30,22 +30,35 @@ includeHTML(() => {
       menuBody.classList.toggle("open");
     });
   }
-  
-  // ✅ 檢查登入狀態並換頭像
+
+  // ✅ 登入後替換會員 icon
   fetch('/avatar/userAvatar')
     .then(res => res.json())
     .then(data => {
       if (data && data.userAvatar) {
         const iconEl = document.getElementById('userIcon');
-        if (iconEl) {
-          const avatarImg = document.createElement('img');
-          avatarImg.src = data.userAvatar;
-          avatarImg.alt = '會員頭像';
-          avatarImg.className = 'avatar-img';
+        const memberEl = iconEl.parentNode;
 
-          // 用頭像圖片取代原本的 icon
-          iconEl.parentNode.replaceChild(avatarImg, iconEl);
-        }
+        // ✅ 改掉原本 .member 的 href 與內容
+        memberEl.href = "/profile";
+        memberEl.innerHTML = `<img src="${data.userAvatar}" alt="會員頭像" class="avatar-img">`;
+
+        // ✅ 新增 dropdown 結構，避免 <a> 包到箭頭
+        const dropdownItem = document.createElement('li');
+        dropdownItem.className = "header__item dropdown";
+
+        dropdownItem.innerHTML = `
+          <div class="dropdown-toggle">
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu1">
+            <li><a href="/notifications">通知中心</a></li>
+            <li><a href="/logout">登出</a></li>
+          </ul>
+        `;
+
+        // 插入箭頭結構到 header__nav（或原本的位置）
+        memberEl.parentNode.appendChild(dropdownItem);
       }
     })
     .catch(err => {
