@@ -13,9 +13,4 @@ public class NhomeController {
 		return "back-end/admin/manage";
 	}
 
-	// 用來導向前台頁面 form.html
-	@GetMapping("/nindex")
-	public String newsPage() {
-		return "front-end/news/nindex";
-	}
 }

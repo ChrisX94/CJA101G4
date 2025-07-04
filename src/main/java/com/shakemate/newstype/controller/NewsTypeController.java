@@ -1,7 +1,7 @@
 package com.shakemate.newstype.controller;
 
 import com.shakemate.newstype.model.NewsType;
-import com.shakemate.newstype.model.NewsTypeRepository;
+import com.shakemate.newstype.repository.NewsTypeRepository;
 
 import jakarta.annotation.PostConstruct;
 

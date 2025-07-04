@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+import com.shakemate.adm.model.AdmVO;
 import com.shakemate.newstype.model.NewsType;
 
 @Entity
@@ -25,20 +26,23 @@ public class News implements Serializable {
 	@Column(name = "CONTENT", length = 800, nullable = false)
 	private String content;
 
-	@Column(name = "PUBLISH_TIME", updatable = false)
+	@Column(name = "PUBLISH_TIME", nullable = false, updatable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
 	private Timestamp publishTime;
 
 	@PrePersist
 	protected void onPublish() {
-		this.publishTime = new Timestamp(System.currentTimeMillis());
+        if (publishTime == null) {
+            publishTime = new Timestamp(System.currentTimeMillis());
+        }
 	}
 
-	// 若未來有 News 與 Admin 關聯可改為 ManyToOne
-	@Column(name = "ADM_ID")
-	private Integer admId;
+    // 管理員關聯：取代原本單純的 admId 欄位
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADM_ID", nullable = false)
+    private AdmVO admin;
 
-	@Column(name = "NEWS_STATUS")
-	private boolean newsStatus = false;
+	@Column(name = "NEWS_STATUS", nullable = false)
+	private boolean newsStatus;
 
 	// Getters and Setters
 	public Integer getNewsId() {
@@ -81,14 +85,6 @@ public class News implements Serializable {
 		this.publishTime = publishTime;
 	}
 
-	public Integer getAdmId() {
-		return admId;
-	}
-
-	public void setAdmId(Integer admId) {
-		this.admId = admId;
-	}
-
 	public boolean isNewsStatus() {
 		return newsStatus;
 	}
@@ -96,22 +92,12 @@ public class News implements Serializable {
 	public void setNewsStatus(boolean newsStatus) {
 		this.newsStatus = newsStatus;
 	}
+
+	public AdmVO getAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(AdmVO admin) {
+		this.admin = admin;
+	}
 }
-
-// 只讀的 FK 欄位(建議移除，因為會從 NewsType 抓)
-// @Column(name = "CATEGORY_ID", insertable = false, updatable = false)
-// private Integer categoryId;
-
-// (會從 NewsType 抓 CATEGORY_ID)
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "CATEGORY_ID", nullable = false)
-//	private NewsType newsType;
-
-//	ADM FK 關聯
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "ADM_ID", nullable = false)
-//	private AdmVO admin;
-//
-//	ADM FK 關聯 處理好後需要刪除	
-//	@Column(name = "ADM_ID")
-//	private Integer admId;
