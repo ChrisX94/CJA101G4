@@ -1,15 +1,26 @@
 package com.shakemate.user.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.shakemate.activity.entity.Activity;
+import com.shakemate.activity.entity.ActivityAnswer;
+import com.shakemate.activity.entity.ActivityComment;
+import com.shakemate.activity.entity.ActivityParticipant;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "USERS")
 public class Users implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -312,5 +323,26 @@ public class Users implements Serializable {
     public int hashCode() {
         return Objects.hashCode(userId);
     }
+
+    // -- 活動功能相關 --
+    // 一對多：一個會員發起多個活動
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Activity> activities = new ArrayList<>();
+
+    // 一對多：一個會員有多個活動參與
+    @JsonIgnore
+    @OneToMany(mappedBy = "participant", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ActivityParticipant> activityParticipants = new ArrayList<>();
+
+    // 一個會員發出多則留言
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ActivityComment> activityComments = new ArrayList<>();
+
+    // 一個會員有多個活動問題回答
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ActivityAnswer> activityAnswers = new ArrayList<>();
 }
 
