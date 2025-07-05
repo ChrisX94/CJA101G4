@@ -4,6 +4,7 @@ import com.shakemate.shshop.dto.ApiResponse;
 import com.shakemate.shshop.dto.ApiResponseFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,8 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.shakemate.notification.exception.ResourceNotFoundException;
-
-@RestControllerAdvice(basePackages = {"com.shakemate.shshop.controller", "com.shakemate.notification.controller"})
+@Component("shshopExceptionHandler")
+@RestControllerAdvice(basePackages = {"com.shakemate.shshop.controller", "com.shakemate.notification.controller", "com.shakemate.ordermaster.controller"})
 public class GlobalExceptionHandler {
 
     /**

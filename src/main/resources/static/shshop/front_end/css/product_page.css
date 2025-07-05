@@ -1,14 +1,82 @@
+/* --- CSS 變數 (Custom Properties) --- */
 :root {
-    --header-height: 6.5rem;
+    --fa-style-family-brands: "Font Awesome 6 Brands";
+    --fa-font-brands: normal 400 1em / 1 "Font Awesome 6 Brands";
+    --header-height: 3rem;
+    --main-bg-bright-green: #DCFF61; /* 背景漸層的亮綠色 */
+    --main-bg-teal: #2EC4B6; /* 背景漸層的藍綠色 (主色調) */
+
+    --primary-button-color: #2EC4B6; /* 主要按鈕綠色，與背景藍綠色一致 */
+    --secondary-button-color: #DCFF61; /* 次要按鈕或強調色，使用亮綠色 */
+    --text-color: #333; /* 常用文字顏色 */
+    --light-gray: #f0f4f7; /* 輕微的背景/邊框色，保持中性 */
+    --medium-gray: #ccc; /* 中等灰色，用於邊框等 */
+    --dark-gray: #555; /* 深灰色，用於次要文字 */
+    --card-bg-color: #ffffff; /* 卡片背景色 */
+    --price-color: #d35400; /* 價格的強調色，保持鮮明 */
+}
+
+*{
+    font-size: 62.5%; /* 1rem = 10px */
+}
+
+/* 通用字體大小設定 */
+.header {
+    font-size: 62.5%; /* 1rem = 10px */
+    box-sizing: border-box; /* 確保所有元素的盒模型一致 */
+}
+
+/* --- 核心背景與佈局設定 --- */
+html, body {
+    height: 100%; /* 讓 html 和 body 佔滿整個視窗高度 */
+    margin: 0;
+    padding: 0;
+    background: transparent; /* 確保沒有任何預設背景 */
+    /* font-family in body is the best place for overall text */
+    font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 body {
-    background: linear-gradient(to top, #84c2db, #beebf4, #e9feff);
+    display: flex;
+    flex-direction: column;
+    line-height: 1.6; /* 確保行高可讀性 */
+    color: var(--text-color); /* 預設文字顏色 */
 }
 
+.bg {
+    position: fixed; /* 將背景固定在視窗，不隨內容捲動 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* 確保背景在所有內容的最下層 */
+    overflow: hidden; /* 防止背景內容溢出 */
+    /* 背景拼接色塊（亮綠 + 藍綠） */
+    background: linear-gradient(
+        185deg,
+        var(--main-bg-bright-green) 0%,
+        var(--main-bg-bright-green) 55%,
+        var(--main-bg-teal) 55%,
+        var(--main-bg-teal) 100%
+    );
+}
+.bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 確保主要內容區塊能顯示在背景之上 */
 .main-detail {
     padding-top: calc(var(--header-height) + 2rem);
-    background-color: inherit;
+    background-color: transparent; /* 再次強調為透明 */
+    flex-grow: 1; /* 讓內容區塊自動填滿剩餘空間 */
+    position: relative; /* 確保 main-detail 具有自己的堆疊上下文，並在 .bg 之上 */
+    z-index: 1; /* 確保在背景之上 */
+    /* Add background-color: transparent here too if it's not working */
 }
 
 .product-page {
@@ -16,7 +84,11 @@ body {
     margin: 0 auto;
     padding: 0 2rem;
     box-sizing: border-box;
+    background-color: transparent; /* 確保 product-page 的背景也是透明，除非您想讓它有個白色背景 */
+    position: relative; /* Ensure it has a stacking context to be above .bg */
+    z-index: 2; /* Higher z-index than main-detail if needed, but 1 is usually enough */
 }
+
 
 /* ===== 商品上半區（圖片＋基本資訊）===== */
 .product-top {
@@ -71,7 +143,7 @@ body {
     width: 80px;
     height: 80px;
     object-fit: cover;
-    border: 1px solid #ccc;
+    border: 1px solid var(--light-gray);
     border-radius: 4px;
     cursor: pointer;
     flex-shrink: 0;
@@ -83,12 +155,13 @@ body {
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0.5rem;
+    color: var(--primary-button-color);
 }
 
 /* 🔹 右側商品資訊 */
 .right-info-box {
     flex: 1 1 400px;
-    background-color: #fff;
+    background-color: var(--card-bg-color); /* 這塊維持白色卡片背景 */
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
@@ -98,17 +171,18 @@ body {
 .right-info-box h1 {
     font-size: 2.8rem;
     margin-bottom: 1.2rem;
+    color: var(--text-color);
 }
 
 .price {
     font-size: 2rem;
-    border-top: 1px solid #aaa;
-    border-bottom: 1px solid #aaa;
+    border-top: 1px solid var(--light-gray);
+    border-bottom: 1px solid var(--light-gray);
     padding: 0.5rem 0;
 }
 
 .price_info {
-    color: #d35400;
+    color: var(--price-color);
     font-size: 2.4rem;
     font-weight: bold;
 }
@@ -116,6 +190,7 @@ body {
 .info-grid p {
     font-size: 1.6rem;
     margin-bottom: 0.8rem;
+    color: var(--dark-gray);
 }
 
 .form-group {
@@ -140,12 +215,13 @@ body {
     font-weight: bold;
     white-space: nowrap;
     margin: 0;
+    color: var(--text-color);
 }
 
 .qty-box {
     display: flex;
     align-items: center;
-    border: 1px solid #ccc;
+    border: 1px solid var(--medium-gray);
     border-radius: 5px;
     overflow: hidden;
     height: 2.8rem;
@@ -160,13 +236,14 @@ body {
     border: none;
     outline: none;
     box-sizing: border-box;
+    color: var(--text-color);
 }
 
 .qty-btn {
     width: 2.8rem;
     height: 100%;
     font-size: 1.4rem;
-    background-color: #3e92cc;
+    background-color: var(--primary-button-color);
     color: white;
     border: none;
     cursor: pointer;
@@ -174,6 +251,11 @@ body {
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
+    transition: background-color 0.3s ease;
+}
+
+.qty-btn:hover {
+    background-color: #208e82;
 }
 
 .buy-btn {
@@ -182,30 +264,32 @@ body {
     align-items: center;
     padding: 0 1rem;
     font-size: 1.4rem;
-    background-color: #3e92cc;
+    background-color: var(--primary-button-color);
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .buy-btn:hover {
-    background-color: #2b6ca3;
+    background-color: #208e82;
 }
 
 .chat-btn {
     margin-top: 1rem;
     padding: 0.6rem 1.2rem;
     font-size: 1.4rem;
-    background-color: #3e92cc;
+    background-color: var(--primary-button-color);
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .chat-btn:hover {
-    background-color: #2b6ca3;
+    background-color: #208e82;
 }
 
 /* ===== 商品說明區塊 ===== */
@@ -214,7 +298,7 @@ body {
 }
 
 .product-section {
-    background: white;
+    background: var(--card-bg-color); /* 這塊維持白色卡片背景 */
     padding: 2rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
@@ -224,6 +308,12 @@ body {
 .product-section h2 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.product-section p {
+    color: var(--dark-gray);
+    line-height: 1.6;
 }
 
 /* 🔍 Modal：放大圖片樣式 */
@@ -253,28 +343,8 @@ body {
     color: #fff;
     cursor: pointer;
 }
-.bg {
-  position: relative;
-  min-height: 100vh;
-  z-index: 0;
 
-  /* 背景拼接色塊（亮綠 + 藍綠） */
-  background: linear-gradient(
-    185deg,
-    #DCFF61 0%,
-    #DCFF61 55%,
-    #2EC4B6 55%,
-    #2EC4B6 100%
-  );
-  overflow: hidden;
+strong{
+    font-size: 1.6rem;
 }
 
-/* 背景上方有再加一層帶透明度的白色 */
-.bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
-  z-index: 0;
-  pointer-events: none;
-}

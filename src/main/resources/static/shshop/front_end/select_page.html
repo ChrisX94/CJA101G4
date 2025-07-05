@@ -4,10 +4,11 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>MatchMarket</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="css/header.css" />
+  <link rel="stylesheet" href="../../css/headerStyle.css" />
   <link rel="stylesheet" href="css/select_page.css" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
 </head>
 <body>
 <div w3-include-html="../../header1.html"></div>
@@ -69,8 +70,9 @@
   </div>
 </div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="../../js/header.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
 <script>
   // 全域變數
   const navList = $(".nav_list");
@@ -210,7 +212,7 @@
           const friendHTML = `
           <li data-id="${friend.userId}">
             <img class="friend-avatar" src="${friend.img1}" alt="${friend.username}">
-            <span>${friend.username}</span>
+            <span class="friend_Name">${friend.username}</span>
           </li>`;
           friendList.append(friendHTML);
         });

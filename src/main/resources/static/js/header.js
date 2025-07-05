@@ -53,7 +53,7 @@ includeHTML(() => {
           </div>
           <ul class="dropdown-menu dropdown-menu1">
             <li><a href="/notifications">通知中心</a></li>
-            <li><a href="/logout">登出</a></li>
+            <li><a href="/login/logout">登出</a></li>
           </ul>
         `;
 
