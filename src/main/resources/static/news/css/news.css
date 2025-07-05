@@ -1,0 +1,256 @@
+:root {
+	--primary-color: orange;
+	--secondary-color: #6b8cae;
+	--background-color: #f8f9fa;
+	--message-bg-user: #e3f2fd;
+	--message-bg-bot: #ffffff;
+	--border-color: #d0d0d0;
+}
+/* 你原本的 style 都直接貼上即可 */
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: var(--background-color);
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.container {
+	display: flex;
+	flex-direction: column;
+	max-width: 1200px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 20px;
+	box-sizing: border-box;
+	height: 100%;
+}
+
+header {
+	background-color: var(--primary-color);
+	color: white;
+	padding: 15px;
+	text-align: center;
+	border-radius: 8px 8px 0 0;
+}
+
+.main-content {
+	display: flex;
+	flex-grow: 1;
+	gap: 20px;
+	height: calc(100% - 60px);
+}
+
+.sidebar {
+	width: 250px;
+	background-color: white;
+	border-radius: 8px;
+	padding: 15px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.category-list {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.category-item {
+	padding: 12px 15px;
+	border-bottom: 1px solid var(--border-color);
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.category-item:hover {
+	background-color: #f0f7ff;
+}
+
+.category-item.active {
+	background-color: var(--message-bg-user);
+	font-weight: bold;
+}
+
+.chat-container {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	background-color: white;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+}
+
+.chat-messages {
+	flex-grow: 1;
+	padding: 20px;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.message {
+	max-width: 80%;
+	padding: 15px;
+	border-radius: 15px;
+	position: relative;
+	line-height: 1.5;
+}
+
+.message-user {
+	background-color: var(--message-bg-user);
+	align-self: flex-end;
+	border-bottom-right-radius: 5px;
+}
+
+.message-bot {
+	background-color: var(--message-bg-bot);
+	align-self: flex-start;
+	border-bottom-left-radius: 5px;
+	border: 1px solid var(--border-color);
+}
+
+.message-time {
+	font-size: 0.7em;
+	color: #888;
+	position: absolute;
+	bottom: 5px;
+	right: 15px;
+}
+
+.chat-input-container {
+	display: flex;
+	padding: 15px;
+	border-top: 1px solid var(--border-color);
+	background-color: white;
+}
+
+.chat-input {
+	flex-grow: 1;
+	padding: 12px 15px;
+	border: 1px solid var(--border-color);
+	border-radius: 25px;
+	margin-right: 10px;
+	font-size: 16px;
+}
+
+.send-button {
+	background-color: var(--primary-color);
+	color: white;
+	border: none;
+	border-radius: 25px;
+	padding: 0 20px;
+	cursor: pointer;
+	font-size: 16px;
+	transition: background-color 0.2s;
+}
+
+.send-button:hover {
+	background-color: var(--secondary-color);
+}
+
+.feedback-container {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 5px;
+	margin-top: 5px;
+	font-size: 0.8em;
+}
+
+.feedback-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 5px;
+}
+
+.feedback-button:hover {
+	color: var(--primary-color);
+}
+
+.typing-indicator {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 15px;
+	background-color: var(--message-bg-bot);
+	border-radius: 15px;
+	align-self: flex-start;
+	margin-bottom: 10px;
+	border: 1px solid var(--border-color);
+}
+
+.typing-bubble {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: var(--secondary-color);
+	animation: typing-bubble 1s infinite alternate;
+}
+
+.typing-bubble:nth-child(2) {
+	animation-delay: 0.3s;
+}
+
+.typing-bubble:nth-child(3) {
+	animation-delay: 0.6s;
+}
+
+/* @ */
+keyframes typing-bubble {from { opacity:0.5;
+	transform: translateY(0px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(-5px);
+}
+
+}
+.hidden {
+	display: none;
+}
+
+/* 響應式設計 */
+@media ( max-width : 768px) {
+	.main-content {
+		flex-direction: column;
+	}
+	.sidebar {
+		width: 100%;
+		margin-bottom: 15px;
+	}
+	.message {
+		max-width: 90%;
+	}
+}
+
+.floating-button {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	background-color: #406caa;
+	color: white;
+	border: none;
+	border-radius: 25px;
+	padding: 12px 20px;
+	font-size: 16px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	cursor: pointer;
+	z-index: 1000;
+}
+
+.ask-link {
+    display: inline-block;
+    color: #406caa;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.ask-link:hover {
+    text-decoration: underline;
+}
