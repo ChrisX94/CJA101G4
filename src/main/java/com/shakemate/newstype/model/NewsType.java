@@ -25,7 +25,10 @@ public class NewsType implements Serializable {
     
     @Column(name = "NEWS_DESC", length = 100, nullable = false)
     private String newsDesc;
-
+    
+	@OneToMany(mappedBy = "newsType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore // 防止雙向關聯導致 JSON 無限循環
+	private List<News> newsList;
     
     // getter / setter
 	public Integer getCategoryId() {
@@ -52,8 +55,4 @@ public class NewsType implements Serializable {
 		this.newsDesc = newsDesc;
 	}
 	
-	@OneToMany(mappedBy = "newsType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JsonIgnore // 防止雙向關聯導致 JSON 無限循環
-	private List<News> newsList;
-
 }

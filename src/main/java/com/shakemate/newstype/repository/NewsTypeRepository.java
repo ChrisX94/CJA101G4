@@ -1,4 +1,4 @@
-package com.shakemate.newstype.model;
+package com.shakemate.newstype.repository;
 
 import com.shakemate.newstype.model.NewsType;
 import org.springframework.data.jpa.repository.JpaRepository;

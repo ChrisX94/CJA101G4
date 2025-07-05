@@ -1,0 +1,30 @@
+package com.shakemate.news.dto;
+
+import java.sql.Timestamp;
+import com.shakemate.news.model.News;
+
+public class NewsResponse {
+    private Integer newsId;
+    private String title;
+    private String content;
+    private Timestamp publishTime;
+    private String categoryName;
+    private String adminName;
+
+    public NewsResponse(News news) {
+        this.newsId = news.getNewsId();
+        this.title = news.getTitle();
+        this.content = news.getContent();
+        this.publishTime = news.getPublishTime();
+        this.categoryName = news.getNewsType().getCategoryName();
+        this.adminName = news.getAdmin().getAdmName();
+    }
+
+    // getters
+    public Integer getNewsId() { return newsId; }
+    public String getTitle() { return title; }
+    public String getContent() { return content; }
+    public Timestamp getPublishTime() { return publishTime; }
+    public String getCategoryName() { return categoryName; }
+    public String getAdminName() { return adminName; }
+}
