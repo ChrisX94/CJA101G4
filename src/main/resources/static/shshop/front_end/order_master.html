@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>訂單管理 | MatchMarket</title>
+  <link rel="stylesheet" href="../../css/headerStyle.css" />
+  <link rel="stylesheet" href="css/order_master.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div w3-include-html="../../header1.html"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <h3 class="sidebar-title">角色切換</h3>
+      <a href="#" class="sidebar-item role-tab active" data-role="buyer">買家訂單</a>
+      <a href="#" class="sidebar-item role-tab" data-role="seller">賣家訂單</a>
+      <h3 class="sidebar-title">狀態快速篩選</h3>
+      <a href="#" class="sidebar-item status-quick active" data-status="all">全部</a>
+      <a href="#" class="sidebar-item status-quick" data-status="0">處理中</a>
+      <a href="#" class="sidebar-item status-quick" data-status="1">已完成</a>
+      <a href="#" class="sidebar-item status-quick" data-status="2">已取消</a>
+      <a href="#" class="sidebar-item status-quick" data-status="3">糾紛處理中</a>
+    </aside>
+
+    <main class="main-content">
+      <div class="card" id="filter-card">
+        <div class="header-section">
+          <h2 class="section-title">查詢條件</h2>
+        </div>
+        <div class="multi-filter">
+          <label>訂單編號：<input type="text" id="orderIdInput" placeholder="請輸入訂單編號" style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;max-width:160px;"></label>
+          <label>訂單狀態：
+            <select id="orderStatusFilter">
+              <option value="all">全部</option>
+              <option value="0">處理中</option>
+              <option value="1">已完成</option>
+              <option value="2">已取消</option>
+              <option value="3">糾紛處理中</option>
+            </select>
+          </label>
+          <label>付款狀態：
+            <select id="paymentStatusFilter">
+              <option value="all">全部</option>
+              <option value="0">未付款</option>
+              <option value="1">已付款</option>
+              <option value="2">已退款</option>
+              <option value="3">已取消</option>
+            </select>
+          </label>
+          <label>物流狀態：
+            <select id="shippingStatusFilter">
+              <option value="all">全部</option>
+              <option value="0">備貨中</option>
+              <option value="1">已出貨</option>
+              <option value="2">已送達</option>
+              <option value="3">退貨</option>
+              <option value="4">取消</option>
+            </select>
+          </label>
+          <button id="searchButton" class="material-button">查詢訂單</button>
+        </div>
+      </div>
+
+      <div class="card" id="result-card">
+        <div class="header-section">
+          <h2 class="section-title">訂單列表</h2>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>訂單編號</th>
+                <th>下單日期</th>
+                <th>圖片</th>
+                <th>商品名稱</th>
+                <th>單價</th>
+                <th>數量</th>
+                <th>總額</th>
+                <th>付款方式</th>
+                <th>付款狀態</th>
+                <th>物流方式</th>
+                <th>物流狀態</th>
+                <th>訂單狀態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="order-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/header.js"></script>
+  <script>
+    const API_MAP = {
+      buyer: "/api/shorder/buyer",
+      seller: "/api/shorder/seller"
+    };
+    let CURRENT_ROLE = "buyer";
+    let ALL_ORDERS = [];
+
+    function formatDateTime(ts) {
+      return ts ? new Date(ts).toLocaleString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "-";
+    }
+
+    function goToOrderDetail(id) {
+      localStorage.setItem("viewOrderId", id);
+        localStorage.setItem("orderRole", CURRENT_ROLE); // 儲存角色資訊
+      window.location.href = "order_detail.html";
+    }
+
+    function getOrderStatusStr(c) {
+      return ["處理中", "已完成", "已取消", "糾紛處理中"][c] || "未知";
+    }
+    function getPaymentStatusStr(c) {
+      return ["未付款", "已付款", "已退款", "已取消"][c] || "未知";
+    }
+    function getShippingStatusStr(c) {
+      return ["備貨中", "已出貨", "已送達", "退貨", "取消"][c] || "未知";
+    }
+    function getPaymentMethodStr(c) {
+      return ["貨到付款", "線上付款"][c] || "未知";
+    }
+    function getShippingMethodStr(c) {
+      return ["宅配", "超商取貨"][c] || "未知";
+    }
+
+    async function loadOrders() {
+      try {
+        const res = await fetch(API_MAP[CURRENT_ROLE]);
+        const { data } = await res.json();
+        ALL_ORDERS = data || [];
+        renderOrders(getActiveStatus());
+      } catch (err) {
+        console.error("載入訂單失敗", err);
+      }
+    }
+
+    function renderOrders(statusFilter = "all") {
+      const tbody = document.getElementById("order-tbody");
+      tbody.innerHTML = "";
+
+      const os = document.getElementById("orderStatusFilter").value;
+      const ps = document.getElementById("paymentStatusFilter").value;
+      const ss = document.getElementById("shippingStatusFilter").value;
+      const keyword = document.getElementById("orderIdInput").value.trim();
+
+      let filtered = [...ALL_ORDERS].filter(o => {
+        return (statusFilter === "all" || String(o.orderStatus) === statusFilter) &&
+               (os === "all" || String(o.orderStatus) === os) &&
+               (ps === "all" || String(o.paymentStatus) === ps) &&
+               (ss === "all" || String(o.shippingStatus) === ss) &&
+               (!keyword || String(o.shOrderId).includes(keyword));
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="13">查無符合條件的訂單</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(o => {
+        const img = o.shProd?.picUrls?.[0] || "https://via.placeholder.com/60";
+        tbody.innerHTML += `
+        <tr>
+          <td>${o.shOrderId}</td>
+          <td>${formatDateTime(o.orderDate)}</td>
+          <td><img src="${img}" alt="圖" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"/></td>
+          <td>${o.shProd?.prodName || '-'}</td>
+          <td>$${o.productPrice}</td>
+          <td>${o.productQuantity}</td>
+          <td>$${o.totalAmount}</td>
+          <td>${o.paymentMethodStr || getPaymentMethodStr(o.paymentMethod)}</td>
+          <td>${o.paymentStatusStr || getPaymentStatusStr(o.paymentStatus)}</td>
+          <td>${o.shippingMethodStr || getShippingMethodStr(o.shippingMethod)}</td>
+          <td>${o.shippingStatusStr || getShippingStatusStr(o.shippingStatus)}</td>
+          <td>${o.orderStatusStr || getOrderStatusStr(o.orderStatus)}</td>
+          <td><button class="material-button" onclick="goToOrderDetail(${o.shOrderId})">查看</button></td>
+        </tr>`;
+      });
+    }
+
+    function getActiveStatus() {
+      const el = document.querySelector(".status-btn.active, .status-quick.active");
+      return el ? el.dataset.status : "all";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadOrders();
+
+      document.querySelectorAll(".role-tab").forEach(tab => {
+        tab.onclick = e => {
+          e.preventDefault();
+          document.querySelectorAll(".role-tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          CURRENT_ROLE = tab.dataset.role;
+          loadOrders();
+        };
+      });
+
+      document.querySelectorAll(".status-btn, .status-quick").forEach(btn => {
+        btn.onclick = e => {
+          e.preventDefault();
+          document.querySelectorAll(".status-btn, .status-quick").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderOrders(btn.dataset.status);
+        };
+      });
+
+      ["orderStatusFilter", "paymentStatusFilter", "shippingStatusFilter"].forEach(id => {
+        document.getElementById(id).onchange = () => renderOrders(getActiveStatus());
+      });
+
+      document.getElementById("searchButton").onclick = () => renderOrders(getActiveStatus());
+    });
+  </script>
+</body>
+</html>

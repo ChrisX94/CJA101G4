@@ -5,45 +5,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Product details｜MatchMarket</title>
-    <link rel="stylesheet" href="css/header.css" />
+    <link rel="stylesheet" href="../../css/headerStyle.css" />
     <link rel="stylesheet" href="css/product_page.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 </head>
 
 <body>
+    <div class="bg"></div>
 
-    <header class="header">
-        <div class="header__logo">
-            <a href="/">
-                <img src="../../img/logoText.png" alt="Logo" />
-            </a>
-        </div>
-        <nav class="header__nav">
-            <ul class="header__list">
-                <li class="header__item"><a href="#">配對</a></li>
-                <li class="header__item"><a href="#">聊天室</a></li>
-                <li class="header__item"><a href="#">活動</a></li>
-                <li class="header__item"><a href="#">討論區</a></li>
-                <li class="header__item dropdown">
-                    <a href="select_page.html">MatchMarket</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="select_page.html">看一下商品</a></li>
-                        <li class="dropdown-submenu">
-                            <a href="product_manager.html">My MatchMarket</a>
-                            <ul class="dropdown-menu">
-                                <li><a href="add_product.html">上架商品</a></li>
-                                <li><a href="#">已購賣商品</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                <li class="header__item"><a href="#">會員專區</a></li>
-            </ul>
-        </nav>
-        <div class="header__user">
-            <i class="fa-solid fa-user"></i>
-        </div>
-    </header>
+    <div w3-include-html="../../header1.html"></div>
 
     <main class="main-detail">
         <div class="product-page">
@@ -112,6 +84,7 @@
         <img id="modalImg" src="" alt="放大圖片" style="max-width:90%; max-height:90%;">
     </div>
 
+    <script src="../../js/header.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -120,6 +93,12 @@
             if (!productId) {
                 console.error("查無商品");
                 return;
+            }
+            const viewOnly = localStorage.getItem("viewOnly") === "true";
+            if (viewOnly) {
+                const interactionBlock = document.querySelector(".right-info-box .form-group");
+                if (interactionBlock) interactionBlock.style.display = "none";
+                localStorage.removeItem("viewOnly"); // ✅ 用完即刪，避免影響其他頁
             }
 
             const mainImg = document.querySelector(".main-img img");
