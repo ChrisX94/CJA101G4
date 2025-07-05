@@ -467,6 +467,7 @@ html {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   position: relative;
   font-family: "Noto Sans TC", sans-serif;
+  margin-top: 6rem;
 }
 
 .profile__header {
@@ -902,6 +903,7 @@ html {
   max-height: 80%;
   overflow-y: auto;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  margin-top: 5rem;
 }
 
 /* 標題 */
@@ -1085,6 +1087,28 @@ html {
   border-radius: 1rem;
   margin: 1.5rem 0 4rem;
   overflow: hidden;
+}
+
+
+/* ✅ 愛心出現並抖動 */
+.match-heart-only {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  z-index: 9999;
+  animation: shakeHeart 0.6s ease-in-out 3;
+}
+
+/* ✅ 抖兩下的動畫 */
+@keyframes shakeHeart {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  20% { transform: translate(-55%, -50%) rotate(-5deg); }
+  40% { transform: translate(-45%, -50%) rotate(5deg); }
+  60% { transform: translate(-54%, -50%) rotate(-3deg); }
+  80% { transform: translate(-46%, -50%) rotate(3deg); }
+  100% { transform: translate(-50%, -50%) rotate(0deg); }
 }
 
 

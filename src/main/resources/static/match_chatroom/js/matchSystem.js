@@ -94,8 +94,7 @@ function startMatchPage() {
 		// 送出後關掉視窗
 		filterModal.style.display = 'none';
 
-
-		// 👉 準備 payload（送出的資料）
+		// 若有條件，準備 payload（送出的資料）送到條件配對API
 		const payload = {
 			action: "getFiltered",
 			currentUserId: currentUserId, // 從你的 URL 或變數取得
@@ -301,9 +300,18 @@ function startMatchPage() {
 							matchList.splice(currentIndex, 1);
 							localStorage.setItem(`matchedList_${currentUserId}`, JSON.stringify(matchList));
 						}
+						// ✅ 插入動畫畫面
+						const logo = document.createElement("img");
+						logo.src = "/img/logo.png";
+						logo.alt = "logo";
+						logo.className = "match-heart-only";
+						document.body.appendChild(logo);
 						
 						// 對方也按過你：跳轉成功配對頁面
-						window.location.href = `matchSuccess.html?fromSuccess=1&roomId=${data.roomId}`;
+						// ✅ 2 秒後跳轉
+						setTimeout(() => {
+						  window.location.href = `matchSuccess.html?fromSuccess=1&roomId=${data.roomId}`;
+						}, 1800); // 可依動畫調整秒數
 						return; // 不切換下一位，直接跳頁
 					}
 				}

@@ -500,8 +500,16 @@ document.getElementById("imageInput").addEventListener("change", function(event)
 
 		const container = document.getElementById("chatContent");
 		container.appendChild(el);
-		container.scrollTop = container.scrollHeight;
-
+		
+		// ✅ 找出剛剛加入的圖片，等圖片載入後再捲到底
+		const img = el.querySelector("img");
+		if (img) {
+			img.onload = () => {
+				container.scrollTop = container.scrollHeight;
+			};
+		} else {
+			container.scrollTop = container.scrollHeight; // 沒圖片就直接捲
+		}
 		// ✅ 傳 FormData 給後端儲存
 		const formData = new FormData();
 		formData.append("roomId", currentRoomId);
