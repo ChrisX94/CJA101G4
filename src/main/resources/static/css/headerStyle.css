@@ -209,7 +209,7 @@
   transition: color 0.3s;
 }
 .fa-user:hover {
-  color: #14ac8b;
+  color: #2EC4B6;
 }
 
 .mobile__nav {
@@ -219,7 +219,6 @@
   .mobile__nav {
     display: flex;
     align-items: center;
-    gap: 20px;
   }
 }
 @media (max-width: 480px) {
@@ -238,16 +237,36 @@
   height: 1.8rem;
   cursor: pointer;
 }
+
 .hamburger span {
   height: 0.3rem;
   background: #333;
   border-radius: 3px;
+  transition: background-color 0.3s;
 }
+
+.hamburger:hover  span {
+  background: #2EC4B6;
+}
+
 
 /* ▼ 下拉容器 */
 .header__item {
   position: relative;
   height: 6.5rem;
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__item {
+    padding-left: 1.5rem;
+    height: 4rem;
+  }
+}
+@media (max-width: 480px) {
+    .header__item {
+    padding-left: 1.5rem;
+    height: 4rem ;
+  }
 }
 
 .header__item > .dropdown-menu {
@@ -338,5 +357,51 @@
 .dropdown-toggle i {
   font-size: 1.2rem;
   color: #444;
+}
+
+@media (max-width: 768px) {
+  .header__item.dropdown > .dropdown-menu {
+    display: none;
+  }
+
+  .header__item.dropdown > .dropdown-toggle {
+    display: none;
+  }
+  .header__list .header__item > a::after {
+    display: none;
+  }  
+  
+}
+
+
+/* 預設隱藏手機版大頭貼 */
+.mobile-avatar {
+  display: none;
+}
+
+/* ✅ RWD：手機版顯示，並擺在漢堡左邊 */
+@media (max-width: 768px) {
+  .mobile-avatar {
+    display: block;
+    margin-right: 2rem;
+  }
+
+  .mobile-avatar img {
+	width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 0 0 3px #2EC4B6;
+  }
+
+  /* ✅ 桌機原本那顆大頭貼隱藏 */
+  .header__nav .member {
+    display: none;
+  }
+
+  .header__item.dropdown {
+    display: none;
+  }
 }
 

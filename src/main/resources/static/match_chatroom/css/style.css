@@ -59,9 +59,10 @@ html {
 @media (min-width: 481px) and (max-width: 768px) {
   .chat-layout {
     height: calc(100vh - 65px);
-    margin-top: 0;
+    margin-top: 6.5rem;
     max-width: 100%;
     border: none;
+    border-radius: 0;
   }
 }
 @media (max-width: 480px) {
@@ -75,7 +76,7 @@ html {
 
 .chat-list {
   width: 27.5rem;
-  background: #F9F7EF;
+  background: #FCF7F8;
   border-right: 1.5px solid #ddd;
   padding: 1rem;
   box-sizing: border-box;
