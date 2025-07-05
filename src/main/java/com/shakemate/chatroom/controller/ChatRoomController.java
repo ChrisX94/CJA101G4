@@ -40,7 +40,12 @@ public class ChatRoomController {
 	
     @GetMapping("/currentUserId")
     public Map<String, Object> getCurrentUserId(HttpSession session) {
-        Integer id = (Integer) session.getAttribute("account");
+    	Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer id = Integer.parseInt(userIdObj.toString());
+
         Map<String, Object> result = new HashMap<>();
         result.put("currentUserId", id);
         return result;
@@ -49,7 +54,12 @@ public class ChatRoomController {
     // ✅ 取得聊天室清單
     @GetMapping("/list")
     public ResponseEntity<?> getChatRooms(HttpSession session) {
-        Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
+    	Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer currentUserId = Integer.parseInt(userIdObj.toString());
+
         List<ChatRoomVO> list = chatRoomDAO.findByUserId(currentUserId);
         return ResponseEntity.ok(list);
     }
@@ -90,7 +100,11 @@ public class ChatRoomController {
     @PostMapping("/markAsRead")
     public ResponseEntity<?> markAsRead(@RequestParam int roomId, HttpSession session) {
         try {
-            Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
+        	Object userIdObj = session.getAttribute("account");
+        	if (userIdObj == null) {
+        		return null;
+        	}
+            Integer currentUserId = Integer.parseInt(userIdObj.toString());
             chatMessageService.markMessagesAsReadWhenClickRoom(currentUserId, roomId);
             return ResponseEntity.ok("success");
         } catch (Exception e) {
@@ -124,6 +138,4 @@ public class ChatRoomController {
             return ResponseEntity.internalServerError().body("error");
         }
     }
-
-
 }
