@@ -1,6 +1,6 @@
 
 document.addEventListener("DOMContentLoaded", function () {
-    fetch("http://localhost:8087/api/ShShop/allTypes")
+    fetch("/api/ShShop/allTypes")
         .then(response => {
             if (!response.ok) throw new Error("分類載入失敗");
             return response.json();

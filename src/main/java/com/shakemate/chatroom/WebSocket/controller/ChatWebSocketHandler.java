@@ -47,9 +47,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
-        Integer senderId = extractUserId(session);
         String msg = message.getPayload();
-
+        
+        // 建立 ObjectMapper 用來把 JSON 字串解析成 Java Map 或物件
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> data;
         try {
@@ -59,10 +59,16 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        int roomId = (int) data.get("roomId");
-        int fromId = (int) data.get("senderId");
-        int receiveId = (int) data.get("receiveId");
-        String type = (String) data.get("type");
+//        int roomId = (int) data.get("roomId");
+//        int fromId = (int) data.get("senderId");
+//        int receiveId = (int) data.get("receiveId");
+//        String type = (String) data.get("type");
+        
+        int roomId    = Integer.parseInt(data.get("roomId").toString());
+        int fromId    = Integer.parseInt(data.get("senderId").toString());
+        int receiveId = Integer.parseInt(data.get("receiveId").toString());
+        String type   = data.get("type").toString(); // 這邊不用再 cast 成 (String)，直接 toString 即可
+
 
         WebSocketSession targetSession = userSessions.get(receiveId);
         if (targetSession != null && targetSession.isOpen()) {

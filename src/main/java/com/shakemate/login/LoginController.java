@@ -2,6 +2,7 @@ package com.shakemate.login;
 
 import com.shakemate.user.model.Users;
 import com.shakemate.user.service.UserService;
+import com.shakemate.user.service.UserService.LoginResult;
 import com.shakemate.user.util.UserPostMultipartFileUploader;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -28,7 +29,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/login")
 public class LoginController {
 
-
     @Autowired
     private UserService userService;
 
@@ -38,20 +38,23 @@ public class LoginController {
     // 處理登入
     @PostMapping("/loginHandler")
     public String login(@RequestParam String account,
-                        @RequestParam String password,
-                        HttpServletRequest request,
-                        Model model) {
+            @RequestParam String password,
+            HttpServletRequest request,
+            Model model) {
         Users user = userService.getUserByEmail(account);
-        if (user == null || !userService.login(user.getEmail(), password)) {
+
+        if (user == null || userService.login(user.getEmail(), password) != LoginResult.SUCCESS
+                || user.getUserStatus() == (byte) 4) {
+
             model.addAttribute("errorMsg", "登入失敗，請檢查帳號或密碼！");
             return "login"; // 回到 login.html
         }
         // 登入成功
         HttpSession session = request.getSession();
         session.setAttribute("account", user.getUserId());
-        System.out.println(session.getAttribute("account"));
+        session.setAttribute("userAvatar", user.getImg1()); 
         String location = (String) session.getAttribute("location");
-        return "redirect:" + (location != null ? location : "testlogin");
+        return "redirect:/";
     }
 
     // 處理登出
@@ -72,12 +75,12 @@ public class LoginController {
 
     @PostMapping("/signupHandler")
     public String signupHandler(@Valid @ModelAttribute("user") Users user,
-                                BindingResult bindingResult,
-                                ModelMap model,
-                                @RequestParam("confirm_password") String confirmPassword,
-                                @RequestParam(value="interests", required = false) String[] interestsArr ,
-                                @RequestParam(value="personality", required = false) String[] personalityArr,
-                                @RequestParam("image") MultipartFile[] parts) throws IOException {
+            BindingResult bindingResult,
+            ModelMap model,
+            @RequestParam("confirm_password") String confirmPassword,
+            @RequestParam(value = "interests", required = false) String[] interestsArr,
+            @RequestParam(value = "personality", required = false) String[] personalityArr,
+            @RequestParam("image") MultipartFile[] parts) throws IOException {
 
         model.addAttribute("user", user); // ✅ 確保一開始就綁好 user，Thymeleaf 才不會炸掉
 
@@ -96,7 +99,7 @@ public class LoginController {
 
         // 3. 檢查年齡
         int age = Period.between(user.getBirthday().toLocalDate(), LocalDate.now()).getYears();
-        if(age < 15){
+        if (age < 15) {
             model.addAttribute("errorMessage", "年齡需滿16歲");
             return "front-end/user/signup";
         }
@@ -122,7 +125,7 @@ public class LoginController {
             model.addAttribute("errorMessage", "系統錯誤：" + e.getMessage());
             return "front-end/user/signup";
         }
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             model.addAttribute("user", user);
             return "front-end/user/signup";
         }
@@ -131,12 +134,12 @@ public class LoginController {
         userService.signIn(user, interestsArr, personalityArr, imgUrl);
         model.addAttribute("success", "- (新增成功)");
 
-        return "testlogin/testlogin";
+        return "/index";
     }
 
     @GetMapping("/testlogin")
     public String testLogin(HttpServletRequest request) {
-        return "testlogin/testlogin"; // 回登入畫面
+        return "/index"; // 回登入畫面
     }
 
     public BindingResult removeFieldError(Users user, BindingResult result, String removedFieldname) {

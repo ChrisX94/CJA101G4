@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MatchMarket - 訂單詳情</title>
+  <link rel="stylesheet" href="./css/view_order.css">
+</head>
+
+<body>
+
+  <!-- 側邊欄 -->
+  <aside>
+    <h2>管理後台</h2>
+    <nav>
+      <ul>
+        <li><a href="#">📦 商品管理</a></li>
+        <li><a href="#" class="active">🧾 訂單管理</a></li>
+        <li><a href="#">👤 使用者管理</a></li>
+        <li><a href="#">📊 儀表板</a></li>
+        <li><a href="#">🚪 登出</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- 主內容 -->
+  <main>
+    <header>
+      <h1>訂單詳情</h1>
+    </header>
+
+    <!-- 上半部 -->
+    <div class="order-detail-container">
+
+      <!-- 左：商品資訊 -->
+      <div class="left-column">
+        <h3>📦 商品資訊</h3>
+        <div class="product-info" id="productInfo">
+          <!-- 商品資料由JS填入 -->
+        </div>
+      </div>
+
+      <!-- 右：訂單資訊 -->
+      <div class="right-column" id="orderContent">
+        <!-- 訂單資訊由JS填入 -->
+      </div>
+    </div>
+
+    <!-- 下半部：狀態管理 -->
+    <div class="status-management">
+      <h3>🛠️ 訂單狀態管理</h3>
+
+      <div class="form-group">
+        <label>訂單狀態：</label>
+        <select id="orderStatus">
+          <option value="0">處理中</option>
+          <option value="1">已完成</option>
+          <option value="2">已取消</option>
+          <option value="3">糾紛處理中</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>付款狀態：</label>
+        <select id="paymentStatus">
+          <option value="0">未付款</option>
+          <option value="1">已付款</option>
+          <option value="2">已退款</option>
+          <option value="3">取消</option>
+
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>運送狀態：</label>
+        <select id="shippingStatus">
+          <option value="0">備貨中</option>
+          <option value="1">已出貨</option>
+          <option value="2">已送達</option>
+          <option value="3">退貨</option>
+          <option value="4">取消</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>運送地址：</label>
+        <input type="text" id="shippingNote" placeholder="請輸入運送單號">
+      </div>
+
+      <div class="form-group">
+        <label>訂單備註</label>
+        <textarea id="orderNote" rows="3" placeholder="輸入備註..."></textarea>
+      </div>
+
+      <div class="btn-group">
+        <button onclick="saveChanges()">💾 儲存變更</button>
+        <button onclick="cancelOrder()">❌ 取消訂單</button>
+        <button onclick="markDispute()">⚖️ 處理糾紛</button>
+        <button onclick="window.history.back()">返回</button>
+      </div>
+    </div>
+
+  </main>
+
+  </main>
+
+  <!-- =============== JS =============== -->
+  <script>
+    let currentOrder = null;
+    const orderId = localStorage.getItem('viewOrderId');
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!orderId) {
+        alert("未找到訂單ID，請從訂單列表進入。");
+        window.location.href = "order_manager.html";
+        return;
+      }
+
+      fetch(`http://localhost:8080/api/shorder/${orderId}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json.status === 200 && json.data) {
+            currentOrder = json.data;
+            renderOrderDetail(json.data);
+          } else {
+            document.getElementById('orderContent').innerHTML = `<p>查無此訂單</p>`;
+            document.getElementById('productInfo').innerHTML = "";
+          }
+        });
+    });
+
+    function renderOrderDetail(order) {
+      // 狀態選單初始化
+      document.getElementById('orderStatus').value = order.orderStatus;
+      document.getElementById('paymentStatus').value = order.paymentStatus;
+      document.getElementById('shippingStatus').value = order.shippingStatus;
+      document.getElementById('orderNote').value = order.orderNote || "";
+      document.getElementById('shippingNote').value = order.shippingAddress || "";
+
+      // 左側訂單資料
+      const html = `
+    <h2>訂單編號：#${order.shOrderId}</h2>
+
+    <div class="section">
+      <h3>👤 買家資訊</h3>
+      <p><strong>名稱：</strong>${order.buyerName}</p>
+      <p><strong>Email：</strong>${order.buyerEmail}</p>
+    </div>
+
+    <div class="section">
+      <h3>👤 賣家資訊</h3>
+      <p><strong>名稱：</strong>${order.sellerName}</p>
+      <p><strong>Email：</strong>${order.sellerEmail}</p>
+    </div>
+
+    <div class="section">
+      <h3>📜 訂單資訊</h3>
+      <p><strong>下單時間：</strong> ${formatDateTime(order.orderDate)}</p>
+      <p><strong>付款方式：</strong> ${order.paymentMethodStr}</p>
+      <p><strong>付款狀態：</strong> ${order.paymentStatusStr}</p>
+      <p><strong>運送方式：</strong> ${order.shippingMethodStr}</p>
+      <p><strong>運送狀態：</strong> ${order.shippingStatusStr}</p>
+      <p><strong>訂單狀態：</strong> ${order.orderStatusStr}</p>
+      <p><strong>運費：</strong> NT$ ${order.shippingFee}</p>
+      <p><strong>平台手續費：</strong> NT$ ${order.platformFee}</p>
+      <p><strong>運送地址：</strong> ${order.shippingAddress}</p>
+    </div>
+  `;
+      document.getElementById('orderContent').innerHTML = html;
+
+      // 右側商品資訊
+      const productHtml = `
+    <img src="${order.shProd.picUrls?.[0] || 'https://placehold.co/300x300?text=No+Image'}" alt="商品圖片">
+    <p><strong>名稱：</strong>${order.shProd.prodName}</p>
+    <p><strong>品牌：</strong>${order.shProd.prodBrand}</p>
+    <p><strong>描述：</strong>${order.shProd.prodDesc}</p>
+    <p><strong>單價：</strong>NT$ ${order.productPrice}</p>
+    <p><strong>數量：</strong>${order.productQuantity}</p>
+    <p><strong>總金額：</strong>NT$ ${order.totalAmount}</p>
+  `;
+      document.getElementById('productInfo').innerHTML = productHtml;
+    }
+
+    // ✅ 儲存變更
+    function saveChanges() {
+      const payload = {
+        shOrderId: currentOrder.shOrderId,
+        orderStatus: parseInt(document.getElementById('orderStatus').value),
+        paymentStatus: parseInt(document.getElementById('paymentStatus').value),
+        shippingStatus: parseInt(document.getElementById('shippingStatus').value),
+        orderNote: document.getElementById('orderNote').value.trim(),
+        shippingAddress: document.getElementById('shippingNote').value.trim()
+      };
+
+      fetch(`http://localhost:8080/api/shorder/update`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(json => {
+          alert("更新成功！");
+          location.reload();
+        })
+        .catch(err => {
+          console.error("更新失敗", err);
+          alert("更新失敗");
+        });
+    }
+
+    // ✅ 取消訂單
+    function cancelOrder() {
+      if (!confirm("確定要取消此訂單？")) return;
+
+      document.getElementById('orderStatus').value = 2;
+      document.getElementById('paymentStatus').value = 3;
+      document.getElementById('shippingStatus').value = 4;
+      saveChanges();
+    }
+
+    // ✅ 標記為糾紛
+    function markDispute() {
+      if (!confirm("確定將此訂單標記為糾紛處理中？")) return;
+      document.getElementById('orderStatus').value = 3; // 糾紛處理中
+      document.getElementById('paymentStatus').value = 3;
+      document.getElementById('shippingStatus').value = 4;
+      saveChanges();
+    }
+
+    // ✅ 工具：時間格式化
+    function formatDateTime(dateStr) {
+      const date = new Date(dateStr);
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    }
+
+    function pad(n) {
+      return n.toString().padStart(2, '0');
+    }
+
+  </script>
+</body>
+
+</html>

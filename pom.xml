@@ -29,6 +29,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<start-class>com.shakemate.ShakemateApplication</start-class>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -225,12 +226,7 @@
 			<version>1.1.4</version>
 		</dependency>
 
-		<!-- com.sun.mail -->                        <!-- spring-boot 未內建依賴 -->
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
-			<version>1.6.2</version>
-		</dependency>
+		<!-- com.sun.mail - 已移除舊版本，使用新的 jakarta.mail -->
 
 
 
@@ -249,6 +245,29 @@
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<!-- <version>8.0.2.Final</version> -->
+		</dependency>
+
+		<!-- ========================================================================================== -->
+		<!-- ●以下為 通知系統 預備使用● -->
+
+		<!-- Apache Commons Text - 用於字符串模板替換 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+
+		<!-- Jakarta Mail - 用於郵件發送 -->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+
+		<!-- Spring Boot Mail Starter -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
 		<!-- ========================================================================================== -->
@@ -343,6 +362,18 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+		<!--	POI 輸出成office套件 只支援 .xls 	-->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.4.1</version>
+		</dependency>
+		<!--	POI 輸出成office套件支援 .xlsx 格式（XSSF）	-->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.4.1</version>
+		</dependency>
 
 
     </dependencies>

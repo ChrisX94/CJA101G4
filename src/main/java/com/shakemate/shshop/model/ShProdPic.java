@@ -1,6 +1,7 @@
 package com.shakemate.shshop.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ public class ShProdPic implements Serializable {
     private String prodPic;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "PROD_ID", nullable = false)
     private ShProd shProd;
 

@@ -4,75 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>配對成功！</title>
+<!-- Swiper 的 CSS -->
+<link rel="stylesheet"
+	href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+<!-- Swiper 的 JS -->
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/css/headerStyle.css">
 <style>
-html {
-	height: 100%;
-	font-size: 62.5%;
-	font-family: "Noto Sans TC", sans-serif;
-	background: linear-gradient(to top, #84c2db, #beebf4, #e9feff);
-}
 
-body {
-	font-family: sans-serif;
-	text-align: center;
-	padding: 2rem;
-}
 
-.success-message {
-	font-size: 2.5rem;
-	color: #333;
-	margin-bottom: 1.5rem;
-}
-
-.btn {
-	padding: 0.75rem 1.5rem;
-	font-size: 1.6rem;
-	border: none;
-	border-radius: 8px;
-	margin: 0.5rem;
-	cursor: pointer;
-}
-
-.btn-chat {
-	padding: 1rem 3rem;
-	font-size: 1.6rem;
-	border: none;
-	border-radius: 2rem;
-	cursor: pointer;
-	transition: background 0.3s;
-	background-color: #0097a7;
-	color: #fff;
-}
-
-.btn-chat:hover {
-	background-color: #007e8c;
-}
-
-.btn-continue {
-	padding: 1rem 3rem;
-	font-size: 1.6rem;
-	border: none;
-	border-radius: 2rem;
-	cursor: pointer;
-	transition: background 0.3s;
-	background-color: #aaa;
-	color: #fff;
-}
-
-.btn-continue:hover {
-	background-color: #888;
-}
 </style>
 </head>
 <body>
+	<div class="bg">
+		<div class="success__wrap">
+			<h1 class="success-message">🎉 配對成功！</h1>
+			
+			<div class="match-success-profile">
+			    <!-- 名字與資訊 -->
+				<h2 class="match__name"></h2>
+				<p class="match__info"></p>
+				
+				<!-- 頭貼輪播區塊 -->
+				<div class="matchSuccess__avatar-box"></div>
+			</div>
 
-	<h1 class="success-message">🎉 配對成功！</h1>
-
-	<!-- 	<button id="btnChat" class="btn btn-chat">開始聊天</button> -->
-	<!-- 	<button id="btnContinue" class="btn btn-continue">再抖一下</button> -->
-	<button class="btn btn-chat" onclick="goToChat()">開始聊天</button>
-	<button class="btn btn-continue" onclick="goToMatch()">再抖一下</button>
-
+			<div class="matchSuccess__actions">
+				<button class="success-btn success-btn--chat" onclick="goToChat()">開始聊天</button>
+				<button class="success-btn success-btn--continue" onclick="goToMatch()">再抖一下</button>
+			</div>
+		</div>
+	</div>
 	<script src="js/matchSystem.js"></script>
 </body>
 </html>

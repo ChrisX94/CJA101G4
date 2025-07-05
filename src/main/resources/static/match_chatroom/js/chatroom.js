@@ -1,4 +1,3 @@
-//const urlParams = new URLSearchParams(window.location.search);
 //const currentUserId = parseInt(urlParams.get("currentUserId")) || null;
 //
 //if (!currentUserId) {
@@ -13,54 +12,46 @@ let currentRoomId = null;
 let receiveId = null;
 let selectedImageFile = null;
 
-// 側邊選單
-//function toggleSidebar() {
-//	const wrapper = document.querySelector('.sidebar-wrapper');
-//	const toggleBtn = document.getElementById('menuToggle');
-//	wrapper.classList.toggle('active');
-//	toggleBtn.classList.toggle('active');
-//}
-
-
-
 // 取得currentUserId
 fetch(`${API_BASE}/currentUserId`)
-  .then(res => {
-    if (!res.ok) throw new Error("尚未登入");
-    return res.json();
-  })
-  .then(data => {
-    currentUserId = data.currentUserId;
-	console.log(currentUserId);
-	connectWebSocket(currentUserId);
-  })
-  .catch(err => {
-    alert("⚠️ 請先登入");
-    window.location.href = "login.html"; // 或其他導回首頁
-  });
+	.then(res => {
+		if (!res.ok) throw new Error("尚未登入");
+		return res.json();
+	})
+	.then(data => {
+		currentUserId = data.currentUserId;
+		console.log(currentUserId);
+		connectWebSocket(currentUserId);
+	})
+	.catch(err => {
+		alert("⚠️ 請先登入");
+		window.location.href = "login.html"; // 或其他導回首頁
+	});
 
 // 取得聊天室清單
 function loadChatRooms() {
+	const urlParams = new URLSearchParams(window.location.search);
+	const urlRoomId = urlParams.get("roomId"); // 假如網址有 ?roomId=9 就會抓到 9
+	
 	fetch(`${API_BASE}/list`)
 		.then(res => res.json())
 		.then(data => {
 			const ul = document.querySelector(".chat-list");
 			ul.innerHTML = "";
 			data.forEach(room => {
-				console.log("room是啥呢",room);
+				console.log("room是啥呢", room);
 				const li = document.createElement("li");
 				li.classList.add("chat-item");
 				li.dataset.roomid = room.roomId;
 				li.dataset.peerid = room.peerId;
 				li.dataset.name = room.peerName;
 				li.dataset.avatar = room.peerAvatar;
-				li.onclick = () => handleRoomClick(room.roomId, room.peerName, room.peerId, room.peerAvatar);
 
 				let previewText;
 				if (!room.lastMessage) {
-					previewText = "開始跟抖友聊天吧！==";
+					previewText = "開始跟抖友聊天吧！";
 				} else if (room.lastMessage.startsWith("image:")) {
-					previewText = "[圖圖]";
+					previewText = "【圖片】";
 				} else {
 					previewText = room.lastMessage.slice(0, 10) + (room.lastMessage.length > 10 ? "..." : "");
 				}
@@ -78,13 +69,43 @@ function loadChatRooms() {
 					  <span class="unread-dot"></span>
 					`;
 				const dot = li.querySelector(".unread-dot");
-				
-				console.log("抓到沒",room.hasUnread);
+
+				console.log("抓到沒", room.hasUnread);
 				if (room.hasUnread && dot) {
 					dot.classList.add("show");
 				}
 				ul.appendChild(li);
 			});
+
+			// ✅ 當聊天室清單渲染完之後，綁定點擊事件
+			document.querySelectorAll(".chat-item").forEach(item => {
+				item.addEventListener("click", () => {
+					const roomId = item.dataset.roomid;
+					const peerId = item.dataset.peerid;
+					const peerName = item.dataset.name;
+					const peerAvatar = item.dataset.avatar;
+
+					// ✅ 用 pushState 改變網址，不重新整理
+					history.pushState(null, "", `chatroom.html?roomId=${roomId}`);
+
+					// ✅ 呼叫切換函式
+					handleRoomClick(roomId, peerName, peerId, peerAvatar);
+				});
+			});
+			
+			if (urlRoomId) {
+				const targetLi = document.querySelector(`.chat-item[data-roomid="${urlRoomId}"]`);
+				if (targetLi) {
+					const peerId = targetLi.dataset.peerid;
+					const peerName = targetLi.dataset.name;
+					const peerAvatar = targetLi.dataset.avatar;
+
+					// ✅ 模擬點擊這個聊天室
+					handleRoomClick(urlRoomId, peerName, peerId, peerAvatar);
+				}
+			}
+
+
 		})
 		.catch(error => {
 			console.error("載入聊天室時出錯:", error);
@@ -92,6 +113,9 @@ function loadChatRooms() {
 }
 // 點擊聊天室後的處理
 function handleRoomClick(roomId, peerName, peerId, peerAvatar) {
+//	// 將右上角點點icon的下拉列表，預設關閉
+//	menu.classList.remove("show");
+	
 	receiveId = peerId;
 	console.log("點到聊天室了，roomId:", roomId);
 	// 告訴後端我點進聊天室了 → 把這間聊天室未讀訊息改成已讀
@@ -121,7 +145,7 @@ function handleRoomClick(roomId, peerName, peerId, peerAvatar) {
 			document.querySelector(".chatroom__bar-name").textContent = peerName || "未知用戶";
 
 			renderHistoryMessages(data, peerName, peerAvatar, peerId);
-			
+
 			document.querySelector(".chat-input").style.display = "flex";
 			document.querySelector(".chatroom__bar").style.display = "block";
 			const li = document.querySelector(`.chat-list li[data-roomid="${roomId}"]`);
@@ -133,25 +157,25 @@ function handleRoomClick(roomId, peerName, peerId, peerAvatar) {
 				const container = document.getElementById("chatContent");
 				container.scrollTop = container.scrollHeight;
 			}, 0); // 0毫秒即可，等 call stack 清空＋DOM 更新
-	
+
 			document.querySelector(".chatroom__bar-userInfo").onclick = () => {
-							openProfile(peerId, peerName, peerAvatar);
-						};
+				openProfile(peerId, peerName, peerAvatar);
+			};
 		})
 		.catch(err => {
 			console.error("取得訊息時出錯:", err);
 		});
-	
-			
+
+
 	if (socket && socket.readyState === WebSocket.OPEN) {
 		socket.send(JSON.stringify({
-		  type: "read",
-		  roomId: currentRoomId,
-		  senderId: currentUserId,
-		  receiveId: receiveId
+			type: "read",
+			roomId: currentRoomId,
+			senderId: currentUserId,
+			receiveId: receiveId
 		}));
 	}
-		
+
 }
 // 切換聊天室選擇狀態，並將對應聊天室項目標記為 active（用於 UI 顯示目前選中的聊天室）
 function switchChat(roomId) {
@@ -179,15 +203,15 @@ async function sendMessage() {
 	formData.append("content", content || "");
 
 	// 寫入資料庫
-//	fetch(`${API_BASE}/send`,{ method: "POST", body: formData });
+	//	fetch(`${API_BASE}/send`,{ method: "POST", body: formData });
 
 	const response = await fetch(`${API_BASE}/send`, {
-	    method: "POST",
-	    body: formData
+		method: "POST",
+		body: formData
 	});
 
 	if (!response.ok) {
-	    throw new Error("傳送失敗");
+		throw new Error("傳送失敗");
 	}
 
 	// 即時顯示在畫面上
@@ -205,7 +229,7 @@ async function sendMessage() {
 
 	// 即時傳送文字訊息給對方
 	if (socket && socket.readyState === WebSocket.OPEN) {
-//		socket.send(`${currentRoomId}|${currentUserId}|${content}|${receiveId}`);
+		//		socket.send(`${currentRoomId}|${currentUserId}|${content}|${receiveId}`);
 		socket.send(JSON.stringify({
 			type: "text",
 			roomId: currentRoomId,
@@ -214,10 +238,12 @@ async function sendMessage() {
 			content
 		}));
 	}
+	
 	// 主動更新自己聊天室列表（preview + 時間）
 	const li = document.querySelector(`.chat-list li[data-roomid="${currentRoomId}"]`);
 	if (li) {
-		li.querySelector(".chat-preview").textContent = content;
+		const previewContent = content.slice(0, 10) + (content.length > 10 ? "..." : "");
+		li.querySelector(".chat-preview").textContent = previewContent;
 		li.querySelector(".chat-time").textContent = getTimeString(); // 使用你自己寫好的時間函式
 		document.querySelector(".chat-list").prepend(li);
 
@@ -291,7 +317,7 @@ function renderHistoryMessages(data, peerName, peerAvatar, peerId) {
 
 // 彈出會員介紹視窗：顯示對方資訊
 function openProfile(peerId, peerName, avatarSrc) {
-	console.log('openProfile 參數：',peerId, peerName);
+	console.log('openProfile 參數：', peerId, peerName);
 	// 1. 取得所有要更新的 DOM 元素
 	const popup = document.getElementById("profilePopup");
 	const popupAvatar = document.getElementById("popupAvatar");
@@ -307,13 +333,13 @@ function openProfile(peerId, peerName, avatarSrc) {
 		.then(profile => {
 			// ✅ 如果已經是 base64 或完整路徑，直接用
 			// ✅ 名稱、年齡星座
-//			popupAvatar.src = profile.avatarList[0];
+			//			popupAvatar.src = profile.avatarList[0];
 			popupName.textContent = `${profile.username || '--'} `;
 			popupAge.textContent = `${profile.age}歲・${profile.zodiac}`;
 			popupPersonality.textContent = `${profile.personality || '--'}`;
 			popupInterests.textContent = `${profile.interests || '--'}`;
 			popupIntro.textContent = `${profile.intro || '--'}`;
-			
+
 			console.log("🎯 avatarList 是：", profile.avatarList);
 
 			// 頭貼輪播渲染
@@ -367,26 +393,25 @@ function connectWebSocket(userId) {
 				});
 				return;
 			}
-		}, 300); 
-		
+		}, 300);
+
 
 		if (type === "read") {
 			return;
 		}
-		
+
 		if (li) {
 			// 更新 preview 文本
 			const preview = li.querySelector("p");
-//			preview.textContent = contentRaw.startsWith("image:") ? "[圖圖]" : contentRaw.slice(0, 10) + (contentRaw.length > 10 ? "..." : "");
-
-			preview.textContent = type === "image" ? "[圖圖]" : content.slice(0, 10) + (content.length > 10 ? "..." : "");
+			
+			preview.textContent = type === "image" ? "【圖片】" : content.slice(0, 10) + (content.length > 10 ? "..." : "");
 			// 更新訊息傳送時間			
 			const time = li.querySelector(".chat-time");
 			if (time) {
 				time.textContent = getTimeString(); // 或 formatTime(new Date())
 			}
 			// ✅ 如果這不是目前開啟的聊天室 → 顯示紅點
-			if (parseInt(roomId) !== currentRoomId) {
+			if (roomId !== currentRoomId) {
 				const dot = li.querySelector(".unread-dot");
 				if (dot) {
 					dot.classList.add("show");
@@ -400,12 +425,14 @@ function connectWebSocket(userId) {
 			li.classList.add("fade-in"); // 重新加上動畫 class，達到「聊天室列表往上跳」的效果			
 		}
 		// ✅ 如果剛好正在看這個聊天室，就顯示訊息氣泡
-		console.log(senderId);
-		if (parseInt(roomId) === currentRoomId) {
+		console.log("💬 roomId（後端傳來）:", roomId, typeof roomId);
+		console.log("🟢 currentRoomId（目前聊天室）:", currentRoomId, typeof currentRoomId);
+		console.log("🟡 相等嗎？", parseInt(roomId) === currentRoomId);
+		if (parseInt(roomId) === parseInt(currentRoomId)) {
 			console.log("對方正在這間聊天室!");
 			if (type === "image") {
 				renderIncomingMessage(senderId, "", content);
-			} else {
+			} else {	
 				renderIncomingMessage(senderId, content);
 			}
 
@@ -473,8 +500,16 @@ document.getElementById("imageInput").addEventListener("change", function(event)
 
 		const container = document.getElementById("chatContent");
 		container.appendChild(el);
-		container.scrollTop = container.scrollHeight;
-
+		
+		// ✅ 找出剛剛加入的圖片，等圖片載入後再捲到底
+		const img = el.querySelector("img");
+		if (img) {
+			img.onload = () => {
+				container.scrollTop = container.scrollHeight;
+			};
+		} else {
+			container.scrollTop = container.scrollHeight; // 沒圖片就直接捲
+		}
 		// ✅ 傳 FormData 給後端儲存
 		const formData = new FormData();
 		formData.append("roomId", currentRoomId);
@@ -482,18 +517,18 @@ document.getElementById("imageInput").addEventListener("change", function(event)
 		formData.append("content", "");
 		formData.append("img", file);
 		fetch(`${API_BASE}/send`, {
-		  method: "POST",
-		  body: formData
+			method: "POST",
+			body: formData
 		});
 
 		// ✅ 傳 WebSocket
 		if (socket && socket.readyState === WebSocket.OPEN) {
 			const msg = {
-			  type: "image", // ✅ 訊息類型
-			  roomId: currentRoomId,
-			  senderId: currentUserId,
-			  receiveId: receiveId,
-			  content: imageBase64 // ✅ 直接是 base64 字串（不要再加 "image:" 前綴）
+				type: "image", // ✅ 訊息類型
+				roomId: currentRoomId,
+				senderId: currentUserId,
+				receiveId: receiveId,
+				content: imageBase64 // ✅ 直接是 base64 字串（不要再加 "image:" 前綴）
 			};
 			socket.send(JSON.stringify(msg));
 		}
@@ -503,7 +538,7 @@ document.getElementById("imageInput").addEventListener("change", function(event)
 	// 主動更新自己聊天室列表（preview + 時間）
 	const li = document.querySelector(`.chat-list li[data-roomid="${currentRoomId}"]`);
 	if (li) {
-		li.querySelector(".chat-preview").textContent = "[圖圖]";
+		li.querySelector(".chat-preview").textContent = "【圖片】";
 		li.querySelector(".chat-time").textContent = getTimeString(); // 使用你自己寫好的時間函式
 		document.querySelector(".chat-list").prepend(li);
 
@@ -534,10 +569,10 @@ function getTimeString() {
 function createMessageElement({ isMe, content = "", imageBase64 = null, timeStr, avatarUrl = "", peerId = "", peerName = "", isRead = false }) {
 	const el = document.createElement("div");
 	el.className = "message " + (isMe ? "right" : "left");
-	
+
 	const bubbleBlock = document.createElement("div");
 	bubbleBlock.className = "bubble-block";
-	
+
 	// ✅ 文字 or 圖片內容
 	if (imageBase64) {
 		const img = document.createElement("img");
@@ -567,7 +602,7 @@ function createMessageElement({ isMe, content = "", imageBase64 = null, timeStr,
 
 	const meta = document.createElement("div");
 	meta.className = "meta-info";
-	
+
 	// 判斷已讀
 	if (isMe && isRead) {
 		const read = document.createElement("span");
@@ -622,11 +657,9 @@ document.addEventListener("click", function(e) {
 	const menu = document.querySelector(".chatroom__bar-menu");
 
 	if (toggle.contains(e.target)) {
-		// 點擊點點點：開關選單
-		menu.style.display = (menu.style.display === "block") ? "none" : "block";
+		menu.classList.toggle("show"); // ✅ 切換顯示狀態
 	} else if (!menu.contains(e.target)) {
-		// 點到其他地方：關閉選單
-		menu.style.display = "none";
+		menu.classList.remove("show"); // ✅ 點到別處就關掉
 	}
 });
 

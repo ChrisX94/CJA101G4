@@ -1,361 +1,672 @@
-
-<!-- <!DOCTYPE html> -->
-<!-- <html xmlns:th="http://www.thymeleaf.org"> -->
-
-<!-- <head> -->
-<!--     <meta charset="UTF-8"> -->
-<!--     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
-<!--     <title>Index.html</title> -->
-<!-- </head> -->
-<!-- <body> -->
-<!-- <a th:href="@{/login}" >login</a> -->
-<!-- <br> -->
-<!-- <a th:href="@{/login/testlogin}" >test login</a> -->
-<!-- <br> -->
-
-<!-- </body> -->
-<!-- </html> -->
-
-
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shakemates</title>
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Orbitron', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    body {
-      background: #0d0f14;
-      color: #ffffff;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&display=swap" rel="stylesheet">
 
-    /* Header */
-    .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      backdrop-filter: blur(12px);
-      background: rgba(13, 15, 20, 0.6);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      z-index: 100;
-    }
-
-    .nav-left,
-    .nav-right {
-      display: flex;
-      gap: 30px;
-      align-items: center;
-    }
-
-    .nav-item,
-    .search-btn,
-    .login-btn,
-    .user-icon {
-      text-decoration: none;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 8px;
-      text-transform: uppercase;
-      font-weight: 500;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .search-btn {
-      border-color: #ff00aa;
-      color: #ff00aa;
-      background: none;
-    }
-
-    .login-btn {
-      padding: 10px 20px;
-      border-radius: 50px;
-      border-color: #00e5ff;
-      font-weight: 600;
-    }
-
-    .user-icon {
-      width: 40px;
-      height: 40px;
-      background: #fff;
-      color: #0d0f14;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .nav-item:hover,
-    .search-btn:hover,
-    .login-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-    }
-
-    .login-btn:hover {
-      background: rgba(0, 229, 255, 0.1);
-    }
-
-    .user-icon:hover {
-      background: #fff;
-      color: #0d0f14;
-      transform: translateY(-3px);
-      box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-    }
-
-    /* Hero Carousel */
-    .hero {
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-      margin-top: 80px;
-    }
-
-    .slides {
-      display: flex;
-      width: 300%;
-      height: 100%;
-      animation: slideAnim 18s infinite linear;
-    }
-
-    .slide {
-      flex: 1 0 100%;
-      background-size: cover;
-      background-position: center;
-      position: relative;
-    }
-
-    .slide::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.35);
-    }
-
-    @keyframes slideAnim {
-      0% {
-        transform: translateX(0%);
-      }
-
-      33% {
-        transform: translateX(0%);
-      }
-
-      34% {
-        transform: translateX(-100%);
-      }
-
-      66% {
-        transform: translateX(-100%);
-      }
-
-      67% {
-        transform: translateX(-200%);
-      }
-
-      99% {
-        transform: translateX(-200%);
-      }
-
-      100% {
-        transform: translateX(0%);
-      }
-    }
-
-    .hero-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 2;
-      width: 100%;
-    }
-
-    .hero-content h1 {
-      font-size: 4em;
-      color: #00e5ff;
-      text-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
-    }
-
-    .hero-content p {
-      margin: 20px 0;
-      font-size: 1.2em;
-      color: #fff;
-    }
-
-    .cta-icons {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 40px;
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-      perspective: 1000px; /* ✅ 加上這行 */
-    }
-
-    .icon-card {
-  flex: 1 1 auto;
-  max-width: 180px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  animation: floatCard 3s ease-in-out infinite;
-  transition: transform 0.4s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-  position: relative;
-  margin: 0 10px;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.1em;
-    }
-
-    .icon-card span {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    .shape-triangle {
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      background: #f43f5e;
-    }
-
-    .shape-circle {
-      border-radius: 50%;
-      background: #3b82f6;
-    }
-
-    .shape-square {
-      background: #10b981;
-    }
-
-    @keyframes floatCard {
-
-      0%,
-      100% {
-        transform: translateY(0)
-      }
-
-      50% {
-        transform: translateY(-5px)
-      }
-    }
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="/css/headerStyle.css">
+    <title>Shakemates</title>
+    <style>
+	    * {
+		  padding: 0;
+		  margin: 0;
+		}
+        html {
+            font-size: 62.5%;
+            font-family: "Noto Sans TC", sans-serif;
+        }
 
 
-    .icon-card:hover {
-      	animation-play-state: paused; /* 如果你有 floatCard 動畫，這行仍建議保留 */
-  		transform: scale(1.1) rotate(5deg) !important;
-  		box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
-  		opacity: 0.9;
 
-    }
+        .hero-section {
+			height: 57rem;
+			margin-top: 6.5rem;
+			/* 固定高度 */
+			display: flex;
+			justify-content: center;
+			position: relative;
+			background: #DCFF61;
+			z-index: 0;
+		}
+		
+		.hero-section::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
+			z-index: -1;
+			pointer-events: none;
+		}
+        
+        
 
-    /* Responsive */
-    @media(max-width:768px) {
-      .hero-content h1 {
-        font-size: 2.5em;
-      }
+        .hero-section h1 {
+            font-size: 3rem;
+            margin: 1rem 0;
 
-      .nav-left,
-      .nav-right {
-        gap: 15px;
-      }
+            font-family: "LXGW Marker Gothic", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+        }
 
-      .header {
-        padding: 15px 20px;
-      }
+        .shake {
+            animation: shake 0.6s infinite;
+        }
 
-      .cta-icons {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        width: 100%;
-      }
+        .gradient {
+            background: linear-gradient(to bottom, #E7FF33, #17AB96);
+        }
 
-      .icon-card {
-        width: 120px;
-        height: 120px;
-        max-width: none;
-        margin: 0;
-      }
-    }
-  </style>
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-3px);
+            }
+
+            40% {
+                transform: translateX(3px);
+            }
+
+            60% {
+                transform: translateX(-3px);
+            }
+
+            80% {
+                transform: translateX(3px);
+            }
+        }
+
+        .hero-section p {
+          margin: 0;
+          font-size: 1.6rem;
+          color: #3D3D3D;
+          margin-bottom: 3.5rem;
+        }
+
+        .hero-section button {
+          width: 12rem;
+		  height: 5rem;
+		  font-size: 1.6rem;
+		  border: none;
+		  border-radius: 2rem;
+		  cursor: pointer;
+		  transition: background 0.3s;
+		  background-color: #fff;
+		  color: gray;
+		  font-weight: 700;
+		  border: 2px solid gray;
+        }
+        
+        .hero-section button:hover {
+            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); */
+            background-color:  #DCFF61;
+			border: 2px solid gray;
+			color: #2EC4B6;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* 🔹 textpic 對齊圖片的水平中線 */
+        .hero-section .textpic {
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* 讓文字內容垂直置中，對齊圖片中線 */
+            align-items: center;
+            /* 水平置中 */
+            margin: -15px 3rem 0 -15rem;
+        }
+
+        .hero-section .Cuba {
+            width: 100%;
+            max-width: 35rem;
+    		margin-top: 10rem;
+        }
+
+        .service-section {
+            color: white;
+            padding: 8rem 14rem;
+            position: relative;
+            background: #2EC4B6;
+        }
+
+        .service-section h2 {
+            text-align: center;
+            margin-bottom: 4rem;
+            font-size: 3.8rem;
+        }
+
+        .services {
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+        }
+
+        .service:hover {
+            /* box-shadow: 0.2rem 0.2rem 0.5rem rgba(0, 0, 0, 0.7); */
+            color: #333;
+            border-color: turquoise;
+            transform: scale(1.1);
+        }
+
+        .service {
+            background: white;
+            color: #333;
+            border-radius: 1.5rem;
+            width: 28rem;
+            height: 35rem;
+            text-align: center;
+
+            /* 1) box-sizing 保證 padding + border 算在 width 內 */
+            box-sizing: border-box;
+            /* 2) 一開始就給透明邊框，寬度跟 hover 時一樣 */
+            border: 0.13rem solid transparent;
+            /* 3) 讓 scale 動畫平滑 */
+            transition: transform 0.5s ease, border-color 0.3s ease;
+        }
+
+        .service i {
+            font-size: 5rem;
+            color: #DCFF61;
+            margin:5rem 0 2.5rem 0;
+        }
+
+        .service h3 {
+            color: #00bfa6;
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .service p {
+            width: 75%;
+            font-size: 1.4rem;
+            /* line-height: 2rem; */
+            margin: 0 auto 3rem;
+        }
+
+        .toggle-clamp {
+            width: 75%;
+            font-size: 1.6rem;
+            /* line-height: 2rem; */
+            margin: 0 auto 3rem;
+
+            /* ── 以下是多行省略符設定 ── */
+            /* ── 多行省略設定 ── */
+            display: -webkit-box;
+            /* 啟用 WebKit */
+            -webkit-box-orient: vertical;
+            /* 垂直排列 */
+
+            /* 標準屬性（未來瀏覽器將會原生支援） */
+            line-clamp: 3;
+            /* WebKit 專屬前綴 */
+            -webkit-line-clamp: 3;
+
+            overflow: hidden;
+            /* 隱藏多餘文字 */
+            text-overflow: ellipsis;
+            /* 顯示「…」 */
+            cursor: pointer;
+            /* 提示可點擊 */
+            transition: max-height 0.3s ease;
+        }
+
+        /* ─── 點擊展開後，移除 clamp ─── */
+        .toggle-clamp.expanded {
+            display: block;
+            /* 顯示全部 */
+            -webkit-line-clamp: unset;
+            line-clamp: unset;
+            overflow: visible;
+            max-height: none;
+        }
+
+        .service button {
+        	width: 8.5rem;
+        	height: 4rem;
+            margin-top: 1.5rem;
+            border: 0.2rem solid gray;
+            border-radius: 2rem;
+            color: gray;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 1.6rem;
+            font-weight: 600;
+
+        }
+
+        
+
+        .service button:hover {
+            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5); */
+            background-color: #DCFF61;
+            color: #2EC4B6;
+            border-color: gray;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .Cuba img {
+            width: 150%;
+            /* 圖片隨容器寫度縮放 */
+            display: block;
+            /* 消除圖片底部空白（inline 元素的特性） */
+        }
+
+        /* 🔹 浮動按鈕樣式 */
+        .floating-buttons {
+            position: fixed;
+            left: 2rem;
+            top: 60%;
+            transform: translateY(50%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .floating-btn {
+            width: 5.5rem;
+            height: 5.5rem;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            transition: all 0.3s ease;
+            /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); */
+            backdrop-filter: blur(10px);
+            border: 2px solid #e0e0e0;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            /* box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); */
+        }
+
+/*         .news-btn { */
+/*             background: linear-gradient(135deg, #d7aa2d, orange); */
+/*             color: white; */
+/*         } */
+
+/*         .news-btn:hover { */
+/*             background: linear-gradient(135deg, orange, #d7aa2d); */
+/*         } */
+
+/*         .support-btn { */
+/*             background: linear-gradient(135deg, #4ECDC4, #44A08D); */
+/*             color: white; */
+/*         } */
+
+/*         .support-btn:hover { */
+/*             background: linear-gradient(135deg, #26D0CE, #2A9D8F); */
+/*         } */
+
+        /* 🔹 滾動到 service-section 時的白色樣式 */
+        .floating-btn.white-mode {
+            background: white !important;
+            color: #666 !important;
+            border: 2px solid #e0e0e0;
+        }
+
+        .floating-btn.white-mode:hover {
+            background: #f5f5f5 !important;
+            color: #333 !important;
+            border-color: #ccc;
+        }
+
+        /* 浮動按鈕文字提示 */
+        .floating-btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 7rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.5rem;
+            font-size: 1.3rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            transform: translateY(-50%);
+            top: 50%;
+        }
+
+        .floating-btn:hover::after {
+            opacity: 1;
+        }
+
+        /* 讓 h1 寬度剛好包住最長那行 */
+        #shaky-text {
+            display: inline-block;
+            font-family: "LXGW Marker Gothic", sans-serif;
+            margin-bottom: 2rem;
+            
+        }
+        
+        .shaky-text-ch {
+        	font-size: 7rem;
+        	color: #2EC4B6;
+        }
+        .shaky-text-en {
+        	font-size: 3.8rem;
+        	font-weight: 600;
+        	color: #2EC4B6;
+        }
+
+        /* 每一行都做「兩端對齊」 */
+        #shaky-text .line {
+            display: block;
+            /* 變成塊級，才能 justify */
+            text-align: justify;
+            /* 啟用兩端對齊 */
+            text-justify: distribute;
+            /* 分散對齊，適用中文字 */
+            /* 最新的 CSS 屬性，讓最後一行也強制 justify */
+            text-align-last: justify;
+            /* 如果瀏覽器不支援 text-align-last，也可以用下面的偽元素 hack */
+        }
+
+        #shaky-text .line::after {
+            content: "";
+            display: inline-block;
+            width: 100%;
+            height: 0;
+        }
+
+        /* 響應式設計調整 */
+        @media (max-width: 768px) {
+            .floating-buttons {
+                left: 1rem;
+                gap: 1rem;
+            }
+
+            .floating-btn {
+                width: 4.5rem;
+                height: 4.5rem;
+                font-size: 1.6rem;
+            }
+
+            .floating-btn::after {
+                left: 5.5rem;
+                font-size: 1.2rem;
+                padding: 0.6rem 1rem;
+            }
+
+            /* 🔹 手機版響應式調整 */
+            .hero-section {
+                flex-direction: column;
+                height: auto;
+                padding: 15rem 1rem 5rem;
+                gap: 5rem;
+            }
+
+            .hero-section .textpic,
+            .hero-section .Cuba {
+                max-width: 90%;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headernav .member {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headernav .member {
+                display: none;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headernav {
+                position: absolute;
+                top: 6.5rem;
+                right: 0;
+                flex-direction: column;
+                background: #fff;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                gap: 2rem;
+                padding: 0;
+                /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headernav {
+                position: absolute;
+                top: 6.5rem;
+                right: 0;
+                flex-direction: column;
+                background: #fff;
+                width: 100%;
+                max-height: 0;
+                overflow: hidden;
+                gap: 2rem;
+                padding: 0;
+                /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headernav.open {
+                padding: 2rem;
+                max-height: 500px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headernav.open {
+                padding: 2rem;
+                max-height: 500px;
+            }
+        }
+
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .headerlist {
+                flex-direction: column;
+                width: 100%;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .headerlist {
+                flex-direction: column;
+                width: 100%;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .mobilenav {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mobilenav {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+        }
+
+
+        footer {
+        	background: #2EC4B6;
+            text-align: center;
+            font-size: 1.4rem;
+            color: white;
+            padding-bottom: 1rem;
+        }
+    </style>
 </head>
 
 <body>
-  <header class="header">
-    <div class="nav-left">
-      <a th:href="@{/index}" class="nav-item">首頁</a>
-      <a th:href="@{/activity}" class="nav-item">活動</a>
-      <a th:href="@{/shop}" class="nav-item">商店</a>
-      <a th:href="@{/news}" class="nav-item">最新消息</a>
-      <a th:href="@{/shakemate/chat}" class="nav-item" style="text-decoration: none;">客服</a>
-      <a th:href="@{/login}" class="search-btn">搜尋</a>
+
+   	<!-- ✅ W3Schools 標準：引入 header 區塊 -->
+	<div w3-include-html="/header1.html"></div>
+
+
+    <!-- 🔹 浮動按鈕 -->
+    <div class="floating-buttons">
+        <button class="floating-btn news-btn" data-tooltip="最新消息" onclick="handleNewsClick()">
+            <i class="fa-solid fa-newspaper"></i>
+        </button>
+        <button class="floating-btn support-btn" data-tooltip="客服中心" onclick="handleSupportClick()">
+            <i class="fa-solid fa-headset"></i>
+        </button>
     </div>
-    <div class="nav-right">
-      <a th:href="@{/login/testlogin}" class="login-btn">Login 測試</a>
-      <a th:href="@{/login}" class="login-btn">登入</a>
-      <div class="user-icon">👤</div>
-    </div>
-  </header>
-  <section class="hero">
-    <div class="slides">
-      <!-- 圖片在這裡可直接替換 -->
-      <div class="slide" th:style="|background-image:url(@{/img/4.png});|"></div>
-      <div class="slide" th:style="|background-image:url(@{/img/logoText.png});|"></div>
-      <div class="slide" th:style="|background-image:url(@{/img/logo.png});|"></div>
-    </div>
-    <div class="hero-content">
-      <h1>Shakemates</h1>
-      <p>連結深度，分享時刻</p>
-      <div class="cta-icons">
-        <div class="icon-card shape-triangle" onclick="visitShop()">
-          <span>商店</span>
+
+
+    <section class="hero-section">
+        <div class="textpic">
+            <h1 id="shaky-text">
+                <span class="shaky-text-ch">抖一下</span>
+                <br>
+                <span class="shaky-text-en">ShakeMate</span>
+            </h1>
+            <p>孤單寂寞覺得冷嗎？趕快加入抖一下，在這裡抖出屬於你的他！</p>
+            <br>
+            <button onclick="window.location.href='/match_chatroom/match.html'">抖起來！</button>
         </div>
-        <div class="icon-card shape-circle" onclick="startMatch()">
-          <span>開始配對</span>
+        <div class="Cuba">
+            <img src="/img/bodylogo.png" alt="Cubaimg">
         </div>
-        <div class="icon-card shape-square" onclick="visitEvents()">
-          <span>活動</span>
+    </section>
+
+
+    <section class="service-section">
+        <h2>Our Service</h2>
+        <div class="services">
+            <div class="service">
+                <i class="fa-solid fa-heart"></i>
+                <h3>條件篩選配對</h3>
+                <p class="toggle-clamp">別再亂槍打鳥了！讓條件幫你篩住屬於你的那一款，立馬抖一下，抖出你的愛～</p>
+                <button onclick="window.location.href='/match_chatroom/match.html'">MORE</button>
+            </div>
+            <div class="service">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <h3>MatchMarket</h3>
+                <p class="toggle-clamp">買錯尺寸？送錯禮物？透過上架舊有物品讓對方二次找到他真正的歸屬！</p>
+                <button onclick="window.location.href='/shshop/front_end/select_page.html'">MORE</button>
+            </div>
+            <div class="service">
+                <i class="fa-solid fa-people-group"></i>
+                <h3>揪團活動</h3>
+                <p class="toggle-clamp">一起唱歌、爬山、打桌遊，認識朋友不怕尷尬！專屬活動為你開團～</p>
+                <button onclick="window.location.href='/shshop/front_end/select_page.html'">MORE</button>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
-  <script>
-    function startMatch() { alert('🎉 開始您的交友之旅!'); }
-    function visitShop() { alert('🛍️ 前往商店...'); }
-    function visitEvents() { alert('🎯 前往活動...'); }
-  </script>
+    </section>
+
+    <footer>
+        © 2025 ShakeMate. All rights reserved.
+    </footer>
+
+
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const nav = document.querySelector('.headernav');
+        const header = document.querySelector('.header');
+        const floatingButtons = document.querySelectorAll('.floating-btn');
+
+        hamburger.addEventListener('click', () => {
+            nav.classList.toggle('open');
+        });
+
+        window.addEventListener('scroll', () => {
+            const triggerSection = document.querySelector('.service-section');
+            const triggerPosition = triggerSection.offsetTop;
+
+            // 原本的 header 樣式變更
+            if (window.scrollY >= triggerPosition - 80) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            // 🔹 新增：浮動按鈕樣式變更
+            if (window.scrollY >= triggerPosition - 200) {
+                floatingButtons.forEach(btn => {
+                    btn.classList.add('white-mode');
+                });
+            } else {
+                floatingButtons.forEach(btn => {
+                    btn.classList.remove('white-mode');
+                });
+            }
+        });
+
+        const text = document.getElementById("shaky-text");
+
+        function toggleShake() {
+            text.classList.add("shake"); // 開始抖
+            setTimeout(() => {
+                text.classList.remove("shake"); // 停止抖
+            }, 500); // 抖0.5秒
+        }
+
+        // 每6秒執行一次：抖0.5秒 → 停5秒
+        toggleShake();
+        setInterval(toggleShake, 5500);
+
+        // 🔹 浮動按鈕功能
+        function handleNewsClick() {
+            alert('即將進入最新消息...');
+            window.location.href = 'nindex'
+            // 可以改為: window.location.href = 'news.html';
+        }
+
+        function handleSupportClick() {
+            alert('即將進入客服中心...');
+            window.location.href = 'sindex'
+            // 可以改為開啟客服對話框或跳轉到客服頁面
+        }
+
+        document.querySelectorAll('.toggle-clamp').forEach(p => {
+            p.addEventListener('click', () => {
+                p.classList.toggle('expanded');
+            });
+        });
+	
+    </script>
+	<script src="/js/header.js"></script>
 </body>
 
 </html>
-
-
-

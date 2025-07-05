@@ -13,23 +13,35 @@ import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdPic;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.util.CompositeQueryForShshop;
+import com.shakemate.shshop.util.ExcelHandler;
+import com.shakemate.shshop.util.OpenAiAPI;
 import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.dto.UserDto;
 import com.shakemate.user.model.Users;
+
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.devtools.classpath.ClassPathFileSystemWatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 @Service("ShShop")
 public class ShShopService {
@@ -51,6 +63,13 @@ public class ShShopService {
 
     @Autowired
     private ShShopRedisUtil redisUtil;
+
+    @Autowired
+    private OpenAiAPI openAiAPI;
+    @Autowired
+    private ClassPathFileSystemWatcher classPathFileSystemWatcher;
+    @Autowired
+    private ExcelHandler excelHandler;
 
 
     // 找尋朋友清單
@@ -259,6 +278,8 @@ public class ShShopService {
         return dto;
     }
 
+
+
     // 查一個給更新商品用
     @Transactional(readOnly = true)
     public ShProdDto getByIdForUpdate(int id) {
@@ -266,6 +287,17 @@ public class ShShopService {
         ShProdDto dto = null;
         if (prod != null) {
             dto = new ShProdDto().forUpdateDisplay(prod);
+        }
+        return dto;
+    }
+
+    // 查一個給更新定單用
+    @Transactional(readOnly = true)
+    public ShProdDto getByIdForBuy(int id) {
+        ShProd prod = repo.getByID(id);
+        ShProdDto dto = null;
+        if (prod != null) {
+            dto = new ShProdDto().forUpdatePurchase(prod);
         }
         return dto;
     }
@@ -331,6 +363,19 @@ public class ShShopService {
         return returnStr;
     }
 
+    //查一個給商品頁面用
+    @Transactional
+    public void orderCreated(Integer id, Integer qty) {
+        ShProd prod = repo.getByID(id);
+        if (prod != null) {
+            prod.setProdCount(prod.getProdCount() - qty);
+            if(prod.getProdCount() == 0){
+                prod.setProdStatus((byte) 4);
+            }
+            repo.save(prod);
+        }
+    }
+
     // 用類別取得商品
     @Transactional(readOnly = true)
     public List<ShProdDto> getProdsByType(Integer typeId) {
@@ -353,6 +398,17 @@ public class ShShopService {
             ShProdDto dto = new ShProdDto(p);
             dtos.add(dto);
         }
+        return dtos;
+    }
+
+    // 用user id 取得商品
+    @Transactional(readOnly = true)
+    public List<ShProdDto> getAvailableProdsByUser(Integer userId) {
+        List<ShProd> list = repo.getByUserId(userId);
+        List<ShProdDto> dtos = list.stream()
+                .filter(p -> p.getProdStatus() == (byte) 2)
+                .map(ShProdDto::new)
+                .collect(Collectors.toList());
         return dtos;
 
     }
@@ -396,6 +452,7 @@ public class ShShopService {
                 prod.setProdContent(form.getProdContent());
                 prod.setProdStatusDesc(form.getProdStatusDesc());
                 prod.setProdPrice(form.getProdPrice());
+                prod.setProdStatus((byte) 0); // 每次更新都要重新審核
                 prod.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
                 List<ShProdPic> picList = shProdPic(picUrls, prod);
                 prod.setProdPics(picList);
@@ -434,7 +491,6 @@ public class ShShopService {
         return prodDto;
     }
 
-
     // 複合查詢
     public List<ShProdDto> getProdsByCompositeQuery(Map<String, String> paraMap) {
         List<Integer> friendIds = matchRepo.findFriendIdsByUserId(Integer.parseInt(paraMap.get("userId")));
@@ -448,27 +504,31 @@ public class ShShopService {
     }
 
     // OpenAI 自動商品審核
-    public void autoAudit(String aiResult) {
+    public List<ProdAuditResult> autoAudit(List<ShProdDto> pendingList) {
+        String role = openAiAPI.getSystemSetting();
+        String content = openAiAPI.buildUserPrompt(pendingList);
+        String aiResult = openAiAPI.getResult(role, content);
         RestTemplate restTemplate = new RestTemplate();
         Gson gson = new Gson();
         Type listType = new TypeToken<List<ProdAuditResult>>() {
         }.getType();
         List<ProdAuditResult> resultList = null;
         aiResult = aiResult.replace("```json", "").replace("```", "").trim();
-        System.out.println(aiResult);
         resultList = gson.fromJson(aiResult, listType);
-        String baseUrl = "http://localhost:8087/api/ShShop/";
+        redisUtil.saveAuditResult("auditResult", resultList); // 存入最新結果
+        String baseUrl = "http://localhost:8080/api/ShShop/";
         for (ProdAuditResult re : resultList) {
             Integer prodId = re.getProdId();
             String status = re.getStatus();
 
             if ("approve".equalsIgnoreCase(status)) {
-                // 呼叫審核通過的 API，例如上架商品
+                // 呼叫審核通過的 API
                 restTemplate.postForEntity(
                         baseUrl + "changeStatus?prodId=" + prodId + "&status=approve",
                         null,
                         ApiResponse.class
                 );
+                // 呼叫審核不通過的 API
             } else if ("reject".equalsIgnoreCase(status)) {
                 String reason = re.getReason();
                 restTemplate.postForEntity(
@@ -478,6 +538,38 @@ public class ShShopService {
                 );
             }
         }
+        return resultList;
+    }
+
+    // 取得AI最新審核紀錄
+    public List<ProdAuditResult> aiAuditHistory() {
+        return redisUtil.getLatestAudit("auditResult");
+    }
+
+    // 取得AI所有審核紀錄
+    public Map<String, List<ProdAuditResult>> aiAuditHistoryAll() {
+        return redisUtil.getAllAuditHistory();
+    }
+
+    // 取得商品的審核不通過紀錄
+    public String getRejectReason(Integer prodId) {
+        String rejectionId = "RejectionProdId_" + prodId;
+        return redisUtil.get(rejectionId);
+    }
+
+    // 輸出所有的審核紀錄
+    public byte[] generateAuditExcel() throws IOException {
+        Map<String, List<ProdAuditResult>> data = redisUtil.getAllAuditHistory();
+        if (data == null || data.isEmpty()) {
+            throw new RuntimeException("沒有審核紀錄可以匯出。");
+        } else {
+            return excelHandler.generateAuditExcel(data);
+        }
+    }
+
+    // 輸出所有的審核紀錄的檔案名稱
+    public String generateFileName() {
+        return excelHandler.generateFileName();
     }
 
 

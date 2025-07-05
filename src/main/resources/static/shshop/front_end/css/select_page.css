@@ -1,9 +1,25 @@
+/* --- CSS 變數 (Custom Properties) --- */
 :root {
-    --header-height: 6.5rem;
+    --header-height: 3rem;
     --search-bar-height: 6rem;
-    --aside-width: 240px;
+    --aside-width: 280px; /* 調整側邊欄寬度，讓內容更舒適 */
+
+    /* 根據您的 body 背景色定義主色調及輔助色 */
+    --main-bg-dark: #84c2db; /* 背景漸層的深色 */
+    --main-bg-medium: #DCFF61; /* 背景漸層的中間色 */
+    --main-bg-light: #e9feff; /* 背景漸層的淺色 */
+
+    --primary-button-color: #2EC4B6; /* 原始按鈕綠色 */
+    --secondary-button-color: #2EC4B6; /* 於強調或次要操作 */
+    --text-color: #333;
+    --light-gray: #f0f4f7; /* 輕微的背景/邊框色 */
+    --medium-gray: #ccc;
+    --dark-gray: #555;
+    --card-bg-color: #ffffff;
+    --price-color: #e74c3c; /* 價格的強調色 */
 }
 
+/* --- 通用樣式 --- */
 * {
     padding: 0;
     margin: 0;
@@ -11,9 +27,13 @@
 }
 
 body {
-    font-family: "Noto Sans TC", sans-serif;
-    background: linear-gradient(to top, #84c2db, #beebf4, #e9feff);
-    color: #333;
+    font-family: "Noto Sans TC", "Helvetica Neue", Arial, sans-serif; /* 增加字體優先級，提供更好的中文顯示 */
+    background: linear-gradient(to top, var(--main-bg-dark), var(--main-bg-medium), var(--main-bg-light)); /* 您的背景色，保留不動 */
+    color: var(--text-color);
+    line-height: 1.6; /* 增加行高，提升閱讀性 */
+    min-height: 100vh; /* 確保 body 至少佔據整個視窗高度 */
+    display: flex; /* 使用 Flexbox 佈局 header 和主要內容 */
+    flex-direction: column; /* 讓內容垂直堆疊 */
 }
 
 img {
@@ -21,39 +41,215 @@ img {
     display: block;
 }
 
-.search-bar {
-    position: fixed;
-    top: var(--header-height);
-    left: var(--aside-width);
-    width: calc(100% - var(--aside-width));
-    height: var(--search-bar-height);
-    background-color: #ffffffcc;
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* --- 主要內容區塊 (`.bg`) --- */
+.bg {
+    position: relative;
+    flex-grow: 1; /* 讓 .bg 佔據 body 的剩餘空間 */
+    z-index: 0;
+    overflow: hidden;
+    display: flex; /* 使用 Flexbox 佈局側邊欄和內容包裝器 */
+    padding-top: var(--header-height); /* 為 header 騰出空間 */
+}
+
+/* --- 側邊欄樣式 (`aside.aside`) --- */
+aside.aside {
+    position: fixed; /* 固定側邊欄 */
+    top: calc( var(--header-height ) + 3.5rem); /* 確保側邊欄在 header 下方 */
+    left: 0;
+    width: var(--aside-width);
+    height: calc(100vh - var(--header-height)); /* 修正高度，佔滿剩餘視窗高度 */
+    background-color: var(--main-bg-medium); /* 使用背景的中間色 */
+    padding: 2rem 1.5rem; /* 調整內邊距 */
+    overflow-y: auto; /* 必要時顯示滾動條 */
+    z-index: 800;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15); /* 增加陰影 */
+    border-right: 1px solid rgba(255, 255, 255, 0.2); /* 輕微邊框 */
+}
+
+.nav_list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2.5rem; /* 增加間距 */
+}
+
+.nav_list li a {
+    display: block;
+    padding: 1rem 1.2rem; /* 調整內邊距 */
+    text-align: center;
+    background-color: var(--card-bg-color); /* 使用卡片背景色 */
+    margin-bottom: 0.8rem; /* 調整間距 */
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 600; /* 字體粗細 */
+    border-radius: 10px; /* 更圓潤的邊角 */
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; /* 添加過渡效果 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08); /* 輕微陰影 */
+}
+
+.nav_list li a:hover {
+    background-color: var(--light-gray);
+    transform: translateY(-3px); /* 輕微上浮效果 */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.nav_list li a.active {
+    background-color: var(--secondary-button-color); /* 活躍類別使用強調色 */
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px); /* 稍微上浮 */
+}
+
+/* --- 進階搜尋樣式 (`.advanced-search`) --- */
+.advanced-search {
+    margin-top: 2rem;
+    background: var(--card-bg-color);
+    padding: 1.8rem; /* 調整內邊距 */
+    border-radius: 10px; /* 更圓潤的邊角 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* 更明顯的陰影 */
+    border: 1px solid var(--main-bg-light); /* 輕微邊框 */
+}
+
+.advanced-search h4 {
+    font-size: 1.6rem; /* 調整字體大小 */
+    color: var(--secondary-button-color);
+    margin-bottom: 1.5rem; /* 調整間距 */
+    text-align: center;
+    border-bottom: 2px solid var(--light-gray); /* 增加底線 */
+    padding-bottom: 1rem;
+    font-weight: 700;
+}
+
+.advanced-search input,
+.advanced-search select {
+    width: 100%;
+    margin-bottom: 1.2rem; /* 調整間距 */
+    padding: 1rem 1.2rem; /* 調整內邊距 */
+    font-size: 1.1rem; /* 調整字體大小 */
+    border: 1px solid var(--medium-gray);
+    border-radius: 8px; /* 圓潤邊角 */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.advanced-search input:focus,
+.advanced-search select:focus {
+    border-color: var(--secondary-button-color);
+    box-shadow: 0 0 0 4px rgba(62, 146, 204, 0.2); /* 聚焦時的陰影效果 */
+    outline: none;
+}
+
+.advanced-search .price-range {
     display: flex;
     align-items: center;
-    padding: 0 2rem;
+    gap: 0.8rem; /* 調整間距 */
+    margin-bottom: 1.2rem;
+}
+
+.advanced-search .price-range input {
+    flex: 1;
+    margin-bottom: 0; /* 移除多餘的 margin-bottom */
+}
+
+.advanced-search .price-range span {
+    font-size: 1.2rem;
+    color: var(--dark-gray);
+}
+
+.advanced-search .button-group { /* 新增按鈕群組樣式 */
+    display: flex;
     gap: 1rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 1.8rem;
+}
+
+.advanced-search button {
+    flex: 1; /* 讓按鈕平均分佈 */
+    background: var(--secondary-button-color);
+    color: white;
+    padding: 1rem 1.2rem; /* 調整內邊距 */
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px; /* 圓潤邊角 */
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+
+.advanced-search button:hover {
+    background-color: #26A79A; /* 懸停顏色 */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+#clearBtn {
+    background-color: darkgrey; /* 清空按鈕使用不同顏色 */
+}
+
+#clearBtn:hover {
+    background-color:grey;
+}
+
+/* --- 主要內容區域包裝器 (`.content-wrapper`) --- */
+.content-wrapper { /* 新增內容包裝器樣式 */
+    margin-left: var(--aside-width); /* 調整為騰出側邊欄的精確空間 */
+    flex-grow: 1; /* 讓內容區域佔據剩餘空間 */
+    display: flex;
+    flex-direction: column; /* 讓其內部元素垂直堆疊 */
+}
+
+/* --- 搜尋欄樣式 (`.search-bar`) --- */
+.search-bar {
+    position: sticky; /* 固定搜尋欄 */
+    top: var(--header-height);
+    width: 100%; /* 佔滿父容器寬度 */
+    height: var(--search-bar-height);
+    display: flex;
+    align-items: center;
+    padding: 0 2.5rem; /* 調整內邊距 */
+    gap: 1.2rem; /* 調整間距 */
     z-index: 900;
+    margin: 5rem 0 2rem; /* 與主內容區域的間距 */
 }
 
 .search-bar input {
     flex: 1;
-    height: 3.6rem;
-    font-size: 1.4rem;
-    padding: 0 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    height: 4.2rem; /* 調整高度 */
+    font-size: 1.5rem; /* 調整字體大小 */
+    padding: 0 1.8rem; /* 調整內邊距 */
+    border: 1px solid var(--medium-gray);
+    border-radius: 10px; /* 更圓潤的輸入框 */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar input:focus {
+    border-color: var(--primary-button-color);
+    box-shadow: 0 0 0 5px rgba(46, 196, 182, 0.25);
+    outline: none;
 }
 
 .search-bar button,
 .sort-btn {
-    height: 3.6rem;
-    padding: 0 1.2rem;
+    height: 4.2rem; /* 調整高度 */
+    padding: 0 2rem; /* 調整內邊距 */
     border: none;
-    background-color: #3e92cc;
+    background-color: var(--primary-button-color);
     color: white;
-    border-radius: 4px;
+    border-radius: 10px; /* 更圓潤的按鈕 */
     cursor: pointer;
+    font-size: 1.3rem; /* 調整字體大小 */
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.search-bar button:hover,
+.sort-btn:hover {
+    background-color: #208e82; /* 懸停顏色 */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .sort-buttons {
@@ -61,267 +257,678 @@ img {
     gap: 0.8rem;
 }
 
-aside.aside {
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    width: var(--aside-width);
-    height: 100vh;
-    background-color: lightblue;
-    padding: 2rem 1rem;
-    overflow-y: auto;
-    z-index: 800;
+.sort-btn {
+    background-color: #6c757d; /* 預設排序按鈕顏色 */
 }
 
-.nav_list {
-    list-style: none;
-    padding: 0;
+.sort-btn:hover {
+    background-color: #5a6268;
 }
 
-.nav_list li a {
-    display: block;
-    padding: 0.8rem;
-    text-align: center;
-    background-color: white;
-    margin-bottom: 1rem;
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-    border-radius: 4px;
+.sort-btn.active-sort-btn { /* 活躍排序按鈕樣式 */
+    background-color: var(--secondary-button-color);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
+/* --- 商品列表樣式 (`main`, `.item_list`) --- */
 main.main {
-    margin-left: var(--aside-width);
-    padding-top: calc(var(--header-height) + var(--search-bar-height) + 2rem);
-    padding-left: 2rem;
-    padding-right: 2rem;
-    background: inherit;
-    min-height: 100vh;
+    /* 調整左右邊距，讓卡牌列表離頁面邊緣更近或更遠 */
+    /* 例如：如果您覺得左右太寬，可以減少 2.5rem */
+    padding: 0 1.5rem 4rem 1.5rem; /* 預設 2.5rem，調整為 1.5rem 讓左右間距更小 */
+    background: transparent;
+    flex-grow: 1;
 }
 
 .item_list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    /* 核心調整：卡牌之間的間距 */
+    gap: 1rem; /* 原為 1.5rem，調整為 1rem 讓卡牌更緊密 */
     list-style: none;
     padding: 0;
 }
 
 .item_list li {
-    width: calc(25% - 2rem);
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--light-gray);
 }
 
-.item_list a {
-    text-decoration: none;
-    color: inherit;
+.item_list li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .img_block {
-    height: 200px;
+    height: 160px;
     overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid var(--light-gray);
 }
 
 .img_block img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.item_list li:hover .img_block img {
+    transform: scale(1.05);
 }
 
 .item_text {
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: auto;
+}
+
+.prod-info {
+    margin-bottom: 0.8rem;
 }
 
 .prod-name {
-    font-weight: bold;
-    font-size: 2rem;
-    margin-bottom: 0.8rem;
+    font-weight: 700;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    line-height: 1.3;
 }
 
 .prod-brand {
-    color: #555;
-    margin-bottom: 0.8rem;
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
 }
 
 .prod-type {
-    color: #555;
+    color: var(--dark-gray);
     font-size: 0.8rem;
-    
+    margin-bottom: 0.8rem;
 }
 
 .prod-price {
-    color: #d35400;
+    color: var(--price-color);
     font-weight: bold;
     font-size: 2rem;
     text-align: right;
+    margin-top: 0.8rem;
 }
 
-.owner{
+.owner {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.5rem;
-    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--dark-gray);
+    border-top: 1px solid var(--light-gray);
+    padding-top: 0.8rem;
+    margin-top: 0.8rem;
 }
 
+.error-message {
+    width: 100%;
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 1.4rem;
+    color: #c0392b;
+    padding: 2rem;
+    background-color: #ffebee;
+    border-radius: 10px;
+    margin-top: 1.5rem;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e74c3c;
+}
 
-
-/* ✅ 好友清單浮動樣式 */
+/* --- 好友清單浮動樣式 (`.friend-floating`) --- */
 .friend-floating {
     position: fixed;
-    right: 2rem;
-    bottom: 2rem;
-    width: 250px;
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.15);
-    transition: max-height 0.4s ease, opacity 0.3s ease;
+    right: 3rem; /* 調整位置 */
+    bottom: 3rem; /* 調整位置 */
+    width: 300px; /* 調整寬度 */
+    background: var(--card-bg-color);
+    border-radius: 20px; /* 更圓潤的邊角 */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); /* 更明顯的陰影 */
+    transition: max-height 0.5s ease-in-out, opacity 0.4s ease; /* 調整過渡效果 */
     overflow: hidden;
     z-index: 1000;
-    max-height: 320px;
+    max-height: 450px; /* 調整最大高度 */
+    border: 1px solid var(--main-bg-light);
 }
 
 /* 收合狀態只顯示標題列高度 */
 .friend-floating.collapsed {
-    max-height: 4.2rem;
-    opacity: 0.9;
+    max-height: 5.5rem; /* 調整收合高度 */
+    opacity: 0.98;
 }
 
 .friend-panel {
-    padding: 1rem;
+    padding: 1.8rem; /* 調整內邊距 */
 }
 
 .friend-title {
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 1.8rem; /* 調整字體大小 */
+    font-weight: 700;
     text-align: center;
-    color: #3e92cc;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.5rem;
-    margin-bottom: 0.5rem;
+    color: var(--secondary-button-color);
+    border-bottom: 2px solid var(--light-gray); /* 更明顯的底線 */
+    padding-bottom: 1rem;
+    margin-bottom: 1.2rem;
 }
 
 .friend-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 200px;
+    max-height: 280px; /* 調整好友列表最大高度 */
     overflow-y: auto;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: var(--secondary-button-color) var(--light-gray); /* Firefox */
+}
+
+.friend-list::-webkit-scrollbar { /* Chrome, Safari */
+    width: 8px;
+}
+
+.friend-list::-webkit-scrollbar-track {
+    background: var(--light-gray);
+    border-radius: 10px;
+}
+
+.friend-list::-webkit-scrollbar-thumb {
+    background-color: var(--secondary-button-color);
+    border-radius: 10px;
+    border: 2px solid var(--light-gray);
 }
 
 .friend-list li {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
-    gap: 0.5rem;
+    padding: 1rem 1.2rem; /* 調整內邊距 */
+    gap: 1rem; /* 調整間距 */
     cursor: pointer;
     border-bottom: 1px solid #eee;
-    color: #3e92cc;
+    color: var(--text-color);
+    font-size: 1.15rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.friend-list li:last-child {
+    border-bottom: none; /* 移除最後一個項目的底線 */
 }
 
 .friend-list li:hover {
-    background-color: #e0f4ff;
-    font-weight: bold;
+    background-color: #e6f7ff; /* 更柔和的懸停色 */
+    transform: translateX(5px); /* 輕微右移效果 */
+}
+
+.no-friends { /* 沒有好友的提示樣式 */
+    text-align: center;
+    color: var(--dark-gray);
+    padding: 1.5rem;
+    font-style: italic;
+    font-size: 1rem;
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    margin-top: 1rem;
 }
 
 .friend-list img {
-    width: 30px;
-    height: 30px;
+    width: 45px; /* 調整頭像大小 */
+    height: 45px;
     object-fit: cover;
     border-radius: 50%;
+    border: 3px solid var(--secondary-button-color); /* 增加邊框 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .toggle-friend-btn {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    background: #3e92cc;
+    top: 1rem; /* 調整位置 */
+    right: 1rem; /* 調整位置 */
+    background: var(--secondary-button-color);
     color: white;
     border: none;
     border-radius: 50%;
-    width: 2.2rem;
-    height: 2.2rem;
+    width: 3.2rem; /* 調整大小 */
+    height: 3.2rem;
     cursor: pointer;
-    box-shadow: 0 0 0.3rem rgba(0, 0, 0, 0.2);
-}
-
-.advanced-search {
-    margin-top: 2rem;
-    background: white;
-    padding: 1rem;
-    border-radius: 0.8rem;
-    box-shadow: 0 0 0.3rem rgba(0, 0, 0, 0.1);
-}
-
-.advanced-search h4 {
-    font-size: 1.3rem;
-    color: #3e92cc;
-    margin-bottom: 0.8rem;
-    text-align: center;
-}
-
-.advanced-search input,
-.advanced-search select {
-    width: 100%;
-    margin-bottom: 0.6rem;
-    padding: 0.6rem;
-    font-size: 1.2rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.advanced-search .price-range {
-    display: flex;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    display: flex; /* 居中箭頭 */
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+    font-size: 1.4rem; /* 調整箭頭大小 */
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.advanced-search .price-range input {
-    flex: 1;
+.toggle-friend-btn:hover {
+    background-color: #26A79A;
+    transform: rotate(20deg); /* 輕微旋轉效果 */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.advanced-search button {
-    width: 100%;
-    background: #3e92cc;
-    color: white;
-    padding: 0.6rem;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+/* --- RWD 響應式設計 --- */
+@media (max-width: 1200px) {
+    main.main {
+        padding: 0 1rem 3rem 1rem; /* 調整左右邊距，從 2rem 減少到 1rem */
+    }
+    .item_list {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 0.8rem; /* 減少卡牌之間的間距，從 1.5rem 減少到 0.8rem */
+    }
+
+    .prod-name {
+        font-size: 1.5rem;
+    }
+
+    .prod-price {
+        font-size: 2rem;
+    }
+
+    .img_block {
+        height: 140px;
+    }
+
+    .item_text {
+        padding: 0.8rem;
+    }
 }
 
-.advanced-search button:hover {
-    background-color: #2e7ab5;
+@media (max-width: 992px) {
+    :root {
+        --aside-width: 250px;
+        --search-bar-height: 5.5rem;
+    }
+
+    aside.aside {
+        top: calc( var(--header-height ) + 3.5rem);
+        padding: 1.5rem 1rem;
+    }
+
+    .nav_list li a {
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .advanced-search {
+        padding: 1.5rem;
+    }
+
+    .advanced-search h4 {
+        font-size: 1.4rem;
+    }
+
+    .search-bar {
+        padding: 0 2rem;
+        height: 5.5rem;
+        margin-top: 3rem;
+    }
+
+    .search-bar input {
+        height: 3.8rem;
+        font-size: 1.3rem;
+    }
+
+    .search-bar button,
+    .sort-btn {
+        height: 3.8rem;
+        padding: 0 1.6rem;
+        font-size: 1.1rem;
+    }
+
+    main.main {
+        padding: 0 1rem 3rem 1rem; /* 調整左右邊距，從 2rem 減少到 1rem */
+    }
+
+    .item_list {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.7rem; /* 進一步減少卡牌之間的間距，從 1.2rem 減少到 0.7rem */
+    }
+
+    .prod-name {
+        font-size: 1.3rem;
+    }
+
+    .prod-price {
+        font-size: 1.7rem;
+    }
+
+    .img_block {
+        height: 120px;
+    }
+
+    .item_text {
+        padding: 0.7rem;
+    }
+
+    .friend-floating {
+        right: 2rem;
+        bottom: 2rem;
+        width: 260px;
+        max-height: 380px;
+    }
+
+    .friend-floating.collapsed {
+        max-height: 5rem;
+    }
+
+    .toggle-friend-btn {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.2rem;
+    }
 }
 
-.advanced-search {
-    margin-top: 2rem;
-    padding: 1rem;
-    background-color: #e0f7ff;
-    border-radius: 5px;
+@media (max-width: 768px) {
+    :root {
+        --header-height: 5rem;
+        --aside-width: 100%; /* 側邊欄全寬 */
+    }
+
+    body {
+        flex-direction: column;
+    }
+
+    .bg {
+        flex-direction: column;
+        padding-top: var(--header-height);
+        align-items: center;
+    }
+
+    aside.aside {
+        position: static;
+        width: 100%;
+        height: auto;
+        padding: 1.5rem 1.2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        border-right: none;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        top: auto;
+        margin-top: 0;
+    }
+
+    .nav_list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .nav_list li {
+        flex-basis: calc(50% - 0.4rem);
+        max-width: calc(50% - 0.4rem);
+    }
+
+    .nav_list li a {
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .advanced-search {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+    }
+
+    .advanced-search h4 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .advanced-search input,
+    .advanced-search select,
+    .advanced-search button {
+        font-size: 1rem;
+        padding: 0.8rem;
+    }
+
+    .content-wrapper {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .search-bar {
+        position: static;
+        width: 100%;
+        left: 0;
+        padding: 1.2rem;
+        height: auto;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        border-radius: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        top: auto;
+        margin-top: 0;
+    }
+
+    .search-bar input {
+        width: 100%;
+        margin-bottom: 1rem;
+        height: 3.8rem;
+    }
+
+    .search-bar button {
+        margin-left: 0;
+        width: 100%;
+        height: 3.8rem;
+    }
+
+    .sort-buttons {
+        width: 100%;
+        justify-content: center;
+        margin-top: 1rem;
+        gap: 0.6rem;
+    }
+
+    .sort-btn {
+        flex: 1;
+        font-size: 1.05rem;
+        padding: 0 1.2rem;
+        height: 3.5rem;
+    }
+
+    main.main {
+        padding: 0 1rem 3rem 1rem; /* 調整左右邊距，從 1.5rem 減少到 1rem */
+        min-height: auto;
+    }
+
+    .item_list {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.8rem; /* 增加間距到 0.8rem (之前 1rem，768px 為 1.2rem)，讓單列和兩列時稍有空間感 */
+    }
+
+    .item_list li {
+        width: auto;
+    }
+
+    .img_block {
+        height: 100px;
+    }
+
+    .item_text {
+        padding: 0.6rem;
+    }
+
+    .prod-name {
+        font-size: 1.1rem;
+    }
+
+    .prod-price {
+        font-size: 1.4rem;
+    }
+    .prod-brand {
+        font-size: 0.8rem;
+    }
+    .prod-type {
+        font-size: 0.7rem;
+    }
+    .owner {
+        font-size: 0.8rem;
+        gap: 0.4rem;
+        padding-top: 0.6rem;
+        margin-top: 0.6rem;
+    }
+
+    .friend-floating {
+        right: 1.5rem;
+        bottom: 1.5rem;
+        width: 240px;
+        max-height: 350px;
+        border-radius: 15px;
+    }
+
+    .friend-floating.collapsed {
+        max-height: 4.5rem;
+    }
+
+    .toggle-friend-btn {
+        width: 2.8rem;
+        height: 2.8rem;
+        font-size: 1.1rem;
+    }
 }
 
-.advanced-search form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
+@media (max-width: 576px) {
+    .search-bar {
+        padding: 1rem;
+    }
+
+    .search-bar input {
+        height: 3.2rem;
+        font-size: 1.1rem;
+    }
+
+    .search-bar button,
+    .sort-btn {
+        height: 3.2rem;
+        font-size: 0.95rem;
+        padding: 0 1rem;
+    }
+
+    .sort-buttons {
+        gap: 0.4rem;
+    }
+
+    .item_list {
+        grid-template-columns: 1fr; /* 單列佈局 */
+        gap: 0.8rem; /* 調整為 0.8rem，保持單列時的適當間距 */
+    }
+
+    .img_block {
+        height: 150px;
+    }
+
+    .item_text {
+        padding: 0.8rem;
+    }
+
+    .prod-name {
+        font-size: 1.1rem;
+    }
+
+    .prod-price {
+        font-size: 1.4rem;
+    }
+
+    .friend-floating {
+        width: 90%;
+        left: 5%;
+        right: auto;
+        bottom: 1.2rem;
+        max-height: 60vh;
+        border-radius: 12px;
+    }
+
+    .friend-floating.collapsed {
+        max-height: 4rem;
+    }
+
+    .toggle-friend-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1rem;
+    }
 }
 
-aside.aside {
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    width: var(--aside-width);
-    height: calc(100vh - var(--header-height));
-    /* ✅ 修正高度 */
-    background-color: lightblue;
-    padding: 2rem 1rem;
-    overflow-y: auto;
-    /* ✅ 加入滾動條 */
-    z-index: 800;
-    scroll-behavior: smooth;
+/* --- 商品列表樣式 (`main`, `.item_list`) --- */
+main.main {
+   padding: 0 1.5rem 4rem 1.5rem;
+   background: transparent;
+   flex-grow: 1;
+}
+
+.item_list {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+   /* 大幅增加卡牌之間的間距 */
+   gap: 2.5rem; /* 原為 1rem，增加到 2.5rem */
+   list-style: none;
+   padding: 0;
+}
+
+/* ... (其餘樣式保持不變) ... */
+
+/* --- RWD 響應式設計 --- */
+@media (max-width: 1200px) {
+   main.main {
+       padding: 0 1rem 3rem 1rem;
+   }
+   .item_list {
+       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+       /* 相應增加間距 */
+       gap: 2rem; /* 原為 0.8rem，增加到 2rem */
+   }
+
+   /* ... (其餘 @media 查詢中的樣式保持不變) ... */
+}
+
+@media (max-width: 992px) {
+   /* ... (其餘 @media 查詢中的樣式保持不變) ... */
+   main.main {
+       padding: 0 1rem 3rem 1rem;
+   }
+
+   .item_list {
+       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+       /* 相應增加間距 */
+       gap: 1.8rem; /* 原為 0.7rem，增加到 1.8rem */
+   }
+   /* ... (其餘 @media 查詢中的樣式保持不變) ... */
+}
+
+@media (max-width: 768px) {
+   /* ... (其餘 @media 查詢中的樣式保持不變) ... */
+   main.main {
+       padding: 0 1rem 3rem 1rem;
+       min-height: auto;
+   }
+
+   .item_list {
+       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+       /* 相應增加間距 */
+       gap: 1.5rem; /* 原為 0.8rem，增加到 1.5rem */
+   }
+   /* ... (其餘 @media 查詢中的樣式保持不變) ... */
+}
+
+@media (max-width: 576px) {
+   /* ... (其餘 @media 查詢中的樣式保持不變) ... */
+   .item_list {
+       grid-template-columns: 1fr; /* 單列佈局 */
+       /* 單列時的垂直間距也增加 */
+       gap: 2rem; /* 原為 0.8rem，增加到 2rem */
+   }
+   /* ... (其餘 @media 查詢中的樣式保持不變) ... */
 }

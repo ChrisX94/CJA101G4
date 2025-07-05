@@ -696,16 +696,34 @@
   
     /* ✅ 主要新增：卡片包裹成 swiper */
   }
+  .match__wrap {
+    @include laptop() {
+      width: 90%;
+    }
+    @include pad() {
+      width: 350px;
+    }
+    @include mobile() {
+      width: 90%;
+    }
+  }
   
   .match__header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin: 2.5rem 0;
+    position: relative;
+
+    @include laptop() {
+      margin: 2.5rem auto;
+      max-width: 75rem;
+    }
   
     .match__name {
       font-size: 2.6rem;
       font-weight: bold;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
       color: #0097a7;
+      line-height: 1;
     }
   
     .match__info {
@@ -743,6 +761,20 @@
     box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
     justify-content: center;
     margin-bottom: 4rem;
+    @include laptop() {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @include pad() {
+      flex-direction: column;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @include mobile() {
+      flex-direction: column;
+      width: 100%;
+      box-sizing: border-box;
+    }
   
     /* 稍微跟按鈕區拉開一點 */
   }
@@ -753,6 +785,13 @@
     height: 25rem;
     border-radius: 1rem;
     overflow: hidden;
+
+    @include pad() {
+      width: 100%;
+    }
+    @include mobile() {
+      width: 100%;
+    }
   
     .match__avatar {
       width: 100%;
@@ -943,21 +982,20 @@
   
   .filter-btn-wrapper {
     text-align: center;
-    display: flex;
-    justify-content: flex-end;
-    width: 62rem;
-    margin: 1rem auto;
+    width: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
   }
   
   .filterBtn {
     background-color: #0097a7;
     color: #fff;
     border: none;
-    padding: 0.6rem 1.2rem;
+    padding: 5px 10px;
     border-radius: 1.2rem;
     font-size: 1.6rem;
     cursor: pointer;
-    margin: 0 0.5rem;
   }
   
   #filterModal {
@@ -967,7 +1005,8 @@
   /* 彈窗背景遮罩 */
   
   .modal-overlay {
-    display: none;
+    display: block;
+    // display: none;
   
     /* 預設隱藏 */
     position: fixed;

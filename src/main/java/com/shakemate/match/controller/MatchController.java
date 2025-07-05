@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -32,7 +34,11 @@ public class MatchController {
 
     @GetMapping("/getNext")
     public UserProfileVO getNextUser(HttpSession session) throws Exception {
-        Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
+    	Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer currentUserId = Integer.parseInt(userIdObj.toString());
         UserProfileVO profile = userProfileDAO.getRandomUnmatchedUser(currentUserId);
         if (profile == null) {
             throw new NoSuchElementException("沒有更多會員");
@@ -42,7 +48,11 @@ public class MatchController {
 
     @PostMapping(value = "/getFiltered", consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<UserProfileVO> getFiltered(@RequestBody Map<String, Object> data, HttpSession session) throws Exception {
-        Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
+    	Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer currentUserId = Integer.parseInt(userIdObj.toString());
 
         Integer gender = null;
         try {
@@ -54,13 +64,27 @@ public class MatchController {
 
         List<String> interests = (List<String>) data.get("interests");
         List<String> personality = (List<String>) data.get("personality");
+        
+        // ✅ 防呆：如果三個條件都是空，就改成隨機推薦
+        boolean noGender = (gender == null);
+        boolean noInterests = (interests == null || interests.isEmpty());
+        boolean noPersonality = (personality == null || personality.isEmpty());
 
+        if (noGender && noInterests && noPersonality) {
+            UserProfileVO profile = userProfileDAO.getRandomUnmatchedUser(currentUserId);
+            return profile == null ? Collections.emptyList() : List.of(profile);
+        }
+        
         return userProfileDAO.prefer_matched(currentUserId, interests, personality, gender);
     }
 
     @PostMapping("/like")
     public Map<String, Object> likeUser(@RequestParam int targetId, HttpSession session) throws Exception {
-        Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
+    	Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer currentUserId = Integer.parseInt(userIdObj.toString());
         Map<String, Object> result = new HashMap<>();
         
         // 檢查是否已經有對這個人按過的紀錄
@@ -86,7 +110,11 @@ public class MatchController {
 
     @PostMapping("/dislike")
     public Map<String, Object> dislikeUser(@RequestParam int targetId, HttpSession session) throws Exception {
-        Integer currentUserId = Integer.valueOf(session.getAttribute("account").toString());
+    	Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer currentUserId = Integer.parseInt(userIdObj.toString());
         Map<String, Object> result = new HashMap<>();
 
         if (!matchService.hasUserActed(currentUserId, targetId)) {
@@ -95,4 +123,24 @@ public class MatchController {
         result.put("disliked", true);
         return result;
     }
+    
+    @GetMapping("/getUserStatus")
+    public Map<String, Object> getUserStatus(HttpSession session) throws SQLException {
+        Map<String, Object> result = new HashMap<>();
+        Object userIdObj = session.getAttribute("account");
+    	if (userIdObj == null) {
+    		return null;
+    	}
+        Integer userId = Integer.parseInt(userIdObj.toString());
+      
+        if (userId == null) {
+            result.put("status", -1); // 表示未登入或 session 遺失
+            return result;
+        }
+
+        UserProfileVO profile = userProfileDAO.findById(userId);
+        result.put("status", profile.getUserStatus());
+        return result;
+    }
+
 }

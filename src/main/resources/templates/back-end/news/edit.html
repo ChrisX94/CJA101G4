@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>編輯新聞</title></head>
+<body>
+  <h1>編輯新聞</h1>
+  <form th:action="@{/news/save}" th:object="${newsDto}" method="post">
+    <input type="hidden" th:field="*{newsId}" />
+
+    <label>類別：
+      <select th:field="*{categoryId}">
+        <option th:each="type : ${allTypes}"
+                th:value="${type.categoryId}"
+                th:text="${type.categoryName}"
+                th:selected="${type.categoryId} == ${newsDto.categoryId}">
+        </option>
+      </select>
+    </label><br/>
+
+    <label>標題：<input type="text" th:field="*{title}" /></label><br/>
+
+    <label>內容：<textarea th:field="*{content}"></textarea></label><br/>
+
+    <button type="submit">更新</button>
+  </form>
+  <a th:href="@{/news}">返回列表</a>
+</body>
+</html>

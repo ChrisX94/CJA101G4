@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的訂單 | MatchMarket</title>
+
+    <!-- 共用樣式：站點導覽列 -->
+    <link rel="stylesheet" href="./css/header.css" />
+    <link rel="stylesheet" href="./css/my_order_manager.css">
+
+    <!-- Google Icons & FontAwesome -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- 單頁樣式（可獨立成 order_manager.css，也可以內嵌） -->
+    <style>
+
+    </style>
+</head>
+
+<body>
+
+    <!-- ⬆ Header (若已經抽成共用片段，可用 Thymeleaf include) -->
+    <!-- <header class="header">
+        <div class="header__logo">
+            <a href="/">
+                <img src="../../img/logoText.png" alt="Logo" />
+            </a>
+        </div>
+        <nav class="header__nav">
+            <ul class="header__list">
+                <li class="header__item"><a href="#">配對</a></li>
+                <li class="header__item"><a href="#">聊天室</a></li>
+                <li class="header__item"><a href="#">活動</a></li>
+                <li class="header__item"><a href="#">討論區</a></li>
+                <li class="header__item dropdown">
+                    <a href="select_page.html">MatchMarket</a>
+                </li>
+                <li class="header__item"><a href="#">會員專區</a></li>
+            </ul>
+        </nav>
+        <div class="header__user"><i class="fa-solid fa-user"></i></div>
+    </header> -->
+
+    <!-- ⬇ 主內容 -->
+    <main class="main-content">
+        <h1 class="page-title">我的訂單</h1>
+
+        <!-- 訂單狀態快速篩選 -->
+        <!-- 多層篩選 -->
+        <div class="multi-filter">
+            <label>
+                訂單狀態：
+                <select id="orderStatusFilter">
+                    <option value="處理中">處理中</option>
+                    <option value="all">全部</option>
+                    <option value="已完成">已完成</option>
+                    <option value="已取消">已取消</option>
+                </select>
+            </label>
+
+            <label>
+                付款狀態：
+                <select id="paymentStatusFilter">
+                    <option value="all">全部</option>
+                    <option value="已付款">已付款</option>
+                    <option value="未付款">未付款</option>
+                </select>
+            </label>
+
+            <label>
+                物流狀態：
+                <select id="shippingStatusFilter">
+                    <option value="all">全部</option>
+                    <option value="已送達">已送達</option>
+                    <option value="已出貨">已出貨</option>
+                    <option value="備貨中">備貨中</option>
+                </select>
+            </label>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 90px">訂單編號</th>
+                        <th style="width: 110px">下單日期</th>
+                        <th style="width: 80px">圖片</th>
+                        <th style="width: 160px">商品名稱</th>
+                        <th style="width: 60px">單價</th>
+                        <th style="width: 60px">數量</th>
+                        <th style="width: 80px">總額</th>
+                        <th style="width: 90px">付款狀態</th>
+                        <th style="width: 90px">物流狀態</th>
+                        <th style="width: 90px">訂單狀態</th>
+                        <th style="width: 60px">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="order-tbody">
+                    <!-- 資料由 JS 動態注入 -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+<script>
+    /* ------------------------------- 公用函式 ------------------------------- */
+    function formatDateTime(timestamp) {
+        if (!timestamp) return "-";
+        const date = new Date(timestamp);
+        return date.toLocaleString("zh-TW", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
+    }
+
+    function goToOrderDetail(orderId) {
+        localStorage.setItem("viewOrderId", orderId);
+        window.location.href = "order_detail.html";
+    }
+
+    /* --------------------------- 取得並渲染訂單資料 --------------------------- */
+    let ALL_ORDERS = [];
+
+    async function loadOrders() {
+        try {
+            const res = await fetch("/api/shorder/buyer");
+            const body = await res.json();
+            if (!body || !Array.isArray(body.data)) {
+                console.error("回傳格式錯誤", body);
+                return;
+            }
+            ALL_ORDERS = body.data;
+            renderOrders("處理中");
+        } catch (err) {
+            console.error("載入訂單失敗", err);
+        }
+    }
+
+    function renderOrders(buttonStatus = "處理中") {
+        const tbody = document.getElementById("order-tbody");
+        tbody.innerHTML = "";
+
+        // 讀取下拉式篩選
+        const orderStatus = document.getElementById("orderStatusFilter")?.value || "all";
+        const paymentStatus = document.getElementById("paymentStatusFilter")?.value || "all";
+        const shippingStatus = document.getElementById("shippingStatusFilter")?.value || "all";
+
+        let filtered = [...ALL_ORDERS];
+
+        // 按鈕篩選（如：全部、待付款、運送中...）
+        if (buttonStatus !== "all") {
+            filtered = filtered.filter(o => o.orderStatusStr === buttonStatus);
+        }
+
+        // 多層篩選（下拉選單）
+        if (orderStatus !== "all") {
+            filtered = filtered.filter(o => o.orderStatusStr === orderStatus);
+        }
+        if (paymentStatus !== "all") {
+            filtered = filtered.filter(o => o.paymentStatusStr === paymentStatus);
+        }
+        if (shippingStatus !== "all") {
+            filtered = filtered.filter(o => o.shippingStatusStr === shippingStatus);
+        }
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="11">沒有符合條件的訂單</td></tr>`;
+            return;
+        }
+
+        filtered.forEach(order => {
+            const firstImg = order.shProd?.picUrls?.[0] || "https://via.placeholder.com/60";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${order.shOrderId}</td>
+                <td>${formatDateTime(order.orderDate)}</td>
+                <td>
+                    <img class="prod-img" src="${firstImg}" 
+                         alt="商品圖片" 
+                         onerror="this.src='https://via.placeholder.com/60';">
+                </td>
+                <td>${order.shProd?.prodName || "-"}</td>
+                <td>$${order.productPrice}</td>
+                <td>${order.productQuantity}</td>
+                <td>$${order.totalAmount}</td>
+                <td>${order.paymentStatusStr}</td>
+                <td>${order.shippingStatusStr}</td>
+                <td>${order.orderStatusStr}</td>
+                <td>
+                    <button class="material-button" onclick="goToOrderDetail(${order.shOrderId})">查看</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* ------------------------------ 篩選器事件 ------------------------------ */
+    document.addEventListener("DOMContentLoaded", () => {
+        loadOrders();
+
+        // 上方按鈕篩選（快速篩選）
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                const status = btn.dataset.status;
+                renderOrders(status);
+            });
+        });
+
+        // 下拉選單多層篩選
+        ["orderStatusFilter", "paymentStatusFilter", "shippingStatusFilter"]
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener("change", () => {
+                        const activeBtn = document.querySelector(".filter-btn.active");
+                        const buttonStatus = activeBtn ? activeBtn.dataset.status : "all";
+                        renderOrders(buttonStatus);
+                    });
+                }
+            });
+    });
+</script>
+
+</body>
+
+</html>

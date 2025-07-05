@@ -34,6 +34,9 @@ public class UserProfileVO {
 
     @Column(name = "intro")
     private String intro;
+    
+    @Column(name = "user_status")
+    private int userStatus;
 
     public UserProfileVO() {
 		super();
@@ -41,7 +44,7 @@ public class UserProfileVO {
 	}
 
 	public UserProfileVO(int userId, String username, int age, String zodiac, List<String> avatarList,
-                         String personality, String interests, String intro) {
+                         String personality, String interests, String intro, int userStatus) {
         this.userId = userId;
         this.username = username;
         this.age = age;
@@ -50,6 +53,7 @@ public class UserProfileVO {
         this.personality = personality;
         this.interests = interests;
         this.intro = intro;
+        this.userStatus = userStatus;
     }
 
     // Getter 和 Setter 方法（可選擇是否加入）
@@ -117,4 +121,12 @@ public class UserProfileVO {
     public void setIntro(String intro) {
         this.intro = intro;
     }
+
+	public int getUserStatus() {
+		return userStatus;
+	}
+
+	public void setUserStatus(int userStatus) {
+		this.userStatus = userStatus;
+	}
 }

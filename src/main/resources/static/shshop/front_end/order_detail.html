@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>訂單詳細資訊</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .order-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section p strong {
+            display: inline-block;
+            width: 120px; /* Adjust as needed for alignment */
+            color: #555;
+            font-weight: 600;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .product-info img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .product-details {
+            flex-grow: 1;
+        }
+
+        .product-details h3 {
+            margin: 0 0 10px 0;
+            color: #3498db;
+            font-size: 1.4em;
+        }
+
+        .product-details p {
+            margin: 5px 0;
+        }
+
+        .price-summary {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border: 1px solid #dde;
+        }
+
+        .price-summary div {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .price-summary div:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #e74c3c;
+            padding-top: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #fff;
+            margin-left: 10px;
+            font-size: 0.9em;
+            background-color: #6c757d; /* Default gray */
+        }
+
+        .status-badge.completed {
+            background-color: #28a745; /* Green */
+        }
+
+        .status-badge.paid {
+            background-color: #007bff; /* Blue */
+        }
+
+        .status-badge.delivered {
+            background-color: #ffc107; /* Yellow, adjust as needed */
+            color: #333;
+        }
+        
+        .status-badge.shipped {
+            background-color: #6f42c1; /* Purple */
+        }
+
+        #loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+                .back-button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none; /* Remove underline for anchor tag */
+            display: inline-block; /* Make it behave like a block for padding/margin */
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="order-container">
+        <div id="loading">載入中，請稍候...</div>
+        <div id="orderContent" style="display: none;">
+            <h1 id="orderTitle">訂單詳細資訊</h1>
+
+            <div class="section">
+                <h2>訂單狀態</h2>
+                <p>
+                    <strong>訂單狀態:</strong>
+                    <span id="orderStatus" class="status-badge"></span>
+                </p>
+                <p>
+                    <strong>付款狀態:</strong>
+                    <span id="paymentStatus" class="status-badge"></span>
+                </p>
+                <p>
+                    <strong>運送狀態:</strong>
+                    <span id="shippingStatus" class="status-badge"></span>
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>訂單資訊</h2>
+                <p><strong>訂單編號:</strong> <span id="shOrderId"></span></p>
+                <p><strong>訂單日期:</strong> <span id="orderDate"></span></p>
+                <p><strong>備註:</strong> <span id="orderNote"></span></p>
+            </div>
+
+            <div class="section">
+                <h2>商品資訊</h2>
+                <div class="product-info">
+                    <img id="prodImage" src="" alt="商品圖片">
+                    <div class="product-details">
+                        <h3 id="prodName"></h3>
+                        <p><strong>品牌:</strong> <span id="prodBrand"></span></p>
+                        <p><strong>描述:</strong> <span id="prodDesc"></span></p>
+                        <p><strong>價格:</strong> NT$ <span id="prodPrice"></span></p>
+                        <p><strong>數量:</strong> <span id="productQuantity"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>賣家資訊</h2>
+                <p><strong>賣家名稱:</strong> <span id="sellerName"></span></p>
+                <p><strong>賣家 Email:</strong> <span id="sellerEmail"></span></p>
+            </div>
+
+            <div class="section">
+                <h2>配送與付款</h2>
+                <p><strong>配送方式:</strong> <span id="shippingMethod"></span></p>
+                <p><strong>配送地址:</strong> <span id="shippingAddress"></span></p>
+                <p><strong>付款方式:</strong> <span id="paymentMethod"></span></p>
+            </div>
+
+            <div class="section price-summary">
+                <h2>費用明細</h2>
+                <div>
+                    <span>商品總額:</span>
+                    <span>NT$ <span id="itemTotal"></span></span>
+                </div>
+                <div>
+                    <span>運費:</span>
+                    <span>NT$ <span id="shippingFee"></span></span>
+                </div>
+                <div>
+                    <span>平台手續費:</span>
+                    <span>NT$ <span id="platformFee"></span></span>
+                </div>
+                <div>
+                    <span>總金額:</span>
+                    <span>NT$ <span id="totalAmount"></span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="back-button-container">
+        <button class="back-button" onclick="history.back()">返回上一頁</button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const orderId = localStorage.getItem('viewOrderId'); // 從 localStorage 獲取 orderId
+            const loadingDiv = document.getElementById('loading');
+            const orderContentDiv = document.getElementById('orderContent');
+
+            if (!orderId) {
+                loadingDiv.textContent = '錯誤：找不到訂單編號。請確認 localStorage 中是否存在 "orderId"。';
+                return;
+            }
+
+            const apiUrl = `http://localhost:8080/api/shorder/${orderId}`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 200 && data.data) {
+                        const order = data.data;
+                        console.log('訂單詳細資訊:', order);
+
+                        // 更新標題
+                        document.getElementById('orderTitle').textContent = `訂單詳細資訊 #${order.shOrderId}`;
+
+                        // 更新訂單狀態
+                        document.getElementById('orderStatus').textContent = order.orderStatusStr;
+                        document.getElementById('orderStatus').className = `status-badge ${order.orderStatusStr === '已完成' ? 'completed' : ''}`; // 根據實際狀態調整 CSS Class
+                        document.getElementById('paymentStatus').textContent = order.paymentStatusStr;
+                        document.getElementById('paymentStatus').className = `status-badge ${order.paymentStatusStr === '已付款' ? 'paid' : ''}`;
+                        document.getElementById('shippingStatus').textContent = order.shippingStatusStr;
+                        document.getElementById('shippingStatus').className = `status-badge ${order.shippingStatusStr === '已送達' ? 'delivered' : order.shippingStatusStr === '已出貨' ? 'shipped' : ''}`;
+
+
+                        // 更新訂單資訊
+                        document.getElementById('shOrderId').textContent = order.shOrderId;
+                        const orderDate = new Date(order.orderDate);
+                        document.getElementById('orderDate').textContent = orderDate.toLocaleString('zh-TW', {
+                            year: 'numeric', month: '2-digit', day: '2-digit',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit',
+                            hour12: false, timeZoneName: 'short'
+                        });
+                        document.getElementById('orderNote').textContent = order.orderNote || '無';
+
+                        // 更新商品資訊
+                        document.getElementById('prodImage').src = order.shProd.picUrls[0] || 'placeholder.jpg'; // 如果沒有圖片則使用預設圖片
+                        document.getElementById('prodName').textContent = order.shProd.prodName;
+                        document.getElementById('prodBrand').textContent = order.shProd.prodBrand;
+                        document.getElementById('prodDesc').textContent = order.shProd.prodDesc;
+                        document.getElementById('prodPrice').textContent = order.shProd.prodPrice;
+                        document.getElementById('productQuantity').textContent = order.productQuantity;
+
+                        // 更新賣家資訊
+                        document.getElementById('sellerName').textContent = order.sellerName;
+                        document.getElementById('sellerEmail').textContent = order.sellerEmail;
+
+                        // 更新配送與付款
+                        document.getElementById('shippingMethod').textContent = order.shippingMethodStr;
+                        document.getElementById('shippingAddress').textContent = order.shippingAddress;
+                        document.getElementById('paymentMethod').textContent = order.paymentMethodStr;
+
+                        // 更新費用明細
+                        document.getElementById('itemTotal').textContent = order.productPrice;
+                        document.getElementById('shippingFee').textContent = order.shippingFee;
+                        document.getElementById('platformFee').textContent = order.platformFee;
+                        document.getElementById('totalAmount').textContent = order.totalAmount;
+
+                        loadingDiv.style.display = 'none';
+                        orderContentDiv.style.display = 'block';
+
+                    } else {
+                        loadingDiv.textContent = `載入訂單失敗：${data.message || '未知錯誤'}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取訂單詳細資訊時發生錯誤:', error);
+                    loadingDiv.textContent = `載入訂單失敗：${error.message}，請檢查網路連線或API服務。`;
+                });
+        });
+    </script>
+</body>
+</html>

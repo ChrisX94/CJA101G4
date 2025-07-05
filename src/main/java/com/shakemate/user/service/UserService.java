@@ -1,7 +1,5 @@
 package com.shakemate.user.service;
 
-
-
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.model.Users;
 import com.shakemate.util.PasswordConvert;
@@ -11,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
-
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
@@ -33,26 +30,32 @@ public class UserService {
         return usersRepo.findByEmail(email);
     }
 
-    public boolean login(String email, String inputPassword) {
+    public enum LoginResult {
+        SUCCESS, WRONG_PASSWORD, USER_NOT_FOUND
+    }
+
+    public LoginResult login(String email, String inputPassword) {
         Users user = usersRepo.findByEmail(email);
-        return user != null && pc.passwordVerify(user.getPwd(), inputPassword);
+        if (user == null)
+            return LoginResult.USER_NOT_FOUND;
+        if (!pc.passwordVerify(user.getPwd(), inputPassword))
+            return LoginResult.WRONG_PASSWORD;
+        return LoginResult.SUCCESS;
     }
 
     @Transactional
-    public void signIn(Users user, String[] interestsArr, String[] personalityArr, String imgUrl ){
+    public void signIn(Users user, String[] interestsArr, String[] personalityArr, String imgUrl) {
         String rowPassword = user.getPwd();
         user.setPwd(pc.hashing(rowPassword));
         user.setImg1(imgUrl);
-        if(interestsArr != null && interestsArr.length > 0) {
+        if (interestsArr != null && interestsArr.length > 0) {
             String interests = String.join(",", interestsArr);
             user.setInterests(interests);
         }
-        if(personalityArr != null && personalityArr.length > 0){
+        if (personalityArr != null && personalityArr.length > 0) {
             String personality = String.join(",", personalityArr);
             user.setPersonality(personality);
         }
-
-
 
         Timestamp now = new Timestamp(System.currentTimeMillis());
         user.setCreatedTime(now);
@@ -68,8 +71,19 @@ public class UserService {
         return usersRepo.findAll();
     }
 
-    public Users getUserById(Integer userId){
+    public Users getUserById(Integer userId) {
         return usersRepo.findById(userId).orElse(null);
     }
-}
 
+    @Transactional
+    public void updateUser(Users user) {
+        user.setUpdatedTime(new Timestamp(System.currentTimeMillis()));
+        usersRepo.save(user); // JPA save() 會自動根據 ID 做更新或新增
+    }
+
+    @Transactional
+    public void deleteUser(Integer userId) {
+        usersRepo.deleteById(userId);
+    }
+
+}

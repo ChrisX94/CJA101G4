@@ -77,7 +77,7 @@
                         <th>描述</th>
                         <th>商品狀態</th>
                         <th>操作</th>
-                        <th>審核拒絕原因</th>
+                        <th>備註</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,7 +106,7 @@
         });
 
         function loadAllProducts() {
-            fetch("http://localhost:8087/api/ShShop/myProds", {
+            fetch("/api/ShShop/myProds", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -146,7 +146,7 @@
                         <td>
                           <button type="button" class="material-button edit-btn" onclick="goToEdit(${prod.prodId}, '${prod.prodStatusStr}')">修改</button>
                         </td>
-                        <td>${prod.rejectReason || ""}</td>
+                        <td>${(prod.rejectReason && '審核不通過原因:<br>' + prod.rejectReason) || ''}</td>
                     `;
                         tbody.appendChild(tr);
                     });
@@ -180,7 +180,7 @@
 
 
         function loadOnSaleProducts() {
-            fetch("http://localhost:8087/api/ShShop/myProds", {
+            fetch("/api/ShShop/myProds", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -235,7 +235,7 @@
             const confirmed = confirm("確定要下架這個商品嗎？");
             if (!confirmed) return;
 
-            fetch("http://localhost:8087/api/ShShop/delist", {
+            fetch("/api/ShShop/delist", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -266,7 +266,7 @@
             const confirmed = confirm("確定要重新送審這個商品嗎？");
             if (!confirmed) return;
 
-            fetch("http://localhost:8087/api/ShShop/sendReview", {
+            fetch("/api/ShShop/sendReview", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -293,7 +293,7 @@
 
 
         function loadOnDelistProducts() {
-            fetch("http://localhost:8087/api/ShShop/myProds", {
+            fetch("/api/ShShop/myProds", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -343,7 +343,7 @@
                 });
         }
         function loadOnPendingProducts() {
-            fetch("http://localhost:8087/api/ShShop/myProds", {
+            fetch("/api/ShShop/myProds", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -383,7 +383,7 @@
                         <td>
                           <button type="button" class="material-button edit-btn" onclick="goToEdit(${prod.prodId}, '${prod.prodStatusStr}')">修改</button>
                         </td>
-                        <td>${prod.rejectReason}</td>
+                        <td>${(prod.rejectReason && '審核不通過原因:<br>' + prod.rejectReason) || ''}</td>
                     `;
                         tbody.appendChild(tr);
                     });

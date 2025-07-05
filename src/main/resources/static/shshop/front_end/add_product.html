@@ -245,7 +245,7 @@
       const formData = new FormData(form);
       imageFiles.forEach(file => formData.append("prodImage", file));
 
-      fetch("http://localhost:8087/api/ShShop/addNewProd", {
+      fetch("/api/ShShop/addNewProd", {
         method: "POST",
         body: formData
       })

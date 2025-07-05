@@ -1,0 +1,407 @@
+@charset "UTF-8";
+
+/* 🔹 頂部選單區 */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6.5rem;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4rem 0 2rem;
+  box-sizing: border-box;
+  z-index: 1000;
+  border-bottom: 2px solid #EBEBEB;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+}
+
+/* 讓 <a> 變成一整塊都可點 */
+.header__logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit; /* 讓文字維持原本顏色 */
+}
+
+.header__logo-img {
+  height: 6.5rem;
+}
+
+.header__logo-link img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+.header__logo-txt {
+  display: flex;
+  flex-direction: column;
+  color: #2EC4B6;
+  font-family: "LXGW Marker Gothic", sans-serif;
+  font-style: normal;
+}
+
+.header__logo-txt .ch {
+  font-size: 2.4rem;
+  font-weight: 800;
+}
+
+.header__logo-txt .en {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.header__nav {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.member {
+  display: inline-block;
+  padding: 6px;
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.member:hover {
+  background-color: rgba(0, 0, 0, 0.06); /* 可調成你要的顏色 */
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__nav .member {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .header__nav .member {
+    display: none;
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__nav {
+    position: absolute;
+    top: 6.5rem;
+    right: 0;
+    flex-direction: column;
+    background: #fff;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    gap: 2rem;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+@media (max-width: 480px) {
+  .header__nav {
+    position: absolute;
+    top: 6.5rem;
+    right: 0;
+    flex-direction: column;
+    background: #fff;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    gap: 2rem;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__nav.open {
+    padding: 2rem;
+    max-height: 500px;
+  }
+}
+@media (max-width: 480px) {
+  .header__nav.open {
+    padding: 2rem;
+    max-height: 500px;
+  }
+}
+
+.header__list {
+  display: flex;
+  gap: 4.5rem;
+  list-style: none;
+  margin-right: 4rem;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__list {
+    flex-direction: column;
+    width: 100%;
+    gap: 1.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .header__list {
+    flex-direction: column;
+    width: 100%;
+    gap: 1.5rem;
+  }
+}
+
+.header__nav-item {
+  font-size: 1.6rem;
+  color: #333;
+  cursor: pointer;
+}
+.header__nav-item:hover {
+  color: #3e92cc;
+}
+
+.header__nav ul {
+  display: flex;
+  list-style: none;
+}
+
+.header__item a {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  text-decoration: none;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #555;
+  transition: color 0.3s;
+  position: relative; /* 用來當作 ::after 的定位基準 */
+  overflow: hidden;
+  letter-spacing: 0.1em;
+}
+.header__item a[lang="en"] {
+  letter-spacing: 0.04em;
+}
+.header__item a:hover {
+  color: #2EC4B6;
+}
+
+/* 🔹 加入動畫底線元素 */
+.header__list .header__item > a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0); /* 從中間縮放 */
+  transform-origin: center;
+  width: 3rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background-color: #2EC4B6; /* 你主色 */
+  transition: transform 0.3s ease;
+}
+
+/* 🔹 hover 時展開底線 */
+.header__list .header__item > a:hover::after {
+  transform: translateX(-50%) scaleX(1); /* 展開成全長 */
+}
+
+.fa-user {
+  font-size: 2rem;
+  color: #555;
+  transition: color 0.3s;
+}
+.fa-user:hover {
+  color: #2EC4B6;
+}
+
+.mobile__nav {
+  display: none;
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .mobile__nav {
+    display: flex;
+    align-items: center;
+  }
+}
+@media (max-width: 480px) {
+  .mobile__nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 2.5rem;
+  height: 1.8rem;
+  cursor: pointer;
+}
+
+.hamburger span {
+  height: 0.3rem;
+  background: #333;
+  border-radius: 3px;
+  transition: background-color 0.3s;
+}
+
+.hamburger:hover  span {
+  background: #2EC4B6;
+}
+
+
+/* ▼ 下拉容器 */
+.header__item {
+  position: relative;
+  height: 6.5rem;
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .header__item {
+    padding-left: 1.5rem;
+    height: 4rem;
+  }
+}
+@media (max-width: 480px) {
+    .header__item {
+    padding-left: 1.5rem;
+    height: 4rem ;
+  }
+}
+
+.header__item > .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: -1.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  min-width: 18rem;
+  padding: 6px 0;
+  z-index: 999;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.header__item > .dropdown-menu1 {
+  left: -6.5rem;
+  min-width: 12rem;
+}
+
+/* ✅ hover 顯示 */
+.header__item:hover > .dropdown-menu {
+  display: block;
+}
+
+/* ▼ 下拉選單內的項目 */
+.dropdown-menu li {
+  list-style: none;
+}
+
+.dropdown-menu li a {
+  display: block;
+  padding: 10px 16px;
+  color: #333;
+  text-decoration: none;
+  font-size: 15px;
+  transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+/* ✅ 滑過效果：背景變亮、文字內縮有動態感 */
+.dropdown-menu li a:hover {
+  background-color: #f5f5f5;
+  padding-left: 20px;
+  color: #2EC4B6; /* teal 色調，你可以改成你的主色 */
+}
+
+/* header 登入後頭像 */
+.avatar-img {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 0 0 3px #2EC4B6;
+}
+
+/* 🔹 讓 .header__nav 最右側能同時擺下大頭貼與箭頭 */
+.header__nav .member,
+.header__nav .header__item.dropdown {
+  display: flex;
+  align-items: center;
+}
+
+/* 🔹 大頭貼右邊的箭頭 icon 微調對齊 */
+.dropdown-toggle .fa-chevron-down {
+  font-size: 1.6rem;
+  margin-left: 0.5rem;
+  color: #444;
+  transition: transform 0.3s ease;
+}
+
+/* 可選：hover 時轉向（如果想加動畫） */
+.header__item.dropdown:hover .fa-chevron-down {
+  transform: rotate(-180deg);
+}
+	
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 1rem;
+  cursor: pointer;
+}
+
+.dropdown-toggle i {
+  font-size: 1.2rem;
+  color: #444;
+}
+
+@media (max-width: 768px) {
+  .header__item.dropdown > .dropdown-menu {
+    display: none;
+  }
+
+  .header__item.dropdown > .dropdown-toggle {
+    display: none;
+  }
+  .header__list .header__item > a::after {
+    display: none;
+  }  
+  
+}
+
+
+/* 預設隱藏手機版大頭貼 */
+.mobile-avatar {
+  display: none;
+}
+
+/* ✅ RWD：手機版顯示，並擺在漢堡左邊 */
+@media (max-width: 768px) {
+  .mobile-avatar {
+    display: block;
+    margin-right: 2rem;
+  }
+
+  .mobile-avatar img {
+	width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 0 0 3px #2EC4B6;
+  }
+
+  /* ✅ 桌機原本那顆大頭貼隱藏 */
+  .header__nav .member {
+    display: none;
+  }
+
+  .header__item.dropdown {
+    display: none;
+  }
+}
+

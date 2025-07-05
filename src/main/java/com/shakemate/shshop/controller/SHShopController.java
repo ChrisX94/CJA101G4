@@ -1,9 +1,6 @@
 package com.shakemate.shshop.controller;
 
-import com.shakemate.shshop.dto.ApiResponse;
-import com.shakemate.shshop.dto.ApiResponseFactory;
-import com.shakemate.shshop.dto.ShProdDto;
-import com.shakemate.shshop.dto.ShProdTypeDto;
+import com.shakemate.shshop.dto.*;
 import com.shakemate.shshop.model.ShProd;
 import com.shakemate.shshop.model.ShProdType;
 import com.shakemate.shshop.service.ShShopService;
@@ -15,12 +12,16 @@ import com.shakemate.util.PostImageUploader;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +40,8 @@ public class SHShopController {
     private PostMultipartFileUploader postImageUploader;
     @Autowired
     private ShShopRedisUtil redisUtil;
-    @Autowired
-    private OpenAiAPI openAiAPI;
+
+
 
 
     /* ======================================== Front-End ========================================== */
@@ -199,6 +200,10 @@ public class SHShopController {
                 data = data.stream().filter(p -> p.getProdStatus() == 3).collect(Collectors.toList());
                 break;
             default:
+                for(ShProdDto p : data){
+                    String reason = "RejectionProdId_" + p.getProdId().toString();
+                    p.setRejectReason(redisUtil.get(reason));
+                }
                 break;
         }
         return ResponseEntity.ok(ApiResponseFactory.success(data));
@@ -218,6 +223,21 @@ public class SHShopController {
     public ResponseEntity<ApiResponse<ShProdDto>> getProdsByIdPost(@RequestParam("id") String idStr) {
         Integer id = Integer.parseInt(idStr);
         ShProdDto data = shShopService.getByIdForUpdate(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+
+    // 用PK找商品(post)用於新增及修改不會計數
+    @PostMapping("/checkout")
+    public ResponseEntity<ApiResponse<ShProdDto>> getProdForBuy(@RequestParam("id") String idStr) {
+        Integer id = Integer.parseInt(idStr);
+        ShProdDto data = shShopService.getByIdForBuy(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+    // 用user找商品(會員用)
+    @PostMapping("/getProdsByUser")
+    public ResponseEntity<ApiResponse<List<ShProdDto>>> getAvailableProdsByUser(@RequestParam("userId") String userIdStr) {
+        Integer userId = Integer.parseInt(userIdStr.toString());
+        List<ShProdDto> data = shShopService.getAvailableProdsByUser(userId);
         return ResponseEntity.ok(ApiResponseFactory.success(data));
     }
 
@@ -332,7 +352,6 @@ public class SHShopController {
     }
 
 
-
     /* ======================================== Back-End ========================================== */
 
     // 用id 找商品，管理員用
@@ -361,8 +380,8 @@ public class SHShopController {
         return ResponseEntity.ok(ApiResponseFactory.success("success", data));
     }
 
-    // 用user找商品(會員、管理員共用)
-    @PostMapping("/getProdsByUser")
+    // 用user找商品(管理員用)
+    @PostMapping("/getProdsByUserAdm")
     public ResponseEntity<ApiResponse<List<ShProdDto>>> getProdsByUser(@RequestParam("userId") String userIdStr) {
         Integer userId = Integer.parseInt(userIdStr.toString());
         List<ShProdDto> data = shShopService.getProdsByUser(userId);
@@ -411,7 +430,7 @@ public class SHShopController {
         }
         return ResponseEntity.ok(ApiResponseFactory.success(returnMsg));
     }
-
+    // 取得所有的審核記錄(Excel檔)
     // 審核不通過 (尚未導入adm session)
     @PostMapping("/reject")
     public ResponseEntity<ApiResponse<ShProdDto>> rejection(@RequestParam("id") Integer prodId,
@@ -425,16 +444,58 @@ public class SHShopController {
         }
     }
 
+    // Open AI 審核
     @PostMapping("/aiAudit")
-    public ResponseEntity<ApiResponse<String>> aiAudit(){
+    public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAudit(){
         List<ShProdDto> pendingList = shShopService.pending();
-        String role = openAiAPI.getSystemSetting();
-        String content = openAiAPI.buildUserPrompt(pendingList);
-        String aiResult = openAiAPI.getResult(role, content);
-        System.out.println(aiResult);
-        shShopService.autoAudit(aiResult);
-        return ResponseEntity.ok(ApiResponseFactory.success(aiResult));
+        if(pendingList == null || pendingList.size() == 0){
+            return ResponseEntity.ok(ApiResponseFactory.success("目前沒有要審核的商品", null));
+        }else {
+            List<ProdAuditResult> aiResult = shShopService.autoAudit(pendingList);
+            return ResponseEntity.ok(ApiResponseFactory.success(aiResult));
+        }
+    }
 
+    // 取的最新的AI審紀錄
+    @PostMapping("/aiAuditLatest")
+    public ResponseEntity<ApiResponse<List<ProdAuditResult>>> aiAuditLatest(){
+        List<ProdAuditResult> data = shShopService.aiAuditHistory();
+        if (data == null || data.isEmpty()) {
+            return ResponseEntity.ok(ApiResponseFactory.success("目前沒有AI審核紀錄", data));
+        } else {
+            return ResponseEntity.ok(ApiResponseFactory.success(data));
+        }
+    }
+
+    // 取得所有AI審紀錄
+    @PostMapping("/aiAuditHistoryAll")
+    public ResponseEntity<ApiResponse<Map<String, List<ProdAuditResult>>>> getAuditHistoryAll() {
+        Map<String, List<ProdAuditResult>> data = shShopService.aiAuditHistoryAll();
+        return ResponseEntity.ok(ApiResponseFactory.success(data));
+    }
+
+    // 取得商品的審核不通過紀錄
+    @PostMapping("/getRejectReason")
+    public ResponseEntity<ApiResponse<String>> getRejectReason(@RequestParam Integer id) {
+        String returnMsg = shShopService.getRejectReason(id);
+        return ResponseEntity.ok(ApiResponseFactory.success(returnMsg));
+    }
+
+    @GetMapping("/downloadAuditHistory")
+    public ResponseEntity<byte[]> downloadAuditHistory(){
+        try {
+            byte[] file = shShopService.generateAuditExcel();
+            String fileName = URLEncoder.encode(shShopService.generateFileName(), StandardCharsets.UTF_8);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(file);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(("❌ 沒有審核紀錄可以匯出").getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(("❌ 沒有審核紀錄可以匯出").getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     /* ======================================== General ========================================== */
@@ -460,6 +521,5 @@ public class SHShopController {
             return ResponseEntity.ok(ApiResponseFactory.success("success", list));
         }
     }
-
 
 }

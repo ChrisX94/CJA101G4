@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>後台管理系統 (RWD 優化)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "LXGW WenKai TC", cursive;
+      background-color: #f4f6fa;
+      color: #333;
+      line-height: 1.5;
+    }
+    header {
+      background-color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 1001;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    /* 新增右上角按鈕容器 */
+    .header-actions {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 0.5rem;
+    }
+    .header-actions button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .header-actions button:hover {
+      background: #f0f0f0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .side-nav {
+      position: fixed;
+      top: 0;
+      left: -240px;
+      width: 240px;
+      height: 100%;
+      max-height: 100vh;
+      overflow-y: auto;
+      background-color: #ffffff;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+      transition: left 0.3s ease;
+      z-index: 1002;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding-top: 1rem;
+    }
+    .side-nav.open { left: 0; }
+    .side-nav button.close-btn {
+      align-self: flex-end;
+      margin: 0.5rem 0.75rem;
+      font-size: 1.2rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #666;
+    }
+    .side-nav a {
+      display: block;
+      padding: 1rem;
+      color: #444;
+      text-decoration: none;
+      width: 100%;
+      border-bottom: 1px solid #eee;
+    }
+    .side-nav a:hover { background-color: #f0f2f5; }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      display: none;
+      z-index: 1000;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .open-menu-btn {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.75rem 1.25rem;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-size: 1rem;
+    }
+    .open-menu-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .action-btn {
+      padding: 1rem;
+      background-color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    @media (max-width: 768px) {
+      header h1 { font-size: 1rem; }
+      .side-nav { width: 200px; }
+      .button-grid { grid-template-columns: 1fr 1fr; }
+      .action-btn { font-size: 0.9rem; }
+    }
+    @media (max-width: 480px) {
+      header { padding: 0.75rem; }
+      header h1 { font-size: 0.9rem; }
+      .side-nav { width: 180px; padding-top: 0.5rem; }
+      .side-nav button.close-btn { margin: 0.3rem 0.5rem; }
+      .button-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+      .action-btn { padding: 0.75rem; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>後台管理系統</h1>
+    <div class="header-actions">
+      <button onclick="history.back()">返回上一頁</button>
+      <button onclick="location.href='/adm/logout'">登出</button>
+    </div>
+  </header>
+
+  <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+  <nav id="sideMenu" class="side-nav">
+    <button class="close-btn" onclick="closeMenu()">✖</button>
+    <a href="/" class="nav-link">回首頁</a>
+    <a href="/adm/adminHome" class="nav-link">回登入</a>
+  </nav>
+
+  <div class="container">
+    <button class="open-menu-btn" id="menuOpenBtn">☰ 開啟選單</button>
+    <div class="button-grid">
+      <button class="action-btn" onclick="location.href='/a-data'">配對管理</button>
+      <button class="action-btn" onclick="location.href='/b-data'">聊天室管理</button>
+      <button class="action-btn" onclick="location.href='/b-data'">活動管理</button>
+      <button class="action-btn" onclick="location.href='/shshop/back_end/back_end_product_manager.html'">MatchMarket管理</button>
+      <button class="action-btn" onclick="location.href='/member'">會員管理</button>
+      <button class="action-btn" onclick="location.href='/member'">通知管理</button>
+      <button class="action-btn" onclick="location.href='/news'">消息管理</button>
+      <button class="action-btn" onclick="location.href='/servicecase/list'">客服管理</button>
+    </div>
+  </div>
+
+  <script>
+    function openMenu() {
+      document.getElementById('sideMenu').classList.add('open');
+      document.getElementById('overlay').style.display = 'block';
+    }
+
+    function closeMenu() {
+      document.getElementById('sideMenu').classList.remove('open');
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    document.getElementById('menuOpenBtn').addEventListener('click', openMenu);
+  </script>
+</body>
+</html>
