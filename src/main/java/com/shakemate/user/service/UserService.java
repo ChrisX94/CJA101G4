@@ -3,6 +3,8 @@ package com.shakemate.user.service;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.model.Users;
 import com.shakemate.util.PasswordConvert;
+
+import org.apache.el.stream.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +33,25 @@ public class UserService {
     }
 
     public enum LoginResult {
-        SUCCESS, WRONG_PASSWORD, USER_NOT_FOUND
+        SUCCESS, WRONG_PASSWORD, USER_NOT_FOUND, ACCOUNT_SUSPENDED, ACCOUNT_DELETED
     }
 
     public LoginResult login(String email, String inputPassword) {
         Users user = usersRepo.findByEmail(email);
         if (user == null)
             return LoginResult.USER_NOT_FOUND;
+
+        // 檢查帳戶狀態
+        if (user.getUserStatus() == (byte) 2) {
+            return LoginResult.ACCOUNT_SUSPENDED;
+        }
+        if (user.getUserStatus() == (byte) 3) {
+            return LoginResult.ACCOUNT_DELETED;
+        }
+        if (user.getUserStatus() != 1) {
+            return LoginResult.USER_NOT_FOUND;
+        }
+
         if (!pc.passwordVerify(user.getPwd(), inputPassword))
             return LoginResult.WRONG_PASSWORD;
         return LoginResult.SUCCESS;

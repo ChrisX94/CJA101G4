@@ -6,7 +6,7 @@ public class ImgbbAKUser {
     public static String getImgbbApiKey(String password) {
         if ("for_User_Use_Only".equals(password)) {
             return IMGBB_API_KEY;
-        }else
+        } else
             return null;
     }
 }

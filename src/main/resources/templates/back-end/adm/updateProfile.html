@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>會員資料修改</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        .error {
+            color: red;
+            font-size: 12px;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .auth-checkbox {
+            margin: 5px 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-success fixed-top justify-content-center">
+        <div align="center">
+            <h2>會員資料修改</h2>
+            <h3>
+                <a class="navbar-brand" th:href="@{/adm/select_page}"><span style="font-size:1.5em;">🔙</span> 回查詢頁</a>
+                <a class="navbar-brand" th:href="@{/adm/adminHome}" style="margin-left: 20px;">🏠 回管理員首頁</a>
+            </h3>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+        <div class="form-container">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">✏️ 修改會員資料</h4>
+                </div>
+                <div class="card-body">
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                    <form th:action="@{/adm/updateProfile}" method="post" th:object="${userUpdate}">
+                        <!-- 會員ID (畫面顯示用，readonly) -->
+                        <div class="mb-3">
+                            <label class="form-label">會員ID:</label>
+                            <input type="text" th:value="*{userId}" class="form-control" readonly
+                                style="background-color: #f8f9fa;">
+                        </div>
+
+                        <!-- 隱藏欄位，實際送出用 -->
+                        <input type="hidden" th:field="*{userId}" />
+
+
+
+                        <!-- 會員名稱-->
+                        <div class="mb-3">
+                            <label class="form-label">會員名稱: <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{username}" class="form-control"
+                                onclick="hideContent('username.errors');" />
+                            <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error"
+                                id="username.errors"></span>
+                        </div>
+
+                        <!-- 會員Email (唯讀) -->
+                        <div class="mb-3">
+                            <label class="form-label">Email:</label>
+                            <input type="text" th:field="*{email}" class="form-control" readonly
+                                style="background-color: #f8f9fa;">
+                        </div>
+                        <!-- 性別-->
+                        <div class="mb-3">
+                            <label class="form-label">性別 <span class="text-danger">*</span></label>
+                            <div class="mt-2 d-flex gap-3">
+                                <label class="form-check-inline">
+                                    <input type="radio" th:field="*{gender}" value="0" class="form-radio-input">
+                                    <span class="form-option-text">男</span>
+                                </label>
+                                <label class="form-check-inline">
+                                    <input type="radio" th:field="*{gender}" value="1" class="form-radio-input">
+                                    <span class="form-option-text">女</span>
+                                </label>
+                            </div>
+                            <span th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"
+                                class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <!-- 出生日期-->
+                        <div class="mb-3">
+                            <label class="form-label">出生日期: <span class="text-danger">*</span></label>
+                            <input type="date" th:field="*{birthday}" class="form-control"
+                                onclick="hideContent('birthday.errors');" />
+                            <span th:if="${#fields.hasErrors('birthday')}" th:errors="*{birthday}" class="error"
+                                id="birthday.errors"></span>
+                        </div>
+
+                        <!-- 居住區域-->
+                        <div class="mb-3">
+                            <label class="form-label">居住區域: <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{location}" class="form-control"
+                                onclick="hideContent('location.errors');" />
+                            <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="error"
+                                id="location.errors"></span>
+                        </div>
+
+                        <!--關於我-->
+                        <div class="mb-3">
+                            <label class="form-label">關於我: <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{intro}" class="form-control"
+                                onclick="hideContent('intro.errors');" />
+                            <span th:if="${#fields.hasErrors('intro')}" th:errors="*{intro}" class="error"
+                                id="intro.errors"></span>
+                        </div>
+
+                        <!-- 帳號狀態設定 -->
+                        <div class="mb-3">
+                            <label class="form-label">帳號狀態:</label>
+                            <div class="form-check">
+                                <input type="radio" th:field="*{userStatus}" class="form-check-input" value="1"
+                                    id="statusNormal">
+                                <label class="form-check-label" for="statusNormal">一般會員（可登入）</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" th:field="*{userStatus}" class="form-check-input" value="2"
+                                    id="statusSuspended">
+                                <label class="form-check-label" for="statusSuspended">停權</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" th:field="*{userStatus}" class="form-check-input" value="3"
+                                    id="statusDeleted">
+                                <label class="form-check-label" for="statusDeleted">註銷</label>
+                            </div>
+                        </div>
+
+
+                        <!-- 按鈕區域 -->
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/adm/listAllUser}" class="btn btn-secondary">🔙 返回列表</a>
+                            <button type="submit" class="btn btn-warning">💾 送出修改</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="text/javascript">
+        // 清除提示信息
+        function hideContent(elementId) {
+            var element = document.getElementById(elementId);
+            if (element) {
+                element.style.display = "none";
+            }
+        }
+
+        // 防止瀏覽器快取
+        window.onpageshow = function (event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        };
+    </script>
+
+</body>
+
+</html>

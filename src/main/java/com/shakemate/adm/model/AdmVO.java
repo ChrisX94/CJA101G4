@@ -135,7 +135,7 @@ public class AdmVO implements Serializable {
 		this.admSta = admSta;
 	}
 
-	// 新增業界常用的 getStatus/setStatus 方法（對應 admSta）
+	// 新增getStatus/setStatus 方法（對應 admSta）
 	public Boolean getStatus() {
 		return admSta;
 	}
