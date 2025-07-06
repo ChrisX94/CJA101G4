@@ -31,31 +31,13 @@
 }
 
 .header__logo-img {
-  height: 6.5rem;
+  height: 5rem;
 }
 
 .header__logo-link img {
   height: 100%;
   width: auto;
   object-fit: contain;
-}
-
-.header__logo-txt {
-  display: flex;
-  flex-direction: column;
-  color: #2EC4B6;
-  font-family: "LXGW Marker Gothic", sans-serif;
-  font-style: normal;
-}
-
-.header__logo-txt .ch {
-  font-size: 2.4rem;
-  font-weight: 800;
-}
-
-.header__logo-txt .en {
-  font-size: 1.4rem;
-  font-weight: 800;
 }
 
 .header__nav {
