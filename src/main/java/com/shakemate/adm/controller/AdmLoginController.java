@@ -30,29 +30,38 @@ public class AdmLoginController {
 	@PostMapping("/admLogin")
 	public String doLogin(@RequestParam String admAcc, @RequestParam String admPwd, HttpSession session, Model model) {
 
-		AdmVO adm = admService.findByAcc(admAcc); // 在 service 寫這個方法
+		AdmVO adm = admService.findByAcc(admAcc); // 先查帳號
 
-		if (adm != null && PasswordUtil.matchPassword(admPwd, adm.getAdmPwd()) && adm.getAdmSta()) {
+		if (adm == null) {
+			model.addAttribute("error", "您的帳號不存在");
+			return "back-end/adm/admLogin";
+		}
 
-			// 判斷是否為最高級管理員
-			boolean isSuperAdmin = adm.getAuthFuncs() != null &&
-					adm.getAuthFuncs().stream().anyMatch(auth -> auth.getAuthId() == 1);
+		// 判斷帳號是否停用
+		if (!adm.getAdmSta()) {
+			model.addAttribute("error", "您的帳號已被停用");
+			return "back-end/adm/admLogin";
+		}
 
-			// 將登入者的資料儲存進session
-			session.setAttribute("loggedInAdm", adm);
-			session.setAttribute("isSuperAdmin", isSuperAdmin); // 把判斷結果塞進 session
+		// 密碼錯誤
+		if (!PasswordUtil.matchPassword(admPwd, adm.getAdmPwd())) {
+			model.addAttribute("error", "您的帳號或密碼錯誤");
+			return "back-end/adm/admLogin";
+		}
 
-			// 若為最高級管理員 導向list all
-			if (isSuperAdmin) {
-				return "redirect:/adm/adminHome";
-				// 若不為 導向一般頁面
-			} else {
-				return "back-end/adm/adminHome";
-			}
+		// 登入成功，判斷是否為超級管理員
+		boolean isSuperAdmin = adm.getAuthFuncs() != null &&
+				adm.getAuthFuncs().stream().anyMatch(auth -> auth.getAuthId() == 1);
 
+		// 設定 session
+		session.setAttribute("loggedInAdm", adm);
+		session.setAttribute("isSuperAdmin", isSuperAdmin);
+
+		// 根據角色導向
+		if (isSuperAdmin) {
+			return "redirect:/adm/adminHome";
 		} else {
-			model.addAttribute("error", "您的帳號或密碼錯誤"); // failed to login
-			return "/back-end/adm/admLogin";
+			return "back-end/adm/adminHome";
 		}
 	}
 

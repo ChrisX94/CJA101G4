@@ -19,7 +19,8 @@ public class UserPostMultipartFileUploader {
     private static final String IMGBB_API_KEY = ImgbbAKUser.getImgbbApiKey("for_User_Use_Only");
 
     public static String uploadImageToImgbb(MultipartFile imageFile) throws IOException {
-        if (imageFile == null || imageFile.isEmpty()) return null;
+        if (imageFile == null || imageFile.isEmpty())
+            return null;
 
         // 1. 將圖片讀成 Base64
         byte[] imageBytes = imageFile.getBytes();

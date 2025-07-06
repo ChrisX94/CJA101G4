@@ -13,8 +13,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import com.shakemate.user.model.Users;
+import com.shakemate.user.service.UserService;
 
 public class UserLoginFilter implements Filter {
+
+    private UserService userService;
+
+    public UserLoginFilter(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void init(FilterConfig config) throws ServletException {
@@ -53,11 +60,11 @@ public class UserLoginFilter implements Filter {
         }
 
         // 檢查用戶狀態（如果用戶已登入）
-        if (loggedInUser instanceof Users) {
-            Users user = (Users) loggedInUser;
+        if (account instanceof Integer && userService != null) {
+            Integer userId = (Integer) account;
+            Users user = userService.getUserById(userId);
 
-            // 檢查用戶狀態是否正常（userStatus = 1 表示正常）
-            if (user.getUserStatus() != 1) {
+            if (user != null && user.getUserStatus() != 1) {
                 // 用戶狀態異常，清除 session 並重定向到登入頁面
                 session.invalidate();
                 response.sendRedirect(contextPath + "/login?error=account_disabled");

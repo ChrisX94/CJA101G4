@@ -23,6 +23,9 @@ import com.shakemate.adm.model.AdmVO;
 import com.shakemate.adm.model.AuthFuncService;
 import com.shakemate.adm.model.AuthFuncVO;
 import com.shakemate.adm.util.PasswordUtil;
+import com.shakemate.user.dto.UserUpdateDTO;
+import com.shakemate.user.model.Users;
+import com.shakemate.user.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +43,9 @@ public class AdmController {
 
 	@Autowired
 	private AdmRepository admRepository;
+
+	@Autowired
+	private UserService userService;
 
 	// 顯示新增管理員表單
 	@GetMapping("addAdm")
@@ -159,9 +165,6 @@ public class AdmController {
 			// 先測試資料庫連接
 			admSvc.testDatabaseConnection();
 
-			// 使用Service的基本資料+權限更新方法
-			admSvc.updateAdmBasicWithAuth(admVO, authFuncIds);
-
 			// 清除快取
 			admSvc.clearCache();
 
@@ -175,44 +178,10 @@ public class AdmController {
 			System.err.println("錯誤類型: " + e.getClass().getSimpleName());
 			e.printStackTrace();
 			model.addAttribute("error", "修改失敗：" + e.getMessage());
-			return "back-end/adm/update_adm_input";
+			return "back-end/adm/updateProfile";
 		}
 
-		return "redirect:/adm/listAllAdm";
-	}
-
-	// 刪除管理員
-	@PostMapping("delete")
-	public String delete(@RequestParam("admId") Integer admId,
-			HttpSession session, ModelMap model, RedirectAttributes redirectAttributes) {
-
-		// 檢查當前登入的管理員
-		AdmVO currentAdm = (AdmVO) session.getAttribute("loggedInAdm");
-		if (currentAdm == null) {
-			return "redirect:/adm/admLogin";
-		}
-
-		// 防止刪除自己
-		if (currentAdm.getAdmId().equals(admId)) {
-			redirectAttributes.addFlashAttribute("error", "不能刪除自己的帳號！");
-			return "redirect:/adm/listAllAdm";
-		}
-
-		// 檢查要刪除的管理員是否存在
-		AdmVO admToDelete = admSvc.getOneAdm(admId);
-		if (admToDelete == null) {
-			redirectAttributes.addFlashAttribute("error", "要刪除的管理員不存在！");
-			return "redirect:/adm/listAllAdm";
-		}
-
-		try {
-			admSvc.deleteAdm(admId);
-			redirectAttributes.addFlashAttribute("success", "管理員刪除成功！");
-		} catch (Exception e) {
-			redirectAttributes.addFlashAttribute("error", "刪除失敗：" + e.getMessage());
-		}
-
-		return "redirect:/adm/listAllAdm";
+		return "redirect:/adm/listAllUser";
 	}
 
 	// 權限下拉選單資料（checkbox 多選用）
@@ -274,6 +243,102 @@ public class AdmController {
 		List<AdmVO> list = admSvc.getAll();
 		model.addAttribute("admList", list);
 		return "back-end/adm/listAllAdm";
+	}
+
+	// 查詢所有員工
+	@GetMapping("listAllUser")
+	public String listAllUser(HttpSession session, ModelMap model, HttpServletResponse response) {
+		// 設置響應標頭防止快取
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Expires", "0");
+
+		AdmVO adm = (AdmVO) session.getAttribute("loggedInAdm");
+
+		// 沒有登入 → 踢回 login 頁面
+		if (adm == null) {
+			return "redirect:/adm/admLogin";
+		}
+
+		List<Users> list = userService.getAllUsers();
+		model.addAttribute("userList", list);
+		return "back-end/adm/listAllUser";
+	}
+
+	// 修改會員
+	@GetMapping("/updateProfile")
+	public String updateProfile(@RequestParam("userId") Integer userId,
+			HttpSession session,
+			ModelMap model,
+			HttpServletResponse response) {
+		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Expires", "0");
+
+		AdmVO adm = (AdmVO) session.getAttribute("loggedInAdm");
+		if (adm == null) {
+			return "redirect:/adm/admLogin";
+		}
+
+		Users user = userService.getUserById(userId);
+		if (user == null) {
+			model.addAttribute("error", "找不到該會員");
+			return "redirect:/adm/listAllUser";
+		}
+
+		// 將 Users entity → DTO
+		UserUpdateDTO dto = new UserUpdateDTO();
+		dto.setUserId(user.getUserId());
+		dto.setUsername(user.getUsername());
+		dto.setEmail(user.getEmail());
+		dto.setGender(user.getGender());
+		dto.setBirthday(user.getBirthday());
+		dto.setLocation(user.getLocation());
+		dto.setIntro(user.getIntro());
+		dto.setUserStatus(user.getUserStatus());
+
+		// 改為 userUpdate，對應 Thymeleaf 的 th:object
+		model.addAttribute("userUpdate", dto);
+		return "back-end/adm/updateProfile";
+	}
+
+	// 處理修改表單送出
+	@PostMapping("updateProfile")
+	public String updateProfile(@Valid @ModelAttribute("userUpdate") UserUpdateDTO userdto,
+			BindingResult result,
+			ModelMap model,
+			RedirectAttributes redirectAttributes) {
+
+		Users existingUser = userService.getUserById(userdto.getUserId());
+		if (existingUser == null) {
+			model.addAttribute("error", "要修改的會員不存在！");
+			model.addAttribute("userUpdate", userdto);
+			return "back-end/adm/updateProfile";
+		}
+
+		if (result.hasErrors()) {
+			model.addAttribute("userUpdate", userdto);
+			return "back-end/adm/updateProfile";
+		}
+
+		try {
+			existingUser.setUsername(userdto.getUsername());
+			existingUser.setGender(userdto.getGender());
+			existingUser.setBirthday(userdto.getBirthday());
+			existingUser.setLocation(userdto.getLocation());
+			existingUser.setIntro(userdto.getIntro());
+			existingUser.setUserStatus(userdto.getUserStatus()); // 這是關鍵！
+
+			userService.updateUser(existingUser); // 寫進資料庫
+
+			redirectAttributes.addFlashAttribute("success", "會員資料修改成功！");
+			return "redirect:/adm/listAllUser";
+		} catch (Exception e) {
+			model.addAttribute("error", "修改失敗：" + e.getMessage());
+			model.addAttribute("userUpdate", userdto);
+			return "back-end/adm/updateProfile";
+		}
+
 	}
 
 	@GetMapping("/adminHome")
