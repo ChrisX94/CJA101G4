@@ -13,7 +13,6 @@ import com.shakemate.activity.repository.ActivityRepository;
 import com.shakemate.activity.service.ActivityCommentService;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.model.Users;
-
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

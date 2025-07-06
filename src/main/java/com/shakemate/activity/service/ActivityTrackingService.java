@@ -15,7 +15,9 @@ public interface ActivityTrackingService {
     ActivityTrackingDTO update(ActivityTrackingId id, ActivityTrackingUpdateDTO updateDTO);
     void delete(ActivityTrackingId id);
 
+
     void createTracking(ActivityTrackingCreateDTO createDTO);
     void unTracking(Integer userId, Integer activityId);
+    boolean isTracking(Integer userId, Integer activityId);
 
 }

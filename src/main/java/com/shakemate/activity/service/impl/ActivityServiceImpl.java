@@ -423,6 +423,50 @@ public class ActivityServiceImpl implements ActivityService {
         activityRepository.save(activity);
     }
 
+    @Override
+    public List<ActivityCalendarResponse> getMyCalendar(Integer userId) {
+
+        // 找團員
+        List<ActivityParticipant> all = activityParticipantRepository.findAll();
+        List<ActivityCalendarResponse> responseList = new ArrayList<>();
+        for(ActivityParticipant par : all) {
+            // 2 - 已加入
+            if(par.getId().getParticipantId() == userId && par.getParStatus() == 2) {
+                ActivityCalendarResponse cal = new ActivityCalendarResponse();
+                Activity activity = par.getActivity();
+                cal.setActivityId(activity.getActivityId());
+                cal.setTitle(activity.getTitle());
+                cal.setActivStartTime(activity.getActivStartTime());
+                cal.setActivEndTime(activity.getActivEndTime());
+                cal.setParticipantStatusCode((byte) 2);
+                cal.setParticipantStatusLabel("團員");
+
+                responseList.add(cal);
+            }
+        }
+
+        // 找團主
+        List<Activity> actAll = activityRepository.findAll();
+        for(Activity act : actAll) {
+            Users user = act.getUser();
+            if(user.getUserId() == userId && getActivityStatus(act.getActivityId()).getStatusCode() != 6 ) {
+                ActivityCalendarResponse cal = new ActivityCalendarResponse();
+                cal.setActivityId(act.getActivityId());
+                cal.setTitle(act.getTitle());
+                cal.setActivStartTime(act.getActivStartTime());
+                cal.setActivEndTime(act.getActivEndTime());
+                cal.setParticipantStatusCode((byte) 1);
+                cal.setParticipantStatusLabel("團主");
+
+                responseList.add(cal);
+            }
+        }
+
+        return responseList;
+
+    }
+
+
     // 獲得參加狀態
     public ParticipantStatusResponse getParticipantStatus(Integer userId, Integer activityId) {
         Optional<ActivityParticipant> participant = activityParticipantRepository.findById(new ActivityParticipantId(userId, activityId));
@@ -459,7 +503,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         // 若已取消，直接回傳狀態碼 6
         if (activity.getActivityStatus() == 3) {
-            return new ActivityStatusResponse(6, "活動已取消");
+            return new ActivityStatusResponse(6, "已取消");
         }
 
 
@@ -480,19 +524,19 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         if (!now.isBefore(regEnd) && now.isBefore(actStart)) {
-            return new ActivityStatusResponse(2, "報名已截止");
+            return new ActivityStatusResponse(2, "即將開始");
         }
 
         if (!now.isBefore(actStart) && now.isBefore(actEnd)) {
-            return new ActivityStatusResponse(4, "活動進行中");
+            return new ActivityStatusResponse(4, "進行中");
         }
 
         if(now.isAfter(actEnd) && activity.getSignupCount() < activity.getMinPeople()) {
-            return new ActivityStatusResponse(6, "活動已取消");
+            return new ActivityStatusResponse(6, "已取消");
         }
 
         if (now.isAfter(actEnd)) {
-            return new ActivityStatusResponse(5, "活動已結束");
+            return new ActivityStatusResponse(5, "已結束");
         }
 
         // 理論上不會進入此處，保底

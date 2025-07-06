@@ -143,6 +143,22 @@ public class ActivityTrackingServiceImpl implements ActivityTrackingService {
 
     }
 
+    // 使用者是否收藏了活動
+    @Override
+    public boolean isTracking(Integer userId, Integer activityId) {
+
+        Optional<ActivityTracking> activityTracking = activityTrackingRepository.findById(new ActivityTrackingId(activityId, userId));
+        if(activityTracking.isEmpty()) {
+            return false;
+        } else {
+            ActivityTracking tracking = activityTracking.get();
+            if(tracking.getTrackingState() == 1) {
+                return false;
+            }
+            return true;
+        }
+    }
+
 
 
 
