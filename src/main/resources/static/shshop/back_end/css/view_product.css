@@ -15,7 +15,7 @@ body {
 
 /* 側邊欄樣式 */
 aside {
-    width: 12%; /* 側邊欄寬度 */
+    width: 15%; /* 側邊欄寬度 */
     background-color: #2c3e50; /* 深藍灰色背景 */
     color: white; /* 文字顏色 */
     padding: 20px; /* 內邊距 */
@@ -152,6 +152,7 @@ th {
     border: none; /* 無邊框 */
     border-radius: 4px; /* 圓角 */
     color: white; /* 文字顏色 */
+    background: gray;
 }
 
 .btn-edit {
