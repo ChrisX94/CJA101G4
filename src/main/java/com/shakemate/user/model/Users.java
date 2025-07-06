@@ -1,18 +1,25 @@
 package com.shakemate.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.shakemate.ordermaster.model.ShOrder;
+import com.shakemate.activity.entity.Activity;
+import com.shakemate.activity.entity.ActivityAnswer;
+import com.shakemate.activity.entity.ActivityComment;
+import com.shakemate.activity.entity.ActivityParticipant;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "USERS")
 public class Users implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -70,39 +77,11 @@ public class Users implements Serializable {
     @Column(name = "IMG5", length = 300)
     private String img5;
 
-    @Transient
-    private MultipartFile[] uploadedImages;
-
-    public MultipartFile[] getUploadedImages() {
-        return uploadedImages;
-    }
-
-    public void setUploadedImages(MultipartFile[] uploadedImages) {
-        this.uploadedImages = uploadedImages;
-    }
-
-    @Transient
-    private List<java.util.Map<String, String>> photos;
-
-    public List<java.util.Map<String, String>> getPhotos() {
-        return photos;
-    }
-
-    public void setPhotos(List<java.util.Map<String, String>> photos) {
-        this.photos = photos;
-    }
-
     @Column(name = "INTERESTS", length = 300)
     private String interests;
 
     @Column(name = "PERSONALITY", length = 300)
     private String personality;
-
-    @Transient
-    private List<String> interestsList;
-
-    @Transient
-    private List<String> personalityList;
 
     @Column(name = "UPDATED_TIME", nullable = false)
     private Timestamp updatedTime;
@@ -118,14 +97,6 @@ public class Users implements Serializable {
 
     @Column(name = "SELL_STATUS", nullable = false)
     private Boolean sellStatus;
-
-    @OneToMany(mappedBy = "buyer")
-    @JsonIgnore
-    private List<ShOrder> buyerOrders;
-
-    @OneToMany(mappedBy = "seller")
-    @JsonIgnore
-    private List<ShOrder> sellerOrders;
 
     public Users() {
     }
@@ -279,22 +250,6 @@ public class Users implements Serializable {
         this.personality = personality;
     }
 
-    public List<String> getInterestsList() {
-        return interestsList;
-    }
-
-    public void setInterestsList(List<String> interestsList) {
-        this.interestsList = interestsList;
-    }
-
-    public List<String> getPersonalityList() {
-        return personalityList;
-    }
-
-    public void setPersonalityList(List<String> personalityList) {
-        this.personalityList = personalityList;
-    }
-
     public Timestamp getUpdatedTime() {
         return updatedTime;
     }
@@ -335,22 +290,6 @@ public class Users implements Serializable {
         this.sellStatus = sellStatus;
     }
 
-    public List<ShOrder> getBuyerOrders() {
-        return buyerOrders;
-    }
-
-    public void setBuyerOrders(List<ShOrder> buyerOrders) {
-        this.buyerOrders = buyerOrders;
-    }
-
-    public List<ShOrder> getSellerOrders() {
-        return sellerOrders;
-    }
-
-    public void setSellerOrders(List<ShOrder> sellerOrders) {
-        this.sellerOrders = sellerOrders;
-    }
-
     @Override
     public String toString() {
         return "Users{" +
@@ -384,4 +323,25 @@ public class Users implements Serializable {
     public int hashCode() {
         return Objects.hashCode(userId);
     }
+
+    // -- 活動功能相關 --
+    // 一對多：一個會員發起多個活動
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Activity> activities = new ArrayList<>();
+
+    // 一對多：一個會員有多個活動參與
+    @JsonIgnore
+    @OneToMany(mappedBy = "participant", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ActivityParticipant> activityParticipants = new ArrayList<>();
+
+    // 一個會員發出多則留言
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ActivityComment> activityComments = new ArrayList<>();
+
+    // 一個會員有多個活動問題回答
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ActivityAnswer> activityAnswers = new ArrayList<>();
 }
