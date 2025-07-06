@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.stream.Collectors;
 
 // base package
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.shakemate.activity")
 public class GlobalExceptionHandler {
 
     // 處理自訂例外
