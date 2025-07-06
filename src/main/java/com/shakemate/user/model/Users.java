@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.sql.Date;
@@ -344,4 +345,48 @@ public class Users implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ActivityAnswer> activityAnswers = new ArrayList<>();
+
+    @Transient
+    private List<String> interestsList;
+
+    @Transient
+    private List<String> personalityList;
+
+    public List<String> getInterestsList() {
+        return interestsList;
+    }
+
+    public void setInterestsList(List<String> interestsList) {
+        this.interestsList = interestsList;
+    }
+
+    public List<String> getPersonalityList() {
+        return personalityList;
+    }
+
+    public void setPersonalityList(List<String> personalityList) {
+        this.personalityList = personalityList;
+    }
+
+    @Transient
+    private List<java.util.Map<String, String>> photos;
+
+    @Transient
+    private MultipartFile[] uploadedImages;
+
+    public MultipartFile[] getUploadedImages() {
+        return uploadedImages;
+    }
+
+    public void setUploadedImages(MultipartFile[] uploadedImages) {
+        this.uploadedImages = uploadedImages;
+    }
+
+    public List<java.util.Map<String, String>> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<java.util.Map<String, String>> photos) {
+        this.photos = photos;
+    }
 }
