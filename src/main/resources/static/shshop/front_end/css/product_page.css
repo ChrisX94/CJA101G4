@@ -3,35 +3,51 @@
     --fa-style-family-brands: "Font Awesome 6 Brands";
     --fa-font-brands: normal 400 1em / 1 "Font Awesome 6 Brands";
     --header-height: 3rem;
-    --main-bg-bright-green: #DCFF61; /* 背景漸層的亮綠色 */
-    --main-bg-teal: #2EC4B6; /* 背景漸層的藍綠色 (主色調) */
+    --main-bg-bright-green: #DCFF61;
+    /* 背景漸層的亮綠色 */
+    --main-bg-teal: #2EC4B6;
+    /* 背景漸層的藍綠色 (主色調) */
 
-    --primary-button-color: #2EC4B6; /* 主要按鈕綠色，與背景藍綠色一致 */
-    --secondary-button-color: #DCFF61; /* 次要按鈕或強調色，使用亮綠色 */
-    --text-color: #333; /* 常用文字顏色 */
-    --light-gray: #f0f4f7; /* 輕微的背景/邊框色，保持中性 */
-    --medium-gray: #ccc; /* 中等灰色，用於邊框等 */
-    --dark-gray: #555; /* 深灰色，用於次要文字 */
-    --card-bg-color: #ffffff; /* 卡片背景色 */
-    --price-color: #d35400; /* 價格的強調色，保持鮮明 */
+    --primary-button-color: #2EC4B6;
+    /* 主要按鈕綠色，與背景藍綠色一致 */
+    --secondary-button-color: #DCFF61;
+    /* 次要按鈕或強調色，使用亮綠色 */
+    --text-color: #333;
+    /* 常用文字顏色 */
+    --light-gray: #f0f4f7;
+    /* 輕微的背景/邊框色，保持中性 */
+    --medium-gray: #ccc;
+    /* 中等灰色，用於邊框等 */
+    --dark-gray: #555;
+    /* 深灰色，用於次要文字 */
+    --card-bg-color: #ffffff;
+    /* 卡片背景色 */
+    --price-color: #d35400;
+    /* 價格的強調色，保持鮮明 */
 }
 
-*{
-    font-size: 62.5%; /* 1rem = 10px */
+* {
+    font-size: 62.5%;
+    /* 1rem = 10px */
 }
 
 /* 通用字體大小設定 */
 .header {
-    font-size: 62.5%; /* 1rem = 10px */
-    box-sizing: border-box; /* 確保所有元素的盒模型一致 */
+    font-size: 62.5%;
+    /* 1rem = 10px */
+    box-sizing: border-box;
+    /* 確保所有元素的盒模型一致 */
 }
 
 /* --- 核心背景與佈局設定 --- */
-html, body {
-    height: 100%; /* 讓 html 和 body 佔滿整個視窗高度 */
+html,
+body {
+    height: 100%;
+    /* 讓 html 和 body 佔滿整個視窗高度 */
     margin: 0;
     padding: 0;
-    background: transparent; /* 確保沒有任何預設背景 */
+    background: transparent;
+    /* 確保沒有任何預設背景 */
     /* font-family in body is the best place for overall text */
     font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
@@ -39,43 +55,52 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
-    line-height: 1.6; /* 確保行高可讀性 */
-    color: var(--text-color); /* 預設文字顏色 */
+    line-height: 1.6;
+    /* 確保行高可讀性 */
+    color: var(--text-color);
+    /* 預設文字顏色 */
 }
 
 .bg {
-    position: fixed; /* 將背景固定在視窗，不隨內容捲動 */
+    position: fixed;
+    /* 將背景固定在視窗，不隨內容捲動 */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* 確保背景在所有內容的最下層 */
-    overflow: hidden; /* 防止背景內容溢出 */
+    z-index: -1;
+    /* 確保背景在所有內容的最下層 */
+    overflow: hidden;
+    /* 防止背景內容溢出 */
     /* 背景拼接色塊（亮綠 + 藍綠） */
-    background: linear-gradient(
-        185deg,
-        var(--main-bg-bright-green) 0%,
-        var(--main-bg-bright-green) 55%,
-        var(--main-bg-teal) 55%,
-        var(--main-bg-teal) 100%
-    );
+    background: linear-gradient(185deg,
+            var(--main-bg-bright-green) 0%,
+            var(--main-bg-bright-green) 55%,
+            var(--main-bg-teal) 55%,
+            var(--main-bg-teal) 100%);
 }
+
 .bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
-  z-index: 0;
-  pointer-events: none;
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.35);
+    /* 可以調淡一點 0.15～0.3 */
+    z-index: 0;
+    pointer-events: none;
 }
 
 /* 確保主要內容區塊能顯示在背景之上 */
 .main-detail {
     padding-top: calc(var(--header-height) + 2rem);
-    background-color: transparent; /* 再次強調為透明 */
-    flex-grow: 1; /* 讓內容區塊自動填滿剩餘空間 */
-    position: relative; /* 確保 main-detail 具有自己的堆疊上下文，並在 .bg 之上 */
-    z-index: 1; /* 確保在背景之上 */
+    background-color: transparent;
+    /* 再次強調為透明 */
+    flex-grow: 1;
+    /* 讓內容區塊自動填滿剩餘空間 */
+    position: relative;
+    /* 確保 main-detail 具有自己的堆疊上下文，並在 .bg 之上 */
+    z-index: 1;
+    /* 確保在背景之上 */
     /* Add background-color: transparent here too if it's not working */
 }
 
@@ -84,9 +109,12 @@ body {
     margin: 0 auto;
     padding: 0 2rem;
     box-sizing: border-box;
-    background-color: transparent; /* 確保 product-page 的背景也是透明，除非您想讓它有個白色背景 */
-    position: relative; /* Ensure it has a stacking context to be above .bg */
-    z-index: 2; /* Higher z-index than main-detail if needed, but 1 is usually enough */
+    background-color: transparent;
+    /* 確保 product-page 的背景也是透明，除非您想讓它有個白色背景 */
+    position: relative;
+    /* Ensure it has a stacking context to be above .bg */
+    z-index: 2;
+    /* Higher z-index than main-detail if needed, but 1 is usually enough */
 }
 
 
@@ -161,7 +189,8 @@ body {
 /* 🔹 右側商品資訊 */
 .right-info-box {
     flex: 1 1 400px;
-    background-color: var(--card-bg-color); /* 這塊維持白色卡片背景 */
+    background-color: var(--card-bg-color);
+    /* 這塊維持白色卡片背景 */
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
@@ -298,7 +327,8 @@ body {
 }
 
 .product-section {
-    background: var(--card-bg-color); /* 這塊維持白色卡片背景 */
+    background: var(--card-bg-color);
+    /* 這塊維持白色卡片背景 */
     padding: 2rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
@@ -344,7 +374,22 @@ body {
     cursor: pointer;
 }
 
-strong{
+strong {
     font-size: 1.6rem;
 }
 
+#return-btn {
+    background-color: #2EC4B6;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 2rem;
+    color: white;
+    margin-left: 2.4rem;
+}
+
+#return-div{
+    margin-bottom: 0.8rem;
+}
