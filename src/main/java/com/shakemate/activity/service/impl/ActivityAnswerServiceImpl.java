@@ -48,8 +48,10 @@ public class ActivityAnswerServiceImpl implements ActivityAnswerService {
                 .collect(Collectors.toList());
     }
 
+    // 若答卷存在，則修改
     @Override
     public ActivityAnswerDTO create(ActivityAnswerCreateDTO createDTO) {
+
 
         // createDTO -> Entity
         ActivityAnswer activityAnswer = activityAnswerMapper.toEntity(createDTO);
@@ -74,6 +76,7 @@ public class ActivityAnswerServiceImpl implements ActivityAnswerService {
 
         // Entity -> DTO
         return activityAnswerMapper.toDto(saved);
+
 
 
 
@@ -115,6 +118,31 @@ public class ActivityAnswerServiceImpl implements ActivityAnswerService {
     @Transactional
     public List<ActivityAnswerDTO> createSubmission(List<ActivityAnswerCreateDTO> createDTOList) {
 
+        // 先找是否有
+        List<ActivityAnswer> exist = new ArrayList<>();
+        for(ActivityAnswerCreateDTO cr : createDTOList) {
+            List<ActivityAnswer> all = activityAnswerRepository.findAll();
+            for(ActivityAnswer ans : all) {
+                if(cr.getActivityId() == ans.getActivity().getActivityId() && cr.getUserId() == ans.getUser().getUserId()) {
+                    ans.setAnswerText(cr.getAnswerText());
+                    exist.add(ans);
+                }
+            }
+        }
+
+        if(!exist.isEmpty()) {
+            activityAnswerRepository.saveAll(exist);
+            List<ActivityAnswerDTO> dtoList = new ArrayList<>();
+            for(ActivityAnswer ex : exist) {
+                ActivityAnswerDTO dto = activityAnswerMapper.toDto(ex);
+                dtoList.add(dto);
+            }
+            return dtoList;
+
+        }
+
+
+        // 若沒有
         List<ActivityAnswerDTO> activityAnswerDTOList = new ArrayList<>();
         for(ActivityAnswerCreateDTO createDTO : createDTOList) {
             activityAnswerDTOList.add(create(createDTO));

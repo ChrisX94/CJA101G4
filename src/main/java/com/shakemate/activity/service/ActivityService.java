@@ -27,6 +27,8 @@ public interface ActivityService {
     Page<OwnerCardResponse> getOwnerCards(Integer userId, int page, int size, String sort);
     Page<JoinedCardResponse> getJoinedCard(Integer userId, int page, int size, String sort);
     Page<SavedCardResponse> getSavedCard(Integer userId, int page, int size, String sort);
+    ActivityStatusResponse getActivityStatus(Integer activityId);
+    List<ActivityCalendarResponse> getMyCalendar(Integer userId);
 
     // 測試用
     Page<Activity> getFilteredActivities(int userAge, int userGender, int page, int size, String sort);

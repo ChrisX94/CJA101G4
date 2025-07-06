@@ -19,7 +19,7 @@ public class AIAssistService {
         }
 
         String prompt = """
-            根據以下活動文章內容，請產生一個準確的中文標題與 3~5 個關鍵標籤，回傳 JSON 格式：
+            根據以下活動文章內容，請產生一個準確的中文標題與 1~3 個關鍵標籤，回傳 JSON 格式：
             「文章內容」：
             %s
 
