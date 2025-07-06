@@ -1,31 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>最新消息列表</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>問題列表</title>
   <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #f4f4f4; }
+    /* Reset & 基礎 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans TC', sans-serif; color: #333; }
+
+    /* 全頁背景漸層 */
+    .bg {
+      position: relative;
+      min-height: 100vh;
+      z-index: 0;
+      background: linear-gradient(185deg,
+        #DCFF61 0%,
+        #DCFF61 55%,
+        #2EC4B6 55%,
+        #2EC4B6 100%);
+      overflow: hidden;
+    }
+
+    /* 容器 */
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* 類別按鈕列 */
+    .category-bar {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+    .category-bar::-webkit-scrollbar { height: 6px; }
+    .category-bar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+
+    .category-item {
+      position: relative;
+      flex: 0 0 auto;
+      margin-right: 1rem;
+      padding: .5rem 1rem;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.8);
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      outline: none;
+      color: #555;
+      transition: background .2s, color .2s;
+    }
+    .category-item.active {
+      background: #007bff;
+      color: #fff;
+    }
+
+    /* 按鈕下劃線動畫 */
+    .category-item::after {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      bottom: -2px;
+      height: 3px;
+      background: #007bff;
+      transform: scaleX(0);
+      transform-origin: center center;
+      transition: transform .3s;
+    }
+    .category-item.active::after {
+      transform: scaleX(1);
+    }
+
+    /* 新聞列表 */
+    .news-list ul { list-style: none; padding: 0; }
+    .news-list li {
+      background: #fff;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp .4s forwards;
+    }
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .news-title { font-size: 1.1rem; margin-bottom: .5rem; }
+    .news-time { font-size: .9rem; color: #666; }
+    .no-news {
+      text-align: center;
+      color: #999;
+      padding: 2rem 0;
+    }
   </style>
 </head>
 <body>
-  <h1>最新消息</h1>
-  <table id="news-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>標題</th>
-        <th>類別</th>
-        <th>發布時間</th>
-        <th>作者</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- JS 會動態插入 <tr> -->
-    </tbody>
-  </table>
+  <div class="bg">
+    <!-- 暫時停用 Header 載入 -->
+    <!-- <div w3-include-html="header1.html"></div> -->
 
-  <script src="js/news.js"></script>
+    <div class="container">
+      <!-- 類別按鈕列 -->
+      <nav class="category-bar" id="categoryBar">
+        <button th:each="type : ${allTypes}"
+                class="category-item"
+                th:data-id="${type.categoryId}"
+                th:text="${type.categoryName}"
+                onclick="selectCategory(this)">
+          類別名稱
+        </button>
+      </nav>
+
+      <!-- 新聞列表 -->
+      <section class="news-list" id="newsList">
+        <ul>
+          <li th:each="item : ${newsList}">
+            <div class="news-title" th:text="${item.title}">新聞標題</div>
+            <div class="news-time" th:text="${#dates.format(item.publishTime,'yyyy/MM/dd HH:mm')}">時間</div>
+          </li>
+          <li th:if="${#lists.isEmpty(newsList)}" class="no-news">
+            目前沒有任何新聞。
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    const apiBase = /*[[@{/api}]]*/ '/api';
+
+    // 選取分類
+    function selectCategory(el) {
+      document.querySelectorAll('.category-item').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      loadNewsByCategory(el.dataset.id);
+    }
+
+    // 載入分類新聞
+    async function loadNewsByCategory(categoryId) {
+      const ul = document.querySelector('#newsList ul');
+      ul.innerHTML = '';
+      try {
+        const resp = await fetch(`${apiBase}/news/category/${categoryId}`);
+        if (!resp.ok) throw new Error(resp.status);
+        const list = await resp.json();
+        if (!list.length) {
+          ul.innerHTML = '<li class="no-news">這個類別目前沒有新聞。</li>';
+          return;
+        }
+        list.forEach(item => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div class="news-title">${item.title}</div>
+            <div class="news-time">${new Date(item.publishTime)
+              .toLocaleString('zh-TW',{year:'numeric',month:'2-digit',
+              day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`;
+          ul.appendChild(li);
+        });
+      } catch (err) {
+        console.error('載入新聞失敗', err);
+        ul.innerHTML = '<li class="no-news">載入新聞失敗，請稍後重試。</li>';
+      }
+    }
+
+    // 初始自動選第一分類
+    document.addEventListener('DOMContentLoaded', () => {
+      const first = document.querySelector('.category-item');
+      if (first) selectCategory(first);
+    });
+  </script>
 </body>
 </html>

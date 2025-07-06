@@ -17,6 +17,13 @@ import java.util.stream.Collectors;
 public class NewsService {
     @Autowired private NewsRepository newsRepo;
     @Autowired private NewsTypeRepository typeRepo;
+    
+ // 依類別取得新聞列表
+    public List<NewsResponse> getNewsByCategory(Integer categoryId) {
+        return newsRepo.findByNewsType_CategoryId(categoryId).stream()
+                       .map(NewsResponse::new)
+                       .collect(Collectors.toList());
+    }
 
     // 建立或更新新聞
     public NewsResponse saveOrUpdate(NewsDto dto, AdmVO admin) {
