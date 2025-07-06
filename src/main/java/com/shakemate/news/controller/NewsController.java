@@ -31,4 +31,10 @@ public class NewsController {
 	public List<NewsResponse> latest() {
 		return newsSvc.getLatestNews();
 	}
+	
+	@GetMapping("/category/{categoryId}")
+	public List<NewsResponse> byCategory(@PathVariable Integer categoryId) {
+	    return newsSvc.getNewsByCategory(categoryId);
+	}
+
 }
