@@ -135,7 +135,22 @@
             width: 100%;
             max-width: 35rem;
     		margin-top: 10rem;
-        }
+			animation: floatZoom 2s ease-in-out infinite;
+ 			transform-origin: center;
+		}
+		
+		/* 關鍵動畫：上下飄動 + 微放大縮小 */
+		@keyframes floatZoom {
+		  0% {
+		    transform: translateY(0) scale(1);
+		  }
+		  50% {
+		    transform: translateY(-10px) scale(1.05);
+		  }
+		  100% {
+		    transform: translateY(0) scale(1);
+		  }
+		}
 
         .service-section {
             color: white;
@@ -367,18 +382,14 @@
         /* 讓 h1 寬度剛好包住最長那行 */
         #shaky-text {
             display: inline-block;
-            font-family: "LXGW Marker Gothic", sans-serif;
-            margin-bottom: 2rem;
+			font-family: "Noto Sans TC", sans-serif;
+            margin-bottom: 1.5rem;
             
         }
         
         .shaky-text-ch {
-        	font-size: 7rem;
-        	color: #2EC4B6;
-        }
-        .shaky-text-en {
-        	font-size: 3.8rem;
-        	font-weight: 600;
+        	font-size: 3.2rem;
+        	font-weight: 700;
         	color: #2EC4B6;
         }
 
@@ -557,9 +568,7 @@
     <section class="hero-section">
         <div class="textpic">
             <h1 id="shaky-text">
-                <span class="shaky-text-ch">抖一下</span>
-                <br>
-                <span class="shaky-text-en">ShakeMate</span>
+                <span class="shaky-text-ch">配對聊天｜二手商城｜揪團活動</span>
             </h1>
             <p>孤單寂寞覺得冷嗎？趕快加入抖一下，在這裡抖出屬於你的他！</p>
             <br>
