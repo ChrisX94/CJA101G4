@@ -123,7 +123,14 @@
 			<scope>provided</scope>
 		</dependency>
 
+<!-- 確保掃描到所有Mapper -->
 
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <!--    <version>2.3.0</version>  請使用與專案相容的最新版本 -->
+    <version>3.0.4</version>
+</dependency>
 
 
 
