@@ -2,6 +2,7 @@ package com.shakemate.ordermaster.controller;
 
 import com.shakemate.ordermaster.config.EcpayLogisticsConfig;
 import com.shakemate.ordermaster.config.EcpayPaymentConfig;
+import com.shakemate.ordermaster.dto.ShOrderDto;
 import com.shakemate.ordermaster.eum.PaymentStatus;
 import com.shakemate.ordermaster.eum.ShippingStatus;
 import com.shakemate.ordermaster.service.EcpayService;
@@ -444,7 +445,8 @@ public class EcpayController {
             default:
                 break;
         }
-        if (isCollect != null) {
+        ShOrderDto data= orderService.getOrderById(orderId);
+        if (isCollect != null && data.getOrderStatus() != PaymentStatus.UNPAID.getCode() ) {
             switch (isCollect) {
                 case "0":
                     orderService.paymentStatus(orderId, PaymentStatus.UNPAID);

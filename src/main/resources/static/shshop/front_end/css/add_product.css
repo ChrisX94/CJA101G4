@@ -6,7 +6,32 @@ body {
   line-height: 1.6;
   font-family: "Noto Sans TC", sans-serif;
   color: #333;
-  background: linear-gradient(to top, #84c2db, #beebf4, #e9feff);
+
+  /* ✅ 背景漸層 */
+  background: linear-gradient(
+    185deg,
+    #DCFF61 0%,
+    #DCFF61 55%,
+    #2EC4B6 55%,
+    #2EC4B6 100%
+  );
+
+  min-height: 100vh;         /* ✅ 確保 body 撐滿全畫面 */
+  position: relative;        /* ✅ 提供 ::before 定位依據 */
+  overflow-x: hidden;
+}
+
+/* ✅ 白色半透明遮罩 */
+body::before {
+  content: "";
+  position: fixed;           /* ✅ 要用 fixed，才能蓋滿整個視窗 */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.35); /* ✅ 可調淡一點 */
+  z-index: -1;               /* ✅ 貼在背景下層 */
+  pointer-events: none;      /* ✅ 不影響點擊 */
 }
 
 input,
@@ -15,6 +40,10 @@ textarea,
 button,
 label {
   font-size: 1.4rem;
+}
+
+*{
+  font-size: 62.5%;
 }
 
 /* ===== 表單版面 ===== */
@@ -48,6 +77,7 @@ h1 {
   width: 120px;
   font-weight: bold;
   padding-top: 0.5rem;
+  font-size: 3rem;
 }
 
 .form-input-col {
@@ -81,6 +111,7 @@ h1 {
 /* ===== 圖片拖曳與預覽 ===== */
 .drop-zone {
   border: 2px dashed #ccc;
+  font-size: 10px;
   padding: 2rem;
   text-align: center;
   cursor: pointer;
@@ -146,12 +177,13 @@ button {
 }
 
 button.save {
-  background-color: #3e92cc;
+  background-color: #2EC4B6;
   color: white;
 }
 
 button.discard {
-  background-color: #ccc;
+  background-color: gray;
+  color: white;
 }
 
 .error-msg {
@@ -178,28 +210,29 @@ button.discard {
     flex-direction: column;
   }
 }
-.bg {
-  position: relative;
-  min-height: 100vh;
-  z-index: 0;
 
-  /* 背景拼接色塊（亮綠 + 藍綠） */
-  background: linear-gradient(
-    185deg,
-    #DCFF61 0%,
-    #DCFF61 55%,
-    #2EC4B6 55%,
-    #2EC4B6 100%
-  );
-  overflow: hidden;
+
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
 }
 
-/* 背景上方有再加一層帶透明度的白色 */
-.bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
-  z-index: 0;
-  pointer-events: none;
+.left-btn button {
+  background-color: #2EC4B6;
+  /* border: 2px solid #999; */
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.right-btns button {
+  margin-left: 0.5rem;
+}
+.basic-info{
+  text-align: center;
+  margin-top: -1rem;
+
 }
