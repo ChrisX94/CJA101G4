@@ -66,8 +66,7 @@ public class ShShopService {
 
     @Autowired
     private OpenAiAPI openAiAPI;
-    @Autowired
-    private ClassPathFileSystemWatcher classPathFileSystemWatcher;
+
     @Autowired
     private ExcelHandler excelHandler;
 
