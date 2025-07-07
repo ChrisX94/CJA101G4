@@ -46,6 +46,15 @@
         #2EC4B6 100%);
       overflow: hidden;
     }
+    
+    .bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.35);
+    z-index: 0;
+    pointer-events: none;
+	}
 
     .container {
       max-width: 120rem;
