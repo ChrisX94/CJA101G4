@@ -11,6 +11,7 @@ import org.mybatis.spring.annotation.MapperScan;
 @EntityScan(basePackages = "com.shakemate")
 @SpringBootApplication(scanBasePackages = "com.shakemate")
 @MapperScan("com.shakemate.activity.mapper")
+
 public class ShakemateApplication {
 
 	public static void main(String[] args) {
