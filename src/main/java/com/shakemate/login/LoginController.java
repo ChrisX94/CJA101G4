@@ -62,6 +62,7 @@ public class LoginController {
                 Users user = userService.getUserByEmail(account);
                 HttpSession session = request.getSession();
                 session.setAttribute("account", user.getUserId());
+
                 session.setAttribute("userAvatar", user.getImg1());
                 String location = (String) session.getAttribute("location");
                 return "redirect:/";
@@ -210,7 +211,7 @@ public class LoginController {
         return "forgotPassword";
     }
 
-    @GetMapping("/resetPassword")
+@GetMapping("/resetPassword")
     public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
         Integer userId = redisUtil.getObject("resetToken:" + token, Integer.class);
         if (userId == null) {
@@ -287,5 +288,6 @@ public class LoginController {
         model.addAttribute("message", "驗證成功！您現在可以登入");
         return "verifySuccess";
     }
-
 }
+
+

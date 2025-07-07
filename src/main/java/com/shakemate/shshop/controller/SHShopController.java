@@ -42,6 +42,21 @@ public class SHShopController {
     private ShShopRedisUtil redisUtil;
 
 
+    // 取得聊天室的網址
+    @GetMapping("/getRoomUrl")
+    public ResponseEntity<ApiResponse<String>> getRoomUrl(@RequestParam("seller") Integer seller, HttpSession session) {
+        Object userIdObj = session.getAttribute("account");
+        if (userIdObj == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponseFactory.error(400, "尚未登入"));
+        }
+        Integer viewerId = Integer.parseInt(userIdObj.toString());
+        Integer roomId = shShopService.getRoomId(viewerId, seller);
+        String url = "/match_chatroom/chatroom.html?roomId=" + roomId;
+        return ResponseEntity.ok(ApiResponseFactory.success(url));
+
+    }
 
 
     /* ======================================== Front-End ========================================== */
@@ -211,8 +226,7 @@ public class SHShopController {
 
     // 用PK找商品(get) 會計數
     @GetMapping("/getProd")
-    public ResponseEntity<ApiResponse<ShProdDto>> getProdsById(@RequestParam("id") String idStr) {
-        Integer id = Integer.parseInt(idStr);
+    public ResponseEntity<ApiResponse<ShProdDto>> getProdsById(@RequestParam("id") Integer id) {
         shShopService.addViews(id);
         ShProdDto data = shShopService.getById(id);
         return ResponseEntity.ok(ApiResponseFactory.success(data));

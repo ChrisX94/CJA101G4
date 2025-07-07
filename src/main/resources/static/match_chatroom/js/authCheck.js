@@ -21,13 +21,13 @@ function showLockOverlay() {
 	overlay.innerHTML = `
   		<div class="lock-content">
   			<i class="fa-solid fa-lock"></i>
-  			<button id="goToEditBtn">請先填寫會員資料</button>
+  			<button id="goToEditBtn">請先登入</button>
   		</div>
   	`;
 
 	document.body.appendChild(overlay);
 
 	document.getElementById("goToEditBtn").addEventListener("click", () => {
-		window.location.href = "editProfile.html"; // 👉 換成你的資料頁面
+		window.location.href = "/login"; // 👉 換成你的資料頁面
 	});
 }

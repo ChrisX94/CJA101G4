@@ -129,7 +129,8 @@ public class MatchController {
         Map<String, Object> result = new HashMap<>();
         Object userIdObj = session.getAttribute("account");
     	if (userIdObj == null) {
-    		return null;
+    		result.put("status", "請登入");
+    		return result;
     	}
         Integer userId = Integer.parseInt(userIdObj.toString());
       

@@ -41,6 +41,7 @@ public class UserService {
     @Autowired
     private PasswordConvert passwordConvert;
 
+
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
@@ -118,7 +119,9 @@ public class UserService {
     }
 
     public void sendResetPasswordEmail(String email) {
+
         Users user = usersRepo.findByEmail(email);
+
         if (user == null) {
             throw new IllegalArgumentException("此 Email 尚未註冊");
         }
@@ -130,12 +133,15 @@ public class UserService {
         redisUtil.setObject("resetToken:" + token, user.getUserId(), 1800); // 1800 秒 = 30 分鐘
 
         // 準備信件內容
+
         String resetLink = "http://localhost:8080/login/resetPassword?token=" + token;
+
         String subject = "重設密碼通知";
         String content = "請點擊下列連結以重設密碼（30 分鐘內有效）：\n" + resetLink;
 
         mailService.sendMail(email, subject, content);
     }
+
 
     public void updatePassword(Integer userId, String rawPassword) {
         Users user = getUserById(userId);
@@ -161,5 +167,6 @@ public class UserService {
         // 寄信
         mailService.sendMail(user.getEmail(), "帳號驗證", content);
     }
+
 
 }
