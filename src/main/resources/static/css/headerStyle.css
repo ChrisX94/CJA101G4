@@ -312,6 +312,7 @@
 .header__nav .header__item.dropdown {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 /* 🔹 大頭貼右邊的箭頭 icon 微調對齊 */
@@ -343,11 +344,11 @@
 
 @media (max-width: 768px) {
   .header__item.dropdown > .dropdown-menu {
-    display: none;
+    /* display: none; */
   }
 
   .header__item.dropdown > .dropdown-toggle {
-    display: none;
+    /* display: none; */
   }
   .header__list .header__item > a::after {
     display: none;
@@ -383,7 +384,21 @@
   }
 
   .header__item.dropdown {
-    display: none;
+    /* display: none; */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .header__item.dropdown > .dropdown-menu {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: unset;
+    box-shadow: none;
   }
 }
 

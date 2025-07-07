@@ -24,8 +24,10 @@ fetch(`${API_BASE}/currentUserId`)
 		connectWebSocket(currentUserId);
 	})
 	.catch(err => {
-		alert("⚠️ 請先登入");
-		window.location.href = "login.html"; // 或其他導回首頁
+		console.warn("❗尚未登入，將交由遮罩機制處理");
+
+		// ✅ 顯示你原本寫好的遮罩
+		showLockOverlay(); // 這個方法請確保你已經定義好在 global
 	});
 
 // 取得聊天室清單
