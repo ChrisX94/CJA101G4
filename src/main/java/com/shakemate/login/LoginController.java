@@ -62,17 +62,27 @@ public class LoginController {
                 Users user = userService.getUserByEmail(account);
                 HttpSession session = request.getSession();
                 session.setAttribute("account", user.getUserId());
+
+                session.setAttribute("userAvatar", user.getImg1());
                 String location = (String) session.getAttribute("location");
                 return "redirect:/";
+
+            case NOT_VERIFIED:
+                model.addAttribute("error", "尚未完成信箱驗證，請先至信箱完成驗證！");
+                return "login";
+
             case ACCOUNT_SUSPENDED:
                 model.addAttribute("error", "您的帳號已被停用，請聯繫客服! <br> <a href='/servicecase/sadd'>聯絡客服</a>");
                 return "login";
+
             case ACCOUNT_DELETED:
                 model.addAttribute("error", "您的帳號已被註銷，請重新註冊!");
                 return "login";
+
             case USER_NOT_FOUND:
                 model.addAttribute("error", "登入失敗，請檢查帳號密碼，若無帳號請先註冊!");
                 return "login";
+
             default:
                 model.addAttribute("error", "登入失敗，請稍後再試");
                 return "login";
@@ -154,9 +164,10 @@ public class LoginController {
 
         // 7. 註冊成功
         userService.signIn(user, interestsArr, personalityArr, imgUrl);
-        model.addAttribute("success", "- (新增成功)");
+        userService.handlePostRegister(user);
+        model.addAttribute("success", "註冊成功，請至信箱完成驗證");
 
-        return "/index";
+        return "/login";
     }
 
     @GetMapping("/testlogin")
@@ -183,6 +194,12 @@ public class LoginController {
 
     @PostMapping("/forgotPassword")
     public String forgotPassword(@RequestParam String email, Model model) {
+
+        if (email == null || email.trim().isEmpty()) {
+            model.addAttribute("error", "請輸入Email");
+            return "forgotPassword";
+        }
+
         try {
             userService.sendResetPasswordEmail(email);
             model.addAttribute("message", "重設密碼信已發送，請檢查您的信箱");
@@ -194,39 +211,83 @@ public class LoginController {
         return "forgotPassword";
     }
 
-    @GetMapping("/reset-password")
+@GetMapping("/resetPassword")
     public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
         Integer userId = redisUtil.getObject("resetToken:" + token, Integer.class);
         if (userId == null) {
             model.addAttribute("error", "連結已失效或錯誤");
-            return "reset_password_error";
+            return "resetPassword_error";
         }
 
         model.addAttribute("token", token);
-        return "reset_password_form"; // 顯示輸入新密碼頁面
+        return "resetPassword"; // 顯示輸入新密碼頁面
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping("/resetPassword")
     public String handleResetPassword(@RequestParam("token") String token,
             @RequestParam("newPassword") String newPassword,
+            @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
             Model model) {
+
+        // 檢查兩次密碼是否一致
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "兩次密碼輸入不一致");
+            return "resetPassword";
+        }
+
+        // 密碼格式檢查：至少8位數，包含英文+數字+特殊符號
+        String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+{}\\[\\]:;<>,.?~\\\\/-]).{8,}$";
+        if (!newPassword.matches(regex)) {
+            model.addAttribute("error", "密碼格式錯誤：需至少8位，包含英文、數字與特殊符號");
+            return "resetPassword";
+        }
+
+        // 驗證 token 是否有效
         Integer userId = redisUtil.getObject("resetToken:" + token, Integer.class);
         if (userId == null) {
-            model.addAttribute("error", "連結已過期或無效");
-            return "reset_password_error";
+            model.addAttribute("error", "連結已失效，請重新申請重設密碼連結");
+            return "resetPassword_error";
         }
 
-        Users user = usersRepository.findById(userId).orElse(null);
-        if (user == null) {
-            model.addAttribute("error", "帳號不存在");
-            return "reset_password_error";
-        }
+        // 更新密碼
+        userService.updatePassword(userId, newPassword);
+        redisUtil.delete("resetToken:" + token); // 清除使用過的 token
 
-        user.setPwd(passwordConvert.hashing(newPassword));
-        usersRepository.save(user);
-        redisUtil.delete("resetToken:" + token);
-
-        return "reset_password_success";
+        model.addAttribute("success", "密碼已重設成功，請重新登入");
+        return "login";
     }
 
+    @GetMapping("/verify")
+    public String verifyEmail(@RequestParam("token") String token, Model model) {
+        String email = redisUtil.get("verify:token:" + token);
+
+        if (email == null) {
+            model.addAttribute("message", "驗證連結已失效或無效");
+            return "verifyFail"; // Thymeleaf 頁面
+        }
+
+        Users user = usersRepository.findByEmail(email);
+        if (user == null) {
+            model.addAttribute("message", "帳號不存在");
+            return "verifyFail";
+        }
+
+        if (user.getUserStatus() == 1) {
+            model.addAttribute("message", "帳號已經驗證過了");
+            return "verifySuccess";
+        }
+
+        // 驗證成功：更新狀態
+        user.setUserStatus((byte) 1);
+        user.setPostStatus(true);
+        user.setAtAcStatus(true);
+        user.setSellStatus(true);
+        usersRepository.save(user);
+        // 移除 Redis 裡的 token
+        redisUtil.delete("verify:token:" + token);
+        model.addAttribute("message", "驗證成功！您現在可以登入");
+        return "verifySuccess";
+    }
 }
+
+
