@@ -21,7 +21,8 @@ public class LoginFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
         HttpServletRequest req = (HttpServletRequest) request; // ServletRequest 轉成 HttpServletRequest
         HttpServletResponse res = (HttpServletResponse) response; // ServletResponse 轉成 HttpServletResponse
 
@@ -29,7 +30,8 @@ public class LoginFilter implements Filter {
         Object account = session.getAttribute("account"); // 取得 account 物件
 
         if (account == null) { // 如果 account 沒有值
-            session.setAttribute("location", req.getRequestURI()); // 取得前頁的資訊, req.getRequestURI() 是 Servlet 中用來取得 HTTP 請求的 URI 路徑
+            session.setAttribute("location", req.getRequestURI()); // 取得前頁的資訊, req.getRequestURI() 是 Servlet 中用來取得 HTTP
+                                                                   // 請求的 URI 路徑
             res.sendRedirect(req.getContextPath() + "/login"); // 要重導的網址
             return;
         } else {
