@@ -463,8 +463,8 @@ public class EcpayController {
                     break;
             }
 
-            orderService.checkingStatus(orderId);
         }
+        orderService.checkingStatus(orderId);
         return "1|OK";
     }
 }
