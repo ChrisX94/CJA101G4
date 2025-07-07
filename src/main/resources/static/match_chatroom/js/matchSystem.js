@@ -27,6 +27,12 @@ fetch(`${MATCH_API_BASE}/currentUserId`)
 		// ⏬ 把你原本的初始化邏輯、篩選綁定、按鈕綁定都放進來 ⏬
 		startMatchPage(); // ← 你原本的主邏輯全寫這裡
 	})
+	.catch(err => {
+			console.warn("❗尚未登入，將交由遮罩機制處理");
+
+			// ✅ 顯示你原本寫好的遮罩
+			showLockOverlay(); // 這個方法請確保你已經定義好在 global
+		});
 
 
 function startMatchPage() {
@@ -311,7 +317,7 @@ function startMatchPage() {
 						// ✅ 2 秒後跳轉
 						setTimeout(() => {
 						  window.location.href = `matchSuccess.html?fromSuccess=1&roomId=${data.roomId}`;
-						}, 1800); // 可依動畫調整秒數
+						}, 1000); // 可依動畫調整秒數
 						return; // 不切換下一位，直接跳頁
 					}
 				}
