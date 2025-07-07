@@ -29,10 +29,22 @@
 
     body {
       font-family: "Noto Sans TC", sans-serif;
-      background-color: #DCFF61;
       height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+    
+        /* 全頁背景漸層 */
+    .bg {
+      position: relative;
+      min-height: 100vh;
+      z-index: 0;
+      background: linear-gradient(185deg,
+        #DCFF61 0%,
+        #DCFF61 55%,
+        #2EC4B6 55%,
+        #2EC4B6 100%);
+      overflow: hidden;
     }
 
     .container {
@@ -347,6 +359,8 @@
 </head>
 
 <body>
+
+<div class="bg">
   <div class="container">
 
     <!-- 固定 Header -->
@@ -384,6 +398,7 @@
         </div>
       </main>
     </div>
+  </div>
   </div>
 
 
@@ -542,6 +557,8 @@
     }
   });
   </script>
+  
+  <script src="/js/header.js"></script>
 
 </body>
 
