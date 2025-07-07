@@ -1,7 +1,9 @@
 package com.shakemate.user.service;
 
+import com.shakemate.shshop.util.ShShopRedisUtil;
 import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.model.Users;
+import com.shakemate.util.MailService;
 import com.shakemate.util.PasswordConvert;
 
 import org.apache.el.stream.Optional;
@@ -17,6 +19,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,15 @@ public class UserService {
 
     @Autowired
     private PasswordConvert pc;
+
+    @Autowired
+    private ShShopRedisUtil redisUtil;
+
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private UsersRepository usersRepository;
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
@@ -100,4 +112,23 @@ public class UserService {
         usersRepo.deleteById(userId);
     }
 
+    public void sendResetPasswordEmail(String email) {
+        Users user = usersRepository.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("此 Email 尚未註冊");
+        }
+
+        // 產生 token（UUID）
+        String token = UUID.randomUUID().toString();
+
+        // 存入 Redis（key: resetToken:xxx, value: userId, 有效 30 分鐘）
+        redisUtil.setObject("resetToken:" + token, user.getUserId(), 1800); // 1800 秒 = 30 分鐘
+
+        // 準備信件內容
+        String resetLink = "http://localhost:8080/user/reset-password?token=" + token;
+        String subject = "重設密碼通知";
+        String content = "請點擊下列連結以重設密碼（30 分鐘內有效）：\n" + resetLink;
+
+        mailService.sendMail(email, subject, content);
+    }
 }

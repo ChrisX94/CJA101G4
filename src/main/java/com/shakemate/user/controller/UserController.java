@@ -158,6 +158,7 @@ public class UserController {
             @RequestParam("intro") String intro,
             @RequestParam(value = "interestsList", required = false) List<String> interestsList,
             @RequestParam(value = "personalityList", required = false) List<String> personalityList,
+            @RequestParam(value = "newPassword", required = false) String newPassword,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
@@ -181,6 +182,17 @@ public class UserController {
         original.setLocation(location);
         original.setIntro(intro);
         original.setUpdatedTime(Timestamp.from(Instant.now()));
+
+        // 處理密碼更新
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            // 驗證密碼長度
+            if (newPassword.length() < 6) {
+                redirectAttributes.addFlashAttribute("error", "密碼長度至少需要6個字符");
+                return "redirect:/user/profile";
+            }
+            // 加密新密碼並更新
+            original.setPwd(passwordConvert.hashing(newPassword));
+        }
 
         // 處理興趣和個性特徵
         if (interestsList != null && !interestsList.isEmpty()) {
@@ -250,12 +262,6 @@ public class UserController {
         result.put("success", false);
         result.put("message", "找不到用戶");
         return result;
-    }
-
-    @Transactional
-    public void updateUser(Users user) {
-        user.setUpdatedTime(new Timestamp(System.currentTimeMillis())); // 更新時間戳記
-        usersRepository.save(user); // JPA 自動判斷是更新還是新增（根據主鍵 userId）
     }
 
     @PostMapping("/banUser")

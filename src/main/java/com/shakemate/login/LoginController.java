@@ -1,9 +1,13 @@
 package com.shakemate.login;
 
+import com.shakemate.shshop.util.ShShopRedisUtil;
+import com.shakemate.user.dao.UsersRepository;
 import com.shakemate.user.model.Users;
 import com.shakemate.user.service.UserService;
 import com.shakemate.user.service.UserService.LoginResult;
 import com.shakemate.user.util.UserPostMultipartFileUploader;
+import com.shakemate.util.PasswordConvert;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -35,26 +39,44 @@ public class LoginController {
     @Autowired
     private UserPostMultipartFileUploader imgHandler;
 
+    @Autowired
+    private ShShopRedisUtil redisUtil;
+
+    @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
+    private PasswordConvert passwordConvert;
+
     // 處理登入
     @PostMapping("/loginHandler")
     public String login(@RequestParam String account,
             @RequestParam String password,
             HttpServletRequest request,
             Model model) {
-        Users user = userService.getUserByEmail(account);
 
-        if (user == null || userService.login(user.getEmail(), password) != LoginResult.SUCCESS
-                || user.getUserStatus() == (byte) 4) {
-
-            model.addAttribute("errorMsg", "登入失敗，請檢查帳號或密碼！");
-            return "login"; // 回到 login.html
+        LoginResult result = userService.login(account, password);
+        switch (result) {
+            case SUCCESS:
+                // 登入成功，需要重新獲取用戶資料來設置 session
+                Users user = userService.getUserByEmail(account);
+                HttpSession session = request.getSession();
+                session.setAttribute("account", user.getUserId());
+                String location = (String) session.getAttribute("location");
+                return "redirect:/";
+            case ACCOUNT_SUSPENDED:
+                model.addAttribute("error", "您的帳號已被停用，請聯繫客服! <br> <a href='/servicecase/sadd'>聯絡客服</a>");
+                return "login";
+            case ACCOUNT_DELETED:
+                model.addAttribute("error", "您的帳號已被註銷，請重新註冊!");
+                return "login";
+            case USER_NOT_FOUND:
+                model.addAttribute("error", "登入失敗，請檢查帳號密碼，若無帳號請先註冊!");
+                return "login";
+            default:
+                model.addAttribute("error", "登入失敗，請稍後再試");
+                return "login";
         }
-        // 登入成功
-        HttpSession session = request.getSession();
-        session.setAttribute("account", user.getUserId());
-        session.setAttribute("userAvatar", user.getImg1()); 
-        String location = (String) session.getAttribute("location");
-        return "redirect:/";
     }
 
     // 處理登出
@@ -64,13 +86,13 @@ public class LoginController {
         if (session != null) {
             session.invalidate();
         }
-        return "redirect:/login"; // 回登入畫面
+        return "redirect:/"; // 回首頁畫面
     }
 
     @GetMapping("/signup")
     public String signup(Model model) {
         model.addAttribute("user", new Users());
-        return "front-end/user/signup";
+        return "signup";
     }
 
     @PostMapping("/signupHandler")
@@ -82,26 +104,26 @@ public class LoginController {
             @RequestParam(value = "personality", required = false) String[] personalityArr,
             @RequestParam("image") MultipartFile[] parts) throws IOException {
 
-        model.addAttribute("user", user); // ✅ 確保一開始就綁好 user，Thymeleaf 才不會炸掉
+        model.addAttribute("user", user); // 確保一開始就綁好 user，Thymeleaf 才不會炸掉
 
         // 1. Email 重複檢查
         if (userService.getUserByEmail(user.getEmail()) != null) {
             bindingResult.rejectValue("email", "error.user", "此 Email 已註冊，請使用其他信箱");
             model.addAttribute("user", user);
-            return "front-end/user/signup";
+            return "signup";
         }
 
         // 2. 密碼不一致
         if (!user.getPwd().equals(confirmPassword)) {
             model.addAttribute("pwdMismatch", "密碼與確認密碼不一致！");
-            return "front-end/user/signup";
+            return "signup";
         }
 
         // 3. 檢查年齡
         int age = Period.between(user.getBirthday().toLocalDate(), LocalDate.now()).getYears();
         if (age < 15) {
             model.addAttribute("errorMessage", "年齡需滿16歲");
-            return "front-end/user/signup";
+            return "signup";
         }
 
         // 4. 忽略 MultipartFile 檢查錯誤
@@ -110,7 +132,7 @@ public class LoginController {
         // 5. 後端驗證失敗
         if (parts == null || parts.length == 0 || parts[0].isEmpty()) {
             model.addAttribute("errorMessage", "請上傳照片");
-            return "front-end/user/signup";
+            return "signup";
         }
 
         // 6. 圖片上傳
@@ -119,15 +141,15 @@ public class LoginController {
             imgUrl = imgHandler.uploadImageToImgbb(parts[0]);
             if (imgUrl == null || imgUrl.isBlank()) {
                 model.addAttribute("errorMessage", "照片上傳失敗");
-                return "front-end/user/signup";
+                return "signup";
             }
         } catch (Exception e) {
             model.addAttribute("errorMessage", "系統錯誤：" + e.getMessage());
-            return "front-end/user/signup";
+            return "signup";
         }
         if (bindingResult.hasErrors()) {
             model.addAttribute("user", user);
-            return "front-end/user/signup";
+            return "signup";
         }
 
         // 7. 註冊成功
@@ -151,6 +173,60 @@ public class LoginController {
             result.addError(fieldError);
         }
         return result;
+    }
+
+    @GetMapping("/forgotPassword")
+    public String forgotPassword(Model model) {
+        model.addAttribute("user", new Users());
+        return "forgotPassword";
+    }
+
+    @PostMapping("/forgotPassword")
+    public String forgotPassword(@RequestParam String email, Model model) {
+        try {
+            userService.sendResetPasswordEmail(email);
+            model.addAttribute("message", "重設密碼信已發送，請檢查您的信箱");
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage()); // 顯示「此 Email 尚未註冊」
+        } catch (Exception e) {
+            model.addAttribute("error", "系統錯誤，請稍後再試");
+        }
+        return "forgotPassword";
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
+        Integer userId = redisUtil.getObject("resetToken:" + token, Integer.class);
+        if (userId == null) {
+            model.addAttribute("error", "連結已失效或錯誤");
+            return "reset_password_error";
+        }
+
+        model.addAttribute("token", token);
+        return "reset_password_form"; // 顯示輸入新密碼頁面
+    }
+
+    @PostMapping("/reset-password")
+    public String handleResetPassword(@RequestParam("token") String token,
+            @RequestParam("newPassword") String newPassword,
+            Model model) {
+        Integer userId = redisUtil.getObject("resetToken:" + token, Integer.class);
+        if (userId == null) {
+            model.addAttribute("error", "連結已過期或無效");
+            return "reset_password_error";
+        }
+
+        Users user = usersRepository.findById(userId).orElse(null);
+        if (user == null) {
+            model.addAttribute("error", "帳號不存在");
+            return "reset_password_error";
+        }
+
+        user.setPwd(passwordConvert.hashing(newPassword));
+        usersRepository.save(user);
+        redisUtil.delete("resetToken:" + token);
+
+        return "reset_password_success";
     }
 
 }

@@ -215,6 +215,7 @@
 
         .form-group input[type="text"],
         .form-group input[type="email"],
+        .form-group input[type="password"],
         .form-group textarea {
             width: calc(100% - 24px);
             padding: 12px;
@@ -228,6 +229,7 @@
 
         .form-group input[type="text"]:focus,
         .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus,
         .form-group textarea:focus {
             border-color: #2EC4B6;
             box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.2);
@@ -501,6 +503,18 @@
                 <div class="form-group">
                     <label for="intro">關於我:</label>
                     <textarea id="intro" th:text="${user.intro != null ? user.intro : ''}"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">修改密碼:</label>
+                    <input type="password" id="newPassword" placeholder="請輸入新密碼">
+                    <p class="note">如不修改密碼請留空</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">確認密碼:</label>
+                    <input type="password" id="confirmPassword" placeholder="請再次輸入新密碼">
+                    <p class="note">請再次輸入新密碼以確認</p>
                 </div>
 
                 <div class="form-group">
@@ -874,6 +888,30 @@
 
             // 儲存按鈕的邏輯
             saveButton.addEventListener('click', function () {
+                // 密碼驗證
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // 如果用戶輸入了新密碼，則需要驗證
+                if (newPassword || confirmPassword) {
+                    if (!newPassword) {
+                        alert('請輸入新密碼');
+                        return;
+                    }
+                    if (!confirmPassword) {
+                        alert('請確認新密碼');
+                        return;
+                    }
+                    if (newPassword !== confirmPassword) {
+                        alert('兩次輸入的密碼不一致，請重新輸入');
+                        return;
+                    }
+                    if (newPassword.length < 6) {
+                        alert('密碼長度至少需要6個字符');
+                        return;
+                    }
+                }
+
                 const selectedInterests = Array.from(document.querySelectorAll('#interestsCheckboxes input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
 
@@ -892,6 +930,11 @@
                 formData.append('birthday', document.getElementById('birthday').value);
                 formData.append('location', document.getElementById('location').value);
                 formData.append('intro', document.getElementById('intro').value);
+
+                // 添加密碼（如果用戶有輸入）
+                if (newPassword) {
+                    formData.append('newPassword', newPassword);
+                }
 
                 // 添加興趣和個性特徵
                 selectedInterests.forEach(interest => {
