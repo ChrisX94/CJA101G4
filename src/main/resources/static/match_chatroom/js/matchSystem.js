@@ -366,24 +366,12 @@ function goToChat() {
 		alert("❌ 無法取得 roomId");
 		return;
 	}
-
-	fetch(`${MATCH_API_BASE}/currentUserId`)
-		.then(res => res.json())
-		.then(data => {
-//			const currentUserId = data.currentUserId;
-			window.location.href = `chatroom.html?roomId=${roomId}`;
-		})
-		.catch(() => alert("⚠️ 無法取得使用者 ID"));
+	window.location.href = `chatroom.html?roomId=${roomId}`;
 }
 
 function goToMatch() {
-	fetch(`${MATCH_API_BASE}/currentUserId`)
-		.then(res => res.json())
-		.then(data => {
-//			const currentUserId = data.currentUserId;
-			window.location.href = `match.html?fromSuccess=1`;
-		})
-		.catch(() => alert("⚠️ 無法取得使用者 ID"));
+	window.location.href = `match.html?fromSuccess=1`;
+
 }
 
 // 符合條件篩選的條件加上highlight樣式
