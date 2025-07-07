@@ -1,138 +1,147 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MatchMarket - 訂單管理</title>
     <link rel="stylesheet" href="css/order_manger.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
 </head>
 
 <body>
-<aside>
-    <h2>管理後台</h2>
-    <nav>
-        <ul>
-            <li><a href="back_end_product_manager.html">📦 商品管理</a></li>
-            <li><a href="order_manager.html" class="active">🧾 訂單管理</a></li>
-            <li><a href="#">👤 使用者管理</a></li>
-            <li><a href="#">📊 儀表板</a></li>
-            <li><a href="#">🚪 登出</a></li>
-        </ul>
-    </nav>
-</aside>
+    <aside>
+        <h2>MatchMarket後台管理</h2>
+        <nav>
+            <ul>
+                <li><a href="#"><i class="fa-solid fa-arrow-left"></i> 返回後台管理</a></li>
+                <li><a href="back_end_product_manager.html">📦 商品管理</a></li>
+                <li><a href="order_manager.html" class="active">🧾 訂單管理</a></li>
+            </ul>
+        </nav>
+    </aside>
 
-<main>
-    <header>
-        <h1>MatchMarket 訂單管理</h1>
-    </header>
+    <main>
+        <header>
+            <h1>MatchMarket 訂單管理</h1>
+        </header>
 
-    <div class="content-section">
-        <div class="search-filter">
-            <h3>🧾 訂單清單</h3>
-            <div class="left-group">
-                <input type="text" id="orderIdInput" placeholder="訂單ID">
-                <input type="text" id="buyerInput" placeholder="買家名稱">
-                <input type="text" id="sellerInput" placeholder="賣家名稱">
-                <input type="text" id="productInput" placeholder="商品名稱">
+        <div class="content-section">
+            <div class="search-filter">
+                <h3>🧾 訂單清單</h3>
+                <div class="left-group">
 
-                <div>
-                    <label>開始日期</label>
-                    <input type="date" id="startDate">
+                    <div class="section-1">
+                        <input type="text" id="orderIdInput" placeholder="訂單ID">
+                        <input type="text" id="buyerInput" placeholder="買家名稱">
+                        <input type="text" id="sellerInput" placeholder="賣家名稱">
+                        <input type="text" id="productInput" placeholder="商品名稱">
+                    </div>
+
+                    <div class="section-2">
+                        <div>
+                            <label>開始日期</label>
+                            <input type="date" id="startDate">
+                        </div>
+
+                        <div>
+                            <label>結束日期</label>
+                            <input type="date" id="endDate">
+                        </div>
+                        <div>
+                            <label>訂單狀態</label>
+                            <select id="orderStatusSelect">
+                                <option value="">所有狀態</option>
+                                <option value="0">處理中</option>
+                                <option value="1">已完成</option>
+                                <option value="2">已取消</option>
+                                <option value="3">糾紛處理中</option>
+                            </select>
+                        </div>
+                    </div>
+
                 </div>
-
-                <div>
-                    <label>結束日期</label>
-                    <input type="date" id="endDate">
+                <div class="btn-group">
+                    <button id="searchButton">🔍 查詢訂單</button>
                 </div>
-
-                <select id="orderStatusSelect">
-                    <option value="">所有狀態</option>
-                    <option value="0">處理中</option>
-                    <option value="1">已完成</option>
-                    <option value="2">已取消</option>
-                    <option value="3">糾紛處理中</option>
-                </select>
-            </div>
-            <div class="btn-group">
-                <button id="searchButton">🔍 查詢訂單</button>
             </div>
         </div>
-    </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th></th>
-            <th>訂單ID</th>
-            <th>商品名稱</th>
-            <th>價格</th>
-            <th>數量</th>
-            <th>總金額</th>
-            <th>買家</th>
-            <th>賣家</th>
-            <th>狀態</th>
-            <th>訂單日期</th>
-        </tr>
-        </thead>
-        <tbody id="orderTableBody">
-        <tr>
-            <td colspan="10" style="text-align:center;">載入中...</td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>訂單ID</th>
+                    <th>商品名稱</th>
+                    <th>價格</th>
+                    <th>數量</th>
+                    <th>總金額</th>
+                    <th>買家</th>
+                    <th>賣家</th>
+                    <th>狀態</th>
+                    <th>訂單日期</th>
+                </tr>
+            </thead>
+            <tbody id="orderTableBody">
+                <tr>
+                    <td colspan="10" style="text-align:center;">載入中...</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("searchButton").addEventListener("click", searchOrders);
-        searchOrders(); // 預設載入
-    });
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("searchButton").addEventListener("click", searchOrders);
+            searchOrders(); // 預設載入
+        });
 
-    function searchOrders() {
-        const orderId = document.getElementById("orderIdInput").value.trim();
-        const buyerName = document.getElementById("buyerInput").value.trim();
-        const sellerName = document.getElementById("sellerInput").value.trim();
-        const productName = document.getElementById("productInput").value.trim();
-        const orderStatus = document.getElementById("orderStatusSelect").value;
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
+        function searchOrders() {
+            const orderId = document.getElementById("orderIdInput").value.trim();
+            const buyerName = document.getElementById("buyerInput").value.trim();
+            const sellerName = document.getElementById("sellerInput").value.trim();
+            const productName = document.getElementById("productInput").value.trim();
+            const orderStatus = document.getElementById("orderStatusSelect").value;
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
 
-        const params = new URLSearchParams();
-        if (orderId) params.append("shOrderId", orderId);
-        if (buyerName) params.append("buyerName", buyerName);
-        if (sellerName) params.append("sellerName", sellerName);
-        if (productName) params.append("prodName", productName);
-        if (orderStatus) params.append("orderStatus", orderStatus);
-        if (startDate) params.append("startDate", startDate + "T00:00:00");
-        if (endDate) params.append("endDate", endDate + "T23:59:59");
+            const params = new URLSearchParams();
+            if (orderId) params.append("shOrderId", orderId);
+            if (buyerName) params.append("buyerName", buyerName);
+            if (sellerName) params.append("sellerName", sellerName);
+            if (productName) params.append("prodName", productName);
+            if (orderStatus) params.append("orderStatus", orderStatus);
+            if (startDate) params.append("startDate", startDate + "T00:00:00");
+            if (endDate) params.append("endDate", endDate + "T23:59:59");
 
-        fetch(`http://localhost:8080/api/shorder/search?${params.toString()}`)
-            .then(res => res.json())
-            .then(json => {
-                const orders = json.data || [];
-                renderTable(orders);
-            })
-            .catch(err => {
-                console.error("查詢失敗", err);
-                const tbody = document.getElementById("orderTableBody");
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">查詢失敗</td></tr>`;
-            });
-    }
-
-    function renderTable(data) {
-        const tbody = document.getElementById("orderTableBody");
-        tbody.innerHTML = "";
-
-        if (data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">查無資料</td></tr>`;
-            return;
+            fetch(`http://localhost:8080/api/shorder/search?${params.toString()}`)
+                .then(res => res.json())
+                .then(json => {
+                    const orders = json.data || [];
+                    renderTable(orders);
+                })
+                .catch(err => {
+                    console.error("查詢失敗", err);
+                    const tbody = document.getElementById("orderTableBody");
+                    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">查詢失敗</td></tr>`;
+                });
         }
 
-        data.forEach(order => {
-            const tr = document.createElement("tr");
-            const statusClass = getStatusClass(order.orderStatus);
+        function renderTable(data) {
+            const tbody = document.getElementById("orderTableBody");
+            tbody.innerHTML = "";
 
-            tr.innerHTML = `
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">查無資料</td></tr>`;
+                return;
+            }
+
+            data.forEach(order => {
+                const tr = document.createElement("tr");
+                const statusClass = getStatusClass(order.orderStatus);
+
+                tr.innerHTML = `
                 <td><button class="btn-action btn-edit" onclick="viewOrder(${order.shOrderId})">查看</button></td>
                 <td class="id_td">${order.shOrderId}</td>
                 <td>
@@ -149,33 +158,34 @@
                 <td><span class="status-tag ${statusClass}">${order.orderStatusStr}</span></td>
                 <td>${formatDateTime(order.orderDate)}</td>
             `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function viewOrder(orderId) {
-        localStorage.setItem("viewOrderId", orderId);
-        window.location.href = "view_order.html";
-    }
-
-    function formatDateTime(dateStr) {
-        const date = new Date(dateStr);
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-    }
-
-    function pad(n) {
-        return n.toString().padStart(2, '0');
-    }
-
-    function getStatusClass(status) {
-        switch (status) {
-            case 1: return 'status-up';
-            case 2: return 'status-down';
-            case 0:
-            case 3:
-            default: return 'status-pending';
+                tbody.appendChild(tr);
+            });
         }
-    }
-</script>
+
+        function viewOrder(orderId) {
+            localStorage.setItem("viewOrderId", orderId);
+            window.location.href = "view_order.html";
+        }
+
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        }
+
+        function pad(n) {
+            return n.toString().padStart(2, '0');
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 1: return 'status-up';
+                case 2: return 'status-down';
+                case 0:
+                case 3:
+                default: return 'status-pending';
+            }
+        }
+    </script>
 </body>
+
 </html>

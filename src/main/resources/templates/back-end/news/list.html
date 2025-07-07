@@ -1,263 +1,584 @@
 <!DOCTYPE html>
-<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>人工處理案件列表</title>
-<link
-	href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC&display=swap"
-	rel="stylesheet">
-<style>
-* {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新聞列表</title>
 
-body {
-	font-family: "LXGW WenKai TC", cursive;
-	background: rgba(170, 198, 202, 1);
-	color: #333;
-}
-/* 頂部工具列 */
-.top-bar {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 8px 16px;
-	background: #fff;
-	border-bottom: 2px solid #ddd;
-}
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-.top-bar .title {
-	font-size: 1.2rem;
-	font-weight: bold;
-	color: #5b3a36;
-}
+  <style>
+    /* === 全局設定 === */
+    :root {
+      --primary-color: #007BFF;
+      --primary-hover: #0056b3;
+      --success-color: #28a745;
+      --danger-color: #dc3545;
+      --warning-color: #ffc107;
+      --light-bg: #f8f9fa;
+      --border-color: #dee2e6;
+      --text-color: #333;
+      --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
+      --radius: 8px;
+    }
 
-.top-bar .right-links a {
-	margin-left: 8px;
-	padding: 4px 8px;
-	font-size: 0.85rem;
-	color: #fff;
-	background: #ff9800; /* 客服使用橙色 */
-	border-radius: 4px;
-	text-decoration: none;
-	transition: opacity .2s;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.top-bar .right-links a.home {
-	background: darkkhaki; /* 回首頁使用黃色 */
-}
+    html {
+      font-size: 62.5%;
+      font-family: "Noto Sans TC", sans-serif;
+      height: 100%;
+    }
 
-.top-bar .right-links a:hover {
-	color: black;
-	opacity: 0.8;
-}
-
-.container {
-	max-width: 1200px;
-	margin: 16px auto;
-	padding: 0 16px;
-}
-
-/* 新增案件按鈕 */
-.add-btn {
-	display: block;
-	width: 100%;
-	margin-bottom: 12px;
-	padding: 8px 0;
-	font-size: 1rem;
-	text-align: center;
-	background: #8bc34a;
-	color: #fff;
-	border-radius: 4px;
-	text-decoration: none;
-	transition: opacity .2s;
-}
-
-.add-btn:hover {
-	color: black;
-	opacity: 0.85;
-}
-
-/* 原本表格格式 */
-table {
-	border-collapse: separate;
-	border-spacing: 0 5px;
-	width: 100%;
-	background-color: #fff;
-	border-radius: 8px;
-	overflow: hidden;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	font-size: 1rem;
-}
-
-table th:nth-child(1), table td:nth-child(1) {
-	display: none;
-}
-
-th, td {
-	padding: 8px 12px;
-	text-align: center;
-	border: 1px solid #ddd;
-}
-
-th {
-	background: #f7f7f7;
-	font-weight: bold;
-	border-bottom: 2px solid #ccc;
-}
-
-tbody tr:nth-child(odd) {
-	background: rgba(91, 58, 54, 1);
-	color: white;
-}
-
-tbody tr:nth-child(even) {
-	background: rgba(91, 58, 54, 1);
-	opacity: 0.8;
-	color: white;
-}
-
-tbody tr:hover {
-	background: #f1f1f1;
-	color: black;
-	opacity: 1;
-}
-
-/* 操作按鈕 */
-td.actions {
-	display: flex;
-	justify-content: center;
-	gap: 6px;
-	white-space: nowrap;
-}
-
-td.actions a {
-	padding: 4px 8px;
-	font-size: 0.85rem;
-	border-radius: 4px;
-	color: #fff;
-	text-decoration: none;
-	transition: opacity .2s;
-}
-
-td.actions a.edit {
-	background: #2196f3;
-}
-
-td.actions a.del {
-	background: #f44336;
-}
-
-td.actions a:hover {
-	color: black;
-	opacity: 0.8;
-}
-
-/* 標題更大 */
-.top-bar .title {
-	font-size: 30px;
-}
-
-/* 按鈕文字更大 */
-.top-bar .right-links a, .add-btn, td.actions a {
-	font-size: 20px;
-}
-</style>
-</head>
-<body>
-	<div class="top-bar">
-		<div class="title">案件管理</div>
-		<div class="right-links">
-			<a th:href="@{/}" class="home">回首頁</a> <a
-				th:href="@{/shakemate/manage}">後台管理系統</a>
-		</div>
-	</div>
-
-	<div class="container">
-		<a th:href="@{/servicecase/add}" class="add-btn">新增案件</a>
-
-		<table>
-			<thead>
-				<tr class="thead">
-					<th>編號</th>
-					<th onclick="sortTableByColumn(1)" style="cursor: pointer;">類別編號 ▲▼</th>
-					<th onclick="sortTableByColumn(2)" style="cursor: pointer;">使用者編號 ▲▼</th>
-					<th>標題</th>
-					<th>狀態</th>
-					<th>建立時間</th>
-					<th>更新時間</th>
-					<th>操作</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr th:each="sc : ${cases}">
-					<td th:text="${sc.caseId}">1</td>
-					<td th:text="${sc.caseTypeId}">1</td>
-					<td th:text="${sc.userId}">123</td>
-					<td th:text="${sc.title}">範例標題</td>
-					<td th:text="${sc.caseStatus}">0</td>
-					<td th:text="${#dates.format(sc.createTime,'yyyy-MM-dd HH:mm')}">2025-06-20…</td>
-					<td th:text="${#dates.format(sc.updateTime,'yyyy-MM-dd HH:mm')}">2025-06-20…</td>
-					<td class="actions"><a
-						th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
-						<a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}"
-						th:onclick="|return confirm('確定刪除 ID=${sc.caseId}？');|"
-						class="del">刪除</a></td>
-				</tr>
-				<tr th:if="${cases.empty}">
-					<td colspan="7">目前沒有任何案件</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-
-
-	<script>
-	let sortState = {
-  	column: null,
-  	ascending: true
-	};
-
-	window.addEventListener("DOMContentLoaded", () => {
-  	// 頁面一載入就預設以第 6 欄（類別編號）升冪排序
-  	sortTableByColumn(1);
-  	sortTableByColumn(2);
-	});
-
-	function sortTableByColumn(columnIndex) {
-  	const tbody = document.querySelector("table tbody");
-  	const rows = Array.from(tbody.querySelectorAll("tr"))
-    .filter(row => !row.querySelector("td[colspan]")); // 避開空資料列
-
-  	// 切換排序方向
-  	if (sortState.column === columnIndex) {
-    sortState.ascending = !sortState.ascending;
-  	} else {
-    sortState.column = columnIndex;
-    sortState.ascending = true;
-  	}
-
-  	rows.sort((a, b) => {
-    const aText = a.children[columnIndex].innerText.trim();
-    const bText = b.children[columnIndex].innerText.trim();
-
-    const aVal = isNaN(aText) ? aText : parseFloat(aText);
-    const bVal = isNaN(bText) ? bText : parseFloat(bText);
-
-    if (aVal < bVal) return sortState.ascending ? -1 : 1;
-    if (aVal > bVal) return sortState.ascending ? 1 : -1;
-    return 0;
-  	});
-
-  	rows.forEach(row => tbody.appendChild(row));
+    body {
+      margin: 0;
+      padding: 0;
+      font-size: 1.4rem;
+      line-height: 1.6;
+      color: var(--text-color);
+      height: 100vh;
+      overflow-x: hidden;
+    }
+    
+            /* 全頁背景漸層 */
+    .bg {
+      position: relative;
+      min-height: 100vh;
+      z-index: 0;
+      background: linear-gradient(185deg,
+        #DCFF61 0%,
+        #DCFF61 55%,
+        #2EC4B6 55%,
+        #2EC4B6 100%);
+      overflow: hidden;
+    }
+    
+    .bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.35);
+    z-index: 0;
+    pointer-events: none;
 	}
-	</script>
 
+    /* === 主要佈局 === */
+    .main-container {
+      height: 100vh;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
+    .content-wrapper {
+      width: 100%;
+      max-width: 1200px;
+      margin-left: 6rem;
+      /* 為左側懸浮按鈕留出空間 */
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 4rem);
+      /* 減去 padding */
+    }
 
+    /* === 頁面標題區域 === */
+    .header {
+      background: #2EC4B6;
+      color: white;
+      padding: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
 
+    .header h1 {
+      margin: 0;
+      font-size: 2.4rem;
+      font-weight: 700;
+    }
+
+    .add-btn {
+      background: var(--success-color);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .add-btn:hover {
+      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* === 表格樣式 === */
+    .table-container {
+      padding: 2rem;
+      flex: 1;
+      overflow-y: hidden;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th,
+    td {
+      padding: 1.5rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--light-bg);
+      font-weight: 600;
+      color: var(--text-color);
+      font-size: 1.3rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    td {
+      font-size: 1.4rem;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    /* === 操作按鈕 === */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .btn-edit {
+      background: var(--warning-color);
+      color: #333;
+    }
+
+    .btn-edit:hover {
+      background: #e0a800;
+      transform: translateY(-1px);
+    }
+
+    .btn-delete {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+
+    /* === 分頁控制 === */
+    .pagination-section {
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--light-bg);
+      flex-shrink: 0;
+    }
+
+    .pagination-info {
+      text-align: center;
+      font-size: 1.4rem;
+      color: #666;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .page-btn {
+      padding: 1rem 1.5rem;
+      border: 1px solid var(--border-color);
+      background: white;
+      color: var(--text-color);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.3rem;
+      min-width: 4rem;
+    }
+
+    .page-btn:hover {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .page-btn.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* === 懸浮按鈕 === */
+    .floating-nav {
+      position: fixed;
+      top: 50%;
+      left: 2rem;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      z-index: 1000;
+    }
+
+    .floating-btn {
+      width: 5rem;
+      height: 5rem;
+      border-radius: 50%;
+      background: gray;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      font-size: 1.8rem;
+      position: relative;
+      border: 1px solid white;
+    }
+
+    .floating-btn:hover {
+      background: lightgray;
+      transform: scale(1.1);
+      box-shadow: var(--shadow-hover);
+      border: 1px solid gray;
+      color: gray;
+    }
+
+    .floating-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 110%;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0.8rem 1.2rem;
+      border-radius: var(--radius);
+      font-size: 1.2rem;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .floating-btn:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* === 響應式設計 === */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 1rem;
+      }
+
+      .content-wrapper {
+        margin-left: 0;
+        /* 移動版本取消左邊距 */
+        height: calc(100vh - 2rem);
+      }
+
+      .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+      }
+
+      .table-container {
+        padding: 1rem;
+      }
+
+      th,
+      td {
+        padding: 1rem;
+        font-size: 1.2rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .floating-nav {
+        left: 1rem;
+      }
+
+      .floating-btn {
+        width: 4rem;
+        height: 4rem;
+        font-size: 1.6rem;
+      }
+
+      .pagination-section {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .table-wrapper {
+        font-size: 1.2rem;
+      }
+
+      th,
+      td {
+        padding: 0.8rem;
+      }
+
+      .main-container {
+        padding: 0.5rem;
+      }
+
+      .content-wrapper {
+        height: calc(100vh - 1rem);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="bg">
+  <div class="main-container">
+    <div class="content-wrapper">
+      <!-- 頁面標題 -->
+      <div class="header">
+        <h1><i class="fas fa-newspaper"></i>最新消息列表</h1>
+        <a th:href="@{/admin/news/add}" class="add-btn">
+          <i class="fas fa-plus"></i>
+          新增消息
+        </a>
+      </div>
+
+      <!-- 表格區域 -->
+      <div class="table-container">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>編號</th>
+                <th>標題</th>
+                <th>類別</th>
+                <th>發布時間</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr th:each="n : ${newsList}">
+                <td th:text="${n.newsId}">001</td>
+                <td th:text="${n.title}">新聞標題示例</td>
+                <td th:text="${n.categoryName}">科技</td>
+                <td th:text="${#dates.format(n.publishTime, 'yyyy-MM-dd HH:mm')}">2024-01-01 10:30</td>
+                <td>
+                  <div class="action-buttons">
+                    <a th:href="@{|/admin/news/edit/${n.newsId}|}" class="btn btn-edit">
+                      <i class="fas fa-edit"></i>
+                      編輯
+                    </a>
+                    <a th:href="@{|/admin/news/delete/${n.newsId}|}" class="btn btn-delete"
+                      onclick="return confirm('確定要刪除這則新聞嗎？')">
+                      <i class="fas fa-trash"></i>
+                      刪除
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 分頁區域 -->
+      <div class="pagination-section">
+        <div class="pagination-info" id="paginationInfo">
+          載入中...
+        </div>
+        <div class="pagination" id="pagination">
+          <!-- 分頁按鈕將由JavaScript動態生成 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 懸浮導航 -->
+  <div class="floating-nav">
+    <a th:href="@{/admin/dashboard}" class="floating-btn" data-tooltip="回後台首頁">
+      <i class="fas fa-home"></i>
+    </a>
+    <a th:href="@{/login}" class="floating-btn" data-tooltip="回登入頁">
+      <i class="fas fa-sign-in-alt"></i>
+    </a>
+  </div>
+  </div>
+
+  <script>
+    class NewsPagination {
+      constructor() {
+        this.rowsPerPage = 5;
+        this.currentPage = 1;
+        this.totalPages = 1;
+        this.rows = [];
+
+        this.init();
+      }
+
+      init() {
+        this.tbody = document.getElementById('tableBody');
+        this.pagination = document.getElementById('pagination');
+        this.paginationInfo = document.getElementById('paginationInfo');
+
+        this.rows = Array.from(this.tbody.querySelectorAll('tr'));
+        this.totalPages = Math.ceil(this.rows.length / this.rowsPerPage);
+
+        this.showPage(1);
+      }
+
+      showPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+
+        this.currentPage = page;
+        const start = (page - 1) * this.rowsPerPage;
+        const end = start + this.rowsPerPage;
+
+        // 顯示對應頁面的行
+        this.rows.forEach((row, index) => {
+          row.style.display = (index >= start && index < end) ? '' : 'none';
+        });
+
+        this.updatePaginationInfo();
+        this.renderPagination();
+      }
+
+      updatePaginationInfo() {
+        const start = (this.currentPage - 1) * this.rowsPerPage + 1;
+        const end = Math.min(this.currentPage * this.rowsPerPage, this.rows.length);
+
+        this.paginationInfo.textContent =
+          `顯示 ${start} 到 ${end} 筆，共 ${this.rows.length} 筆資料 (第 ${this.currentPage} 頁，共 ${this.totalPages} 頁)`;
+      }
+
+      renderPagination() {
+        this.pagination.innerHTML = '';
+
+        // 上一頁按鈕
+        const prevBtn = this.createButton('上一頁', () => this.showPage(this.currentPage - 1));
+        prevBtn.disabled = this.currentPage === 1;
+        this.pagination.appendChild(prevBtn);
+
+        // 頁碼按鈕
+        const startPage = Math.max(1, this.currentPage - 2);
+        const endPage = Math.min(this.totalPages, this.currentPage + 2);
+
+        if (startPage > 1) {
+          this.pagination.appendChild(this.createButton('1', () => this.showPage(1)));
+          if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.className = 'page-btn';
+            ellipsis.style.cursor = 'default';
+            this.pagination.appendChild(ellipsis);
+          }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+          const btn = this.createButton(i.toString(), () => this.showPage(i));
+          if (i === this.currentPage) {
+            btn.classList.add('active');
+          }
+          this.pagination.appendChild(btn);
+        }
+
+        if (endPage < this.totalPages) {
+          if (endPage < this.totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.className = 'page-btn';
+            ellipsis.style.cursor = 'default';
+            this.pagination.appendChild(ellipsis);
+          }
+          this.pagination.appendChild(this.createButton(this.totalPages.toString(), () => this.showPage(this.totalPages)));
+        }
+
+        // 下一頁按鈕
+        const nextBtn = this.createButton('下一頁', () => this.showPage(this.currentPage + 1));
+        nextBtn.disabled = this.currentPage === this.totalPages;
+        this.pagination.appendChild(nextBtn);
+      }
+
+      createButton(text, onClick) {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.className = 'page-btn';
+        button.addEventListener('click', onClick);
+        return button;
+      }
+    }
+
+    // 初始化分頁
+    document.addEventListener('DOMContentLoaded', () => {
+      new NewsPagination();
+    });
+  </script>
 </body>
+
 </html>

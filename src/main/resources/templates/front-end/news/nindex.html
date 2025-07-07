@@ -1,166 +1,343 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News CRUD 管理介面</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        form { margin-top: 20px; }
-        form input, form textarea, form button, form select { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }
-        .actions button { margin-right: 5px; }
-        .hidden { display: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>問題列表</title>
+
+  <!-- 字體與圖示 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="/css/headerStyle.css">
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 62.5%;
+    }
+
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      height: 100vh;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 全頁背景漸層 */
+    .bg {
+      position: relative;
+      min-height: 100vh;
+      z-index: 0;
+      background: linear-gradient(185deg,
+          #DCFF61 0%,
+          #DCFF61 55%,
+          #2EC4B6 55%,
+          #2EC4B6 100%);
+      overflow: hidden;
+    }
+    
+    .bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.35);
+    z-index: 0;
+    pointer-events: none;
+	}
+
+    /* 容器 */
+    .container {
+      max-width: 800px;
+      margin: 10rem auto;
+      padding: 0 1rem;
+    }
+
+    /* 類別按鈕列 */
+    .category-bar {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .category-bar::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .category-bar::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+
+    .category-item {
+      position: relative;
+      flex: 0 0 auto;
+      margin-right: 1rem;
+      padding: .5rem 1rem;
+      font-size: 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      outline: none;
+      color: #555;
+      transition: background .2s, color .2s;
+    }
+
+    .category-item.active {
+      background: #007bff;
+      color: #fff;
+    }
+
+    /* 新聞列表 */
+    .news-list ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .news-list li {
+      background: #fff;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp .4s forwards;
+      cursor: pointer;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .news-title {
+      font-size: 1.6rem;
+      margin-bottom: .5rem;
+    }
+
+    .news-time {
+      font-size: 1.3rem;
+      color: #666;
+    }
+
+    .no-news {
+      text-align: center;
+      color: #999;
+      padding: 2rem 0;
+    }
+
+    /* 包覆跑馬燈的容器 */
+    .news-ticker {
+      background: gray;
+      overflow: hidden;
+      white-space: nowrap;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* 滾動軌道 */
+    .ticker-track {
+      background: transparent;
+      display: inline-block;
+      width: 100%;
+      /* 讓內容寬度為100% */
+      animation: ticker 15s linear infinite;
+      /* 讓內容滾動 */
+    }
+
+    /* 跑馬燈的每一則 */
+    .ticker-item {
+      display: inline-block;
+      font-size: 1.4rem;
+      color: white;
+      padding-left: 2rem;
+      margin-right: 2rem;
+      /* 留空隙 */
+    }
+
+    /* 定義往左滾動的動畫 */
+    @keyframes ticker {
+      0% {
+        transform: translateX(100%);
+      }
+
+      /* 初始位置在右側 */
+      100% {
+        transform: translateX(-100%);
+      }
+
+      /* 滾動至整行消失 */
+    }
+
+    /* 弹出框和遮罩层样式 */
+    #contentModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 500px;
+      max-width: 90%;
+      box-sizing: border-box;
+      z-index: 1001;
+    }
+
+    #contentModalOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+      /* 默认隐藏 */
+    }
+
+    #contentModal h3 {
+      font-size: 3rem;
+    }
+
+    #contentModal p {
+      font-size: 1.6rem;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>News CRUD 管理介面</h1>
+  <div class="bg">
+    <!-- 固定 Header -->
+    <div th:replace="~{/fragments/header1 :: header}"></div>
 
-    <!-- 新增 / 編輯表單 -->
-    <form id="newsForm">
-        <h2 id="formTitle">新增 News</h2>
-        <input type="hidden" id="newsId" />
-        <label>標題：</nlabel>
-        <input type="text" id="title" placeholder="輸入標題" required />
-        <label>內容：</label>
-        <textarea id="content" rows="4" placeholder="輸入內容" required></textarea>
-        <label>類別 ID：</label>
-        <input type="number" id="typeId" placeholder="輸入類別 ID" required />
-        <button type="submit" id="submitBtn">新增</button>
-        <button type="button" id="cancelEditBtn" class="hidden">取消編輯</button>
-    </form>
+    <div class="container">
+      <!-- 類別按鈕列 -->
+      <nav class="category-bar" id="categoryBar">
+        <button th:each="type : ${allTypes}" class="category-item" th:data-id="${type.categoryId}"
+          th:text="${type.categoryName}" onclick="selectCategory(this)"></button>
+      </nav>
 
-    <!-- 資料列表 -->
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>標題</th>
-                <th>內容</th>
-                <th>類別 ID</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="newsTableBody">
-            <!-- JavaScript 動態產生 -->
-        </tbody>
-    </table>
+      <!-- 新增：消息跑馬燈 -->
+      <div class="news-ticker" id="newsTicker">
+        <div class="ticker-track" id="tickerTrack">
+          <span class="ticker-item">歡迎來到最新消息，選擇問題類別即可看見相關資訊!</span>
+        </div>
+      </div>
 
-    <script>
-        const apiUrl = '/api/news';
+      <!-- 新聞列表 -->
+      <section class="news-list" id="newsList">
+        <ul id="newsListUl">
+          <li th:each="item : ${newsList}" onclick="showContent('${item.title}', '${item.content}')">
+            <div class="news-title" th:text="${item.title}">新聞標題</div>
+            <div class="news-time" th:text="${#dates.format(item.publishTime,'yyyy/MM/dd HH:mm')}">時間</div>
+          </li>
+          <li th:if="${#lists.isEmpty(newsList)}" class="no-news">
+            目前沒有任何新聞。
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadNews();
+  <!-- 遮罩层 -->
+  <div id="contentModalOverlay" onclick="closeModal()"></div>
 
-            const form = document.getElementById('newsForm');
-            form.addEventListener('submit', handleFormSubmit);
-            document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+  <!-- 彈出框 -->
+  <div id="contentModal">
+    <h3 id="contentTitle"></h3>
+    <p id="contentText"></p>
+    <button onclick="closeModal()">關閉</button>
+  </div>
+
+  <script th:inline="javascript">
+    const apiBase = /*[[@{/api}]]*/ '/api';
+
+    // 選取分類
+    function selectCategory(el) {
+      document.querySelectorAll('.category-item').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      loadNewsByCategory(el.dataset.id);
+    }
+
+    // 載入分類新聞
+    async function loadNewsByCategory(categoryId) {
+      const ul = document.querySelector('#newsList ul');
+      ul.innerHTML = '';
+      try {
+        const resp = await fetch(`${apiBase}/news/category/${categoryId}`);
+        if (!resp.ok) throw new Error(resp.status);
+        const list = await resp.json();
+        if (!list.length) {
+          ul.innerHTML = '<li class="no-news">這個類別目前沒有新聞。</li>';
+          return;
+        }
+        list.forEach(item => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div class="news-title">${item.title}</div>
+            <div class="news-time">${new Date(item.publishTime)
+              .toLocaleString('zh-TW', {
+                year: 'numeric', month: '2-digit',
+                day: '2-digit', hour: '2-digit', minute: '2-digit'
+              })}</div>`;
+          li.addEventListener('click', function () {
+            showContent(item.title, item.content); // 点击时调用showContent
+          });
+          ul.appendChild(li);
         });
+      } catch (err) {
+        console.error('載入新聞失敗', err);
+        ul.innerHTML = '<li class="no-news">載入新聞失敗，請稍後重試。</li>';
+      }
+    }
 
-        function loadNews() {
-            fetch(apiUrl)
-                .then(res => res.json())
-                .then(data => renderTable(data))
-                .catch(err => console.error('載入失敗', err));
-        }
+    // 顯示選中新聞的詳細內容
+    function showContent(title, content) {
+      // 顯示遮罩層
+      document.getElementById('contentModalOverlay').style.display = 'block';
+      document.getElementById('contentModal').style.display = 'block';
+      document.getElementById('contentTitle').innerText = title;
+      document.getElementById('contentText').innerText = content;
+    }
 
-        function renderTable(newsList) {
-            const tbody = document.getElementById('newsTableBody');
-            tbody.innerHTML = '';
+    // 關閉彈出內容框
+    function closeModal() {
+      document.getElementById('contentModalOverlay').style.display = 'none';
+      document.getElementById('contentModal').style.display = 'none';
+    }
 
-            newsList.forEach(news => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${news.newsId}</td>
-                    <td>${news.title}</td>
-                    <td>${news.content}</td>
-                    <td>${news.typeId}</td>
-                    <td class="actions">
-                        <button onclick="editNews(${news.newsId})">編輯</button>
-                        <button onclick="deleteNews(${news.newsId})">刪除</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    // 初始自動選第一分類
+    document.addEventListener('DOMContentLoaded', () => {
+      const first = document.querySelector('.category-item');
+      if (first) selectCategory(first);
+    });
+  </script>
 
-        function handleFormSubmit(event) {
-            event.preventDefault();
-            const id = document.getElementById('newsId').value;
-            const title = document.getElementById('title').value;
-            const content = document.getElementById('content').value;
-            const typeId = document.getElementById('typeId').value;
+  <script src="/js/header.js"></script>
 
-            const payload = { title, content, typeId: parseInt(typeId) };
-
-            if (id) {
-                // 更新
-                fetch(`${apiUrl}/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(res => res.json())
-                .then(() => {
-                    resetForm();
-                    loadNews();
-                })
-                .catch(err => console.error('更新失敗', err));
-            } else {
-                // 新增
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(res => res.json())
-                .then(() => {
-                    resetForm();
-                    loadNews();
-                })
-                .catch(err => console.error('新增失敗', err));
-            }
-        }
-
-        function editNews(id) {
-            fetch(`${apiUrl}/${id}`)
-                .then(res => {
-                    if (!res.ok) throw new Error('找不到該筆資料');
-                    return res.json();
-                })
-                .then(news => {
-                    document.getElementById('formTitle').textContent = '編輯 News';
-                    document.getElementById('newsId').value = news.newsId;
-                    document.getElementById('title').value = news.title;
-                    document.getElementById('content').value = news.content;
-                    document.getElementById('typeId').value = news.typeId;
-                    document.getElementById('submitBtn').textContent = '更新';
-                    document.getElementById('cancelEditBtn').classList.remove('hidden');
-                })
-                .catch(err => alert(err));
-        }
-
-        function deleteNews(id) {
-            if (!confirm('確定要刪除這筆 News 嗎？')) return;
-            fetch(`${apiUrl}/${id}`, { method: 'DELETE' })
-                .then(res => {
-                    if (res.status === 204) loadNews();
-                    else throw new Error('刪除失敗');
-                })
-                .catch(err => alert(err));
-        }
-
-        function resetForm() {
-            document.getElementById('formTitle').textContent = '新增 News';
-            document.getElementById('newsId').value = '';
-            document.getElementById('title').value = '';
-            document.getElementById('content').value = '';
-            document.getElementById('typeId').value = '';
-            document.getElementById('submitBtn').textContent = '新增';
-            document.getElementById('cancelEditBtn').classList.add('hidden');
-        }
-    </script>
 </body>
+
 </html>

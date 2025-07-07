@@ -19,7 +19,7 @@ public class ShOrderRequestDto {
     private Integer platformFee;
     private Integer shippingFee;
     private String shippingAddress;
-    private String shippingMethod;
+    private byte shippingMethod;
     private byte paymentMethod;
     private String orderNote;
     private Integer totalAmount;
@@ -28,7 +28,7 @@ public class ShOrderRequestDto {
     private byte shippingStatus;
 
 
-    public ShOrderRequestDto(Integer shOrderId, Integer prodId, Integer buyerUserId, Integer sellerUserId, Integer productPrice, Integer productQuantity, Integer platformFee, Integer shippingFee, String shippingAddress, String shippingMethod, byte paymentMethod, String orderNote ) {
+    public ShOrderRequestDto(Integer shOrderId, Integer prodId, Integer buyerUserId, Integer sellerUserId, Integer productPrice, Integer productQuantity, Integer platformFee, Integer shippingFee, String shippingAddress, byte shippingMethod, byte paymentMethod, String orderNote ) {
         this.shOrderId = shOrderId;
         this.prodId = prodId;
         this.buyerUserId = buyerUserId;

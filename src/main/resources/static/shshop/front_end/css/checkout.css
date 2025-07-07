@@ -1,28 +1,64 @@
 /* ---------------------------------- 全局樣式 ---------------------------------- */
+:root {
+    --fa-style-family-brands: "Font Awesome 6 Brands";
+    --fa-font-brands: normal 400 1em / 1 "Font Awesome 6 Brands";
+}
+
+*{
+    font-size: 62.5%; /* 1rem = 10px */
+    box-sizing: border-box; /* 確保所有元素的盒模型一致 */
+}
+
 body {
     font-family: "Roboto", 'Segoe UI', sans-serif;
     margin: 0;
     padding: 0;
-    background: linear-gradient(to bottom, #e6f9ff, #ffffff);
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
     color: var(--on-surface);
+    position: relative;
+    min-height: 100vh;
+    z-index: 0;
+
+    /* 背景拼接色塊（亮綠 + 藍綠） */
+        background: linear-gradient(185deg,
+            #DCFF61 0%,
+            #DCFF61 55%,
+            #2EC4B6 55%,
+            #2EC4B6 100%);
+
 }
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.3); /* 可以調淡一點 0.15～0.3 */
+  z-index: 0;
+  pointer-events: none;
+}
+
 
 /* ---------------------------------- 容器樣式 ---------------------------------- */
 .container {
     max-width: 960px;
-    margin: 40px auto;
-    background-color: white;
+    margin: 4rem auto;
+    background-color: #FCF7F8;
     padding: 24px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* ---------------------------------- 標題樣式 ---------------------------------- */
-h2, h3 {
+h2,
+h3 {
+    font-size: 2rem;
+    font-weight: 600;
     margin-bottom: 1rem;
+}
+
+#des{
+    font-size: 2rem;
 }
 
 /* ---------------------------------- 表單與欄位樣式 ---------------------------------- */
@@ -35,7 +71,9 @@ label {
     margin-bottom: 10px;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
     width: 100%;
     padding: 8px;
     margin-top: 4px;
@@ -132,7 +170,7 @@ input, select, textarea {
     display: block;
     width: 100%;
     padding: 12px;
-    background-color: #28a745;
+    background-color: #2EC4B6;
     border: none;
     color: white;
     border-radius: 6px;
@@ -141,7 +179,7 @@ input, select, textarea {
 }
 
 .btn:hover {
-    background-color: #218838;
+    background-color:#26A79A;
 }
 
 /* ---------------------------------- Modal 燈箱 ---------------------------------- */
@@ -190,51 +228,6 @@ input, select, textarea {
     --header-height: 64px;
 }
 
-/* ---------------------------------- 標題區樣式 ---------------------------------- */
-.header {
-    position: fixed;
-    inset: 0 0 auto 0;
-    height: var(--header-height);
-    background-color: var(--surface-color);
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-.header__logo img {
-    height: 40px;
-}
-
-.header__nav {
-    flex-grow: 1;
-    text-align: center;
-}
-
-.header__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-}
-
-.header__item a {
-    text-decoration: none;
-    color: var(--on-surface);
-    font-weight: 500;
-}
-
-.header__item a:hover {
-    color: var(--primary-color);
-}
-
-.header__user {
-    font-size: 24px;
-    cursor: pointer;
-}
 
 /* ---------------------------------- 主內容區樣式 ---------------------------------- */
 .main-content {
@@ -319,6 +312,10 @@ tr:hover {
     object-fit: cover;
     border-radius: 4px;
 }
+#productPrice{
+    font-size: 2.5rem;
+
+}
 
 /* 操作按鈕 */
 .material-button {
@@ -337,27 +334,26 @@ tr:hover {
 }
 
 .bg {
-  position: relative;
-  min-height: 100vh;
-  z-index: 0;
+    position: relative;
+    min-height: 100vh;
+    z-index: 0;
 
-  /* 背景拼接色塊（亮綠 + 藍綠） */
-  background: linear-gradient(
-    185deg,
-    #DCFF61 0%,
-    #DCFF61 55%,
-    #2EC4B6 55%,
-    #2EC4B6 100%
-  );
-  overflow: hidden;
+    /* 背景拼接色塊（亮綠 + 藍綠） */
+    background: linear-gradient(185deg,
+            #DCFF61 0%,
+            #DCFF61 55%,
+            #2EC4B6 55%,
+            #2EC4B6 100%);
+    overflow: hidden;
 }
 
 /* 背景上方有再加一層帶透明度的白色 */
-.bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
-  z-index: 0;
-  pointer-events: none;
+.body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.35);
+    /* 可以調淡一點 0.15～0.3 */
+    z-index: 0;
+    pointer-events: none;
 }

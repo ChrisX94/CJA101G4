@@ -1,68 +1,65 @@
 package com.shakemate.news.controller;
 
-import com.shakemate.newstype.model.*;
-import com.shakemate.news.model.News;
-import com.shakemate.news.model.NewsService;
-
-import java.util.List;
-
+import com.shakemate.news.dto.NewsDto;
+import com.shakemate.news.dto.NewsResponse;
+import com.shakemate.news.service.NewsService;
+import com.shakemate.newstype.model.NewsType;
+import com.shakemate.newstype.repository.NewsTypeRepository;
+import com.shakemate.adm.model.AdmVO;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
-@RequestMapping("/news")
+@RequestMapping("/admin/news")
 public class NewsWebController {
 
-	@Autowired
-	private NewsService newsService;
+    @Autowired private NewsService newsService;
+    @Autowired private NewsTypeRepository newsTypeRepo;
 
-	@Autowired
-	private NewsTypeRepository newsTypeRepo;
+    @ModelAttribute("allTypes")
+    public List<NewsType> populateNewsTypes() {
+        return newsTypeRepo.findAll();
+    }
 
-	@ModelAttribute("allTypes")
-	public List<NewsType> populateCaseTypes() {
-		return newsTypeRepo.findAll();
-	}
+    @GetMapping
+    public String list(Model model) {
+        List<NewsResponse> list = newsService.getLatestNews();
+        model.addAttribute("newsList", list);
+        return "back-end/news/list";
+    }
 
-	// 顯示全部案件
-	@GetMapping
-	public String list(Model model) {
-		model.addAttribute("news", newsService.getAll());
-		return "back-end/news/list";
-	}
+    @GetMapping("/add")
+    public String showAddForm(Model model) {
+        model.addAttribute("newsDto", new NewsDto());
+        return "back-end/news/add";
+    }
 
-	// 顯示新增表單
-	@GetMapping("/add")
-//    public String showAddForm(Model model) {
-	public String showAddForm(Model model) {
-		model.addAttribute("news", new News());
-		return "back-end/news/add";
-	}
+    @PostMapping("/save")
+    public String save(@ModelAttribute("newsDto") NewsDto dto,
+                       HttpSession session) {
+        AdmVO admin = (AdmVO) session.getAttribute("loggedInAdmin");
+        if (admin == null) {
+            return "redirect:/admin/login";
+        }
+        newsService.saveOrUpdate(dto, admin);
+        return "redirect:/admin/news";
+    }
 
-	// 儲存新案件（或更新）
-	@PostMapping("/save")
-	public String save(@ModelAttribute News newsItem) {
-		newsService.save(newsItem); // JPA save() 可用於新增或更新
-		return "redirect:/news";
-	}
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable Integer id, Model model) {
+        NewsDto dto = newsService.getNewsDtoById(id);
+        model.addAttribute("newsDto", dto);
+        return "back-end/news/edit";
+    }
 
-	// 顯示修改頁面
-	@GetMapping("/edit/{id}")
-	public String showEditForm(@PathVariable("id") Integer newsId, Model model) {
-		News editNews = newsService.findById(newsId);
-		if (editNews == null) {
-			return "redirect:/news?error=notfound";
-		}
-		model.addAttribute("news", editNews);
-		return "back-end/news/edit";
-	}
-
-	// 刪除案件
-	@GetMapping("/delete/{id}")
-	public String delete(@PathVariable Integer id) {
-		newsService.delete(id);
-		return "redirect:/news";
-	}
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable Integer id) {
+        newsService.deleteById(id);
+        return "redirect:/admin/news";
+    }
 }

@@ -1,6 +1,5 @@
 package com.shakemate.user.dao;
 
-
 import com.shakemate.user.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +12,7 @@ import java.util.List;
 public interface UsersRepository extends JpaRepository<Users, Integer> {
     @Transactional
     Users findByEmail(String email);
-    
+
     /**
      * 獲取所有用戶ID，用於廣播通知
      */

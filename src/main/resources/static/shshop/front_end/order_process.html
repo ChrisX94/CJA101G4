@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>物流訂單處理中 | MatchMarket</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
         * {
             box-sizing: border-box;
@@ -12,12 +13,18 @@
 
         body {
             font-family: "Noto Sans TC", sans-serif;
-            background: linear-gradient(to bottom, #f0f8ff, #ffffff);
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
+
+            background: linear-gradient(185deg,
+                    #DCFF61 0%,
+                    #DCFF61 55%,
+                    #2EC4B6 55%,
+                    #2EC4B6 100%);
+            overflow: hidden;
         }
 
         .container {
@@ -31,13 +38,14 @@
         }
 
         h1 {
-            color: #3498db;
+            color: #26A79A;
             margin-bottom: 16px;
         }
 
         .loading {
             font-size: 48px;
             margin: 16px 0;
+            color: #2EC4B6;
             animation: spin 1s linear infinite;
         }
 
@@ -66,7 +74,7 @@
 
         .btn {
             display: inline-block;
-            background-color: #3498db;
+            background-color: #2EC4B6;
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
@@ -76,14 +84,16 @@
         }
 
         .btn:hover {
-            background-color: #217dbb;
+            background-color: #26A79A;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="loading">🔄</div>
+        <div class="loading">
+            <i class="fa-solid fa-rotate"></i>
+        </div>
         <h1>訂單</h1>
         <div class="info">
             <div class="logistics-info">
@@ -95,8 +105,8 @@
             <div>物流方式：<span id="logistics">--</span></div>
         </div>
         <div class="error" id="errorMsg"></div>
-        <a href="my_order_manager.html" class="btn">查看訂單</a>
-        <a href="/" class="btn">回首頁</a>
+        <a href="order_master.html" class="btn">查看訂單</a>
+        <a href="select_page.html" class="btn">回首頁</a>
         <button id="payButton" class="btn" style="display: none;">立即付款</button>
     </div>
 
@@ -111,11 +121,11 @@
             const orderData = JSON.parse(localStorage.getItem('orderData'));
             const processData = JSON.parse(localStorage.getItem('orderProcessData'));
 
-            if (!orderData || !processData) {
-                alert('❌ 找不到訂單資料或物流資料，請重新下單');
-                window.location.href = 'checkout.html';
-                return;
-            }
+            // if (!orderData || !processData) {
+            //     alert('❌ 找不到訂單資料或物流資料，請重新下單');
+            //     window.location.href = 'checkout.html';
+            //     return;
+            // }
 
             try {
                 /* ================= ✔ 建立訂單 ================= */
@@ -220,44 +230,44 @@
                 console.error(err);
             }
 
-                    const payButton = document.getElementById('payButton');
+            const payButton = document.getElementById('payButton');
 
-        if (processData.paymentMethod === 1) {
-            payButton.style.display = 'inline-block'; // 顯示付款按鈕
-        }
-
-                payButton.addEventListener('click', async () => {
-            try {
-                const res = await fetch('/ecpay/checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        orderId: processData.orderId,
-                        totalAmount: processData.totalAmount,
-                        receiverName: processData.receiverName,
-                        receiverPhone: processData.receiverPhoneol
-                    })
-                });
-
-                const html = await res.text();
-
-                // ✔️ 將返回的付款表單插入並自動提交
-                const payFormDiv = document.createElement('div');
-                payFormDiv.innerHTML = html;
-                document.body.appendChild(payFormDiv);
-
-                const payForm = payFormDiv.querySelector('form');
-                if (payForm) {
-                    payForm.submit();
-                } else {
-                    alert('❌ 金流表單產生失敗');
-                }
-
-            } catch (err) {
-                console.error('❌ 金流錯誤', err);
-                alert('❌ 發生錯誤：' + err.message);
+            if (processData.paymentMethod === 1) {
+                payButton.style.display = 'inline-block'; // 顯示付款按鈕
             }
-        });
+
+            payButton.addEventListener('click', async () => {
+                try {
+                    const res = await fetch('/ecpay/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            orderId: processData.orderId,
+                            totalAmount: processData.totalAmount,
+                            receiverName: processData.receiverName,
+                            receiverPhone: processData.receiverPhoneol
+                        })
+                    });
+
+                    const html = await res.text();
+
+                    // ✔️ 將返回的付款表單插入並自動提交
+                    const payFormDiv = document.createElement('div');
+                    payFormDiv.innerHTML = html;
+                    document.body.appendChild(payFormDiv);
+
+                    const payForm = payFormDiv.querySelector('form');
+                    if (payForm) {
+                        payForm.submit();
+                    } else {
+                        alert('❌ 金流表單產生失敗');
+                    }
+
+                } catch (err) {
+                    console.error('❌ 金流錯誤', err);
+                    alert('❌ 發生錯誤：' + err.message);
+                }
+            });
 
 
         });

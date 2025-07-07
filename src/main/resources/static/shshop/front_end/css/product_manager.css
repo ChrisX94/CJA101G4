@@ -1,17 +1,15 @@
-
-
 :root {
-    --primary-color: #6200ee;
+    --primary-color: #DCFF61;
     /* 主要顏色 */
-    --primary-light-color: #bb86fc;
+    --primary-light-color: #2EC4B6;
     /* 主要顏色較淺 */
-    --primary-dark-color: #3700b3;
+    --primary-dark-color: #DCFF61;
     /* 主要顏色較深 */
     --secondary-color: #03dac6;
     /* 次要顏色 (強調色) */
     --background-color: #f5f5f5;
     /* 背景色 */
-    --surface-color: #ffffff;
+    --surface-color: #FCF7F8;
     /* 表面顏色 (卡片、表格背景) */
     --on-primary: #ffffff;
     /* 主要顏色上的文字顏色 */
@@ -23,6 +21,10 @@
     /* 導覽列高度 */
 }
 
+* {
+    font-size: 62.5%;
+}
+
 /* 全局樣式 */
 body {
     font-family: 'Roboto', Arial, sans-serif;
@@ -30,130 +32,25 @@ body {
     margin: 0;
     display: flex;
     min-height: 100vh;
-    background-color: var(--background-color);
+    background: linear-gradient(185deg,
+            #DCFF61 0%,
+            #DCFF61 55%,
+            #2EC4B6 55%,
+            #2EC4B6 100%);
+    /* overflow: hidden;s */
     color: var(--on-surface);
     overflow-x: hidden;
     /* 防止水平滾動條 */
 }
-
-/* Header 導覽列 (整合原 header.css 樣式並 Material Design 化) */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: var(--header-height);
-    /* background-color: var(--primary-color); */
-    /* Material Design Primary Color */
-    color: var(--on-primary);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
-        0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-    /* Material Design 陰影 */
-    z-index: 1000;
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.35); /* 可以調淡一點 0.15～0.3 */
+  z-index: 0;
+  pointer-events: none;
 }
 
-.header__logo img {
-    height: 40px;
-    /* 調整 Logo 大小 */
-    vertical-align: middle;
-}
-
-.header__nav {
-    flex-grow: 1;
-    text-align: center;
-}
-
-.header__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    /* 增加導覽項目間距 */
-}
-
-.header__item a {
-    /* color: var(--on-primary); */
-    text-decoration: none;
-    font-weight: 500;
-    /* Medium 字重 */
-    padding: 8px 0;
-    position: relative;
-    transition: color 0.3s ease;
-}
-
-.header__item a:hover {
-    color: var(--secondary-color);
-    /* hover 時使用強調色 */
-}
-
-/* 下拉選單 */
-.dropdown {
-    position: relative;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    background-color: var(--surface-color);
-    /* 背景色使用表面顏色 */
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    /* Material Design 陰影 */
-    z-index: 1;
-    border-radius: 4px;
-    /* 圓角 */
-    padding: 8px 0;
-    top: calc(100% + 5px);
-    /* 距離父元素下方一些 */
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.dropdown-menu li a {
-    color: var(--on-surface);
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    text-align: left;
-    transition: background-color 0.2s ease;
-}
-
-.dropdown-menu li a:hover {
-    background-color: var(--background-color);
-    /* hover 時背景色 */
-}
-
-.dropdown:hover .dropdown-menu {
-    display: block;
-}
-
-/* 子下拉選單 */
-.dropdown-submenu {
-    position: relative;
-}
-
-.dropdown-submenu .dropdown-menu {
-    top: 0;
-    left: 100%;
-    margin-left: 5px;
-}
-
-.dropdown-submenu:hover .dropdown-menu {
-    display: block;
-}
-
-.header__user {
-    font-size: 24px;
-    cursor: pointer;
-    color: var(--on-primary);
-}
 
 /* 側邊欄 */
 .sidebar {
@@ -170,8 +67,8 @@ body {
 }
 
 .sidebar-title {
-    font-size: 1.1rem;
-    font-weight: 500;
+    font-size: 1.6rem;
+    font-weight: 800;
     /* Medium 字重 */
     color: var(--text-light-gray);
     padding: 20px 24px 10px 24px;
@@ -180,7 +77,8 @@ body {
     /* 大寫 */
 }
 
-.sidebar-item {
+.sidebar-item,
+.sidebar-item-link {
     display: block;
     padding: 12px 24px;
     /* 增加內邊距 */
@@ -195,7 +93,10 @@ body {
     /* Regular 字重 */
 }
 
-.sidebar-item:hover {
+
+
+.sidebar-item:hover,
+.sidebar-item-link:hover {
     background-color: rgba(var(--primary-color-rgb), 0.08);
     /* 使用主色調的輕微透明背景 */
 }
@@ -228,7 +129,7 @@ body {
     /* 圓角 */
     box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
         0px 4px 5px 0px rgba(0, 0, 0, 0.14),
-        0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+        0px 1px 10px 0px #0000001f;
     /* Material Design 陰影 */
     margin-bottom: 24px;
 }
@@ -252,13 +153,17 @@ body {
     /* Material Design 陰影 */
     overflow: hidden;
     /* 防止表格內容超出圓角 */
+    overflow-x: auto; 
+    
 }
 
 table {
     width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
     /* 固定表格佈局 */
+    border-collapse: collapse;
 }
 
 th,
@@ -352,7 +257,7 @@ img.prod-img {
 /* 修改按鈕樣式 */
 .edit-btn {
     background-color: transparent;
-    color: var(--primary-color);
+    color: #2EC4B6;
     /* 使用主色作為文字顏色 */
     box-shadow: none;
     /* 移除陰影 */
@@ -392,20 +297,56 @@ body {
     --primary-color-rgb: 98, 0, 238;
     /* RGB for #6200ee */
 }
+
 /* 商品管理表格樣式 */
-th:nth-child(1), td:nth-child(1) { width: 80px; }    /* 商品圖片 */
-th:nth-child(2), td:nth-child(2) { width: 100px; }   /* 商品名稱 */
-th:nth-child(3), td:nth-child(3) { width: 80px; }    /* 價格 */
-th:nth-child(4), td:nth-child(4) { width: 60px; }    /* 數量 */
-th:nth-child(5), td:nth-child(5) { width: 150px; }   /* 描述 */
-th:nth-child(6), td:nth-child(6) { width: 60px; }   /* 商品狀態 */
-th:nth-child(7), td:nth-child(7) { width: 80px; }    /* 操作 */
- /* 審核拒絕原因 */
-th:nth-child(8), td:nth-child(8) {
+th:nth-child(1),
+td:nth-child(1) {
+    width: 80px;
+}
+
+/* 商品圖片 */
+th:nth-child(2),
+td:nth-child(2) {
+    width: 100px;
+}
+
+/* 商品名稱 */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 80px;
+}
+
+/* 價格 */
+th:nth-child(4),
+td:nth-child(4) {
+    width: 60px;
+}
+
+/* 數量 */
+th:nth-child(5),
+td:nth-child(5) {
+    width: 150px;
+}
+
+/* 描述 */
+th:nth-child(6),
+td:nth-child(6) {
+    width: 60px;
+}
+
+/* 商品狀態 */
+th:nth-child(7),
+td:nth-child(7) {
+    width: 80px;
+}
+
+/* 操作 */
+/* 審核拒絕原因 */
+th:nth-child(8),
+td:nth-child(8) {
     cursor: help;
     width: 250px;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: anywhere;
-}  
-
+}

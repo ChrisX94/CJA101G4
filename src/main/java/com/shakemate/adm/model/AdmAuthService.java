@@ -31,12 +31,12 @@ public class AdmAuthService {
 	public void deleteAdmAuth(Integer admAuthId) {
 		if (repository.existsById(admAuthId))
 			repository.deleteById(admAuthId);
-//				    repository.deleteById(admId);
+		// repository.deleteById(admId);
 	}
 
 	public AdmAuthVO getOneAdmAuth(Integer admAuthId) {
 		Optional<AdmAuthVO> optional = repository.findById(admAuthId);
-//				return optional.get();
+		// return optional.get();
 		return optional.orElse(null); // public T orElse(T other) : 如果值存在就回傳其值，否則回傳other的值
 	}
 
@@ -45,6 +45,6 @@ public class AdmAuthService {
 	}
 
 	public List<AdmAuthVO> getAuthsByAuthId(Integer authId) {
-        return repository.findByAuthFuncVO_AuthId(authId); 
-    }
+		return repository.findByAuthFuncVO_AuthId(authId);
+	}
 }

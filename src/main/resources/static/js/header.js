@@ -43,6 +43,7 @@ includeHTML(() => {
           memberEl.href = "/profile";
           memberEl.innerHTML = `<img src="${data.userAvatar}" alt="會員頭像" class="avatar-img">`;
 
+
           // ✅ 桌機版：新增下拉箭頭區塊
           const dropdownItem = document.createElement('li');
           dropdownItem.className = "header__item dropdown";
@@ -52,11 +53,12 @@ includeHTML(() => {
             </div>
             <ul class="dropdown-menu dropdown-menu1">
               <li><a href="/notifications">通知中心</a></li>
-              <li><a href="/logout">登出</a></li>
+              <li><a href="/login/logout">登出</a></li>
             </ul>
           `;
           memberEl.parentNode.insertBefore(dropdownItem, memberEl.nextSibling);
         }
+
 
         // ✅ 手機版：設定 .mobile-avatar 的 src
         const mobileAvatar = document.querySelector('.mobile-avatar img');

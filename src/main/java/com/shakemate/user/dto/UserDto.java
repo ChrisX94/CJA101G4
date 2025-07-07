@@ -38,7 +38,6 @@ public class UserDto {
     private Boolean postStatus;
     private Boolean atAcStatus;
     private Boolean sellStatus;
-    
 
     public UserDto SimpleUserDto(Users user) {
         UserDto dto = new UserDto();
@@ -46,7 +45,7 @@ public class UserDto {
         dto.setUsername(user.getUsername());
         dto.setImg1(user.getImg1());
         dto.setSellStatus(user.getSellStatus());
-        return dto ;
+        return dto;
     }
 
     @Override

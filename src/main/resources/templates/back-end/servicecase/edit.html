@@ -54,13 +54,27 @@
     .btn.save:hover { transform: translateY(-0.2rem); box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1); }
     .btn.cancel { background: lightcoral; }
     .btn.cancel:hover { transform: translateY(-0.2rem); box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1); }
+  
+  
+  .has-error input,
+.has-error select,
+.has-error textarea {
+  border-color: #e74c3c;
+}
+.error-msg {
+  color: #e74c3c;
+  font-size: 1.2rem;
+  margin-top: 0.4rem;
+}
+  
+  
   </style>
 </head>
 <body>
   <div class="container">
     <h2>編輯服務案件</h2>
 
-    <form th:action="@{/servicecase/save}" th:object="${serviceCase}" method="post">
+    <form th:action="@{/servicecase/save}" th:object="${serviceCaseDTO}" method="post">
       <!-- 案件編號（唯讀） -->
       <div>
         <label for="caseId">案件編號：</label>
@@ -80,29 +94,35 @@
       </div>
 
       <!-- Email（唯讀） -->
-      <div>
+      <div th:classappend="${#fields.hasErrors('email')}? 'has-error'">
         <label for="email">Email：</label>
         <input type="email" id="email" th:field="*{email}" placeholder="輸入 Email" required />
+            <div class="error-msg" th:if="${#fields.hasErrors('email')}"
+         th:errors="*{email}">Email 錯誤</div>
       </div>
 
       <!-- 案件類型 -->
       <div>
         <label for="caseType">案件類型：</label>
-        <select id="caseType" th:field="*{caseType.caseTypeId}" required>
+        <select id="caseType" th:field="*{caseTypeId}" required>
           <option th:each="type : ${allTypes}" th:value="${type.caseTypeId}" th:text="${type.typeName}"></option>
         </select>
       </div>
 
       <!-- 標題 -->
-      <div>
+      <div th:classappend="${#fields.hasErrors('title')}? 'has-error'">
         <label for="title">標題：</label>
-        <input type="text" id="title" th:field="*{title}" placeholder="輸入標題" required />
+        <input type="text" id="title" th:field="*{title}" maxlength="100" placeholder="輸入標題" required />
+            <div class="error-msg" th:if="${#fields.hasErrors('title')}"
+         th:errors="*{title}">標題錯誤</div>
       </div>
 
       <!-- 內容 -->
-      <div>
+      <div th:classappend="${#fields.hasErrors('content')}? 'has-error'">
         <label for="content">內容：</label>
-        <textarea id="content" th:field="*{content}" placeholder="輸入內容" rows="5" required></textarea>
+        <textarea id="content" th:field="*{content}" placeholder="輸入內容" rows="5" maxlength="800" required></textarea>
+            <div class="error-msg" th:if="${#fields.hasErrors('content')}"
+         th:errors="*{content}">內容錯誤</div>
       </div>
 
       <!-- 狀態 -->

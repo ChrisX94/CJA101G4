@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "AUTH_FUNC")
 public class AuthFuncVO implements java.io.Serializable {
@@ -51,10 +50,9 @@ public class AuthFuncVO implements java.io.Serializable {
     public void setAuthDes(String authDes) {
         this.authDes = authDes;
     }
-    
-    
+
     private Set<AdmAuthVO> admAuths = new HashSet<>();
-    
+
     @OneToMany(mappedBy = "authFuncVO", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     public Set<AdmAuthVO> getAdmAuths() {
         return admAuths;

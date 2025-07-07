@@ -1,68 +1,40 @@
 package com.shakemate.news.controller;
 
-import com.shakemate.news.model.News;
-import com.shakemate.news.model.NewsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import com.shakemate.news.service.NewsService;
+import com.shakemate.news.dto.NewsDto;
+import com.shakemate.news.dto.NewsResponse;
+import com.shakemate.adm.model.AdmVO;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/news")
 public class NewsController {
+	@Autowired
+	private NewsService newsSvc;
 
-    @Autowired
-    private NewsService newsService;
+	@PostMapping
+	public ResponseEntity<NewsResponse> postNews(@RequestBody NewsDto dto, HttpSession session) {
+		AdmVO admin = (AdmVO) session.getAttribute("loggedInAdmin");
+		if (admin == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		NewsResponse resp = newsSvc.saveOrUpdate(dto, admin);
+		return ResponseEntity.ok(resp);
+	}
 
-    // 建立一筆 News
-    @PostMapping
-    public ResponseEntity<News> create(@RequestBody News news) {
-        News created = newsService.save(news);
-        return ResponseEntity.ok(created);
-    }
+	@GetMapping("/latest")
+	public List<NewsResponse> latest() {
+		return newsSvc.getLatestNews();
+	}
+	
+	@GetMapping("/category/{categoryId}")
+	public List<NewsResponse> byCategory(@PathVariable Integer categoryId) {
+	    return newsSvc.getNewsByCategory(categoryId);
+	}
 
-    // 取得所有 News
-    @GetMapping
-    public ResponseEntity<List<News>> getAll() {
-        List<News> list = newsService.getAll();
-        return ResponseEntity.ok(list);
-    }
-
-    // 根據 ID 取得單一 News
-    @GetMapping("/{id}")
-    public ResponseEntity<News> getById(@PathVariable Integer id) {
-        News news = newsService.findById(id);
-        if (news == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(news);
-    }
-
-    // 更新一筆 News
-    @PutMapping("/{id}")
-    public ResponseEntity<News> update(
-            @PathVariable Integer id,
-            @RequestBody News news) {
-
-        News existing = newsService.findById(id);
-        if (existing == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        news.setNewsId(id);
-        News updated = newsService.update(news);
-        return ResponseEntity.ok(updated);
-    }
-
-    // 刪除一筆 News
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        News existing = newsService.findById(id);
-        if (existing == null) {
-            return ResponseEntity.notFound().build();
-        }
-        newsService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
 }

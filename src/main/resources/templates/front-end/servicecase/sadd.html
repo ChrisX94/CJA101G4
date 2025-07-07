@@ -10,9 +10,9 @@
   <style>
     /* 全局 */
     html { font-size: 62.5%; font-family: "Noto Sans TC", sans-serif; }
-    body { margin: 0; background: rgba(170,198,202,1); color: #333; }
+    body { margin: 0; background: #2EC4B6; color: #333; }
     *, *::before, *::after { box-sizing: border-box; }
-
+ 
     /* 容器 */
     .container {
       max-width: 60rem;
@@ -48,6 +48,30 @@
     .btn.save:hover { transform: translateY(-0.2rem); box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1); }
     .btn.cancel { background: lightcoral; }
     .btn.cancel:hover { transform: translateY(-0.2rem); box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1); }
+  
+    small.error {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 1.2rem;
+    color: #666;
+  }
+  small.error[style*="red"] {
+    font-weight: bold;
+  }
+  
+  .has-error input,
+.has-error textarea {
+  border-color: #e74c3c;
+}
+
+.error-msg {
+  color: #e74c3c;
+  font-size: 1.2rem;
+  margin-top: 0.4rem;
+}
+  
+   
+  
   </style>
 </head>
 <body>
@@ -59,9 +83,11 @@
       <input type="hidden" th:field="*{userId}" />
 
       <!-- 新增 EMAIL 欄位 -->
-      <div>
+      <div th:classappend="${#fields.hasErrors('email')} ? 'has-error'">
         <label for="email">Email：</label>
         <input type="email" id="email" th:field="*{email}" placeholder="輸入Email" required />
+          <div class="error-msg" th:if="${#fields.hasErrors('email')}"
+         th:errors="*{email}"></div>
       </div>
 
       <!-- 案件類型 & 狀態：固定值，隱藏欄位 + 顯示文字 -->
@@ -81,15 +107,21 @@
       </div>
 
       <!-- 標題 -->
-      <div>
+      <div  th:classappend="${#fields.hasErrors('title')} ? 'has-error'">
         <label for="title">標題：</label>
-        <input type="text" id="title" th:field="*{title}" placeholder="輸入標題" required />
+        <input type="text" id="title" th:field="*{title}" placeholder="輸入標題" maxlength="100" required />
+        <small id="titleCount" class="error">剩餘 100 字</small>
+            <div class="error-msg" th:if="${#fields.hasErrors('title')}"
+         th:errors="*{title}"></div>
       </div>
 
       <!-- 內容 -->
-      <div>
-        <label for="content">內容：</label>
-        <textarea id="content" th:field="*{content}" placeholder="輸入內容" rows="5" required></textarea>
+      <div th:classappend="${#fields.hasErrors('content')} ? 'has-error'">
+        <label for="content">內容（最多 800 字）：</label>
+        <textarea id="content" th:field="*{content}" placeholder="輸入內容" rows="5" maxlength="800" required></textarea>
+        <small id="contentCount" class="error">剩餘 800 字</small>
+            <div class="error-msg" th:if="${#fields.hasErrors('content')}"
+         th:errors="*{content}"></div>
       </div>
 
       <!-- 管理員 ID：後端自動帶入，不顯示於前端 -->
@@ -97,9 +129,28 @@
 
       <div class="btn-group">
         <button type="submit" class="btn save">儲存</button>
-        <a th:href="@{/servicecase}" class="btn cancel">取消</a>
+        <a th:href="@{/sindex}" class="btn cancel">取消</a>
       </div>
     </form>
   </div>
+  
+  <script>
+  // 即時更新剩餘字數
+  function bindCount(id, max) {
+    const el = document.getElementById(id);
+    const counter = document.getElementById(id + 'Count');
+    el.addEventListener('input', () => {
+      const remaining = max - el.value.length;
+      counter.textContent = `剩餘 ${remaining} 字`;
+      // 超過警示（雖然 maxlength 已阻擋，但用於顯示紅字）
+      counter.style.color = remaining < 0 ? 'red' : '#666';
+    });
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    bindCount('title', 100);
+    bindCount('content', 800);
+  });
+</script>
+  
 </body>
 </html>

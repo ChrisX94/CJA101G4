@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,9 +9,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
   <style>
-    html { font-size: 62.5%; font-family: "Noto Sans TC", sans-serif; }
-    body { margin: 0; background: rgba(170,198,202,1); color: #333; }
-    *, *::before, *::after { box-sizing: border-box; }
+    html {
+      font-size: 62.5%;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #2EC4B6;
+      color: #333;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
     .container {
       max-width: 60rem;
@@ -18,10 +32,14 @@
       padding: 2rem;
       background: #fff;
       border-radius: 0.8rem;
-      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.1);
+      box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.1);
     }
 
-    h2 { font-size: 2.4rem; margin-bottom: 1.6rem; text-align: center; }
+    h2 {
+      font-size: 2.4rem;
+      margin-bottom: 1.6rem;
+      text-align: center;
+    }
 
     .result-box {
       margin-top: 2rem;
@@ -31,18 +49,24 @@
       background: #f9f9f9;
     }
 
-    .result-box p { font-size: 1.6rem; line-height: 1.6; }
+    .result-box p {
+      font-size: 1.6rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
 
     <h2>案件提交結果</h2>
-    
-      <p th:if="${successMsg}" class="info" th:text="${successMsg}"
-   style="padding: 1rem; background: lightyellow; border: 1px solid #ccc; border-radius: 0.4rem; margin-bottom: 1.5rem;">
-</p>
-  
+
+    <p th:if="${successMsg}" class="info" th:text="${successMsg}"
+      style="padding: 1rem; background: lightyellow; border: 1px solid #ccc; border-radius: 0.4rem; margin-bottom: 1.5rem;">
+    </p>
+
 
     <div th:if="${serviceCase != null}" class="result-box">
       <p><strong>案件編號：</strong><span th:text="${serviceCase.caseId}"></span></p>
@@ -57,9 +81,10 @@
 
     <div th:if="${serviceCase == null}" class="result-box">
       <p>提交失敗，請確認案件是否正確提交。</p>
-      
-      
+
+
     </div>
   </div>
 </body>
+
 </html>
