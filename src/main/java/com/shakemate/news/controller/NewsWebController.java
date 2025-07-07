@@ -47,7 +47,7 @@ public class NewsWebController {
             return "redirect:/admin/login";
         }
         newsService.saveOrUpdate(dto, admin);
-        return "redirect:/news";
+        return "redirect:/admin/news";
     }
 
     @GetMapping("/edit/{id}")
@@ -60,6 +60,6 @@ public class NewsWebController {
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Integer id) {
         newsService.deleteById(id);
-        return "redirect:/news";
+        return "redirect:/admin/news";
     }
 }

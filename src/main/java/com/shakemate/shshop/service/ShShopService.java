@@ -2,6 +2,7 @@ package com.shakemate.shshop.service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.shakemate.chatroom.repository.ChatRoomRepository;
 import com.shakemate.match.repository.MatchRepository;
 import com.shakemate.shshop.dao.ShShopRepository;
 import com.shakemate.shshop.dao.ShShopTypeRepository;
@@ -36,10 +37,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -70,11 +68,18 @@ public class ShShopService {
     @Autowired
     private ExcelHandler excelHandler;
 
+    @Autowired
+    private ChatRoomRepository crRepo;
 
     // 找尋朋友清單
     @Transactional(readOnly = true)
     public List<Integer> findFriends(Integer userId) {
         return matchRepo.findFriendIdsByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getRoomId(Integer viewerId, Integer seller){
+        return Optional.ofNullable(crRepo.findRoomIdForShop(viewerId, seller)).orElse(0);
     }
 
     // 取得好友資訊(因為不用關聯所以分開查)
@@ -306,8 +311,7 @@ public class ShShopService {
     public void addViews(int id) {
         ShProd prod = repo.getByID(id);
         if (prod != null) {
-            prod.setProdViews(prod.getProdViews() + 1);
-            repo.save(prod);
+            repo.incrementViews(prod.getProdId());
         }
     }
 
