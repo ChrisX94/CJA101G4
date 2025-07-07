@@ -153,13 +153,17 @@ body::before {
     /* Material Design 陰影 */
     overflow: hidden;
     /* 防止表格內容超出圓角 */
+    overflow-x: auto; 
+    
 }
 
 table {
     width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
     /* 固定表格佈局 */
+    border-collapse: collapse;
 }
 
 th,

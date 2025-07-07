@@ -181,6 +181,7 @@
                         localStorage.setItem('checkoutBuyQty', qty);
                         window.location.href = 'checkout.html';
                     });
+                    
                 })
                 .catch(err => {
                     console.error("載入商品資料失敗：", err);
@@ -203,6 +204,9 @@
             document.querySelector(".close-modal").addEventListener("click", () => {
                 document.getElementById("imgModal").style.display = "none";
             });
+
+            
+
         });
     </script>
 

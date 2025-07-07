@@ -76,6 +76,7 @@ public class ShOrderServiceImpl implements ShOrderService{
         order.setShippingFee(orderInfo.getShippingFee());
         order.setPlatformFee(orderInfo.getPlatformFee());
         order.setShippingAddress(orderInfo.getShippingAddress());
+        order.setShippingMethod(orderInfo.getShippingMethod());
         order.setPaymentMethod(orderInfo.getPaymentMethod());
         order.setOrderNote(orderInfo.getOrderNote());
         int amount = calculateTotalAmount(orderInfo.getProductPrice(), orderInfo.getProductQuantity(), orderInfo.getShippingFee());

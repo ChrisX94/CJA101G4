@@ -25,8 +25,8 @@ public class RedisController {
     }
 
     // 查詢標籤
-    @GetMapping("/tags/{activityId}")
-    public Set<String> getTags(@PathVariable Integer activityId) {
+    @GetMapping("/tags")
+    public Set<String> getTags(@RequestParam Integer activityId) {
         return redisService.getTagsByActivityId(activityId);
     }
 
