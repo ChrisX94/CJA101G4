@@ -1,6 +1,5 @@
 package com.shakemate.servicecase.controller;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -12,5 +11,5 @@ public class ShomeController {
     public String chatPage() {
         return "front-end/servicecase/sindex";
     }
-
+    
 }
