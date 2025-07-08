@@ -5,12 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import org.mybatis.spring.annotation.MapperScan;
+
 
 @EnableJpaRepositories(basePackages = "com.shakemate")
 @EntityScan(basePackages = "com.shakemate")
 @SpringBootApplication(scanBasePackages = "com.shakemate")
-@MapperScan("com.shakemate.activity.mapper")
+
 public class ShakemateApplication {
 
 	public static void main(String[] args) {
