@@ -58,8 +58,10 @@ function loadChatRooms() {
 					previewText = room.lastMessage.slice(0, 10) + (room.lastMessage.length > 10 ? "..." : "");
 				}
 				// 判斷用最後訊息時間 or 建立時間
-				const lastTime = room.lastSentTime || room.createdTime;
-				const timeStr = lastTime ? formatTime(lastTime) : "";
+				let timeStr = "";
+				if (room.lastMessage) {
+				  timeStr = room.lastSentTime ? formatTime(room.lastSentTime) : "";
+				}
 
 				li.innerHTML = `
 					  <img src="${room.peerAvatar}" onerror="this.src='img/default.jpg'" />

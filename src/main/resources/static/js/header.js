@@ -46,12 +46,8 @@ includeHTML(() => {
         const iconEl = document.getElementById('userIcon');
         const memberEl = iconEl?.parentNode;
         if (iconEl && memberEl) {
-          memberEl.href = "/profile";
-          
-          // 只有在有頭像時才替換圖標
-          if (data.userAvatar) {
-            memberEl.innerHTML = `<img src="${data.userAvatar}" alt="會員頭像" class="avatar-img">`;
-          }
+          memberEl.href = "/user/profile";
+          memberEl.innerHTML = `<img src="${data.userAvatar}" alt="會員頭像" class="avatar-img">`;
 
           // ✅ 在頭像左側添加通知鈴鐺
           const notificationBell = document.createElement('a');

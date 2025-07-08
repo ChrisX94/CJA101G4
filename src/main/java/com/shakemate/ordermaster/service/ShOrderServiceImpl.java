@@ -59,12 +59,21 @@ public class ShOrderServiceImpl implements ShOrderService{
 
     }
 
+
     @Override
+    @Transactional
     public ShOrderDto createOrder(ShOrderRequestDto orderInfo) {
         ShOrder order = new ShOrder();
-        Users buyer = usersRepository.getOne(orderInfo.getBuyerUserId());
-        Users seller = usersRepository.getOne(orderInfo.getSellerUserId());
-        ShProd prod = shShopRepository.getById(orderInfo.getProdId());
+
+        Users buyer = usersRepository.findById(orderInfo.getBuyerUserId())
+                .orElseThrow(() -> new RuntimeException("找不到買家"));
+
+        Users seller = usersRepository.findById(orderInfo.getSellerUserId())
+                .orElseThrow(() -> new RuntimeException("找不到賣家"));
+
+        ShProd prod = shShopRepository.findById(orderInfo.getProdId())
+                .orElseThrow(() -> new RuntimeException("找不到商品"));
+
         buyer.setUserId(orderInfo.getBuyerUserId());
         seller.setUserId(orderInfo.getSellerUserId());
         prod.setProdId(orderInfo.getProdId());

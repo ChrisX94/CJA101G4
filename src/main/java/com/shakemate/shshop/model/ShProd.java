@@ -46,17 +46,9 @@ public class ShProd implements Serializable {
 
     @Column(name = "PROD_CONTENT")
     @NotEmpty(message="商品內容: 請勿空白")
-    @Pattern(
-            regexp = "^[\\p{IsHan}\\p{L}\\p{N}\\p{Zs}\\p{Punct}，。！？【】《》“”‘’：；、（）—．·]{1,800}$",
-            message = "商品內容只能包含中、英文、日韓法文字、數字與標點，最多800字"
-    )
     private String prodContent;
 
     @NotEmpty(message="商品敘述: 請勿空白")
-    @Pattern(
-            regexp = "^[\\p{IsHan}\\p{L}\\p{N}\\p{Zs}\\p{Punct}，。！？【】《》“”‘’：；、（）—．·]{1,800}$",
-            message = "商品內容只能包含中、英文、日韓法文字、數字與標點，最多800字"
-    )
     @Column(name = "PROD_STATUS_DESC")
     private String prodStatusDesc;
 

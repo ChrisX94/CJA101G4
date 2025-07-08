@@ -555,6 +555,7 @@ main.main {
     max-height: 280px;
     /* 調整好友列表最大高度 */
     overflow-y: auto;
+    overflow-x:hidden;
     scrollbar-width: thin;
     /* Firefox */
     scrollbar-color: var(--primary-button-color) var(--light-gray);
