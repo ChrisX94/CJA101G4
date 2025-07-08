@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>模擬物流狀態</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 50px;
+    }
+
+    .form-container {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 15px;
+      color: #444;
+      font-weight: 500;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin-top: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .back-btn {
+      background-color: #888;
+      margin-top: 8px;
+    }
+
+    .back-btn:hover {
+      background-color: #666;
+    }
+
+    .response-box {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e7f4e4;
+      border: 1px solid #8bc34a;
+      border-radius: 6px;
+      color: #2e7d32;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>模擬物流狀態測試表單</h2>
+    <form id="logisticForm">
+      <label>訂單 ID：
+        <input type="number" name="orderId" required placeholder="請輸入訂單編號">
+      </label>
+
+      <label>物流狀態：
+        <select name="shipmentStatus">
+          <option value="0">備貨中</option>
+          <option value="1">已出貨</option>
+          <option value="2" selected>已送達</option>
+          <option value="3">退貨中</option>
+          <option value="4">已取消</option>
+        </select>
+      </label>
+
+      <label>付款狀態（isCollect）：
+        <select name="isCollect">
+          <option value="">（不變更）</option>
+          <option value="0">未付款</option>
+          <option value="1" selected>已付款</option>
+          <option value="2">已退款</option>
+          <option value="3">已取消</option>
+        </select>
+      </label>
+
+      <label>狀態說明：
+        <input type="text" name="statusDescription" value="測試送達" placeholder="例如：模擬送達、退貨等">
+      </label>
+
+      <button type="submit">送出模擬</button>
+      <button type="button" class="back-btn" onclick="window.history.back()">返回上一頁</button>
+    </form>
+
+    <div class="response-box" id="responseBox"></div>
+  </div>
+
+  <script>
+    document.getElementById("logisticForm").addEventListener("submit", function(event) {
+      event.preventDefault(); // 防止表單預設跳轉
+
+      const form = event.target;
+      const formData = new FormData(form);
+
+      fetch("http://shakemate.ddns.net/ecpay/mockLogistic", {
+        method: "POST",
+        body: new URLSearchParams(formData),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      })
+      .then(res => res.text())
+      .then(responseText => {
+        const box = document.getElementById("responseBox");
+        box.style.display = "block";
+        box.textContent = "伺服器回應：" + responseText;
+      })
+      .catch(err => {
+        const box = document.getElementById("responseBox");
+        box.style.display = "block";
+        box.textContent = "錯誤：" + err;
+        box.style.color = "red";
+      });
+    });
+  </script>
+</body>
+</html>
+<!--
+  注意：這個 HTML 文件是用於模擬物流狀態的測試表單。
+  當你提交表單時，它會向指定的 URL 發送 POST 請求。
+  確保後端服務器已經正確配置以處理這些請求。
