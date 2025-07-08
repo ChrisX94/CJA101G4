@@ -117,7 +117,7 @@
         return;
       }
 
-      fetch(`http://localhost:8080/api/shorder/${orderId}`)
+      fetch(`/api/shorder/${orderId}`)
         .then(res => res.json())
         .then(json => {
           if (json.status === 200 && json.data) {
@@ -193,7 +193,7 @@
         shippingAddress: document.getElementById('shippingNote').value.trim()
       };
 
-      fetch(`http://localhost:8080/api/shorder/update`, {
+      fetch(`/api/shorder/update`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

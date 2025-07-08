@@ -97,7 +97,7 @@
     let currentStatusFilter = "all";
 
     document.addEventListener("DOMContentLoaded", () => {
-      fetch("http://localhost:8080/api/ShShop/all")
+      fetch("/api/ShShop/all")
         .then(res => res.json())
         .then(json => {
           if (!json || !json.data || !Array.isArray(json.data)) {
@@ -206,7 +206,7 @@
           // 顯示 Loading
           loading.style.display = "flex";
 
-          fetch("http://localhost:8080/api/ShShop/aiAudit", { method: "POST" })
+          fetch("/api/ShShop/aiAudit", { method: "POST" })
             .then(res => res.json())
             .then(data => {
               alert("審核完成：" + data.message);
@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.style.display = "block";
     recordContainer.innerHTML = "<p>載入中...</p>";
 
-    fetch("http://localhost:8080/api/ShShop/aiAuditLatest", { method: "POST" })
+    fetch("/api/ShShop/aiAuditLatest", { method: "POST" })
       .then(res => res.json())
       .then(response => {
         const data = response.data;
@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("downloadAuditBtn").addEventListener("click", () => {
-        fetch("http://localhost:8080/api/ShShop/downloadAuditHistory")
+        fetch("/api/ShShop/downloadAuditHistory")
           .then(response => {
             if (!response.ok) {
               throw new Error("下載失敗");
