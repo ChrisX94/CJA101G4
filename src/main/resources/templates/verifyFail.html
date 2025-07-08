@@ -2,12 +2,119 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8" />
     <title>驗證失敗</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .bg {
+            position: relative;
+            min-height: 100vh;
+            background: linear-gradient(185deg,
+                    #DCFF61 0%,
+                    #DCFF61 55%,
+                    #2EC4B6 55%,
+                    #2EC4B6 100%);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.35);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            background-color: white;
+            padding: 2.5rem 3rem;
+            border-radius: 1.5rem;
+            border: 2px solid gray;
+            box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 460px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #d9534f;
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 1rem;
+            box-sizing: border-box;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .button {
+            background-color: #aaa;
+            border: 2px solid gray;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.9rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+
+        .button:hover {
+            background-color: #888;
+        }
+
+        .home-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #007BFF;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .home-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
-    <h2 th:text="${message}">驗證失敗</h2>
-    <a href="/">回首頁</a>
+    <div class="bg">
+        <div class="card">
+            <h2 th:text="${message}">驗證失敗</h2>
+
+            <form th:action="@{/login/resend-verification}" method="get">
+                <label for="email">請輸入您的註冊信箱：</label>
+                <input type="email" name="email" required />
+                <button type="submit" class="button">重新發送驗證信</button>
+            </form>
+
+            <a href="/" class="home-link">← 回首頁</a>
+        </div>
+    </div>
 </body>
 
 </html>

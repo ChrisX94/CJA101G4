@@ -6,6 +6,8 @@ import com.shakemate.user.model.Users;
 import com.shakemate.util.MailService;
 import com.shakemate.util.PasswordConvert;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.apache.el.stream.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +42,6 @@ public class UserService {
 
     @Autowired
     private PasswordConvert passwordConvert;
-
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
@@ -118,7 +119,7 @@ public class UserService {
         usersRepo.deleteById(userId);
     }
 
-    public void sendResetPasswordEmail(String email) {
+    public void sendResetPasswordEmail(String email, HttpServletRequest request) {
 
         Users user = usersRepo.findByEmail(email);
 
@@ -134,14 +135,14 @@ public class UserService {
 
         // 準備信件內容
 
-        String resetLink = "http://localhost:8080/login/resetPassword?token=" + token;
+        String resetLink = request.getRequestURL().toString()
+                .replace(request.getRequestURI(), "") + "/login/resetPassword?token=" + token;
 
         String subject = "重設密碼通知";
-        String content = "請點擊下列連結以重設密碼（30 分鐘內有效）：\n" + resetLink;
+        String content = "請點擊下列連結以重設密碼（ 1 分鐘內有效）：\n" + resetLink;
 
         mailService.sendMail(email, subject, content);
     }
-
 
     public void updatePassword(Integer userId, String rawPassword) {
         Users user = getUserById(userId);
@@ -153,20 +154,20 @@ public class UserService {
         }
     }
 
-    public void handlePostRegister(Users user) {
+    public void handlePostRegister(Users user, HttpServletRequest request) {
         // 產生隨機 token
         String token = UUID.randomUUID().toString();
 
-        // 儲存 token -> email，設定有效時間（例如 24 小時）
-        redisUtil.set("verify:token:" + token, user.getEmail(), 300); // 5 MINS有效
+        // 儲存 token -> email，設定有效時間（
+        redisUtil.set("verify:token:" + token, user.getEmail(), 60);
 
         // 構造驗證連結
-        String link = "http://localhost:8080/login/verify?token=" + token;
+        String link = request.getRequestURL().toString()
+                .replace(request.getRequestURI(), "") + "/login/verify?token=" + token;
         String content = "請點擊以下連結完成帳號驗證：" + link + "\n驗證帳號";
 
         // 寄信
-        mailService.sendMail(user.getEmail(), "帳號驗證", content);
+        mailService.sendMail(user.getEmail(), "ShakeMate 帳號驗證", content);
     }
-
 
 }

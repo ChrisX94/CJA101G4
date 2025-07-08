@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="|${user.username} 會員自介編輯|"></title>
+    <link rel="stylesheet" href="/css/headerStyle.css" />
     <style>
+        * {
+            font-size: 62.5%;
+        }
+
         /* 全局字體和背景 */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,13 +25,45 @@
             /* Fallback */
         }
 
+        .alert-box {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.6rem;
+            z-index: 9999;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-success {
+            background-color: #DCFF61;
+            color: #333;
+            border: 1px solid #c2e059;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+
         /* 背景拼接色塊（亮綠 + 藍綠） */
         .bg {
             position: relative;
             min-height: 100vh;
             width: 100%;
             z-index: 0;
-            background: linear-gradient(to bottom, #E7FF33, #17AB96);
+            background: linear-gradient(185deg,
+                    #DCFF61 0%,
+                    #DCFF61 55%,
+                    #2EC4B6 55%,
+                    #2EC4B6 100%);
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -453,7 +490,19 @@
     </style>
 </head>
 
+
+
 <body>
+    <div class="header1" w3-include-html="/header1.html"></div>
+    <!-- 成功訊息 -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}" style="margin-top: 15px;"></div>
+
+    <!-- 錯誤訊息 -->
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}" style="margin-top: 15px;"></div>
+
+
+
+
     <div class="bg">
         <div class="profile-container">
             <h1 class="main-title">編輯個人自介</h1>
@@ -707,7 +756,7 @@
 
         </div>
     </div>
-
+    <script src="/js/header.js"></script>
     <script th:inline="javascript">
         /*<![CDATA[*/
         document.addEventListener('DOMContentLoaded', function () {
@@ -886,13 +935,24 @@
             }
 
 
+            // 顯示錯誤訊息的函式
+            function showErrorMessage(message) {
+                const messageDiv = document.getElementById("js-message");
+                messageDiv.style.display = "block";
+                messageDiv.className = "alert alert-danger";
+                messageDiv.textContent = message;
+                setTimeout(() => {
+                    messageDiv.style.display = "none";
+                }, 5000);
+            }
+
             // 儲存按鈕的邏輯
-            saveButton.addEventListener('click', function () {
-                // 密碼驗證
+            saveButton.addEventListener('click', function (e) {
                 const newPassword = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
 
-                // 如果用戶輸入了新密碼，則需要驗證
+                const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-]).{8,}$/;
+
                 if (newPassword || confirmPassword) {
                     if (!newPassword) {
                         alert('請輸入新密碼');
@@ -906,12 +966,11 @@
                         alert('兩次輸入的密碼不一致，請重新輸入');
                         return;
                     }
-                    if (newPassword.length < 6) {
-                        alert('密碼長度至少需要6個字符');
+                    if (!passwordPattern.test(newPassword)) {
+                        alert('密碼格式錯誤：必須至少8碼，包含英文、數字與特殊符號');
                         return;
                     }
                 }
-
                 const selectedInterests = Array.from(document.querySelectorAll('#interestsCheckboxes input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
 
@@ -1001,6 +1060,9 @@
             });
         });
         /*]]>*/
+
+
+
     </script>
 </body>
 

@@ -6,6 +6,7 @@ import com.shakemate.user.model.Users;
 import com.shakemate.user.service.UserService;
 import com.shakemate.user.service.UserService.LoginResult;
 import com.shakemate.user.util.UserPostMultipartFileUploader;
+import com.shakemate.util.MailService;
 import com.shakemate.util.PasswordConvert;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,13 +21,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
@@ -46,7 +47,7 @@ public class LoginController {
     private UsersRepository usersRepository;
 
     @Autowired
-    private PasswordConvert passwordConvert;
+    private MailService mailService;
 
     // 處理登入
     @PostMapping("/loginHandler")
@@ -112,7 +113,8 @@ public class LoginController {
             @RequestParam("confirm_password") String confirmPassword,
             @RequestParam(value = "interests", required = false) String[] interestsArr,
             @RequestParam(value = "personality", required = false) String[] personalityArr,
-            @RequestParam("image") MultipartFile[] parts) throws IOException {
+            @RequestParam("image") MultipartFile[] parts, HttpServletRequest request,
+            RedirectAttributes redirectAttributes) throws IOException {
 
         model.addAttribute("user", user); // 確保一開始就綁好 user，Thymeleaf 才不會炸掉
 
@@ -164,10 +166,9 @@ public class LoginController {
 
         // 7. 註冊成功
         userService.signIn(user, interestsArr, personalityArr, imgUrl);
-        userService.handlePostRegister(user);
-        model.addAttribute("success", "註冊成功，請至信箱完成驗證");
-
-        return "/login";
+        userService.handlePostRegister(user, request);
+        redirectAttributes.addFlashAttribute("success", "驗證信已寄出，請至信箱完成驗證後再登入");
+        return "redirect:/login";
     }
 
     @GetMapping("/testlogin")
@@ -193,7 +194,7 @@ public class LoginController {
     }
 
     @PostMapping("/forgotPassword")
-    public String forgotPassword(@RequestParam String email, Model model) {
+    public String forgotPassword(@RequestParam String email, Model model, HttpServletRequest request) {
 
         if (email == null || email.trim().isEmpty()) {
             model.addAttribute("error", "請輸入Email");
@@ -201,7 +202,7 @@ public class LoginController {
         }
 
         try {
-            userService.sendResetPasswordEmail(email);
+            userService.sendResetPasswordEmail(email, request);
             model.addAttribute("message", "重設密碼信已發送，請檢查您的信箱");
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage()); // 顯示「此 Email 尚未註冊」
@@ -211,7 +212,7 @@ public class LoginController {
         return "forgotPassword";
     }
 
-@GetMapping("/resetPassword")
+    @GetMapping("/resetPassword")
     public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
         Integer userId = redisUtil.getObject("resetToken:" + token, Integer.class);
         if (userId == null) {
@@ -262,7 +263,7 @@ public class LoginController {
         String email = redisUtil.get("verify:token:" + token);
 
         if (email == null) {
-            model.addAttribute("message", "驗證連結已失效或無效");
+            model.addAttribute("message", "驗證連結已失效，請點選下方按鈕重新發送驗證信");
             return "verifyFail"; // Thymeleaf 頁面
         }
 
@@ -288,6 +289,34 @@ public class LoginController {
         model.addAttribute("message", "驗證成功！您現在可以登入");
         return "verifySuccess";
     }
+
+    @GetMapping("/resend-verification")
+    public String resendVerification(@RequestParam("email") String email, Model model, HttpServletRequest request) {
+        Users user = usersRepository.findByEmail(email);
+        if (user == null) {
+            model.addAttribute("message", "查無此帳號");
+            return "verifyFail";
+        }
+
+        if (user.getUserStatus() == 1) {
+            model.addAttribute("message", "此帳號已經驗證過了");
+            return "verifySuccess";
+        }
+
+        String newToken = UUID.randomUUID().toString();
+        redisUtil.set("verify:token:" + newToken, email, 300);
+
+        String verifyUrl = request.getRequestURL().toString().replace(request.getRequestURI(), "")
+                + "/login/verify?token=" + newToken;
+
+        String subject = "請重新驗證您的帳號";
+        String content = "請點選以下連結完成驗證：\n" + verifyUrl;
+
+        mailService.sendMail(email, subject, content);
+
+        model.addAttribute("success", "已重新寄出驗證信，請至信箱收信");
+        return "/login";
+
+    }
+
 }
-
-
