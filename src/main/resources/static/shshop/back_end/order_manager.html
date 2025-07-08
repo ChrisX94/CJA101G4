@@ -30,6 +30,7 @@
         <div class="content-section">
             <div class="search-filter">
                 <h3>🧾 訂單清單</h3>
+                
                 <div class="left-group">
 
                     <div class="section-1">
@@ -37,6 +38,22 @@
                         <input type="text" id="buyerInput" placeholder="買家名稱">
                         <input type="text" id="sellerInput" placeholder="賣家名稱">
                         <input type="text" id="productInput" placeholder="商品名稱">
+
+                    </div>
+                    <a href="testLogistic.html" target="_blank" style="
+                            display: inline-block;
+                            margin-top: -20px;
+                            margin-left: 50px;
+                            padding: 6px 12px;
+                            background-color: #007bff;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 6px;
+                            font-size: 0.95rem;
+                            transition: background-color 0.3s;">
+                        🚚 測試物流狀態
+                    </a>
+                    <div>
                     </div>
 
                     <div class="section-2">
@@ -115,7 +132,7 @@
             if (startDate) params.append("startDate", startDate + "T00:00:00");
             if (endDate) params.append("endDate", endDate + "T23:59:59");
 
-            fetch(`http://localhost:8080/api/shorder/search?${params.toString()}`)
+            fetch(`/api/shorder/search?${params.toString()}`)
                 .then(res => res.json())
                 .then(json => {
                     const orders = json.data || [];

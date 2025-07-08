@@ -519,7 +519,7 @@ public class ShShopService {
         aiResult = aiResult.replace("```json", "").replace("```", "").trim();
         resultList = gson.fromJson(aiResult, listType);
         redisUtil.saveAuditResult("auditResult", resultList); // 存入最新結果
-        String baseUrl = "http://localhost:8080/api/ShShop/";
+        String baseUrl = "/api/ShShop/";
         for (ProdAuditResult re : resultList) {
             Integer prodId = re.getProdId();
             String status = re.getStatus();
