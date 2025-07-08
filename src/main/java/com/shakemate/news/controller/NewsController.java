@@ -23,7 +23,7 @@ public class NewsController {
 		if (admin == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
-		NewsResponse resp = newsSvc.saveOrUpdate(dto, admin);
+		NewsResponse resp = newsSvc.saveOrUpdate(dto);
 		return ResponseEntity.ok(resp);
 	}
 

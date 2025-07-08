@@ -294,9 +294,8 @@
             
               <!-- 管理員 ID（可手動輸入） -->
   <div>
-    <label for="adminId">管理員 ID：</label>
-  <input type="hidden" th:if="${newsDto.newsId}" name="newsId" th:value="${newsDto.newsId}" />
-
+<label for="adminId">管理員 ID：</label>
+<input type="number" th:field="*{adminId}" required>
   </div>      
               <div>
                 <label for="categoryId">類別：</label>

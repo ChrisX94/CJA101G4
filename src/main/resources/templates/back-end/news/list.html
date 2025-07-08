@@ -417,6 +417,7 @@
             <thead>
               <tr>
                 <th>編號</th>
+<!--                 <th>管理員</th> -->
                 <th>標題</th>
                 <th>類別</th>
                 <th>發布時間</th>
@@ -426,6 +427,7 @@
             <tbody id="tableBody">
               <tr th:each="n : ${newsList}">
                 <td th:text="${n.newsId}">001</td>
+<!--                 <td th:text="${n.adminId}">管理員 ID</td> -->
                 <td th:text="${n.title}">新聞標題示例</td>
                 <td th:text="${n.categoryName}">科技</td>
                 <td th:text="${#dates.format(n.publishTime, 'yyyy-MM-dd HH:mm')}">2024-01-01 10:30</td>

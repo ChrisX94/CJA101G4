@@ -1,6 +1,7 @@
 package com.shakemate.news.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.shakemate.news.repository.NewsRepository;
 import com.shakemate.newstype.repository.NewsTypeRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class NewsService {
     @Autowired private NewsRepository newsRepo;
     @Autowired private NewsTypeRepository typeRepo;
@@ -26,7 +28,7 @@ public class NewsService {
     }
 
     // 建立或更新新聞
-    public NewsResponse saveOrUpdate(NewsDto dto, AdmVO admin) {
+    public NewsResponse saveOrUpdate(NewsDto dto) {
         NewsType type = typeRepo.findById(dto.getCategoryId())
             .orElseThrow(() -> new EntityNotFoundException("類別不存在"));
         News news = (dto.getNewsId() != null)
@@ -36,7 +38,7 @@ public class NewsService {
         news.setNewsType(type);
         news.setTitle(dto.getTitle());
         news.setContent(dto.getContent());
-        news.setAdmin(admin);
+        news.setAdminId(dto.getAdminId());
         news.setNewsStatus(true);
         news = newsRepo.save(news);
         return new NewsResponse(news);

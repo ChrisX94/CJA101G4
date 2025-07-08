@@ -143,7 +143,9 @@
       font-weight: 500;
     }
 
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       width: 100%;
       padding: 1rem;
       margin: 1rem 0;
@@ -283,8 +285,13 @@
         <!-- 表單 -->
         <div class="table-container">
           <div class="form-box">
-            <form action="/news/save" method="POST"  th:object="${newsDto}">
-  <input type="hidden" th:if="${newsDto.newsId}" name="newsId" th:value="${newsDto.newsId}" />
+            <form th:action="@{${newsDto.newsId == null} ? '/news/add' : '/news/update/' + ${newsDto.newsId}}" method="POST"
+              th:object="${newsDto}">
+
+              <div>
+                <label for="adminId">管理員 ID：</label>
+                <input type="number" th:field="*{adminId}" required>
+              </div>
 
               <div>
                 <label for="categoryId">類別：</label>

@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-import com.shakemate.adm.model.AdmVO;
+//import com.shakemate.adm.model.AdmVO;
 import com.shakemate.newstype.model.NewsType;
 
 @Entity
 @Table(name = "news")
 public class News implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,11 +37,14 @@ public class News implements Serializable {
             publishTime = new Timestamp(System.currentTimeMillis());
         }
 	}
+	
+	@Column(name = "ADM_ID", nullable = false)
+	private Integer adminId;
 
     // 管理員關聯：取代原本單純的 admId 欄位
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ADM_ID", nullable = false)
-    private AdmVO admin;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "ADM_ID", nullable = false)
+//    private AdmVO admin;
 
 	@Column(name = "NEWS_STATUS", nullable = false)
 	private boolean newsStatus;
@@ -93,11 +98,19 @@ public class News implements Serializable {
 		this.newsStatus = newsStatus;
 	}
 
-	public AdmVO getAdmin() {
-		return admin;
+	public Integer getAdminId() {
+		return adminId;
 	}
 
-	public void setAdmin(AdmVO admin) {
-		this.admin = admin;
+	public void setAdminId(Integer adminId) {
+		this.adminId = adminId;
 	}
+
+//	public AdmVO getAdmin() {
+//		return admin;
+//	}
+//
+//	public void setAdmin(AdmVO admin) {
+//		this.admin = admin;
+//	}
 }
