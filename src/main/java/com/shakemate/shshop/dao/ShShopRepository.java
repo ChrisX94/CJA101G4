@@ -67,6 +67,14 @@ public interface ShShopRepository extends JpaRepository<ShProd, Integer> {
     @Modifying
     void incrementViews(@Param("id") Integer id);
 
+    @Query("UPDATE ShProd p SET p.prodStatus = :status WHERE p.prodId = :id")
+    @Modifying
+    void changeProdStatus(@Param("id") Integer id, @Param("status") Byte status);
+
+    @Query("UPDATE ShProd p SET p.prodCount = (p.prodCount - 1) WHERE p.prodId = :id")
+    @Modifying
+    void changeDeductProd(@Param("id") Integer id);
+
 }
 
 

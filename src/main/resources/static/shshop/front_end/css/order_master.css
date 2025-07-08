@@ -44,7 +44,7 @@
         }
 
         /* 下拉選單（省略子階層樣式，可依需求擴充） */
-        .dropdown {
+        .dropdown-menu {
             position: relative;
         }
 
@@ -242,6 +242,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: background-color .2s;
+            font-size: 12px;
         }
 
         .material-button:hover {
