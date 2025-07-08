@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/news")
+@RequestMapping("/news")
 public class NewsWebController {
 
     @Autowired private NewsService newsService;
@@ -44,10 +44,10 @@ public class NewsWebController {
                        HttpSession session) {
         AdmVO admin = (AdmVO) session.getAttribute("loggedInAdmin");
         if (admin == null) {
-            return "redirect:/admin/login";
+            return "redirect:/adm/admLogin";
         }
         newsService.saveOrUpdate(dto, admin);
-        return "redirect:/admin/news";
+        return "redirect:/news";
     }
 
     @GetMapping("/edit/{id}")
