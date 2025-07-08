@@ -2,6 +2,7 @@ package com.shakemate.servicecase.controller;
 //負責後台 HTML 頁面的 CRUD（Thymeleaf／JSP 等）。
 import com.shakemate.casetype.model.CaseType;
 import com.shakemate.casetype.model.CaseTypeRepository;
+import com.shakemate.adm.model.AdmVO; // 根據你的專案結構調整
 import com.shakemate.servicecase.dto.ServiceCaseDTO;
 import com.shakemate.servicecase.mapper.ServiceCaseMapper;
 import com.shakemate.servicecase.model.ServiceCase;
@@ -48,8 +49,16 @@ public class ServiceCaseWebController {
 
 	// 後端新增表單
 	@GetMapping("/add")
-	public String showAddForm(Model model) {
-        model.addAttribute("serviceCaseDTO", new ServiceCaseDTO());
+	public String showAddForm(Model model, HttpSession session) {
+		ServiceCaseDTO dto = new ServiceCaseDTO();
+
+	    // 從 session 取得管理員 ID
+		AdmVO  admin = (AdmVO) session.getAttribute("loggedInAdmin");
+	    if (admin != null) {
+	        dto.setAdmId(admin.getAdmId()); // 自動帶入
+	    }
+		
+        model.addAttribute("serviceCaseDTO", dto);
 		return "back-end/servicecase/add";
 	}
 
@@ -83,32 +92,15 @@ public class ServiceCaseWebController {
         return "front-end/servicecase/sadd";
     }
     
-    @GetMapping("/single")
-    public String findSingleCase(@RequestParam("caseId") Integer caseId, Model model) {
-        ServiceCase serviceCase = service.findById(caseId);
-        model.addAttribute("serviceCase", serviceCase);
-        return "front-end/servicecase/slistone"; // 對應你的 slistone.html 路徑
-    }
-    
-//    @PostMapping("/sadd")
-//    public String saveUserCase(@ModelAttribute("serviceCaseDTO") ServiceCaseDTO dto, RedirectAttributes redirectAttrs) {
-//        ServiceCase entity = ServiceCaseMapper.toEntity(dto);
-//        service.create(entity);
-//        // 加入 flash 訊息
-//        redirectAttrs.addFlashAttribute("successMsg", "案件已成功提交，我們將盡快處理！");        
-//        // ➜ 導向單一查詢頁，帶入剛建立的 caseId
-//        return "redirect:/servicecase/single?caseId=" + entity.getCaseId();
-//    }
-    
     @PostMapping("/sadd")
     public String saveUserCase(
             @Valid @ModelAttribute("serviceCaseDTO") ServiceCaseDTO dto,
-            BindingResult bindingResult,
+            BindingResult errors,
             RedirectAttributes redirectAttrs,
             Model model) {
 
         // 如果有驗證錯誤，回到前端表單
-        if (bindingResult.hasErrors()) {
+        if (errors.hasErrors()) {
             // allTypes 也要再塞一次
             model.addAttribute("allTypes", caseTypeRepo.findAll());
             return "front-end/servicecase/sadd";
@@ -120,7 +112,13 @@ public class ServiceCaseWebController {
         redirectAttrs.addFlashAttribute("successMsg", "案件已成功提交，我們將盡快處理！");
         return "redirect:/servicecase/single?caseId=" + entity.getCaseId();
     }
-
+    
+    @GetMapping("/single")
+    public String findSingleCase(@RequestParam("caseId") Integer caseId, Model model) {
+        ServiceCase serviceCase = service.findById(caseId);
+        model.addAttribute("serviceCase", serviceCase);
+        return "front-end/servicecase/slistone"; // 對應你的 slistone.html 路徑
+    }
 
     // --- 顯示「編輯」表單，先 load DTO ---
     @GetMapping("/edit/{id}")

@@ -16,7 +16,6 @@
 
     body {
       margin: 0;
-      background: #2EC4B6;
       color: #333;
     }
 
@@ -24,6 +23,28 @@
     *::before,
     *::after {
       box-sizing: border-box;
+    }
+
+    /* 全頁背景漸層 */
+    .bg {
+      position: relative;
+      min-height: 100vh;
+      z-index: 0;
+      background: linear-gradient(185deg,
+          #DCFF61 0%,
+          #DCFF61 55%,
+          #2EC4B6 55%,
+          #2EC4B6 100%);
+      overflow: hidden;
+    }
+
+    .bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.35);
+      z-index: 0;
+      pointer-events: none;
     }
 
     .container {
@@ -55,34 +76,69 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
+
+    .right-links {
+      display: flex;
+      justify-content: center;
+      /* 水平置中 */
+      align-items: center;
+      /* 垂直置中（如果需要） */
+      margin-top: 2rem;
+      /* 可選：與上方內容拉開距離 */
+    }
+
+    .right-links a {
+      margin-left: 0.8rem;
+      padding: 0.4rem 1rem;
+      font-size: 1.6rem;
+      /* 調小按鈕文字 */
+      color: #fff;
+      background: #ff9800;
+      border-radius: 0.4rem;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+
+    .right-links a.home {
+      background: darkkhaki;
+    }
+
+    .right-links a:hover {
+      color: black;
+      opacity: 0.8;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <div class="bg">
+    <div class="container">
 
-    <h2>案件提交結果</h2>
+      <h2>案件提交結果</h2>
 
-    <p th:if="${successMsg}" class="info" th:text="${successMsg}"
-      style="padding: 1rem; background: lightyellow; border: 1px solid #ccc; border-radius: 0.4rem; margin-bottom: 1.5rem;">
-    </p>
+      <p th:if="${successMsg}" class="info" th:text="${successMsg}"
+        style="padding: 1rem; background: lightyellow; border: 1px solid #ccc; border-radius: 0.4rem; margin-bottom: 1.5rem;">
+      </p>
 
+      <div th:if="${serviceCase != null}" class="result-box">
+        <p><strong>案件編號：</strong><span th:text="${serviceCase.caseId}"></span></p>
+        <p><strong>案件類型：</strong><span th:text="${serviceCase.caseType.typeName}"></span></p>
+        <p><strong>使用者 ID：</strong><span th:text="${serviceCase.userId}"></span></p>
+        <p><strong>Email：</strong><span th:text="${serviceCase.email}"></span></p>
+        <p><strong>標題：</strong><span th:text="${serviceCase.title}"></span></p>
+        <p><strong>內容：</strong><span th:text="${serviceCase.content}"></span></p>
+        <p><strong>狀態：</strong><span th:text="${serviceCase.statusName}"></span></p>
+        <p><strong>建立時間：</strong><span th:text="${#dates.format(serviceCase.createTime,'yyyy-MM-dd HH:mm')}"></span></p>
+        <div class="right-links">
+          <a th:href="@{/}" class="home">回首頁</a>
+          <a th:href="@{/sindex}">回客服</a>
+        </div>
+      </div>
 
-    <div th:if="${serviceCase != null}" class="result-box">
-      <p><strong>案件編號：</strong><span th:text="${serviceCase.caseId}"></span></p>
-      <p><strong>案件類型：</strong><span th:text="${serviceCase.caseType.typeName}"></span></p>
-      <p><strong>使用者 ID：</strong><span th:text="${serviceCase.userId}"></span></p>
-      <p><strong>Email：</strong><span th:text="${serviceCase.email}"></span></p>
-      <p><strong>標題：</strong><span th:text="${serviceCase.title}"></span></p>
-      <p><strong>內容：</strong><span th:text="${serviceCase.content}"></span></p>
-      <p><strong>狀態：</strong><span th:text="${serviceCase.statusName}"></span></p>
-      <p><strong>建立時間：</strong><span th:text="${#dates.format(serviceCase.createTime,'yyyy-MM-dd HH:mm')}"></span></p>
-    </div>
+      <div th:if="${serviceCase == null}" class="result-box">
+        <p>提交失敗，請確認案件是否正確提交。</p>
 
-    <div th:if="${serviceCase == null}" class="result-box">
-      <p>提交失敗，請確認案件是否正確提交。</p>
-
-
+      </div>
     </div>
   </div>
 </body>
