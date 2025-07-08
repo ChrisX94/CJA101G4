@@ -194,6 +194,201 @@
   color: #2EC4B6;
 }
 
+/* 🔔 通知鈴鐺樣式 */
+.notification-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 1.5rem; /* 與右側頭像保持間距 */
+  cursor: pointer;
+}
+.notification-bell:hover {
+  opacity: 0.8;
+}
+.notification-bell i {
+  font-size: 2.4rem;
+  color: #555;
+  transition: transform 0.3s ease;
+}
+.notification-bell:hover i {
+  transform: scale(1.1);
+}
+.notification-bell i.shake {
+  animation: bellShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes bellShake {
+  10%, 90% { transform: translate3d(-1px, 0, 0) rotate(2deg); }
+  20%, 80% { transform: translate3d(2px, 0, 0) rotate(-4deg); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0) rotate(4deg); }
+  40%, 60% { transform: translate3d(4px, 0, 0) rotate(-4deg); }
+}
+
+.notification-badge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.8rem;
+  background-color: #FF3B30;
+  color: white;
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  line-height: 1.5;
+  min-width: 1.8rem;
+  text-align: center;
+  border: 2px solid white;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 130%; /* 調整下拉選單與鈴鐺的距離 */
+  right: -1rem;
+  width: 35rem; /* 調整寬度 */
+  max-height: 45rem; /* 增加最大高度 */
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.15); /* 增加陰影 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-1rem);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  padding: 0.5rem 0; /* 調整內邊距 */
+  z-index: 1100;
+}
+.notification-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.notification-dropdown .notification-item {
+  display: flex;
+  padding: 1rem 1.5rem;
+  gap: 1rem;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+.notification-dropdown .notification-item:hover {
+  background-color: #f5f5f5;
+}
+.notification-dropdown .notification-item:last-child {
+  border-bottom: none;
+}
+.notification-dropdown .notification-item.unread {
+  background-color: #eef7ff; /* 未讀通知的背景色 */
+}
+
+/* 增加對內容的樣式設定，提高優先級 */
+.notification-dropdown .notification-content {
+  flex-grow: 1;
+}
+
+.notification-dropdown .notification-title {
+  font-size: 1.5rem; /* 調整字體大小 */
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.notification-dropdown .notification-text {
+  font-size: 1.4rem; /* 調整字體大小 */
+  color: #666;
+  line-height: 1.4;
+}
+
+.notification-dropdown .notification-time {
+  font-size: 1.2rem; /* 調整字體大小 */
+  color: #999;
+  margin-top: 0.5rem;
+}
+
+.notification-dropdown .loading,
+.notification-dropdown .error,
+.notification-dropdown .no-notifications {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1.4rem;
+}
+
+.notification-dropdown .error {
+    color: #d32f2f;
+}
+
+.view-all-btn {
+  display: block;
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.4rem;
+  color: #2EC4B6;
+  text-decoration: none;
+  border-top: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+.view-all-btn:hover {
+  background-color: #f5f5f5;
+}
+
+/* 浮動通知樣式 */
+.floating-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 300px;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  display: flex;
+  cursor: pointer;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.floating-notification-content {
+  flex: 1;
+  padding: 12px 16px;
+}
+
+.floating-notification-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.floating-notification-text {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.floating-notification-close {
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.floating-notification-close:hover {
+  color: #666;
+}
+
 .mobile__nav {
   display: none;
 }
@@ -312,7 +507,6 @@
 .header__nav .header__item.dropdown {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
 /* 🔹 大頭貼右邊的箭頭 icon 微調對齊 */
@@ -344,11 +538,11 @@
 
 @media (max-width: 768px) {
   .header__item.dropdown > .dropdown-menu {
-    /* display: none; */
+    display: none;
   }
 
   .header__item.dropdown > .dropdown-toggle {
-    /* display: none; */
+    display: none;
   }
   .header__list .header__item > a::after {
     display: none;
@@ -384,21 +578,26 @@
   }
 
   .header__item.dropdown {
-    /* display: none; */
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: auto;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    display: none;
   }
+}
 
-  .header__item.dropdown > .dropdown-menu {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    position: unset;
-    box-shadow: none;
-  }
+.notification-settings-btn {
+  float: right;
+  display: inline-block;
+  margin-left: 1.5rem;
+  font-size: 1.4rem;
+  padding: 0.5rem 1.2rem;
+  background: #f5f5f5;
+  border-radius: 0.6rem;
+  color: #1976d2;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  vertical-align: middle;
+  border: 1px solid #e0e0e0;
+}
+.notification-settings-btn:hover {
+  background: #e3f2fd;
+  color: #1565c0;
 }
 

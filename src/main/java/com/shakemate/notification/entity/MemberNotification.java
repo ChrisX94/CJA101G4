@@ -1,28 +1,31 @@
 package com.shakemate.notification.entity;
 
 import com.shakemate.notification.enums.DeliveryStatus;
-import com.shakemate.user.model.Users;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "MEMBER_NOTIFICATION")
 @IdClass(MemberNotificationId.class)
 public class MemberNotification {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "NOTIFICATION_ID", nullable = false)
-    private Notification notification;
+    @Column(name = "NOTIFICATION_ID", nullable = false)
+    private Integer notification;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID", nullable = false)
-    private Users user;
+    @Column(name = "USER_ID", nullable = false)
+    private Integer user;
 
     @Column(name = "IS_READ", nullable = false)
     private Boolean isRead = false;

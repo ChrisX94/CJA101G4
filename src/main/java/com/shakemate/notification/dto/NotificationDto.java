@@ -28,4 +28,13 @@ public class NotificationDto {
     // 這些欄位來自 MemberNotification，用於會員端
     private Boolean isRead;
     private LocalDateTime readTime;
+
+    private LocalDateTime validFrom;
+    private LocalDateTime validUntil;
+
+    private String notificationType;
+    private String notificationCategory;
+    private Integer notificationLevel;
+    private Boolean isBroadcast;
+    private Map<String, Object> targetCriteria;
 } 

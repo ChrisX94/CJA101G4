@@ -91,24 +91,20 @@ public class NotificationController {
     }
 
     // 標記通知為已讀
-    @PostMapping("/api/{id}/read")
+    @PostMapping("/api/{id}/mark-read")
     @ResponseBody
     public ResponseEntity<Void> markNotificationAsRead(@PathVariable Long id, HttpSession session) {
-        System.out.println("=== DEBUG: markNotificationAsRead API 被呼叫，通知ID: " + id + " ===");
-        
         Integer userId = (Integer) session.getAttribute("account");
         if (userId == null) {
-            System.out.println("DEBUG: 用戶未登入，返回 401");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
         try {
             notificationService.markAsRead(userId, id.intValue());
-            System.out.println("DEBUG: 通知已標記為已讀");
             return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            // 查不到MemberNotification時返回404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
-            System.err.println("DEBUG: 標記通知為已讀時發生錯誤: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -165,13 +161,28 @@ public class NotificationController {
 
     @PutMapping("/api/preferences")
     @ResponseBody
-    public ResponseEntity<List<NotificationPreferenceDto>> updatePreferences(@RequestBody List<NotificationPreferenceDto> dtos, HttpSession session) {
+    public ResponseEntity<?> updatePreferences(@RequestBody List<NotificationPreferenceDto> dtos, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("account");
         if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("未登入，請重新登入");
         }
-        dtos.forEach(dto -> preferenceService.updatePreferences(userId, dto));
-        return ResponseEntity.ok(dtos);
+        try {
+            List<NotificationPreferenceDto> result = new java.util.ArrayList<>();
+            for (NotificationPreferenceDto dto : dtos) {
+                try {
+                    NotificationPreferenceDto updated = preferenceService.updatePreferencesWithResult(userId, dto);
+                    System.out.println("[通知偏好設定] 儲存成功: preferenceId=" + dto.getPreferenceId());
+                    result.add(updated);
+                } catch (Exception e) {
+                    System.err.println("[通知偏好設定] 儲存失敗: preferenceId=" + dto.getPreferenceId() + ", 錯誤: " + e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("偏好設定儲存失敗: " + e.getMessage());
+                }
+            }
+            return ResponseEntity.ok(result);
+        } catch (Exception ex) {
+            System.err.println("[通知偏好設定] 批次儲存失敗: " + ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("批次儲存失敗: " + ex.getMessage());
+        }
     }
 
     @GetMapping("/api/unread-count")
@@ -183,6 +194,26 @@ public class NotificationController {
         }
         long count = notificationService.getUnreadCount(userId);
         return ResponseEntity.ok(Collections.singletonMap("unreadCount", count));
+    }
+
+    @GetMapping("/api/recent")
+    @ResponseBody
+    public ResponseEntity<List<MemberNotificationDto>> getRecentNotifications(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("account");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        try {
+            // 獲取最近的5條通知
+            Pageable pageable = PageRequest.of(0, 5);
+            Page<MemberNotificationDto> notifications = notificationService.getMemberNotifications(userId, pageable);
+            return ResponseEntity.ok(notifications.getContent());
+        } catch (Exception e) {
+            System.err.println("獲取最近通知時發生錯誤: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**

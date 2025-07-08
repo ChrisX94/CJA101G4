@@ -1,0 +1,787 @@
+package com.shakemate.notification.service;
+
+import com.shakemate.notification.util.EncryptionUtil;
+import com.shakemate.notification.util.PhoneRedisKeys;
+import com.shakemate.user.dao.UsersRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+/**
+ * 手機號碼同步服務實現類
+ * 
+ * 提供完整的手機號碼數據同步、一致性檢查、用戶生命週期管理功能
+ * 
+ * @author ShakeMate團隊
+ * @version 1.0
+ */
+@Service
+@Slf4j
+public class PhoneSyncServiceImpl implements PhoneSyncService {
+    
+    @Autowired
+    private PhoneStorageService phoneStorageService;
+    
+    @Autowired
+    private EncryptionUtil encryptionUtil;
+    
+    @Autowired
+    private UsersRepository usersRepository;
+    
+    // 同步統計記錄
+    private final Map<String, Object> syncStatistics = new HashMap<>();
+    private final List<Map<String, Object>> anomalyRecords = new ArrayList<>();
+    
+    // ==================== 同步操作 ====================
+    
+    @Override
+    public Map<String, Object> batchSyncUserPhones(Map<Integer, String> userPhoneMap) {
+        if (userPhoneMap == null || userPhoneMap.isEmpty()) {
+            return createSyncResult(0, 0, 0, "輸入的用戶手機號碼映射為空");
+        }
+        
+        log.info("開始批量同步 {} 個用戶的手機號碼", userPhoneMap.size());
+        
+        int successCount = 0;
+        int failureCount = 0;
+        int skippedCount = 0;
+        List<String> errors = new ArrayList<>();
+        
+        try {
+            for (Map.Entry<Integer, String> entry : userPhoneMap.entrySet()) {
+                Integer userId = entry.getKey();
+                String phoneNumber = entry.getValue();
+                
+                try {
+                    // 驗證手機號碼格式
+                    if (!encryptionUtil.isValidTaiwanMobile(phoneNumber)) {
+                        errors.add(String.format("用戶 %d 的手機號碼格式不正確: %s", userId, encryptionUtil.maskPhone(phoneNumber)));
+                        failureCount++;
+                        continue;
+                    }
+                    
+                    // 檢查是否已存在且屬於其他用戶
+                    Optional<Integer> existingUserId = phoneStorageService.getUserIdByPhone(phoneNumber);
+                    if (existingUserId.isPresent() && !existingUserId.get().equals(userId)) {
+                        errors.add(String.format("手機號碼 %s 已被用戶 %d 使用，無法分配給用戶 %d", 
+                            encryptionUtil.maskPhone(phoneNumber), existingUserId.get(), userId));
+                        skippedCount++;
+                        continue;
+                    }
+                    
+                    // 存儲手機號碼
+                    if (phoneStorageService.storeUserPhone(userId, phoneNumber)) {
+                        successCount++;
+                    } else {
+                        failureCount++;
+                        errors.add(String.format("存儲用戶 %d 的手機號碼失敗", userId));
+                    }
+                    
+                } catch (Exception e) {
+                    failureCount++;
+                    errors.add(String.format("處理用戶 %d 時發生異常: %s", userId, e.getMessage()));
+                    recordAnomaly("BATCH_SYNC_ERROR", userId.toString(), e.getMessage());
+                }
+            }
+            
+            // 更新統計資訊
+            updateSyncStatistics("BATCH_SYNC", successCount, failureCount, skippedCount);
+            
+            log.info("批量同步完成，成功: {}, 失敗: {}, 跳過: {}", successCount, failureCount, skippedCount);
+            
+            return createSyncResult(successCount, failureCount, skippedCount, errors.isEmpty() ? "批量同步完成" : String.join("; ", errors));
+            
+        } catch (Exception e) {
+            log.error("批量同步過程中發生嚴重錯誤: {}", e.getMessage(), e);
+            recordAnomaly("BATCH_SYNC_CRITICAL_ERROR", "SYSTEM", e.getMessage());
+            return createSyncResult(successCount, failureCount, skippedCount, "批量同步發生嚴重錯誤: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public Map<String, Object> syncFromCsvFile(String csvFilePath) {
+        if (csvFilePath == null || csvFilePath.trim().isEmpty()) {
+            return createSyncResult(0, 0, 0, "CSV文件路徑不能為空");
+        }
+        
+        log.info("開始從CSV文件同步手機號碼: {}", csvFilePath);
+        
+        Map<Integer, String> userPhoneMap = new HashMap<>();
+        List<String> parseErrors = new ArrayList<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+            String line;
+            int lineNumber = 0;
+            boolean isFirstLine = true;
+            
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                
+                // 跳過標題行
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    if (line.toLowerCase().contains("userid") || line.toLowerCase().contains("phone")) {
+                        continue;
+                    }
+                }
+                
+                try {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2) {
+                        Integer userId = Integer.valueOf(parts[0].trim());
+                        String phoneNumber = parts[1].trim();
+                        userPhoneMap.put(userId, phoneNumber);
+                    } else {
+                        parseErrors.add(String.format("行 %d 格式不正確: %s", lineNumber, line));
+                    }
+                } catch (NumberFormatException e) {
+                    parseErrors.add(String.format("行 %d 用戶ID格式錯誤: %s", lineNumber, line));
+                }
+            }
+            
+            if (!parseErrors.isEmpty()) {
+                log.warn("CSV解析發現 {} 個錯誤", parseErrors.size());
+                parseErrors.forEach(error -> recordAnomaly("CSV_PARSE_ERROR", csvFilePath, error));
+            }
+            
+            // 執行批量同步
+            Map<String, Object> syncResult = batchSyncUserPhones(userPhoneMap);
+            syncResult.put("csvParseErrors", parseErrors);
+            syncResult.put("csvFilePath", csvFilePath);
+            
+            log.info("CSV文件同步完成，解析 {} 條記錄，錯誤 {} 個", userPhoneMap.size(), parseErrors.size());
+            
+            return syncResult;
+            
+        } catch (Exception e) {
+            log.error("讀取CSV文件失敗: {}", e.getMessage(), e);
+            recordAnomaly("CSV_READ_ERROR", csvFilePath, e.getMessage());
+            return createSyncResult(0, 0, 0, "讀取CSV文件失敗: " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public boolean syncSingleUserPhone(Integer userId, String phoneNumber, String source) {
+        if (userId == null || phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            log.warn("用戶ID或手機號碼不能為空");
+            return false;
+        }
+        
+        try {
+            log.info("同步單個用戶手機號碼: 用戶ID={}, 來源={}", userId, source);
+            
+            // 驗證格式
+            if (!encryptionUtil.isValidTaiwanMobile(phoneNumber)) {
+                log.warn("用戶 {} 的手機號碼格式不正確: {}", userId, encryptionUtil.maskPhone(phoneNumber));
+                recordAnomaly("INVALID_PHONE_FORMAT", userId.toString(), "手機號碼格式不正確: " + encryptionUtil.maskPhone(phoneNumber));
+                return false;
+            }
+            
+            // 記錄同步日誌
+            recordSyncActivity(userId, phoneNumber, source, "SINGLE_SYNC");
+            
+            boolean result = phoneStorageService.storeUserPhone(userId, phoneNumber);
+            
+            if (result) {
+                log.info("成功同步用戶 {} 的手機號碼，來源: {}", userId, source);
+                updateSyncStatistics("SINGLE_SYNC", 1, 0, 0);
+            } else {
+                log.warn("同步用戶 {} 的手機號碼失敗，來源: {}", userId, source);
+                updateSyncStatistics("SINGLE_SYNC", 0, 1, 0);
+                recordAnomaly("SINGLE_SYNC_FAILED", userId.toString(), "來源: " + source);
+            }
+            
+            return result;
+            
+        } catch (Exception e) {
+            log.error("同步用戶 {} 的手機號碼時發生異常: {}", userId, e.getMessage(), e);
+            recordAnomaly("SINGLE_SYNC_ERROR", userId.toString(), e.getMessage());
+            return false;
+        }
+    }
+    
+    @Override
+    public Map<String, Object> syncMissingPhones() {
+        log.info("開始檢查並同步遺漏的手機號碼...");
+        
+        // 由於Users實體沒有手機號碼字段，這個方法主要用於
+        // 從其他可能的數據源（如用戶資料更新表單、第三方系統等）同步
+        // 目前實現為數據一致性檢查
+        
+        try {
+            // 獲取所有用戶ID
+            List<Integer> allUserIds = usersRepository.findAllUserIds();
+            Set<Integer> storedUserIds = phoneStorageService.getAllStoredUserIds();
+            
+            int totalUsers = allUserIds.size();
+            int storedUsers = storedUserIds.size();
+            int missingUsers = totalUsers - storedUsers;
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("totalUsers", totalUsers);
+            result.put("storedUsers", storedUsers);
+            result.put("missingUsers", missingUsers);
+            result.put("coveragePercent", totalUsers > 0 ? (double) storedUsers / totalUsers * 100 : 0);
+            result.put("timestamp", LocalDateTime.now().toString());
+            
+            // 找出沒有手機號碼的用戶
+            List<Integer> missingUserIds = new ArrayList<>();
+            for (Integer userId : allUserIds) {
+                if (!storedUserIds.contains(userId)) {
+                    missingUserIds.add(userId);
+                }
+            }
+            
+            result.put("missingUserIds", missingUserIds.size() > 100 ? 
+                missingUserIds.subList(0, 100) : missingUserIds); // 限制返回數量
+            result.put("missingUserCount", missingUserIds.size());
+            
+            log.info("遺漏手機號碼檢查完成，總用戶: {}, 已存儲: {}, 遺漏: {}", totalUsers, storedUsers, missingUsers);
+            
+            return result;
+            
+        } catch (Exception e) {
+            log.error("檢查遺漏手機號碼時發生錯誤: {}", e.getMessage(), e);
+            recordAnomaly("SYNC_MISSING_ERROR", "SYSTEM", e.getMessage());
+            
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("error", e.getMessage());
+            errorResult.put("timestamp", LocalDateTime.now().toString());
+            return errorResult;
+        }
+    }
+    
+    // ==================== 一致性檢查與修復 ====================
+    
+    @Override
+    public Map<String, Object> performConsistencyCheck() {
+        log.info("開始執行數據一致性檢查...");
+        
+        Map<String, Object> report = new HashMap<>();
+        report.put("checkTime", LocalDateTime.now().toString());
+        
+        try {
+            // 1. 檢查雙向映射一致性
+            Map<String, Object> mappingCheck = phoneStorageService.syncDataConsistency();
+            report.put("mappingConsistency", mappingCheck);
+            
+            // 2. 檢查手機號碼格式
+            Map<String, Object> formatCheck = validateAllPhoneFormats();
+            report.put("formatValidation", formatCheck);
+            
+            // 3. 檢查存儲統計
+            Map<String, Object> storageStats = phoneStorageService.getStorageStatistics();
+            report.put("storageStatistics", storageStats);
+            
+            // 4. 檢查遺漏用戶
+            Map<String, Object> missingCheck = syncMissingPhones();
+            report.put("missingPhones", missingCheck);
+            
+            // 5. 健康檢查
+            Map<String, Object> healthCheck = phoneStorageService.performHealthCheck();
+            report.put("systemHealth", healthCheck);
+            
+            // 綜合評分
+            boolean overallHealth = 
+                Boolean.TRUE.equals(mappingCheck.get("isConsistent")) &&
+                Boolean.TRUE.equals(healthCheck.get("overallHealth")) &&
+                (Integer) storageStats.getOrDefault("userPhoneRecords", 0) > 0;
+            
+            report.put("overallHealthy", overallHealth);
+            report.put("recommendations", generateRecommendations(report));
+            
+            log.info("數據一致性檢查完成，整體健康狀態: {}", overallHealth);
+            
+        } catch (Exception e) {
+            log.error("執行一致性檢查時發生錯誤: {}", e.getMessage(), e);
+            report.put("error", e.getMessage());
+            report.put("overallHealthy", false);
+            recordAnomaly("CONSISTENCY_CHECK_ERROR", "SYSTEM", e.getMessage());
+        }
+        
+        return report;
+    }
+    
+    @Override
+    public Map<String, Object> repairDataInconsistencies(boolean autoFix) {
+        log.info("開始修復數據不一致問題，自動修復: {}", autoFix);
+        
+        Map<String, Object> repairResult = new HashMap<>();
+        int repairedCount = 0;
+        int identifiedIssues = 0;
+        List<String> repairActions = new ArrayList<>();
+        
+        try {
+            // 1. 檢查數據一致性
+            Map<String, Object> consistencyCheck = phoneStorageService.syncDataConsistency();
+            
+            if (Boolean.FALSE.equals(consistencyCheck.get("isConsistent"))) {
+                identifiedIssues = (Integer) consistencyCheck.getOrDefault("inconsistentCount", 0);
+                
+                if (autoFix && identifiedIssues > 0) {
+                    // 清理孤立記錄
+                    int cleanedRecords = phoneStorageService.cleanupExpiredRecords();
+                    repairedCount += cleanedRecords;
+                    repairActions.add(String.format("清理了 %d 個孤立記錄", cleanedRecords));
+                    
+                    // 重新檢查一致性
+                    Map<String, Object> recheckResult = phoneStorageService.syncDataConsistency();
+                    if (Boolean.TRUE.equals(recheckResult.get("isConsistent"))) {
+                        repairActions.add("重新檢查確認數據一致性已恢復");
+                    }
+                }
+            }
+            
+            // 2. 修復TTL
+            if (autoFix) {
+                int refreshedKeys = phoneStorageService.refreshAllTTL();
+                repairActions.add(String.format("刷新了 %d 個鍵的TTL", refreshedKeys));
+            }
+            
+            repairResult.put("identifiedIssues", identifiedIssues);
+            repairResult.put("repairedCount", repairedCount);
+            repairResult.put("repairActions", repairActions);
+            repairResult.put("autoFixEnabled", autoFix);
+            repairResult.put("timestamp", LocalDateTime.now().toString());
+            
+            log.info("數據修復完成，識別問題: {}, 修復數量: {}", identifiedIssues, repairedCount);
+            
+        } catch (Exception e) {
+            log.error("修復數據不一致問題時發生錯誤: {}", e.getMessage(), e);
+            repairResult.put("error", e.getMessage());
+            recordAnomaly("REPAIR_ERROR", "SYSTEM", e.getMessage());
+        }
+        
+        return repairResult;
+    }
+    
+    @Override
+    public Map<String, Object> rebuildAllIndexes() {
+        log.info("開始重建所有手機號碼索引...");
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            // 獲取所有存儲的用戶ID
+            Set<Integer> userIds = phoneStorageService.getAllStoredUserIds();
+            
+            Map<Integer, String> userPhoneMap = new HashMap<>();
+            
+            // 讀取所有現有的手機號碼
+            for (Integer userId : userIds) {
+                Optional<String> phone = phoneStorageService.getPhoneByUserId(userId);
+                phone.ifPresent(phoneNumber -> userPhoneMap.put(userId, phoneNumber));
+            }
+            
+            // 清空現有數據（這裡可以考慮更安全的方式）
+            log.warn("注意：重建索引將清空現有數據並重新創建");
+            
+            // 重新存儲所有數據以重建索引
+            int successCount = phoneStorageService.batchStoreUserPhones(userPhoneMap);
+            
+            result.put("originalRecords", userIds.size());
+            result.put("rebuiltRecords", successCount);
+            result.put("success", successCount == userPhoneMap.size());
+            result.put("timestamp", LocalDateTime.now().toString());
+            
+            log.info("索引重建完成，原始記錄: {}, 重建記錄: {}", userIds.size(), successCount);
+            
+        } catch (Exception e) {
+            log.error("重建索引時發生錯誤: {}", e.getMessage(), e);
+            result.put("error", e.getMessage());
+            recordAnomaly("REBUILD_INDEX_ERROR", "SYSTEM", e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> validateAllPhoneFormats() {
+        log.info("開始驗證所有手機號碼格式...");
+        
+        Map<String, Object> result = new HashMap<>();
+        int totalCount = 0;
+        int validCount = 0;
+        int invalidCount = 0;
+        List<String> invalidPhones = new ArrayList<>();
+        
+        try {
+            Set<Integer> userIds = phoneStorageService.getAllStoredUserIds();
+            totalCount = userIds.size();
+            
+            for (Integer userId : userIds) {
+                Optional<String> phone = phoneStorageService.getPhoneByUserId(userId);
+                if (phone.isPresent()) {
+                    if (encryptionUtil.isValidTaiwanMobile(phone.get())) {
+                        validCount++;
+                    } else {
+                        invalidCount++;
+                        invalidPhones.add(String.format("用戶 %d: %s", userId, encryptionUtil.maskPhone(phone.get())));
+                        recordAnomaly("INVALID_PHONE_FORMAT", userId.toString(), "格式不正確: " + encryptionUtil.maskPhone(phone.get()));
+                    }
+                }
+            }
+            
+            result.put("totalCount", totalCount);
+            result.put("validCount", validCount);
+            result.put("invalidCount", invalidCount);
+            result.put("validPercent", totalCount > 0 ? (double) validCount / totalCount * 100 : 0);
+            result.put("invalidPhones", invalidPhones.size() > 50 ? invalidPhones.subList(0, 50) : invalidPhones);
+            result.put("timestamp", LocalDateTime.now().toString());
+            
+            log.info("手機號碼格式驗證完成，總計: {}, 有效: {}, 無效: {}", totalCount, validCount, invalidCount);
+            
+        } catch (Exception e) {
+            log.error("驗證手機號碼格式時發生錯誤: {}", e.getMessage(), e);
+            result.put("error", e.getMessage());
+            recordAnomaly("VALIDATE_FORMAT_ERROR", "SYSTEM", e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    // ==================== 工具方法 ====================
+    
+    private Map<String, Object> createSyncResult(int success, int failure, int skipped, String message) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("successCount", success);
+        result.put("failureCount", failure);
+        result.put("skippedCount", skipped);
+        result.put("totalCount", success + failure + skipped);
+        result.put("message", message);
+        result.put("timestamp", LocalDateTime.now().toString());
+        return result;
+    }
+    
+    private void updateSyncStatistics(String operation, int success, int failure, int skipped) {
+        String key = operation + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        syncStatistics.put(key + "_success", syncStatistics.getOrDefault(key + "_success", 0) + success);
+        syncStatistics.put(key + "_failure", syncStatistics.getOrDefault(key + "_failure", 0) + failure);
+        syncStatistics.put(key + "_skipped", syncStatistics.getOrDefault(key + "_skipped", 0) + skipped);
+        syncStatistics.put("lastUpdate", LocalDateTime.now().toString());
+    }
+    
+    private void recordAnomaly(String type, String target, String description) {
+        Map<String, Object> anomaly = new HashMap<>();
+        anomaly.put("type", type);
+        anomaly.put("target", target);
+        anomaly.put("description", description);
+        anomaly.put("timestamp", LocalDateTime.now().toString());
+        
+        // 保持異常記錄數量在合理範圍內
+        if (anomalyRecords.size() >= 1000) {
+            anomalyRecords.removeFirst();
+        }
+        anomalyRecords.add(anomaly);
+    }
+    
+    private void recordSyncActivity(Integer userId, String phoneNumber, String source, String operation) {
+        log.debug("記錄同步活動: 用戶={}, 手機號={}, 來源={}, 操作={}", 
+            userId, encryptionUtil.maskPhone(phoneNumber), source, operation);
+    }
+    
+    private List<String> generateRecommendations(Map<String, Object> checkReport) {
+        List<String> recommendations = new ArrayList<>();
+        
+        // 根據檢查結果生成建議
+        if (Boolean.FALSE.equals(checkReport.get("overallHealthy"))) {
+            recommendations.add("系統整體健康狀態不佳，建議執行數據修復");
+        }
+        
+        Map<String, Object> mappingCheck = (Map<String, Object>) checkReport.get("mappingConsistency");
+        if (mappingCheck != null && Boolean.FALSE.equals(mappingCheck.get("isConsistent"))) {
+            recommendations.add("發現數據映射不一致，建議執行自動修復");
+        }
+        
+        Map<String, Object> formatCheck = (Map<String, Object>) checkReport.get("formatValidation");
+        if (formatCheck != null && (Integer) formatCheck.getOrDefault("invalidCount", 0) > 0) {
+            recommendations.add("發現無效的手機號碼格式，建議檢查並修正");
+        }
+        
+        if (recommendations.isEmpty()) {
+            recommendations.add("系統運行正常，建議定期執行維護任務");
+        }
+        
+        return recommendations;
+    }
+    
+    // ==================== 部分方法的簡化實現（完整版本會更複雜） ====================
+    
+    @Override
+    public Map<String, Object> performDailyMaintenance() {
+        log.info("執行日常維護任務...");
+        
+        Map<String, Object> result = new HashMap<>();
+        try {
+            // 執行一致性檢查
+            Map<String, Object> consistencyCheck = performConsistencyCheck();
+            
+            // 清理過期記錄
+            int cleanedRecords = phoneStorageService.cleanupExpiredRecords();
+            
+            // 刷新TTL
+            int refreshedKeys = phoneStorageService.refreshAllTTL();
+            
+            result.put("consistencyCheck", consistencyCheck);
+            result.put("cleanedRecords", cleanedRecords);
+            result.put("refreshedKeys", refreshedKeys);
+            result.put("maintenanceTime", LocalDateTime.now().toString());
+            result.put("success", true);
+            
+            log.info("日常維護完成，清理記錄: {}, 刷新鍵: {}", cleanedRecords, refreshedKeys);
+            
+        } catch (Exception e) {
+            log.error("日常維護任務執行失敗: {}", e.getMessage(), e);
+            result.put("error", e.getMessage());
+            result.put("success", false);
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> performPeriodicBackup(String backupLocation) {
+        // 簡化實現，實際項目中會更複雜
+        Map<String, Object> result = new HashMap<>();
+        result.put("backupLocation", backupLocation);
+        result.put("timestamp", LocalDateTime.now().toString());
+        result.put("message", "備份功能尚未完全實現");
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> restoreFromBackup(String backupLocation, String restoreMode) {
+        // 簡化實現
+        Map<String, Object> result = new HashMap<>();
+        result.put("backupLocation", backupLocation);
+        result.put("restoreMode", restoreMode);
+        result.put("timestamp", LocalDateTime.now().toString());
+        result.put("message", "恢復功能尚未完全實現");
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> getSyncStatistics(String reportType) {
+        Map<String, Object> stats = new HashMap<>(syncStatistics);
+        stats.put("reportType", reportType);
+        stats.put("generatedAt", LocalDateTime.now().toString());
+        return stats;
+    }
+    
+    @Override
+    public Map<String, Object> getDataQualityReport() {
+        try {
+            return performConsistencyCheck();
+        } catch (Exception e) {
+            Map<String, Object> errorReport = new HashMap<>();
+            errorReport.put("error", e.getMessage());
+            errorReport.put("timestamp", LocalDateTime.now().toString());
+            return errorReport;
+        }
+    }
+    
+    @Override
+    public List<Map<String, Object>> getAnomalyRecords(int maxRecords) {
+        int limit = Math.min(maxRecords, anomalyRecords.size());
+        return new ArrayList<>(anomalyRecords.subList(Math.max(0, anomalyRecords.size() - limit), anomalyRecords.size()));
+    }
+    
+    @Override
+    public Map<String, Object> handleUserRegistration(Integer userId, String phoneNumber) {
+        Map<String, Object> result = new HashMap<>();
+        
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            result.put("success", true);
+            result.put("message", "用戶註冊時未提供手機號碼");
+            return result;
+        }
+        
+        try {
+            boolean success = syncSingleUserPhone(userId, phoneNumber, "USER_REGISTER");
+            result.put("success", success);
+            result.put("message", success ? "用戶註冊手機號碼綁定成功" : "用戶註冊手機號碼綁定失敗");
+            result.put("userId", userId);
+            result.put("phoneNumber", encryptionUtil.maskPhone(phoneNumber));
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "用戶註冊處理失敗: " + e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> handlePhoneNumberUpdate(Integer userId, String oldPhoneNumber, String newPhoneNumber) {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            boolean success = phoneStorageService.updateUserPhone(userId, newPhoneNumber);
+            result.put("success", success);
+            result.put("message", success ? "手機號碼更新成功" : "手機號碼更新失敗");
+            result.put("userId", userId);
+            result.put("oldPhoneNumber", oldPhoneNumber != null ? encryptionUtil.maskPhone(oldPhoneNumber) : null);
+            result.put("newPhoneNumber", encryptionUtil.maskPhone(newPhoneNumber));
+            
+            if (success) {
+                recordSyncActivity(userId, newPhoneNumber, "USER_UPDATE", "PHONE_UPDATE");
+            }
+            
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "手機號碼更新失敗: " + e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> handleUserDeregistration(Integer userId) {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            boolean success = phoneStorageService.deleteUserPhone(userId);
+            result.put("success", success);
+            result.put("message", success ? "用戶註銷清理完成" : "用戶註銷清理失敗");
+            result.put("userId", userId);
+            
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "用戶註銷處理失敗: " + e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> verifyUserPhone(Integer userId, String phoneNumber) {
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            Optional<String> storedPhone = phoneStorageService.getPhoneByUserId(userId);
+            
+            if (storedPhone.isPresent()) {
+                boolean matches = storedPhone.get().equals(phoneNumber);
+                result.put("verified", matches);
+                result.put("message", matches ? "手機號碼驗證成功" : "手機號碼不匹配");
+            } else {
+                result.put("verified", false);
+                result.put("message", "用戶沒有綁定手機號碼");
+            }
+            
+            result.put("userId", userId);
+            result.put("phoneNumber", encryptionUtil.maskPhone(phoneNumber));
+            
+        } catch (Exception e) {
+            result.put("verified", false);
+            result.put("message", "手機號碼驗證失敗: " + e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> forceSyncUsers(List<Integer> userIds, boolean forceOverwrite) {
+        // 由於Users實體沒有手機號碼字段，這個方法主要用於強制刷新已存在的記錄
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            int processedCount = 0;
+            for (Integer userId : userIds) {
+                Optional<String> existingPhone = phoneStorageService.getPhoneByUserId(userId);
+                if (existingPhone.isPresent()) {
+                    if (forceOverwrite) {
+                        // 強制重新存儲以刷新TTL等
+                        phoneStorageService.storeUserPhone(userId, existingPhone.get());
+                        processedCount++;
+                    }
+                } else {
+                    // 用戶沒有手機號碼記錄，跳過
+                }
+            }
+            
+            result.put("success", true);
+            result.put("processedCount", processedCount);
+            result.put("totalRequested", userIds.size());
+            result.put("forceOverwrite", forceOverwrite);
+            
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public Map<String, Object> performFunctionTest() {
+        Map<String, Object> testResult = new HashMap<>();
+        
+        try {
+            // 測試基本功能
+            Map<String, Object> healthCheck = phoneStorageService.performHealthCheck();
+            
+            // 測試一個臨時的手機號碼存儲和檢索
+            Integer testUserId = 999999; // 假設的測試用戶ID
+            String testPhone = "0912345678";
+            
+            boolean storeTest = phoneStorageService.storeUserPhone(testUserId, testPhone);
+            Optional<String> retrieveTest = phoneStorageService.getPhoneByUserId(testUserId);
+            boolean deleteTest = phoneStorageService.deleteUserPhone(testUserId);
+            
+            testResult.put("healthCheck", healthCheck);
+            testResult.put("storeTest", storeTest);
+            testResult.put("retrieveTest", retrieveTest.isPresent() && retrieveTest.get().equals(testPhone));
+            testResult.put("deleteTest", deleteTest);
+            testResult.put("overallSuccess", 
+                Boolean.TRUE.equals(healthCheck.get("overallHealth")) && 
+                storeTest && 
+                retrieveTest.isPresent() && 
+                deleteTest);
+            testResult.put("timestamp", LocalDateTime.now().toString());
+            
+        } catch (Exception e) {
+            testResult.put("overallSuccess", false);
+            testResult.put("error", e.getMessage());
+        }
+        
+        return testResult;
+    }
+    
+    @Override
+    public Map<String, Object> getServiceHealthStatus() {
+        Map<String, Object> status = new HashMap<>();
+        
+        try {
+            // PhoneStorageService健康檢查
+            Map<String, Object> storageHealth = phoneStorageService.performHealthCheck();
+            
+            // 統計資訊
+            Map<String, Object> statistics = phoneStorageService.getStorageStatistics();
+            
+            // 異常記錄數量
+            int anomalyCount = anomalyRecords.size();
+            
+            // 最近的同步活動
+            String lastSyncUpdate = (String) syncStatistics.get("lastUpdate");
+            
+            status.put("storageHealth", storageHealth);
+            status.put("statistics", statistics);
+            status.put("anomalyCount", anomalyCount);
+            status.put("lastSyncUpdate", lastSyncUpdate);
+            status.put("serviceStartTime", LocalDateTime.now().toString()); // 簡化，實際應該是服務啟動時間
+            status.put("overall", Boolean.TRUE.equals(storageHealth.get("overallHealth")) && anomalyCount < 100);
+            
+        } catch (Exception e) {
+            status.put("overall", false);
+            status.put("error", e.getMessage());
+        }
+        
+        return status;
+    }
+} 
