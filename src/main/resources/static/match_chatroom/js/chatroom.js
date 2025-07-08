@@ -24,8 +24,10 @@ fetch(`${API_BASE}/currentUserId`)
 		connectWebSocket(currentUserId);
 	})
 	.catch(err => {
-		alert("⚠️ 請先登入");
-		window.location.href = "login.html"; // 或其他導回首頁
+		console.warn("❗尚未登入，將交由遮罩機制處理");
+
+		// ✅ 顯示你原本寫好的遮罩
+		showLockOverlay(); // 這個方法請確保你已經定義好在 global
 	});
 
 // 取得聊天室清單
@@ -56,8 +58,10 @@ function loadChatRooms() {
 					previewText = room.lastMessage.slice(0, 10) + (room.lastMessage.length > 10 ? "..." : "");
 				}
 				// 判斷用最後訊息時間 or 建立時間
-				const lastTime = room.lastSentTime || room.createdTime;
-				const timeStr = lastTime ? formatTime(lastTime) : "";
+				let timeStr = "";
+				if (room.lastMessage) {
+				  timeStr = room.lastSentTime ? formatTime(room.lastSentTime) : "";
+				}
 
 				li.innerHTML = `
 					  <img src="${room.peerAvatar}" onerror="this.src='img/default.jpg'" />

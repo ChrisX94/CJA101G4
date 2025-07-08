@@ -2,6 +2,13 @@ $(document).ready(function() {
     const params = new URLSearchParams(window.location.search);
     const notificationId = params.get('notificationId');
 
+    // 全局變量保存圖表實例
+    let charts = {
+        send: null,
+        success: null,
+        interaction: null
+    };
+
     if (!notificationId) {
         // 如果沒有提供 notificationId，顯示通知選擇列表
         showNotificationSelector();
@@ -16,8 +23,8 @@ $(document).ready(function() {
                 <div class="row justify-content-center">
                     <div class="col-lg-8">
                         <div class="card shadow">
-                            <div class="card-header bg-primary text-white">
-                                <h4 class="mb-0"><i class="fas fa-chart-line"></i> 選擇要查看的通知報告</h4>
+                            <div class="card-header" style="background: linear-gradient(45deg, #2EC4B6, #DCFF61); color: #000;">
+                                <h5 class="mb-0" style="font-size: 1.2rem; font-weight: 500;"><i class="fas fa-chart-line me-2"></i>選擇要查看的通知報告</h5>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -70,9 +77,10 @@ $(document).ready(function() {
                                 <td>${statusBadge}</td>
                                 <td>${createdTime}</td>
                                 <td>
-                                    <button class="btn btn-primary btn-sm view-report-btn" 
+                                    <button class="btn btn-sm view-report-btn" 
+                                            style="background: linear-gradient(45deg, #2EC4B6, #4A90E2); border: none; color: #fff; padding: 0.5rem 1rem; border-radius: 0.8rem;"
                                             data-id="${notification.notificationId}">
-                                        <i class="fas fa-chart-bar"></i> 查看報告
+                                        <i class="fas fa-chart-bar me-1"></i>查看報告
                                     </button>
                                 </td>
                             </tr>
@@ -97,34 +105,53 @@ $(document).ready(function() {
     }
 
     function loadNotificationReport(notificationId) {
-        const apiUrl = `/api/admin/notifications/${notificationId}/report`;
+        $.ajax({
+            url: `/api/admin/notifications/${notificationId}/report`,
+            method: 'GET',
+            success: function(response) {
+                console.log('Report data:', response);
+                updateKPICards(response);
+                renderCharts(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching report:', error);
+                Swal.fire('錯誤', '獲取報表數據失敗', 'error');
+            }
+        });
+    }
 
-        $.get(apiUrl)
-            .done(function(stats) {
-                // Fill headers
-                $('#notification-title').text(stats.notificationTitle);
-                $('#notification-id').text(stats.notificationId);
+    function updateKPICards(data) {
+        $('#total-sent').text(data.totalSent);
+        $('#success-count').text(data.successCount);
+        $('#failure-count').text(data.failureCount);
+        $('#read-count').text(data.readCount);
+        $('#click-count').text(data.clickCount);
+        $('#success-rate').text((data.successRate * 100).toFixed(1) + '%');
+        $('#read-rate').text((data.readRate * 100).toFixed(1) + '%');
+        $('#click-rate').text((data.clickRate * 100).toFixed(1) + '%');
+    }
 
-                // Fill KPI cards
-                $('#total-sent').text(stats.totalSent);
-                const successRate = stats.totalSent > 0 ? ((stats.successCount / stats.totalSent) * 100).toFixed(1) + '%' : 'N/A';
-                $('#success-rate').text(successRate);
-                $('#read-rate').text((stats.readRate * 100).toFixed(1) + '%');
-                $('#click-rate').text((stats.clickRate * 100).toFixed(1) + '%');
+    function renderCharts(data) {
+        // 發送量折線圖
+        if (data.sendTrend && data.sendTrend.labels && data.sendTrend.data) {
+            createLineChart('sendChart', data.sendTrend.labels, data.sendTrend.data, '發送量');
+        }
 
-                // --- Create Charts ---
+        // 成功/失敗分布圓餅圖
+        const successFailureLabels = ['成功', '失敗'];
+        const successFailureData = [data.successCount, data.failureCount];
+        const successFailureColors = ['#38ef7d', '#ff6b6b'];
+        createPieChart('successChart', successFailureLabels, successFailureData, successFailureColors);
 
-                // Delivery Status Chart
-                const deliveryData = [stats.successCount, stats.failureCount, stats.totalSent - stats.successCount - stats.failureCount];
-                createPieChart('deliveryStatusChart', ['成功', '失敗', '其他'], deliveryData, ['#28a745', '#dc3545', '#6c757d']);
-
-                // User Interaction Chart
-                const interactionData = [stats.clickCount, stats.readCount - stats.clickCount, stats.totalSent - stats.readCount];
-                createPieChart('userInteractionChart', ['已點擊', '僅已讀', '未互動'], interactionData, ['#ffc107', '#17a2b8', '#e9ecef']);
-            })
-            .fail(function() {
-                $('body').html('<div class="container py-4"><div class="alert alert-danger">無法載入報告數據，請稍後再試。</div></div>');
-            });
+        // 已讀/未讀/點擊分布圓餅圖
+        const interactionLabels = ['已讀', '未讀', '已點擊'];
+        const interactionData = [
+            data.readCount,
+            data.totalSent - data.readCount,
+            data.clickCount
+        ];
+        const interactionColors = ['#4facfe', '#f093fb', '#f5576c'];
+        createPieChart('interactionChart', interactionLabels, interactionData, interactionColors);
     }
 
     function formatDateTime(data) {
@@ -152,9 +179,47 @@ $(document).ready(function() {
         return statusMap[status] || `<span class="badge bg-light text-dark">${status}</span>`;
     }
 
+    function destroyChart(chart) {
+        if (chart && typeof chart.destroy === 'function') {
+            chart.destroy();
+        }
+    }
+
     function createPieChart(canvasId, labels, data, colors) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        new Chart(ctx, {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.error(`Canvas ${canvasId} not found`);
+            return;
+        }
+
+        // 先清理已存在的圖表
+        if (canvasId === 'successChart') {
+            destroyChart(charts.success);
+            charts.success = null;
+        } else if (canvasId === 'interactionChart') {
+            destroyChart(charts.interaction);
+            charts.interaction = null;
+        }
+
+        // 檢查數據有效性
+        const totalValue = data.reduce((a, b) => a + b, 0);
+        if (!labels || !data || totalValue === 0) {
+            canvas.style.display = 'none';
+            const noDataDiv = document.createElement('div');
+            noDataDiv.className = 'text-center text-muted py-3';
+            noDataDiv.textContent = '暫無資料';
+            canvas.parentNode.insertBefore(noDataDiv, canvas.nextSibling);
+            return;
+        }
+
+        canvas.style.display = 'block';
+        const existingNoData = canvas.parentNode.querySelector('.text-muted');
+        if (existingNoData) {
+            existingNoData.remove();
+        }
+
+        const ctx = canvas.getContext('2d');
+        const chartConfig = {
             type: 'pie',
             data: {
                 labels: labels,
@@ -165,6 +230,7 @@ $(document).ready(function() {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         position: 'top',
@@ -172,19 +238,89 @@ $(document).ready(function() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.raw !== null) {
-                                    label += context.raw;
-                                }
-                                return label;
+                                const value = context.raw;
+                                const percentage = ((value / totalValue) * 100).toFixed(1);
+                                return `${context.label}: ${value} (${percentage}%)`;
                             }
                         }
                     }
                 }
+            }
+        };
+
+        const newChart = new Chart(ctx, chartConfig);
+        if (canvasId === 'successChart') {
+            charts.success = newChart;
+        } else if (canvasId === 'interactionChart') {
+            charts.interaction = newChart;
+        }
+    }
+
+    function createLineChart(canvasId, labels, data, labelName) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.error(`Canvas ${canvasId} not found`);
+            return;
+        }
+
+        // 先清理已存在的圖表
+        destroyChart(charts.send);
+        charts.send = null;
+
+        // 檢查數據有效性
+        if (!labels || !data || labels.length === 0 || data.length === 0) {
+            canvas.style.display = 'none';
+            const noDataDiv = document.createElement('div');
+            noDataDiv.className = 'text-center text-muted py-3';
+            noDataDiv.textContent = '暫無資料';
+            canvas.parentNode.insertBefore(noDataDiv, canvas.nextSibling);
+            return;
+        }
+
+        canvas.style.display = 'block';
+        const existingNoData = canvas.parentNode.querySelector('.text-muted');
+        if (existingNoData) {
+            existingNoData.remove();
+        }
+
+        const ctx = canvas.getContext('2d');
+        const chartConfig = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: labelName,
+                    data: data,
+                    borderColor: '#2EC4B6',
+                    backgroundColor: 'rgba(46, 196, 182, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-        });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        };
+
+        charts.send = new Chart(ctx, chartConfig);
     }
 }); 

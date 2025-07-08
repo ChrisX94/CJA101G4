@@ -24,7 +24,7 @@ public interface NewsRepository extends JpaRepository<News, Integer> {
 
     List<News> findByNewsStatus(boolean newsStatus);
 
-    List<News> findByAdmin(AdmVO admin);// 可選擇性開放
+//    List<News> findByAdmin(AdmVO admin);// 可選擇性開放
     
     
 }

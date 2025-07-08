@@ -23,7 +23,7 @@ public class NewsController {
 		if (admin == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
-		NewsResponse resp = newsSvc.saveOrUpdate(dto, admin);
+		NewsResponse resp = newsSvc.saveOrUpdate(dto);
 		return ResponseEntity.ok(resp);
 	}
 
@@ -31,4 +31,10 @@ public class NewsController {
 	public List<NewsResponse> latest() {
 		return newsSvc.getLatestNews();
 	}
+	
+	@GetMapping("/category/{categoryId}")
+	public List<NewsResponse> byCategory(@PathVariable Integer categoryId) {
+	    return newsSvc.getNewsByCategory(categoryId);
+	}
+
 }

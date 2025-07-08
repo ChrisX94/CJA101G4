@@ -4,8 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${user.username} + ' 會員自介編輯'"></title>
+    <title th:text="|${user.username} 會員自介編輯|"></title>
+    <link rel="stylesheet" href="/css/headerStyle.css" />
     <style>
+        * {
+            font-size: 62.5%;
+        }
+
         /* 全局字體和背景 */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -19,6 +24,34 @@
             background-color: #f0f2f5;
             /* Fallback */
         }
+
+        .alert-box {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.6rem;
+            z-index: 9999;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-success {
+            background-color: #DCFF61;
+            color: #333;
+            border: 1px solid #c2e059;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
 
         /* 背景拼接色塊（亮綠 + 藍綠） */
         .bg {
@@ -162,15 +195,18 @@
             right: 10px;
             background-color: #E24F6C;
             color: #fff;
+            border: none;
             border-radius: 50%;
             width: 40px;
             height: 40px;
+            font-size: 1.5em;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 2em;
-            line-height: 1;
+            cursor: pointer;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s;
+            z-index: 10;
         }
 
         .add-photo-box input[type="file"] {
@@ -181,11 +217,12 @@
             height: 100%;
             opacity: 0;
             cursor: pointer;
+            z-index: 5;
         }
 
         /* 隱藏當圖片滿5張時的新增框 */
         .add-photo-box.hidden {
-            display: none;
+            display: none !important;
         }
 
         /* 資料編輯區塊 */
@@ -215,6 +252,7 @@
 
         .form-group input[type="text"],
         .form-group input[type="email"],
+        .form-group input[type="password"],
         .form-group textarea {
             width: calc(100% - 24px);
             padding: 12px;
@@ -228,6 +266,7 @@
 
         .form-group input[type="text"]:focus,
         .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus,
         .form-group textarea:focus {
             border-color: #2EC4B6;
             box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.2);
@@ -331,7 +370,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-
         /* 底部操作按鈕區塊 */
         .action-buttons {
             margin-top: 50px;
@@ -344,6 +382,12 @@
             /* 按鈕間距 */
             align-items: center;
             /* 居中 */
+            justify-content: center;
+            /* 水平居中 */
+            position: relative;
+            z-index: 10;
+            background-color: #ffffff;
+            text-align: center;
         }
 
         .save-button,
@@ -360,6 +404,12 @@
             /* 讓按鈕佔用較多寬度 */
             max-width: 300px;
             /* 最大寬度限制 */
+            position: relative;
+            z-index: 11;
+            display: block !important;
+            visibility: visible !important;
+            margin: 0 auto;
+            /* 水平居中 */
         }
 
         .save-button {
@@ -419,25 +469,57 @@
                 /* 小螢幕下佔用更多寬度 */
             }
         }
+
+        /* 調試樣式 - 確保重要元素可見 */
+        .data-edit-section,
+        .action-buttons,
+        .form-group,
+        .checkbox-group {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* 強制顯示按鈕 */
+        .save-button,
+        .delete-account-button {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
 
+
+
 <body>
+    <div class="header1" w3-include-html="/header1.html"></div>
+    <!-- 成功訊息 -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}" style="margin-top: 15px;"></div>
+
+    <!-- 錯誤訊息 -->
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}" style="margin-top: 15px;"></div>
+
+
+
+
     <div class="bg">
         <div class="profile-container">
             <h1 class="main-title">編輯個人自介</h1>
 
+
             <div class="photo-section">
                 <h3>我的照片</h3>
                 <div class="photo-gallery-editor" id="photoGallery">
-                    <div class="photo-item" th:each="photoUrl, iterStat : ${user.photos}"
+                    <div class="photo-item"
+                        th:each="photo, iterStat : ${user.photos != null ? user.photos : #lists.create()}"
                         th:data-index="${iterStat.index}">
-                        <img th:src="${photoUrl}" th:alt="'個人照片 ' + ${iterStat.index + 1}">
-                        <button type="button" class="remove-btn"
-                            th:data-photo-id="${'photo-' + iterStat.index}">×</button>
+                        <img th:src="${photo.url}" th:alt="'個人照片 ' + ${iterStat.index + 1}">
+                        <button type="button" class="remove-btn" th:data-photo-id="${'photo-' + photo.pos}">×</button>
                     </div>
 
-                    <div class="photo-item add-photo-box" th:if="${user.photos.size() < 5}">
+                    <!-- 新增照片框 - 始終存在於 DOM 中，由 JavaScript 控制顯示/隱藏 -->
+                    <div class="photo-item add-photo-box">
                         <input type="file" id="add-photo-input" accept="image/*">
                         <span class="plus-icon">+</span>
                     </div>
@@ -448,36 +530,117 @@
                 <h3>基本資料</h3>
                 <div class="form-group">
                     <label for="username">使用者名稱:</label>
-                    <input type="text" id="username" th:value="${user.username}">
+                    <input type="text" id="username" th:value="${user.username != null ? user.username : ''}">
                 </div>
                 <div class="form-group">
                     <label for="email">電子郵件:</label>
-                    <input type="email" id="email" th:value="${user.email}" class="disabled-input" readonly>
+                    <input type="email" id="email" th:value="${user.email != null ? user.email : ''}"
+                        class="disabled-input" readonly>
                     <p class="note email-note">若需更換 Email，請聯繫客服或前往設定頁面重新驗證。</p>
                 </div>
                 <div class="form-group">
-                    <label for="birthdate">出生日期:</label>
-                    <input type="text" id="birthdate" th:value="${#temporals.format(user.birthdate, 'yyyy-MM-dd')}"
+                    <label for="birthday"> 出生日期:</label>
+                    <input type="text" id="birthday"
+                        th:value="${user.birthday != null ? #strings.substring(user.birthday.toString(), 0, 10) : ''}"
                         class="disabled-input" readonly>
                     <p class="note">生日一經設定，不可更改。</p>
                 </div>
                 <div class="form-group">
                     <label for="location">居住地:</label>
-                    <input type="text" id="location" th:value="${user.location}">
+                    <input type="text" id="location" th:value="${user.location != null ? user.location : ''}">
                 </div>
                 <div class="form-group">
-                    <label for="bio">關於我:</label>
-                    <textarea id="bio" th:text="${user.bio}"></textarea>
+                    <label for="intro">關於我:</label>
+                    <textarea id="intro" th:text="${user.intro != null ? user.intro : ''}"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">修改密碼:</label>
+                    <input type="password" id="newPassword" placeholder="請輸入新密碼">
+                    <p class="note">如不修改密碼請留空</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">確認密碼:</label>
+                    <input type="password" id="confirmPassword" placeholder="請再次輸入新密碼">
+                    <p class="note">請再次輸入新密碼以確認</p>
                 </div>
 
                 <div class="form-group">
                     <label>興趣:</label>
                     <div class="checkbox-group" id="interestsCheckboxes">
-                        <label th:each="interest : ${user.allAvailableInterests}">
-                            <input type="checkbox" name="interests" th:value="${interest}"
-                                th:checked="${user.interests.contains(interest)}">
+                        <!-- 興趣選項 - 與後端 UserController 中的 allInterests 保持一致 -->
+                        <label>
+                            <input type="checkbox" name="interests" value="打籃球"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('打籃球')}">
                             <span></span>
-                            <span class="checkbox-text" th:text="${interest}"></span>
+                            <span class="checkbox-text">打籃球</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="健身"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('健身')}">
+                            <span></span>
+                            <span class="checkbox-text">健身</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="烹飪"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('烹飪')}">
+                            <span></span>
+                            <span class="checkbox-text">烹飪</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="投資"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('投資')}">
+                            <span></span>
+                            <span class="checkbox-text">投資</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="旅遊"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('旅遊')}">
+                            <span></span>
+                            <span class="checkbox-text">旅遊</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="攝影"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('攝影')}">
+                            <span></span>
+                            <span class="checkbox-text">攝影</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="閱讀"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('閱讀')}">
+                            <span></span>
+                            <span class="checkbox-text">閱讀</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="追劇"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('追劇')}">
+                            <span></span>
+                            <span class="checkbox-text">追劇</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="打電動"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('打電動')}">
+                            <span></span>
+                            <span class="checkbox-text">打電動</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="聽音樂"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('聽音樂')}">
+                            <span></span>
+                            <span class="checkbox-text">聽音樂</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="寫作"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('寫作')}">
+                            <span></span>
+                            <span class="checkbox-text">寫作</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="手作"
+                                th:checked="${user.interestsList != null and user.interestsList.contains('手作')}">
+                            <span></span>
+                            <span class="checkbox-text">手作</span>
                         </label>
                     </div>
                 </div>
@@ -485,11 +648,102 @@
                 <div class="form-group">
                     <label>個性特徵:</label>
                     <div class="checkbox-group" id="personalityTraitsCheckboxes">
-                        <label th:each="trait : ${user.allAvailablePersonalityTraits}">
-                            <input type="checkbox" name="personality_traits" th:value="${trait}"
-                                th:checked="${user.personalityTraits.contains(trait)}">
+                        <!-- 個性特徵選項 - 與後端 UserController 中的 allTraits 保持一致 -->
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="開朗"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('開朗')}">
                             <span></span>
-                            <span class="checkbox-text" th:text="${trait}"></span>
+                            <span class="checkbox-text">開朗</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="樂觀"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('樂觀')}">
+                            <span></span>
+                            <span class="checkbox-text">樂觀</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="陽光"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('陽光')}">
+                            <span></span>
+                            <span class="checkbox-text">陽光</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="文靜"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('文靜')}">
+                            <span></span>
+                            <span class="checkbox-text">文靜</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="務實"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('務實')}">
+                            <span></span>
+                            <span class="checkbox-text">務實</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="溫柔"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('溫柔')}">
+                            <span></span>
+                            <span class="checkbox-text">溫柔</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="體貼"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('體貼')}">
+                            <span></span>
+                            <span class="checkbox-text">體貼</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="細心"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('細心')}">
+                            <span></span>
+                            <span class="checkbox-text">細心</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="幽默"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('幽默')}">
+                            <span></span>
+                            <span class="checkbox-text">幽默</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="貼心"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('貼心')}">
+                            <span></span>
+                            <span class="checkbox-text">貼心</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="浪漫"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('浪漫')}">
+                            <span></span>
+                            <span class="checkbox-text">浪漫</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="靦腆"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('靦腆')}">
+                            <span></span>
+                            <span class="checkbox-text">靦腆</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="感性"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('感性')}">
+                            <span></span>
+                            <span class="checkbox-text">感性</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="理性"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('理性')}">
+                            <span></span>
+                            <span class="checkbox-text">理性</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="穩重"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('穩重')}">
+                            <span></span>
+                            <span class="checkbox-text">穩重</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" name="personality_traits" value="神秘"
+                                th:checked="${user.personalityList != null and user.personalityList.contains('神秘')}">
+                            <span></span>
+                            <span class="checkbox-text">神秘</span>
                         </label>
                     </div>
                 </div>
@@ -497,26 +751,76 @@
 
             <div class="action-buttons">
                 <button class="save-button">儲存變更</button>
-                <button class="delete-account-button" id="deleteAccountBtn">刪除帳號</button>
+                <button class="delete-account-button" id="deleteAccountBtn">註銷帳號</button>
             </div>
 
         </div>
     </div>
-
+    <script src="/js/header.js"></script>
     <script th:inline="javascript">
         /*<![CDATA[*/
         document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM Content Loaded - Starting profile page initialization');
+
+            // 調試：檢查重要元素是否存在
             const photoGallery = document.getElementById('photoGallery');
+            const saveButton = document.querySelector('.save-button');
+            const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+            const dataEditSection = document.querySelector('.data-edit-section');
+            const actionButtons = document.querySelector('.action-buttons');
+
+            console.log('Photo Gallery:', photoGallery);
+            console.log('Save Button:', saveButton);
+            console.log('Delete Account Button:', deleteAccountBtn);
+            console.log('Data Edit Section:', dataEditSection);
+            console.log('Action Buttons:', actionButtons);
+
+            if (!photoGallery) {
+                console.error('Photo Gallery not found!');
+            }
+            if (!saveButton) {
+                console.error('Save Button not found!');
+            }
+            if (!deleteAccountBtn) {
+                console.error('Delete Account Button not found!');
+            }
+            if (!dataEditSection) {
+                console.error('Data Edit Section not found!');
+            }
+            if (!actionButtons) {
+                console.error('Action Buttons not found!');
+            }
+
+            // 如果按鈕不存在，嘗試重新查找或顯示錯誤
+            if (!saveButton || !deleteAccountBtn) {
+                console.error('Critical buttons missing! Trying to find them again...');
+                const allButtons = document.querySelectorAll('button');
+                console.log('All buttons found:', allButtons);
+
+                // 如果還是找不到，顯示一個錯誤訊息
+                if (!saveButton && !deleteAccountBtn) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = 'background: red; color: white; padding: 20px; margin: 20px; text-align: center;';
+                    errorDiv.innerHTML = '錯誤：按鈕元素未找到，請檢查頁面載入是否正常';
+                    document.body.appendChild(errorDiv);
+                }
+            }
+
             const MAX_PHOTOS = 5; // 最大照片數量
 
             // 從 Thymeleaf 獲取圖片 URL
             let currentPhotoUrls = /*[[${user.photos}]]*/[];
 
             // 從 Thymeleaf 獲取用戶已選擇的興趣 (Thymeleaf 會將 List<String> 轉換為 JavaScript 陣列)
-            let userSelectedInterests = /*[[${user.interests}]]*/[];
+            let userSelectedInterests = /*[[${user.interestsList}]]*/[];
 
             // 從 Thymeleaf 獲取用戶已選擇的個性特徵
-            let userSelectedPersonalityTraits = /*[[${user.personalityTraits}]]*/[];
+            let userSelectedPersonalityTraits = /*[[${user.personalityList}]]*/[];
+
+            // 確保陣列存在，避免 JavaScript 錯誤
+            if (!currentPhotoUrls) currentPhotoUrls = [];
+            if (!userSelectedInterests) userSelectedInterests = [];
+            if (!userSelectedPersonalityTraits) userSelectedPersonalityTraits = [];
 
             // 圖片相關功能不需要太大改動，因為它會操作 DOM，但需要確保初始渲染是正確的。
             // Thymeleaf 已經在 HTML 中初始渲染了圖片，所以 JS 只需要處理新增和刪除。
@@ -527,86 +831,58 @@
                     const photoItemToRemove = event.target.closest('.photo-item');
                     if (photoItemToRemove) {
                         const indexToRemove = parseInt(photoItemToRemove.getAttribute('data-index'));
-
-                        // 在前端資料陣列中移除圖片
-                        currentPhotoUrls.splice(indexToRemove, 1);
-
-                        // 重新渲染照片牆 (這裡簡化，直接移除 DOM 元素並更新新增框顯示狀態)
-                        photoItemToRemove.remove();
-                        updateAddPhotoBoxVisibility(); // 更新新增框的顯示狀態
-
-                        console.log('圖片已在前端移除 (實際刪除需後端支援)');
-                        // 實際應用中，你會在這裡發送 AJAX 請求到後端刪除圖片
-                        // fetch(`/api/profile/photo/${event.target.dataset.photoId}`, { method: 'DELETE' })
-                        //   .then(response => response.json())
-                        //   .then(data => {
-                        //     if (data.success) {
-                        //       console.log("圖片已從後端刪除");
-                        //     } else { alert('刪除失敗'); }
-                        //   })
-                        //   .catch(error => console.error('Error deleting photo:', error));
+                        // 新增確認提示
+                        const isConfirmed = confirm('請問要刪除這張照片嗎？');
+                        if (!isConfirmed) return;
+                        fetch(`/api/profile/photo/${event.target.dataset.photoId}`, { method: 'DELETE' })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    window.location.reload();
+                                } else {
+                                    alert('刪除失敗：' + (data.message || '未知錯誤'));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error deleting photo:', error);
+                                alert('刪除失敗：' + error.message);
+                            });
                     }
                 }
             });
 
             // 處理新增照片預覽
             function handleAddPhoto(event) {
+                console.log('handleAddPhoto called', event);
+                console.log('Files:', event.target.files);
+                console.log('Current photo URLs length:', currentPhotoUrls.length);
+                console.log('MAX_PHOTOS:', MAX_PHOTOS);
+
                 const files = event.target.files;
                 if (files.length > 0 && currentPhotoUrls.length < MAX_PHOTOS) {
                     const file = files[0];
-                    const reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        // 將新圖片加入陣列
-                        currentPhotoUrls.push(e.target.result);
-
-                        // 在 DOM 中創建新的 photo-item 並插入到加號框之前
-                        const newPhotoItem = document.createElement('div');
-                        newPhotoItem.classList.add('photo-item');
-                        newPhotoItem.setAttribute('data-index', currentPhotoUrls.length - 1); // 新增索引
-
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = `個人照片 ${currentPhotoUrls.length}`;
-                        newPhotoItem.appendChild(img);
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.classList.add('remove-btn');
-                        removeBtn.textContent = '×';
-                        removeBtn.setAttribute('data-photo-id', `new-photo-${Date.now()}`); // 新增圖片使用時間戳作為ID，實際應由後端返回
-                        newPhotoItem.appendChild(removeBtn);
-
-                        // 找到 add-photo-box，並在其之前插入新圖片
-                        const addPhotoBox = document.querySelector('.add-photo-box');
-                        if (addPhotoBox) {
-                            photoGallery.insertBefore(newPhotoItem, addPhotoBox);
-                        } else {
-                            photoGallery.appendChild(newPhotoItem); // 如果沒有加號框，直接追加
-                        }
-
-                        updateAddPhotoBoxVisibility(); // 更新新增框的顯示狀態
-                        console.log('新圖片已在前端預覽 (實際需上傳後端)');
-
-                        // 實際應用中，你會在這裡發送 AJAX 請求上傳圖片
-                        // const formData = new FormData();
-                        // formData.append('file', file);
-                        // fetch('/api/profile/photo/upload', {
-                        //     method: 'POST',
-                        //     body: formData
-                        // })
-                        // .then(response => response.json())
-                        // .then(data => {
-                        //     if (data.success && data.imageUrl) {
-                        //         // 更新 currentPhotoUrls 中的預覽 URL 為實際的伺服器 URL
-                        //         // (這需要您在後端處理上傳並返回圖片 URL)
-                        //         // 或者，每次儲存時一起上傳新的圖片
-                        //     } else {
-                        //         alert('圖片上傳失敗');
-                        //     }
-                        // })
-                        // .catch(error => console.error('Error uploading photo:', error));
-                    };
-                    reader.readAsDataURL(file);
+                    console.log('Selected file:', file);
+                    // 直接發送 AJAX 請求上傳圖片，不要先加到 currentPhotoUrls，也不要加 DOM 預覽圖
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    fetch('/api/profile/photo/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.imageUrl) {
+                                window.location.reload();
+                            } else {
+                                alert('圖片上傳失敗：' + (data.message || '未知錯誤'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error uploading photo:', error);
+                            alert('圖片上傳失敗：' + error.message);
+                        });
+                } else {
+                    console.log('No files selected or max photos reached');
                 }
                 event.target.value = ''; // 清空 input value
             }
@@ -618,18 +894,34 @@
             // 如果 add-photo-box 是後續動態生成，需要在生成後重新綁定事件。
             // 由於Thymeleaf已經處理了初始顯示/隱藏，我們只需要在照片增刪後調用此函數。
             function updateAddPhotoBoxVisibility() {
+                console.log('updateAddPhotoBoxVisibility called, currentPhotoUrls.length:', currentPhotoUrls.length);
+
                 const addPhotoBox = document.querySelector('.add-photo-box');
-                if (addPhotoBox) {
-                    if (currentPhotoUrls.length >= MAX_PHOTOS) {
-                        addPhotoBox.classList.add('hidden');
+
+                if (!addPhotoBox) {
+                    console.error('add-photo-box not found in DOM');
+                    return;
+                }
+
+                if (currentPhotoUrls.length >= MAX_PHOTOS) {
+                    addPhotoBox.classList.add('hidden');
+                    console.log('Hiding add-photo-box (max photos reached)');
+                } else {
+                    addPhotoBox.classList.remove('hidden');
+                    console.log('Showing add-photo-box');
+
+                    // 確保文件輸入框的事件監聽器仍然存在
+                    const fileInput = addPhotoBox.querySelector('#add-photo-input');
+                    if (fileInput) {
+                        // 移除舊的事件監聽器（如果存在）
+                        fileInput.removeEventListener('change', handleAddPhoto);
+
+                        // 添加新的事件監聽器
+                        fileInput.addEventListener('change', handleAddPhoto);
+                        fileInput.dataset.listenerAttached = 'true'; // 標記已綁定
+                        console.log('Event listener attached to file input');
                     } else {
-                        addPhotoBox.classList.remove('hidden');
-                        // 確保文件輸入框的事件監聽器仍然存在
-                        const fileInput = addPhotoBox.querySelector('#add-photo-input');
-                        if (fileInput && !fileInput.dataset.listenerAttached) {
-                            fileInput.addEventListener('change', handleAddPhoto);
-                            fileInput.dataset.listenerAttached = 'true'; // 標記已綁定
-                        }
+                        console.error('File input not found in add-photo-box');
                     }
                 }
             }
@@ -639,85 +931,138 @@
             const initialAddPhotoInput = document.getElementById('add-photo-input');
             if (initialAddPhotoInput) {
                 initialAddPhotoInput.addEventListener('change', handleAddPhoto);
-                initialAddAddPhotoInput.dataset.listenerAttached = 'true';
+                initialAddPhotoInput.dataset.listenerAttached = 'true';
             }
 
 
+            // 顯示錯誤訊息的函式
+            function showErrorMessage(message) {
+                const messageDiv = document.getElementById("js-message");
+                messageDiv.style.display = "block";
+                messageDiv.className = "alert alert-danger";
+                messageDiv.textContent = message;
+                setTimeout(() => {
+                    messageDiv.style.display = "none";
+                }, 5000);
+            }
+
             // 儲存按鈕的邏輯
-            const saveButton = document.querySelector('.save-button');
-            saveButton.addEventListener('click', function () {
+            saveButton.addEventListener('click', function (e) {
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/\-]).{8,}$/;
+
+                if (newPassword || confirmPassword) {
+                    if (!newPassword) {
+                        alert('請輸入新密碼');
+                        return;
+                    }
+                    if (!confirmPassword) {
+                        alert('請確認新密碼');
+                        return;
+                    }
+                    if (newPassword !== confirmPassword) {
+                        alert('兩次輸入的密碼不一致，請重新輸入');
+                        return;
+                    }
+                    if (!passwordPattern.test(newPassword)) {
+                        alert('密碼格式錯誤：必須至少8碼，包含英文、數字與特殊符號');
+                        return;
+                    }
+                }
                 const selectedInterests = Array.from(document.querySelectorAll('#interestsCheckboxes input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
 
                 const selectedPersonalityTraits = Array.from(document.querySelectorAll('#personalityTraitsCheckboxes input[type="checkbox"]:checked'))
                     .map(cb => cb.value);
 
-                const updatedProfile = {
-                    username: document.getElementById('username').value,
-                    email: document.getElementById('email').value,
-                    // birthdate 是 readonly，直接取值即可，或者從後端傳過來的原始值
-                    birthdate: document.getElementById('birthdate').value,
-                    location: document.getElementById('location').value,
-                    bio: document.getElementById('bio').value,
+                // 創建 FormData 對象來匹配後端期望的格式
+                const formData = new FormData();
 
-                    interests: selectedInterests,
-                    personality_traits: selectedPersonalityTraits,
+                // 添加用戶ID（從 Thymeleaf 獲取）
+                formData.append('userId', /*[[${user.userId}]]*/ '');
 
-                    // photos 這裡包含的是當前在前端顯示的所有圖片 URL
-                    // 在實際應用中，您可能需要區分「已上傳的現有圖片」和「新上傳但尚未保存的圖片」
-                    // 並將新圖片通過 FormData 等方式單獨發送給後端處理。
-                    photos: currentPhotoUrls
-                };
+                // 添加基本資料
+                formData.append('username', document.getElementById('username').value);
+                formData.append('email', document.getElementById('email').value);
+                formData.append('birthday', document.getElementById('birthday').value);
+                formData.append('location', document.getElementById('location').value);
+                formData.append('intro', document.getElementById('intro').value);
+
+                // 添加密碼（如果用戶有輸入）
+                if (newPassword) {
+                    formData.append('newPassword', newPassword);
+                }
+
+                // 添加興趣和個性特徵
+                selectedInterests.forEach(interest => {
+                    formData.append('interestsList', interest);
+                });
+
+                selectedPersonalityTraits.forEach(trait => {
+                    formData.append('personalityList', trait);
+                });
 
                 console.log('--- 準備儲存的資料 ---');
-                console.log(updatedProfile);
-                alert('資料已在前端控制台顯示 (實際需發送至後端)');
+                console.log('Selected Interests:', selectedInterests);
+                console.log('Selected Personality Traits:', selectedPersonalityTraits);
+                console.log('FormData entries:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(key + ': ' + value);
+                }
 
-                // 在實際應用中，你會在這裡發送 AJAX 請求到後端
-                // fetch('/api/profile/save', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify(updatedProfile)
-                // })
-                // .then(response => response.json())
-                // .then(data => {
-                //     if (data.success) {
-                //         alert('個人資料儲存成功！');
-                //         // 如果有圖片上傳，且是分開上傳的，這裡可能需要更新圖片狀態
-                //     } else {
-                //         alert('儲存失敗：' + data.message);
-                //     }
-                // })
-                // .catch(error => console.error('Error saving profile:', error));
+                // 發送 FormData 到後端
+                fetch('/user/updateProfile', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (response.redirected) {
+                            // 如果後端重定向，跟隨重定向
+                            window.location.href = response.url;
+                        } else if (response.ok) {
+                            alert('個人資料儲存成功！');
+                            // 重新載入頁面以顯示更新後的資料
+                            window.location.reload();
+                        } else {
+                            return response.text().then(text => {
+                                throw new Error('儲存失敗：' + text);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving profile:', error);
+                        alert('儲存失敗：' + error.message);
+                    });
             });
 
             // 刪除帳號功能
-            const deleteAccountBtn = document.getElementById('deleteAccountBtn');
             deleteAccountBtn.addEventListener('click', function () {
                 const isConfirmed = confirm('您確定要永久刪除此帳號嗎？此操作不可逆轉！');
-
                 if (isConfirmed) {
-                    console.log('用戶已確認刪除帳號');
-                    alert('帳號刪除請求已發送 (實際操作需後端處理)。您將被導向首頁或登出。');
-
-                    // 在實際應用中，這裡會發送一個請求到後端 API 來刪除帳號。
-                    // fetch('/api/profile/delete-account', { method: 'POST' })
-                    // .then(response => {
-                    //    if (response.ok) {
-                    //       window.location.href = '/logout'; // 或 /homepage
-                    //    } else {
-                    //       alert('帳號刪除失敗');
-                    //    }
-                    // })
-                    // .catch(error => console.error('Error deleting account:', error));
+                    fetch('/user/delete', { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('帳號已註銷，將自動登出。');
+                                window.location.href = '/login';
+                            } else {
+                                alert('帳號刪除失敗：' + (data.message || '未知錯誤'));
+                            }
+                        })
+                        .catch(error => {
+                            alert('帳號刪除失敗：' + error.message);
+                        });
                 } else {
                     console.log('用戶取消了帳號刪除操作。');
                 }
             });
         });
         /*]]>*/
+
+
+
     </script>
 </body>
 

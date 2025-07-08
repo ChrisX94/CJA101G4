@@ -1,16 +1,50 @@
 $(document).ready(function () {
+    console.log('=== 通知管理頁面載入開始 ===');
+    
+    // 檢查登入狀態
+    $.get('/api/admin/notifications/check-auth')
+        .fail(function(xhr) {
+            if (xhr.status === 401) {
+                Swal.fire({
+                    title: '未登入',
+                    text: '請先登入系統',
+                    icon: 'warning',
+                    confirmButtonText: '前往登入'
+                }).then(() => {
+                    window.location.href = '/adm/admLogin';
+                });
+            }
+        });
+    
     const notificationsApiUrl = '/api/admin/notifications';
     const templatesApiUrl = '/api/admin/notifications/templates';
 
-    const notificationModal = new bootstrap.Modal(document.getElementById('notification-modal'));
-    const reportModal = new bootstrap.Modal(document.getElementById('report-modal'));
+    const notificationModal = new bootstrap.Modal(document.getElementById('notificationModal'));
+    const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
 
     const dt = $('#notifications-table').DataTable({
         processing: true,
-        serverSide: false,
+        serverSide: true,
+        pageLength: 50, // 默认每页50条
+        lengthMenu: [10, 20, 50, 100, 200], // 可选每页条数
         ajax: {
             url: notificationsApiUrl + '/',
-            dataSrc: 'content',
+            data: function(d) {
+                // DataTables参数转Spring Pageable参数
+                return {
+                    page: Math.floor(d.start / d.length),
+                    size: d.length,
+                    sort: d.order && d.order.length > 0 ?
+                        d.columns[d.order[0].column].data + ',' + d.order[0].dir :
+                        'notificationId,desc'
+                };
+            },
+            dataSrc: function(json) {
+                // 兼容Spring Page对象
+                json.recordsTotal = json.totalElements;
+                json.recordsFiltered = json.totalElements;
+                return json.content;
+            },
             error: function(xhr, error, thrown) {
                 console.error('DataTables Ajax error:', error);
                 console.error('XHR status:', xhr.status);
@@ -28,9 +62,8 @@ $(document).ready(function () {
                 render: function(data) {
                     if (!data) return '';
                     if (Array.isArray(data) && data.length >= 5) {
-                        // 支援 5 個或 6 個元素的陣列 [年, 月, 日, 時, 分, 秒(可選)]
                         const year = data[0];
-                        const month = data[1] - 1; // JavaScript 月份從 0 開始
+                        const month = data[1] - 1;
                         const day = data[2];
                         const hour = data[3] || 0;
                         const minute = data[4] || 0;
@@ -42,13 +75,13 @@ $(document).ready(function () {
                 }
             },
             { 
-                data: 'scheduledTime', 
+                data: 'validFrom', 
+                title: '通知有效起始時間',
                 render: function(data) {
                     if (!data) return '';
                     if (Array.isArray(data) && data.length >= 5) {
-                        // 支援 5 個或 6 個元素的陣列 [年, 月, 日, 時, 分, 秒(可選)]
                         const year = data[0];
-                        const month = data[1] - 1; // JavaScript 月份從 0 開始
+                        const month = data[1] - 1;
                         const day = data[2];
                         const hour = data[3] || 0;
                         const minute = data[4] || 0;
@@ -60,13 +93,13 @@ $(document).ready(function () {
                 }
             },
             { 
-                data: 'sentTime', 
+                data: 'validUntil', 
+                title: '通知有效結束時間',
                 render: function(data) {
                     if (!data) return '';
                     if (Array.isArray(data) && data.length >= 5) {
-                        // 支援 5 個或 6 個元素的陣列 [年, 月, 日, 時, 分, 秒(可選)]
                         const year = data[0];
-                        const month = data[1] - 1; // JavaScript 月份從 0 開始
+                        const month = data[1] - 1;
                         const day = data[2];
                         const hour = data[3] || 0;
                         const minute = data[4] || 0;
@@ -81,8 +114,9 @@ $(document).ready(function () {
                 data: null,
                 orderable: false,
                 render: function (data, type, row) {
-                    let buttons = `<button class="btn btn-info btn-sm report-btn" data-id="${row.notificationId}"><i class="fas fa-chart-bar"></i> 報告</button> `;
-                    if (row.status === 'DRAFT' || row.status === 'PENDING') {
+                    let buttons = `<button class="btn btn-primary btn-sm detail-btn" data-id="${row.notificationId}"><i class="fas fa-info-circle"></i> 詳情</button> `;
+                    buttons += `<button class="btn btn-info btn-sm report-btn" data-id="${row.notificationId}"><i class="fas fa-chart-bar"></i> 報告</button> `;
+                    if (row.status === '草稿') {
                         buttons += `<button class="btn btn-success btn-sm send-btn" data-id="${row.notificationId}"><i class="fas fa-paper-plane"></i> 發送</button> `;
                     }
                     buttons += `<button class="btn btn-danger btn-sm delete-btn" data-id="${row.notificationId}"><i class="fas fa-trash"></i> 刪除</button>`;
@@ -106,10 +140,10 @@ $(document).ready(function () {
     
     // Show/hide user IDs textarea based on target type
     $('#targetType').on('change', function() {
-        if ($(this).val() === 'SPECIFIC_USERS') {
-            $('#target-user-ids-group').show();
+        if ($(this).val() === 'SPECIFIC') {
+            $('#targetUsersContainer').show();
         } else {
-            $('#target-user-ids-group').hide();
+            $('#targetUsersContainer').hide();
         }
     });
 
@@ -117,8 +151,8 @@ $(document).ready(function () {
     $('#add-notification-btn').on('click', function () {
         $('#notification-form')[0].reset();
         $('#notificationId').val('');
-        $('#target-user-ids-group').hide();
-        $('#notificationModalLabel').text('新增通知');
+        $('#targetUsersContainer').hide();
+        $('#modalTitle').text('新增通知');
         loadTemplates();
         notificationModal.show();
     });
@@ -128,26 +162,23 @@ $(document).ready(function () {
         e.preventDefault();
         
         let targetIds = null;
-        if ($('#targetType').val() === 'SPECIFIC_USERS') {
-            targetIds = $('#targetUserIds').val().split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+        if ($('#targetType').val() === 'SPECIFIC') {
+            targetIds = $('#targetUsers').val().split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
         }
 
         let renderParams = null;
-        try {
-            const paramsRaw = $('#params').val();
-            if(paramsRaw) renderParams = JSON.parse(paramsRaw);
-        } catch (error) {
-            Swal.fire('錯誤！', '自訂參數必須是合法的 JSON 格式。', 'error');
-            return;
-        }
 
         const formData = {
-            title: '預設標題', // 必需欄位，會被模板覆蓋
-            message: '預設內容', // 必需欄位，會被模板覆蓋
+            title: $('#title').val(),
+            content: $('#content').val(),
+            type: $('#type').val(),
             templateId: parseInt($('#templateId').val()),
             targetType: $('#targetType').val(),
             targetIds: targetIds,
-            scheduledTime: $('#scheduledTime').val() ? new Date($('#scheduledTime').val()).toISOString() : null,
+            startTime: $('#startTime').val() ? new Date($('#startTime').val()).toISOString() : null,
+            endTime: $('#endTime').val() ? new Date($('#endTime').val()).toISOString() : null,
+            notificationCategory: $('#notificationCategory').val(),
+            notificationLevel: parseInt($('#notificationLevel').val()),
             renderParams: renderParams,
         };
 
@@ -168,7 +199,15 @@ $(document).ready(function () {
                 console.error('Error response:', xhr.responseText);
                 console.error('Status:', status);
                 console.error('Error:', error);
+                
+                if (xhr.status === 401) {
+                    Swal.fire('錯誤！', '您的登入狀態已過期，請重新登入。', 'error')
+                    .then(() => {
+                        window.location.href = '/adm/admLogin';
+                    });
+                } else {
                 Swal.fire('錯誤！', '儲存失敗，請檢查欄位並稍後再試。', 'error');
+                }
             }
         });
     });
@@ -334,4 +373,50 @@ $(document).ready(function () {
             }
         });
     });
-}); 
+
+    // 在js底部新增詳情按鈕事件
+    $(document).on('click', '.detail-btn', function () {
+        const id = $(this).data('id');
+        $.get(`/api/admin/notifications/${id}`, function (data) {
+            function formatDate(val) {
+                if (!val) return '';
+                try {
+                    return new Date(val).toLocaleString('zh-TW');
+                } catch { return val; }
+            }
+            function formatObj(val) {
+                if (val == null) return '';
+                if (typeof val === 'object') return `<pre style="white-space:pre-wrap;">${JSON.stringify(val, null, 2)}</pre>`;
+                return val;
+            }
+            function formatLevel(val) {
+                if (val === 1 || val === '1') return '一般';
+                if (val === 2 || val === '2') return '重要';
+                if (val === 3 || val === '3') return '緊急';
+                return val || '';
+            }
+            let html = `<div style='text-align:left;'>` +
+                `<b>通知編號：</b> ${data.notificationId}<br>` +
+                `<b>通知類型：</b> ${data.notificationType || ''}<br>` +
+                `<b>通知細分類別：</b> ${data.notificationCategory || ''}<br>` +
+                `<b>通知重要程度：</b> ${formatLevel(data.notificationLevel)}<br>` +
+                `<b>通知標題：</b> ${data.title || ''}<br>` +
+                `<b>通知內容：</b> ${data.message || ''}<br>` +
+                `<b>是否為廣播：</b> ${data.isBroadcast === true ? '是' : (data.isBroadcast === false ? '否' : '')}<br>` +
+                `<b>目標受眾篩選條件：</b> ${formatObj(data.targetCriteria)}<br>` +
+                `<b>通知有效起始時間：</b> ${formatDate(data.validFrom)}<br>` +
+                `<b>通知有效結束時間：</b> ${formatDate(data.validUntil)}<br>` +
+                `<b>建立時間：</b> ${formatDate(data.createdTime)}<br>` +
+                `<b>更新時間：</b> ${data.updatedTime ? formatDate(data.updatedTime) : '-'}<br>` +
+                `<b>系統管理員ID：</b> ${data.createdBy || ''}<br>` +
+                `<b>通知狀態：</b> ${data.status || ''}<br>` +
+                `</div>`;
+            Swal.fire({
+                title: '通知詳情',
+                html: html,
+                width: 700,
+                confirmButtonText: '關閉',
+            });
+        }).fail(() => Swal.fire('錯誤！', '無法獲取通知詳情。', 'error'));
+    });
+});

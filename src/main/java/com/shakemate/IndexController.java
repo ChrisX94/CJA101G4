@@ -31,5 +31,11 @@ public class IndexController {
 	// 回傳的是 Thymeleaf 的 view 名稱，例如 static/shshop/front_end/select_page.html
 	//		return "back-end/adm/adminHome";
 	//	}
+	
+    // 測試
+    @GetMapping("/manage")
+    public String backPage() {
+    	return "back-end/admin/manage";
+    }
 
 }

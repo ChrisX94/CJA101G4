@@ -12,4 +12,14 @@ public interface NotificationDispatchService {
     @Async
     void dispatchNotification(Notification notification);
 
+    /**
+     * 發送通知給單一用戶 (業務模組對接專用)
+     * @param userId 目標用戶ID
+     * @param title 通知標題
+     * @param content 通知內容
+     * @param deliveryMethod 發送方式 (EMAIL, PUSH, SMS, IN_APP)
+     */
+    @Async
+    void sendNotification(Integer userId, String title, String content, String deliveryMethod);
+
 } 

@@ -17,13 +17,12 @@ public class NotificationTemplateDto {
     @NotBlank(message = "標題模板不可為空")
     private String titleTemplate;
 
-    @NotBlank(message = "內容模板不可為空")
-    private String messageTemplate;
+    private String contentTemplate;
+
+    private String htmlTemplate;
 
     private String templateType;
     private String templateCategory;
-    private String subject;
-    private String htmlContent;
     private String description;
     private String variables; // JSON String
     private String previewImage;

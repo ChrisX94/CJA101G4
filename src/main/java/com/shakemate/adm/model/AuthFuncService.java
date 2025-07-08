@@ -10,21 +10,21 @@ import org.springframework.stereotype.Service;
 @Service("admFuncService")
 public class AuthFuncService {
 
-	@Autowired
-	AuthFuncRepository repository;
+    @Autowired
+    AuthFuncRepository repository;
 
-	@Autowired
-	private SessionFactory sessionFactory;
+    @Autowired
+    private SessionFactory sessionFactory;
 
-	public List<AuthFuncVO> getAll() {
-		return repository.findAll();
-	}
+    public List<AuthFuncVO> getAll() {
+        return repository.findAll();
+    }
 
-	public void addAuthFunc(AuthFuncVO authFuncVO) {
-		repository.save(authFuncVO);
-	}
+    public void addAuthFunc(AuthFuncVO authFuncVO) {
+        repository.save(authFuncVO);
+    }
 
-	// 查單筆
+    // 查單筆
     public AuthFuncVO getOneAdmFunc(Integer authId) {
         Optional<AuthFuncVO> optional = repository.findById(authId);
         return optional.orElse(null);

@@ -15,5 +15,6 @@ public class NotificationReportDto {
     private double readRate;
     private long clickCount;
     private double clickRate;
+    private Object sendTrend;
 
 } 

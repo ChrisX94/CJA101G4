@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用者註冊</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="/css/signin.css">
+    <style>
+        .bg {
+            position: relative;
+            min-height: 100vh;
+            z-index: 0;
+            background: linear-gradient(185deg,
+                    #DCFF61 0%,
+                    #DCFF61 55%,
+                    #2EC4B6 55%,
+                    #2EC4B6 100%);
+            overflow: hidden;
+        }
+
+        .bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.35);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .left-button,
+        .right-button {
+            padding: 0.6rem 1.8rem;
+            font-size: 1.4rem;
+            border-radius: 1.5rem;
+            font-weight: 600;
+            border: 2px solid gray;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .left-button {
+            background-color: #fff;
+            color: gray;
+        }
+
+        .left-button:hover {
+            background-color: #DCFF61;
+            color: #2EC4B6;
+        }
+
+        .right-button {
+            background-color: #aaa;
+            color: #fff;
+        }
+
+        .right-button:hover {
+            background-color: #888;
+        }
+    </style>
+</head>
+
+<body class="bg overflow-auto">
+    <div class="min-h-screen flex items-center justify-center p-4 relative z-10">
+        <div class="main-container bg-white/90 rounded-2xl shadow-xl p-6 w-full max-w-3xl">
+            <!-- Message prompt box -->
+            <div id="messageBox" class="message-box hidden" role="alert">
+                <div class="flex items-center justify-between">
+                    <p id="messageText" class="message-text"></p>
+                    <button id="closeMessage" class="message-close-btn">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+
+            <div class="main-container">
+                <div class="flex justify-center mb-6">
+                    <img src="/img/LOGO1.png" alt="Logo" class="h-16" />
+                </div>
+
+                <h2 class="form-title">註冊新帳號</h2>
+
+
+                <form id="registrationForm" th:action='@{/login/signupHandler}' th:object="${user}" method="POST"
+                    class="form-layout" enctype="multipart/form-data">
+                    <!-- 全局錯誤訊息 -->
+                    <div th:if="${errorMessage}"
+                        class="bg-red-100 border border-red-500 text-red-700 px-4 py-3 rounded mb-4">
+                        <p th:text="${errorMessage}"></p>
+                    </div>
+
+                    <!-- Username -->
+                    <div>
+                        <label for="username" class="form-label">使用者名稱</label>
+                        <input id="username" type="text" th:field="*{username}" class="form-input"
+                            placeholder="請輸入您的使用者名稱" />
+                        <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}"
+                            class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="form-label">電子郵件</label>
+                        <input id="email" type="email" th:field="*{email}" class="form-input" placeholder="請輸入您的電子郵件" />
+                        <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                            class="text-red-500 text-sm block mt-1"></span>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="pwd" class="form-label">密碼</label>
+                        <input id="pwd" type="password" th:field="*{pwd}" class="form-input" placeholder="請輸入密碼" />
+                        <span id="pwdError" class="text-red-500 text-sm hidden"
+                            th:text="${#fields.hasErrors('pwd')} ? ${#fields.errors('pwd')} : ''"
+                            th:classappend="${#fields.hasErrors('pwd')} ? '' : 'hidden'"></span>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="confirm_password" class="form-label">確認密碼</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required class="form-input"
+                            placeholder="請再次輸入密碼">
+                        <span th:if="${pwdMismatch}" th:text="${pwdMismatch}"
+                            class="text-red-500 text-sm block mt-1"></span>
+                    </div>
+
+                    <!-- Gender -->
+                    <div>
+                        <label class="form-label">性別</label>
+                        <div class="mt-2 flex flex-wrap gap-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="gender" value="0" class="form-radio-input" required>
+                                <span class="form-option-text">男</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="gender" value="1" class="form-radio-input" required>
+                                <span class="form-option-text">女</span>
+                            </label>
+                        </div>
+                        <span th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"
+                            class="text-red-500 text-sm block mt-1"></span>
+                    </div>
+
+                    <!-- Birthday -->
+                    <div>
+                        <label for="birthday" class="form-label">生日</label>
+                        <input type="date" id="birthday" th:field="*{birthday}" name="birthday" class="form-input">
+
+                    </div>
+
+                    <!-- Location -->
+                    <input type="text" id="location" th:field="*{location}" class="form-input" placeholder="例如：台北市" />
+                    <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}"
+                        class="text-red-500 text-sm block mt-1"></span>
+
+                    <!-- Introduction -->
+                    <div>
+                        <label class="form-label">個人簡介</label>
+                        <textarea th:field="*{intro}" rows="3" class="form-input"
+                            placeholder="簡單介紹一下自己 (最多200字)"></textarea>
+                    </div>
+                    <!-- Interests (Checkboxes) -->
+                    <div>
+                        <label class="form-label">興趣</label>
+                        <div class="checkbox-grid">
+                            <!-- Checkbox items for Interests -->
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="打籃球" class="form-checkbox-input">
+                                <span class="form-option-text">打籃球</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="健身" class="form-checkbox-input">
+                                <span class="form-option-text">健身</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="烹飪" class="form-checkbox-input">
+                                <span class="form-option-text">烹飪</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="投資" class="form-checkbox-input">
+                                <span class="form-option-text">投資</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="旅遊" class="form-checkbox-input">
+                                <span class="form-option-text">旅遊</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="攝影" class="form-checkbox-input">
+                                <span class="form-option-text">攝影</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="閱讀" class="form-checkbox-input">
+                                <span class="form-option-text">閱讀</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="追劇" class="form-checkbox-input">
+                                <span class="form-option-text">追劇</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="打電動" class="form-checkbox-input">
+                                <span class="form-option-text">打電動</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="聽音樂" class="form-checkbox-input">
+                                <span class="form-option-text">聽音樂</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="寫作" class="form-checkbox-input">
+                                <span class="form-option-text">寫作</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="interests" value="手作" class="form-checkbox-input">
+                                <span class="form-option-text">手作</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Personality Traits (Checkboxes) -->
+                    <div>
+                        <label class="form-label">人格特質</label>
+                        <div class="checkbox-grid">
+                            <!-- Checkbox items for Personality -->
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="開朗" class="form-checkbox-input">
+                                <span class="form-option-text">開朗</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="樂觀" class="form-checkbox-input">
+                                <span class="form-option-text">樂觀</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="陽光" class="form-checkbox-input">
+                                <span class="form-option-text">陽光</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="文靜" class="form-checkbox-input">
+                                <span class="form-option-text">文靜</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="務實" class="form-checkbox-input">
+                                <span class="form-option-text">務實</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="溫柔" class="form-checkbox-input">
+                                <span class="form-option-text">溫柔</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="體貼" class="form-checkbox-input">
+                                <span class="form-option-text">體貼</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="細心" class="form-checkbox-input">
+                                <span class="form-option-text">細心</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="幽默" class="form-checkbox-input">
+                                <span class="form-option-text">幽默</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="貼心" class="form-checkbox-input">
+                                <span class="form-option-text">貼心</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="浪漫" class="form-checkbox-input">
+                                <span class="form-option-text">浪漫</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="靦腆" class="form-checkbox-input">
+                                <span class="form-option-text">靦腆</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="感性" class="form-checkbox-input">
+                                <span class="form-option-text">感性</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="理性" class="form-checkbox-input">
+                                <span class="form-option-text">理性</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="穩重" class="form-checkbox-input">
+                                <span class="form-option-text">穩重</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="personality" value="神秘" class="form-checkbox-input">
+                                <span class="form-option-text">神秘</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Section (Single Image, Required) -->
+                    <div class="mb-6">
+                        <label class="form-label">上傳大頭貼 (必要)</label>
+                        <div class="drop-zone-area" id="dropZone">
+                            拖曳圖片到此處，或點擊選擇
+                        </div>
+                        <input type="file" id="prodImageInput" name="image" accept="image/*" hidden>
+                        <div class="preview-gallery" id="previewContainer"></div>
+                    </div>
+
+                    <!-- Register Button -->
+                    <div class="flex justify-between pt-6">
+                        <a th:href="@{/login}" class="left-button text-center">返回登入</a>
+                        <button type="submit" class="right-button">
+                            註冊
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+            <script>
+                // JavaScript for image upload functionality and custom message box
+
+                // Get relevant elements
+                const registrationForm = document.getElementById('registrationForm'); // Get the form
+                const dropZone = document.getElementById('dropZone');
+                const prodImageInput = document.getElementById('prodImageInput');
+                const previewContainer = document.getElementById('previewContainer');
+                const messageBox = document.getElementById('messageBox');
+                const messageText = document.getElementById('messageText');
+                const closeMessage = document.getElementById('closeMessage');
+
+                // Variable to store the selected file (single image)
+                let fileToUpload = null;
+
+                /**
+                 * Display custom message box
+                 * @param {string} message Message to display
+                 * @param {'info'|'error'} type Message type ('info' or 'error')
+                 */
+                function showMessage(message, type = 'info') {
+                    messageText.textContent = message;
+                    messageBox.classList.remove('hidden');
+
+                    // Remove old styles and add new styles based on type
+                    messageBox.classList.remove('bg-red-100', 'border-red-400', 'text-red-700', 'bg-blue-100', 'border-blue-400', 'text-blue-700');
+                    messageBox.classList.remove('border-red-500', 'border-blue-500'); // Ensure border color is also removed
+
+                    if (type === 'error') {
+                        messageBox.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
+                        closeMessage.classList.add('text-red-700');
+                    } else { // Default to info
+                        messageBox.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
+                        closeMessage.classList.add('text-blue-700');
+                    }
+
+                    // Set event listener for close button
+                    closeMessage.onclick = () => {
+                        messageBox.classList.add('hidden');
+                    };
+
+                    // Auto-hide message box (if not manually closed)
+                    setTimeout(() => {
+                        if (!messageBox.classList.contains('hidden')) {
+                            messageBox.classList.add('hidden');
+                        }
+                    }, 5000); // Hide after 5 seconds
+                }
+
+                // Trigger hidden file input when drop zone is clicked
+                dropZone.addEventListener('click', () => {
+                    prodImageInput.click();
+                });
+
+                // Handle file selection from input
+                prodImageInput.addEventListener('change', (event) => {
+                    handleNewFile(event.target.files);
+                });
+
+                // Handle dragover event: prevent default to allow drop, add visual feedback
+                dropZone.addEventListener('dragover', (event) => {
+                    event.preventDefault();
+                    dropZone.classList.add('border-blue-500', 'bg-blue-50');
+                });
+
+                // Handle dragleave event: remove visual feedback
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+                });
+
+                // Handle drop event: prevent default, remove visual feedback, and process file
+                dropZone.addEventListener('drop', (event) => {
+                    event.preventDefault();
+                    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+                    handleNewFile(event.dataTransfer.files);
+                });
+
+                /**
+                 * Process newly selected or dropped file (single image)
+                 * @param {FileList} newFiles List of new files
+                 */
+                function handleNewFile(newFiles) {
+                    clearPreviews(); // Always clear previews at the beginning of handling new files
+                    fileToUpload = null; // Reset the file to upload
+
+                    // Since only one image is allowed, process only the first file
+                    const file = newFiles[0];
+
+                    if (!file) {
+                        // If no file is selected (e.g., user opened dialog and cancelled), ensure state is clear
+                        updateFileInputFile(); // Update the hidden input state
+                        return;
+                    }
+
+                    if (file.type.startsWith('image/')) {
+                        fileToUpload = file; // Store the single valid image file
+                        previewFile(file);   // Display file preview
+                    } else {
+                        showMessage(`File "${file.name}" is not an image. Please select an image file.`, 'error');
+                    }
+                    updateFileInputFile(); // Always update the file input's state
+                }
+
+                /**
+                 * Update the File property of the hidden file input
+                 * This ensures that the correct single file is sent when the form is submitted
+                 */
+                function updateFileInputFile() {
+                    // DataTransfer object allows us to manipulate FileList
+                    const dataTransfer = new DataTransfer();
+                    if (fileToUpload) {
+                        dataTransfer.items.add(fileToUpload);
+                    }
+                    prodImageInput.files = dataTransfer.files;
+
+                    // Trigger 'change' event on the input to help browsers check the required attribute
+                    // Although hidden, this helps trigger internal validation
+                    // Removed this as it could cause re-triggering issues: const event = new Event('change', { bubbles: true }); prodImageInput.dispatchEvent(event);
+                }
+
+                /**
+                 * Create a preview for a single file
+                 * @param {File} file The file to preview
+                 */
+                function previewFile(file) {
+                    clearPreviews(); // Ensure all old previews are cleared before creating a new one
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file); // Read the file as a Data URL
+
+                    reader.onloadend = () => {
+                        // Create preview item container
+                        const previewItem = document.createElement('div');
+                        previewItem.classList.add('preview-thumbnail');
+
+                        // Create image element
+                        const img = document.createElement('img');
+                        img.src = reader.result; // Set Data URL as image source
+                        img.classList.add('thumbnail-image');
+
+                        // Create remove button
+                        const removeButton = document.createElement('button');
+                        removeButton.innerHTML = '&times;'; // Display 'x' symbol
+                        removeButton.classList.add('remove-button');
+
+                        // Click event for remove button
+                        removeButton.addEventListener('click', (event) => {
+                            event.stopPropagation(); // Prevent event from bubbling to the drop zone
+                            fileToUpload = null; // Clear the file
+                            previewItem.remove(); // Remove preview item from DOM
+                            updateFileInputFile(); // Update file input's File, trigger validation
+                        });
+
+                        // Append image and remove button to preview item container
+                        previewItem.appendChild(img);
+                        previewItem.appendChild(removeButton);
+                        // Append preview item to the preview container
+                        previewContainer.appendChild(previewItem);
+                    };
+                }
+
+                /**
+                 * Clear all image previews from the preview container
+                 */
+                function clearPreviews() {
+                    previewContainer.innerHTML = ''; // Clear the content of the preview container
+                }
+
+                // Form submission event listener for custom image required validation
+                registrationForm.addEventListener('submit', (event) => {
+                    // Check if image is uploaded (required attribute on hidden input may not trigger native UI prompts, so manual check is needed)
+                    if (!fileToUpload) {
+                        event.preventDefault(); // Prevent form submission
+                        showMessage('請上傳個人圖片，此為必填欄位。', 'error');
+                        // Provide visual cue for the drop zone
+                        dropZone.classList.add('border-red-500', 'bg-red-50'); // Red border hint
+                        setTimeout(() => {
+                            dropZone.classList.remove('border-red-500', 'bg-red-50');
+                        }, 3000);
+                    }
+                    // Other form validations (e.g., password confirmation, can be added here)
+                    const password = document.getElementById('pwd').value;
+                    const confirmPassword = document.getElementById('confirm_password').value;
+                    if (password !== confirmPassword) {
+                        event.preventDefault();
+                        showMessage('密碼與確認密碼不符。', 'error');
+                    }
+                });
+
+                // Ensure any potential image input is cleared on page load, in case browser remembers history
+                window.addEventListener('load', () => {
+                    fileToUpload = null;
+                    clearPreviews();
+                    updateFileInputFile(); // Ensure initial state is empty
+                });
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const pwdInput = document.getElementById("pwd");
+                    const errorSpan = document.getElementById("pwdError");
+
+                    const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:'"\\|,.<>\/?]).{8,30}$/;
+
+                    pwdInput.addEventListener("blur", function () {
+                        const value = pwdInput.value;
+
+                        if (!pwdRegex.test(value)) {
+                            errorSpan.textContent = "密碼需包含英文、數字、符號，長度 8～30 字元";
+                            errorSpan.classList.remove("hidden");
+                            pwdInput.classList.add("border-red-500");
+                        } else {
+                            errorSpan.textContent = "";
+                            errorSpan.classList.add("hidden");
+                            pwdInput.classList.remove("border-red-500");
+                        }
+                    });
+
+                    const form = pwdInput.closest("form");
+                    form.addEventListener("submit", function (e) {
+                        const value = pwdInput.value;
+
+                        if (!pwdRegex.test(value)) {
+                            e.preventDefault();
+                            errorSpan.textContent = "密碼需包含英文、數字、符號，長度 8～30 字元";
+                            errorSpan.classList.remove("hidden");
+                            pwdInput.classList.add("border-red-500");
+                            pwdInput.focus();
+                        }
+                    });
+                });
+            </script>
+</body>
+
+</html>

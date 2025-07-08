@@ -293,9 +293,22 @@ public class ActivityController {
     }
 
     @GetMapping("/get-reviews")
-    ApiResponse<List<ReviewListResponse>> getActivityReviews(@RequestParam Integer activityId) {
+    public ApiResponse<List<ReviewListResponse>> getActivityReviews(@RequestParam Integer activityId) {
         List<ReviewListResponse> activityReviews = activityParticipantService.getActivityReviews(activityId);
         return ApiResponse.success(activityReviews);
+    }
+
+    @GetMapping("/get-status")
+    public ApiResponse<ActivityStatusResponse> getActivityStatus(@RequestParam Integer activityId) {
+        ActivityStatusResponse activityStatus = activityService.getActivityStatus(activityId);
+        return ApiResponse.success(activityStatus);
+    }
+
+    @GetMapping("/get-calendar")
+    public ApiResponse<List<ActivityCalendarResponse>> getMyCalendar(@RequestParam Integer userId){
+        List<ActivityCalendarResponse> responseList = activityService.getMyCalendar(userId);
+        return ApiResponse.success(responseList);
+
     }
 
 

@@ -3,18 +3,42 @@ package com.shakemate.servicecase.dto;
 
 import java.sql.Timestamp;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+
+import jakarta.validation.constraints.NotNull;
+
+
 public class ServiceCaseDTO {
 	private Integer caseId;
+	
+    /** 使用者、管理員 ID 都不能為空，空值交給 Spring 檢查 */
+    @NotNull(message = "使用者 ID 不可為空")
 	private Integer userId;
+    
+    @NotNull(message = "管理員 ID 不可為空")
 	private Integer admId;
-	private Integer caseTypeId;
+	
+    private Integer caseTypeId;
 	private String caseTypeName; // 額外欄位：直接顯示 CaseType 的名稱
 	private Timestamp createTime;
 	private Timestamp updateTime;
+	
+    @NotBlank(message = "標題不可為空")
+    @Size(max = 100, message = "標題不能超過 100 字")
 	private String title;
+    
+    @NotBlank(message = "內容不可為空")
+    @Size(max = 800, message = "內容不能超過 800 字")
 	private String content;
 	private Integer caseStatus;
+	
+	
 	/** 新增 email 欄位 */
+    @NotBlank(message = "Email 不可為空")
+    @Email(message = "Email 格式不正確")
 	private String email;
 
 	

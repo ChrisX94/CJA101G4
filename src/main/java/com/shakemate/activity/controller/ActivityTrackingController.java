@@ -81,6 +81,12 @@ public class ActivityTrackingController {
 
     }
 
+    @GetMapping("/is-tracking")
+    public ApiResponse<Boolean> isTracking(@RequestParam Integer userId, @RequestParam Integer activityId) {
+        Boolean result = activityTrackingService.isTracking(userId, activityId);
+        return ApiResponse.success(result);
+    }
+
 
 
 }

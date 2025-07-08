@@ -17,6 +17,13 @@ public class MemberNotificationDto {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime sentTime;
+    
+    private String deliveryMethod;
+
+    private Integer userId;
+
     // 預設建構子
     public MemberNotificationDto() {}
 
@@ -95,5 +102,29 @@ public class MemberNotificationDto {
 
     public void setCreatedTime(LocalDateTime createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public LocalDateTime getSentTime() {
+        return sentTime;
+    }
+
+    public void setSentTime(LocalDateTime sentTime) {
+        this.sentTime = sentTime;
+    }
+
+    public String getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
     }
 } 
