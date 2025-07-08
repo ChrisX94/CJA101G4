@@ -83,7 +83,7 @@ public class ShOrder implements Serializable {
      */
 
     // 收件地址
-    @Column(name = "SHIPPING_ADDRESS", length = 200, nullable = false)
+    @Column(name = "SHIPPING_ADDRESS", length = 500, nullable = false)
     private String shippingAddress;
 
     // 運送方式
