@@ -9,15 +9,19 @@ public class NewsResponse {
     private String content;
     private Timestamp publishTime;
     private String categoryName;
-    private String adminName;
+    private Integer adminId;  // 確保這裡有 adminId 屬性
+//    private String adminName;
+    
+    
 
-    public NewsResponse(News news) {
+	public NewsResponse(News news) {
         this.newsId = news.getNewsId();
         this.title = news.getTitle();
         this.content = news.getContent();
         this.publishTime = news.getPublishTime();
         this.categoryName = news.getNewsType().getCategoryName();
-        this.adminName = news.getAdmin().getAdmName();
+//        this.adminId = news.getAdmin().getAdmName();
+//        this.adminName = news.getAdmin().getAdmName();
     }
 
     // getters
@@ -26,5 +30,13 @@ public class NewsResponse {
     public String getContent() { return content; }
     public Timestamp getPublishTime() { return publishTime; }
     public String getCategoryName() { return categoryName; }
-    public String getAdminName() { return adminName; }
+//    public String getAdminName() { return adminName; }
+
+	public Integer getAdminId() {
+		return adminId;
+	}
+
+	public void setAdminId(Integer adminId) {
+		this.adminId = adminId;
+	}
 }
