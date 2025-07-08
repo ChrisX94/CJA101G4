@@ -1,296 +1,394 @@
 <!DOCTYPE html>
 <html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>人工處理案件列表</title>
-<link
-	href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap"
-	rel="stylesheet">
-<style>
-/* 全局排版設定 */
-html {
-    font-size: 62.5%; /* 1rem = 10px */
-    font-family: "Noto Sans TC", sans-serif;
-}
-body {
-    margin: 0;
-    background: rgba(170, 198, 202, 1);
-    color: #333;
-}
-* {
-    box-sizing: border-box;
-}
-/* 頂部工具列 */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.8rem 1.6rem;
-    background: #fff;
-    border-bottom: 0.2rem solid #ddd;
-}
-.top-bar .title {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #5b3a36;
-}
-.top-bar .right-links a {
-    margin-left: 0.8rem;
-    padding: 0.4rem 1rem;
-    font-size: 1.6rem; /* 調小按鈕文字 */
-    color: #fff;
-    background: #ff9800;
-    border-radius: 0.4rem;
-    text-decoration: none;
-    transition: opacity .2s;
-}
-.top-bar .right-links a.home { background: darkkhaki; }
-.top-bar .right-links a:hover { color: black; opacity: 0.8; }
-.container {
-    max-width: 140rem;
-    margin: 1.6rem auto;
-    padding: 0 1.6rem;
-}
-/* 按鈕群組 */
-.btn-group {
-    display: flex;
-    gap: 1.2rem;
-    margin-bottom: 1.2rem;
-    width: 100%;
-}
-/* 查詢 & 新增 按鈕 */
-.btn-group a {
-    padding: 0.8rem 0;
-    font-size: 1.6rem; /* 調小文字 */
-    text-align: center;
-    color: #fff;
-    border-radius: 0.4rem;
-    text-decoration: none;
-    transition: opacity .2s;
-    width: 50%;
-}
-.search-btn { background: #03a9f4; }
-.search-btn:hover { color: black; opacity: 0.85; }
-.add-btn   { background: #8bc34a; }
-.add-btn:hover { color: black; opacity: 0.85; }
-/* 原本表格格式 */
-table {
-    border-collapse: separate;
-    border-spacing: 0 0.5rem;
-    width: 100%;
-    background-color: #fff;
-    border-radius: 0.8rem;
-    overflow: hidden;
-    box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.1);
-    font-size: 1.6rem;
-}
-table th:nth-child(1), table td:nth-child(1) { display: none; }
-th, td {
-    padding: 0.8rem 1.2rem;
-    text-align: center;
-    border: 0.1rem solid #ddd;
-}
-th {
-    background: #f7f7f7;
-    font-weight: bold;
-    border-bottom: 0.2rem solid #ccc;
-}
-tbody tr:nth-child(odd)  { background: rgba(91, 58, 54, 1); color: white; }
-tbody tr:nth-child(even) { background: rgba(91, 58, 54, 1); opacity: 0.8; color: white; }
-tbody tr:hover          { background: #f1f1f1; color: black; opacity: 1; }
-/* 操作按鈕 */
-td.actions {
-    display: flex;
-    justify-content: center;
-    gap: 0.6rem;
-    white-space: nowrap;
-}
-td.actions a {
-    padding: 0.6rem 1rem; /* 調小按鈕大小 */
-    font-size: 1.6rem;   /* 調小文字 */
-    border-radius: 0.4rem;
-    color: #fff;
-    text-decoration: none;
-    transition: opacity .2s;
-}
-td.actions a.edit { background: #2196f3; }
-td.actions a.del  { background: #f44336; }
-td.actions a:hover { color: black; opacity: 0.8; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>人工處理案件列表</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  <style>
+    /* 全局排版設定 */
+    html {
+      font-size: 62.5%;
+      /* 1rem = 10px */
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: rgba(170, 198, 202, 1);
+      color: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    /* 全頁背景漸層 */
+    .bg {
+      z-index: 0;
+      position: relative;
+      min-height: 100vh;
+      background: linear-gradient(185deg,
+          #DCFF61 0%,
+          #DCFF61 55%,
+          #2EC4B6 55%,
+          #2EC4B6 100%);
+      overflow: hidden;
+    }
+
+    .bg::before {
+      z-index: 0;
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+    }
+
+    /* 頂部工具列 */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.6rem;
+      background: #fff;
+      border-bottom: 0.2rem solid #ddd;
+    }
+
+    .top-bar .title {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #5b3a36;
+    }
+
+    .top-bar .right-links a {
+      margin-left: 0.8rem;
+      padding: 0.4rem 1rem;
+      font-size: 1.6rem;
+      /* 調小按鈕文字 */
+      color: #fff;
+      background: #ff9800;
+      border-radius: 0.4rem;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+
+    .top-bar .right-links a.home {
+      background: darkkhaki;
+    }
+
+    .top-bar .right-links a:hover {
+      color: black;
+      opacity: 0.8;
+    }
+
+    .container {
+      z-index: 1000;
+      max-width: 140rem;
+      margin: 1.6rem auto;
+      padding: 0 1.6rem;
+    }
+
+    /* 按鈕群組 */
+    .btn-group {
+      display: flex;
+      gap: 1.2rem;
+      margin-bottom: 1.2rem;
+      width: 100%;
+    }
+
+    /* 查詢 & 新增 按鈕 */
+    .btn-group a {
+      padding: 0.8rem 0;
+      font-size: 1.6rem;
+      /* 調小文字 */
+      text-align: center;
+      color: #fff;
+      border-radius: 0.4rem;
+      text-decoration: none;
+      transition: opacity .2s;
+      width: 50%;
+    }
+
+    .search-btn {
+      background: #03a9f4;
+    }
+
+    .search-btn:hover {
+      color: black;
+      opacity: 0.85;
+    }
+
+    .add-btn {
+      background: green;
+    }
+
+    .add-btn:hover {
+      color: black;
+      opacity: 0.85;
+    }
+
+    /* 原本表格格式 */
+    table {
+      z-index: 1000;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+      width: 100%;
+      background-color: #fff;
+      border-radius: 0.8rem;
+      overflow: hidden;
+      box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.1);
+      font-size: 1.6rem;
+    }
+
+    table th:nth-child(1),
+    table td:nth-child(1) {
+      display: none;
+    }
+
+    th,
+    td {
+      padding: 0.8rem 1.2rem;
+      text-align: center;
+      border: 0.1rem solid #ddd;
+    }
+
+    th {
+      background: #f7f7f7;
+      font-weight: bold;
+      border-bottom: 0.2rem solid #ccc;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(91, 58, 54, 1);
+      color: white;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(91, 58, 54, 1);
+      opacity: 0.8;
+      color: white;
+    }
+
+    tbody tr:hover {
+      background: #f1f1f1;
+      color: black;
+      opacity: 1;
+    }
+
+    /* 操作按鈕 */
+    td.actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      white-space: nowrap;
+    }
+
+    td.actions a {
+      padding: 0.6rem 1rem;
+      /* 調小按鈕大小 */
+      font-size: 1.6rem;
+      /* 調小文字 */
+      border-radius: 0.4rem;
+      color: #fff;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+
+    td.actions a.edit {
+      background: #2196f3;
+    }
+
+    td.actions a.del {
+      background: #f44336;
+    }
+
+    td.actions a:hover {
+      color: black;
+      opacity: 0.8;
+    }
 
 
 
-  .pagination-controls {
-    margin-top: 1rem;
-    text-align: center;
-  }
-  .page-btn {
-    margin: 0 0.3rem;
-    padding: 0.5rem 1rem;
-    font-size: 1.4rem;
-    border: 1px solid #ccc;
-    background: #eee;
-    cursor: pointer;
-    border-radius: 0.4rem;
-  }
-  .page-btn.active {
-    background-color: #03a9f4;
-    color: #fff;
-    font-weight: bold;
-  }
+    .pagination-controls {
+      margin-top: 1rem;
+      text-align: center;
+    }
 
-</style>
+    .page-btn {
+      margin: 0 0.3rem;
+      padding: 0.5rem 1rem;
+      font-size: 1.4rem;
+      border: 1px solid #ccc;
+      background: #eee;
+      cursor: pointer;
+      border-radius: 0.4rem;
+    }
+
+    .page-btn.active {
+      background-color: #03a9f4;
+      color: #fff;
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <body>
+  <div class="bg">
     <div class="top-bar">
-        <div class="title">案件管理</div>
-        <div class="right-links">
-            <a th:href="@{/}" class="home">回首頁</a>
-            <a th:href="@{/manage}">後台管理系統</a>
-        </div>
+      <div class="title">案件管理</div>
+      <div class="right-links">
+        <a th:href="@{/}" class="home">回首頁</a>
+        <a th:href="@{/manage}">後台管理系統</a>
+      </div>
     </div>
     <div class="container">
-        <div class="btn-group">
-            <a th:href="@{/servicecase/search}" class="search-btn">查詢案件</a>
-            <a th:href="@{/servicecase/add}" class="add-btn">新增案件</a>
-        </div>
-        <table>
-            <thead>
-                <tr class="thead">
-                    <th>編號</th>
-                    <th onclick="sortTableByColumn(1)" style="cursor: pointer;">類別編號 ▲▼</th>
-                    <th onclick="sortTableByColumn(2)" style="cursor: pointer;">用戶編號 ▲▼</th>
-                    <th>Email</th>
-                    <th>標題</th>
-                    <th>狀態</th>
-                    <th>建立時間</th>
-                    <th>更新時間</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr th:each="sc : ${cases}">
-                    <td th:text="${sc.caseId}">1</td>
-                    <td th:text="${sc.caseTypeId}">1</td>
-                    <td th:text="${sc.userId}">123</td>
-                    <td th:text="${sc.email}">email@example.com</td>
-                    <td th:text="${sc.title}">範例標題</td>
-<!--                     <td th:text="${sc.caseStatus}">0</td> -->
-					<td th:text="${sc.statusName}"></td>
-                    <td th:text="${#dates.format(sc.createTime,'yyyy-MM-dd HH:mm')}">2025-06-20…</td>
-                    <td th:text="${#dates.format(sc.updateTime,'yyyy-MM-dd HH:mm')}">2025-06-20…</td>
-                    <td class="actions"><a
-                        th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
-                        <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}"
-                        th:onclick="|return confirm('確定刪除此案件？');|"
-                        class="del">刪除</a></td>
-                </tr>
-                <tr th:if="${cases.empty}"><td colspan="8">目前沒有任何案件</td></tr>
-            </tbody>
-        </table>
-        
-        <!-- 分頁資訊與控制器 -->
-<div class="pagination-controls">
-  <div id="pagination-info" style="margin-bottom: 0.8rem; font-size: 1.6rem;"></div>
-  <div id="pagination"></div>
-</div>
-     
+      <div class="btn-group">
+        <a th:href="@{/servicecase/search}" class="search-btn">查詢案件</a>
+        <a th:href="@{/servicecase/add}" class="add-btn">新增案件</a>
+      </div>
+      <table>
+        <thead>
+          <tr class="thead">
+            <th>編號</th>
+            <th onclick="sortTableByColumn(1)" style="cursor: pointer;">類別編號 ▲▼</th>
+            <th onclick="sortTableByColumn(2)" style="cursor: pointer;">用戶編號 ▲▼</th>
+            <th>Email</th>
+            <th>標題</th>
+            <th>狀態</th>
+            <th>建立時間</th>
+            <th>更新時間</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr th:each="sc : ${cases}">
+            <td th:text="${sc.caseId}">1</td>
+            <td th:text="${sc.caseTypeId}">1</td>
+            <td th:text="${sc.userId}">123</td>
+            <td th:text="${sc.email}">email@example.com</td>
+            <td th:text="${sc.title}">範例標題</td>
+            <!--                     <td th:text="${sc.caseStatus}">0</td> -->
+            <td th:text="${sc.statusName}"></td>
+            <td th:text="${#dates.format(sc.createTime,'yyyy-MM-dd HH:mm')}">2025-06-20…</td>
+            <td th:text="${#dates.format(sc.updateTime,'yyyy-MM-dd HH:mm')}">2025-06-20…</td>
+            <td class="actions"><a th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
+              <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}" th:onclick="|return confirm('確定刪除此案件？');|"
+                class="del">刪除</a>
+            </td>
+          </tr>
+          <tr th:if="${cases.empty}">
+            <td colspan="8">目前沒有任何案件</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 分頁資訊與控制器 -->
+      <div class="pagination-controls">
+        <div id="pagination-info" style="margin-bottom: 0.8rem; font-size: 1.6rem;"></div>
+        <div id="pagination"></div>
+      </div>
+
     </div>
-<script>
-let sortState = { column: null, ascending: true };
+  </div>
 
-window.addEventListener("DOMContentLoaded", () => {
-  sortTableByColumn(1); // 預設排序可保留
-});
+  <script>
+    let sortState = { column: null, ascending: true };
 
-function sortTableByColumn(columnIndex) {
-  const tbody = document.getElementById("tableBody");
-  const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
+    window.addEventListener("DOMContentLoaded", () => {
+      sortTableByColumn(1); // 預設排序可保留
+    });
 
-  // 切換排序狀態
-  if (sortState.column === columnIndex) {
-    sortState.ascending = !sortState.ascending;
-  } else {
-    sortState.column = columnIndex;
-    sortState.ascending = true;
-  }
+    function sortTableByColumn(columnIndex) {
+      const tbody = document.getElementById("tableBody");
+      const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
 
-  // 排序資料
-  rows.sort((a, b) => {
-    const aT = a.children[columnIndex].innerText.trim();
-    const bT = b.children[columnIndex].innerText.trim();
-    const aV = isNaN(aT) ? aT : parseFloat(aT);
-    const bV = isNaN(bT) ? bT : parseFloat(bT);
-    return (aV < bV ? -1 : aV > bV ? 1 : 0) * (sortState.ascending ? 1 : -1);
-  });
+      // 切換排序狀態
+      if (sortState.column === columnIndex) {
+        sortState.ascending = !sortState.ascending;
+      } else {
+        sortState.column = columnIndex;
+        sortState.ascending = true;
+      }
 
-  // 重新插入排序後資料
-  rows.forEach(row => tbody.appendChild(row));
+      // 排序資料
+      rows.sort((a, b) => {
+        const aT = a.children[columnIndex].innerText.trim();
+        const bT = b.children[columnIndex].innerText.trim();
+        const aV = isNaN(aT) ? aT : parseFloat(aT);
+        const bV = isNaN(bT) ? bT : parseFloat(bT);
+        return (aV < bV ? -1 : aV > bV ? 1 : 0) * (sortState.ascending ? 1 : -1);
+      });
+
+      // 重新插入排序後資料
+      rows.forEach(row => tbody.appendChild(row));
 
 
-}
+    }
 
-const rowsPerPage = 5;
-const tbody = document.getElementById("tableBody");
-const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
-const pagination = document.getElementById("pagination");
-const pageInfo = document.getElementById("pagination-info");
+    const rowsPerPage = 5;
+    const tbody = document.getElementById("tableBody");
+    const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
+    const pagination = document.getElementById("pagination");
+    const pageInfo = document.getElementById("pagination-info");
 
-let currentPage = 1;
-let totalPages = Math.ceil(rows.length / rowsPerPage);
+    let currentPage = 1;
+    let totalPages = Math.ceil(rows.length / rowsPerPage);
 
-function showPage(page) {
-  currentPage = page;
-  totalPages = Math.ceil(rows.length / rowsPerPage);
-  const start = (currentPage - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
+    function showPage(page) {
+      currentPage = page;
+      totalPages = Math.ceil(rows.length / rowsPerPage);
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
 
-  rows.forEach((row, index) => {
-    row.style.display = index >= start && index < end ? "" : "none";
-  });
+      rows.forEach((row, index) => {
+        row.style.display = index >= start && index < end ? "" : "none";
+      });
 
-  renderPagination();
-  updatePageInfo();
-}
+      renderPagination();
+      updatePageInfo();
+    }
 
-function updatePageInfo() {
-  pageInfo.innerText = `共 ${rows.length} 筆，頁數 ${currentPage} / ${totalPages}`;
-}
+    function updatePageInfo() {
+      pageInfo.innerText = `共 ${rows.length} 筆，頁數 ${currentPage} / ${totalPages}`;
+    }
 
-function renderPagination() {
-  pagination.innerHTML = "";
+    function renderPagination() {
+      pagination.innerHTML = "";
 
-  // 上一頁
-  if (currentPage > 1) {
-    const prevBtn = document.createElement("button");
-    prevBtn.innerText = "上一頁";
-    prevBtn.className = "page-btn";
-    prevBtn.onclick = () => showPage(currentPage - 1);
-    pagination.appendChild(prevBtn);
-  }
+      // 上一頁
+      if (currentPage > 1) {
+        const prevBtn = document.createElement("button");
+        prevBtn.innerText = "上一頁";
+        prevBtn.className = "page-btn";
+        prevBtn.onclick = () => showPage(currentPage - 1);
+        pagination.appendChild(prevBtn);
+      }
 
-  // 頁碼按鈕
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement("button");
-    btn.innerText = i;
-    btn.className = "page-btn";
-    if (i === currentPage) btn.classList.add("active");
-    btn.onclick = () => showPage(i);
-    pagination.appendChild(btn);
-  }
+      // 頁碼按鈕
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        btn.className = "page-btn";
+        if (i === currentPage) btn.classList.add("active");
+        btn.onclick = () => showPage(i);
+        pagination.appendChild(btn);
+      }
 
-  // 下一頁
-  if (currentPage < totalPages) {
-    const nextBtn = document.createElement("button");
-    nextBtn.innerText = "下一頁";
-    nextBtn.className = "page-btn";
-    nextBtn.onclick = () => showPage(currentPage + 1);
-    pagination.appendChild(nextBtn);
-  }
-}
+      // 下一頁
+      if (currentPage < totalPages) {
+        const nextBtn = document.createElement("button");
+        nextBtn.innerText = "下一頁";
+        nextBtn.className = "page-btn";
+        nextBtn.onclick = () => showPage(currentPage + 1);
+        pagination.appendChild(nextBtn);
+      }
+    }
 
-showPage(currentPage); // 初始顯示
-</script>
+    showPage(currentPage); // 初始顯示
+  </script>
 
 </body>
+
 </html>
