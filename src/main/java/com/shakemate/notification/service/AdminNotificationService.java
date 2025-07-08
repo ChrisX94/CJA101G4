@@ -3,6 +3,7 @@ package com.shakemate.notification.service;
 import com.shakemate.notification.dto.NotificationTemplateDto;
 import com.shakemate.notification.dto.NotificationCreateDto;
 import com.shakemate.notification.dto.NotificationDto;
+import com.shakemate.notification.dto.NotificationPreviewDto;
 import com.shakemate.notification.dto.NotificationReportDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,5 +71,17 @@ public interface AdminNotificationService {
      * @return 報告 DTO
      */
     NotificationReportDto getNotificationReport(Integer notificationId);
+    
+    /**
+     * 獲取通知預覽信息，包括預估接收人數等
+     * @param notificationId 通知ID
+     * @return 通知預覽DTO
+     */
+    NotificationPreviewDto getNotificationPreview(Integer notificationId);
+
+    /**
+     * 查詢單筆通知詳情
+     */
+    NotificationDto getNotificationById(Integer notificationId);
 
 } 

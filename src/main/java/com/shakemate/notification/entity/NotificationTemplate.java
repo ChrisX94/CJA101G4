@@ -40,11 +40,11 @@ public class NotificationTemplate {
     @Column(name = "SUBJECT", nullable = false, length = 200)
     private String titleTemplate;
 
-    @Column(name = "CONTENT")
-    private Boolean hasContent;
+    @Column(name = "CONTENT", nullable = true, columnDefinition = "VARCHAR(255)")
+    private String contentTemplate;
 
     @Column(name = "HTML_CONTENT", columnDefinition = "VARCHAR(255)")
-    private String messageTemplate;
+    private String htmlTemplate;
 
     @Column(name = "VARIABLES", columnDefinition = "json", nullable = true)
     private String variables;

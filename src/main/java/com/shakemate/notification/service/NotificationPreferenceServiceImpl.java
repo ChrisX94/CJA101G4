@@ -91,6 +91,7 @@ public class NotificationPreferenceServiceImpl implements NotificationPreference
 
     @Override
     public void updatePreferences(Integer userId, NotificationPreferenceDto dto) {
+        System.out.println("[Service] 開始更新通知偏好設定: preferenceId=" + dto.getPreferenceId() + ", userId=" + userId);
         NotificationPreference entity = preferenceRepository.findById(dto.getPreferenceId())
                 .orElseThrow(() -> new SecurityException("找不到對應的偏好設定: " + dto.getPreferenceId()));
 
@@ -100,6 +101,36 @@ public class NotificationPreferenceServiceImpl implements NotificationPreference
 
         updateEntityFromDto(entity, dto);
         preferenceRepository.save(entity);
+        preferenceRepository.flush(); // 強制寫入
+        System.out.println("[Service] 儲存並flush完成: preferenceId=" + dto.getPreferenceId());
+    }
+
+    public NotificationPreferenceDto updatePreferencesWithResult(Integer userId, NotificationPreferenceDto dto) {
+        System.out.println("[Service] 開始更新通知偏好設定: preferenceId=" + dto.getPreferenceId() + ", userId=" + userId);
+        NotificationPreference entity = preferenceRepository.findById(dto.getPreferenceId())
+                .orElseThrow(() -> new SecurityException("找不到對應的偏好設定: " + dto.getPreferenceId()));
+        if (!Objects.equals(entity.getUser().getUserId(), userId)) {
+            throw new SecurityException("無權修改偏好設定: " + dto.getPreferenceId());
+        }
+        updateEntityFromDto(entity, dto);
+        preferenceRepository.save(entity);
+        preferenceRepository.flush();
+        System.out.println("[Service] 儲存並flush完成: preferenceId=" + dto.getPreferenceId());
+        // 立即查詢驗證
+        NotificationPreference updated = preferenceRepository.findById(dto.getPreferenceId())
+                .orElseThrow(() -> new SecurityException("儲存後查無資料: " + dto.getPreferenceId()));
+        // 比對關鍵欄位
+        if (!Objects.equals(updated.getEmailEnabled(), dto.getEmailEnabled()) ||
+            !Objects.equals(updated.getSmsEnabled(), dto.getSmsEnabled()) ||
+            !Objects.equals(updated.getPushEnabled(), dto.getPushEnabled()) ||
+            !Objects.equals(updated.getInAppEnabled(), dto.getInAppEnabled()) ||
+            !Objects.equals(updated.getQuietHoursEnabled(), dto.getQuietHoursEnabled()) ||
+            !Objects.equals(updated.getQuietHoursStart(), dto.getQuietHoursStart()) ||
+            !Objects.equals(updated.getQuietHoursEnd(), dto.getQuietHoursEnd())) {
+            throw new RuntimeException("資料庫寫入後資料不一致，請聯絡管理員");
+        }
+        System.out.println("[Service] 資料驗證通過: preferenceId=" + dto.getPreferenceId());
+        return convertToDto(updated);
     }
 
     private NotificationPreferenceDto convertToDto(NotificationPreference entity) {

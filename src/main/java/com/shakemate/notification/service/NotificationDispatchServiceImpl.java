@@ -2,33 +2,33 @@ package com.shakemate.notification.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.shakemate.notification.dto.NotificationDto;
-import com.shakemate.notification.entity.MemberNotification;
 import com.shakemate.notification.entity.Notification;
-import com.shakemate.notification.entity.NotificationPreference;
-import com.shakemate.notification.enums.DeliveryStatus;
-import com.shakemate.notification.repository.MemberNotificationRepository;
+import com.shakemate.notification.dto.NotificationDto;
 import com.shakemate.notification.repository.NotificationRepository;
-import com.shakemate.notification.repository.NotificationPreferenceRepository;
-import com.shakemate.notification.util.UserSpecificationBuilder;
-import com.shakemate.notification.ws.NotificationWebSocketHandler;
 import com.shakemate.user.dao.UsersRepository;
-import com.shakemate.user.model.Users;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.shakemate.notification.entity.MemberNotification;
+import com.shakemate.notification.entity.NotificationPreference;
+import com.shakemate.notification.enums.DeliveryStatus;
+import com.shakemate.notification.repository.MemberNotificationRepository;
+import com.shakemate.notification.repository.NotificationPreferenceRepository;
+import com.shakemate.notification.service.EmailService;
+import com.shakemate.notification.ws.NotificationWebSocketHandler;
+import com.shakemate.user.model.Users;
+import com.shakemate.notification.enums.NotificationStatus;
 
 @Slf4j
 @Service
@@ -41,214 +41,219 @@ public class NotificationDispatchServiceImpl implements NotificationDispatchServ
     private MemberNotificationRepository memberNotificationRepository;
 
     @Autowired
-    private UsersRepository usersRepository;
-
-    @Autowired
     private NotificationPreferenceRepository preferenceRepository;
 
     @Autowired
     private EmailService emailService;
 
     @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PhoneStorageService phoneStorageService;
 
     @Async("asyncTaskExecutor")
     @Override
     @Transactional
     public void dispatchNotification(Notification notification) {
-        log.info("開始派送通知 ID: {}", notification.getNotificationId());
+        log.info("開始派送通知 ID: {} (多渠道完整版)", notification.getNotificationId());
         try {
-            // 暫時直接使用 notification 的 title 和 message，不使用模板渲染
-            String renderedTitle = notification.getTitle();
-            String renderedContent = notification.getMessage();
-
-            List<Integer> targetUserIds;
-
-            if (notification.getTargetIds() != null && !notification.getTargetIds().isEmpty()) {
-                targetUserIds = notification.getTargetIds();
-                log.info("指定使用者模式，目標使用者數量: {}", targetUserIds.size());
-            } else {
-                 targetUserIds = usersRepository.findAllUserIds();
-                 log.info("廣播模式，目標使用者數量: {}", targetUserIds.size());
-            }
-
+            // 1. 解析目標用戶
+            List<Integer> targetUserIds = resolveTargetUserIds(notification);
             if (targetUserIds.isEmpty()) {
-                log.warn("通知 ID: {} 的目標使用者為空，標記為已完成但無人接收。", notification.getNotificationId());
-                notification.setStatus(3); // 3: SENT_EMPTY
+                log.warn("通知 ID: {} 無目標用戶，發送中止", notification.getNotificationId());
+                notification.setStatus(DeliveryStatus.FAILED.getCode());
                 notificationRepository.save(notification);
                 return;
             }
 
-            // DND 過濾邏輯
-            List<Integer> finalUserIds = filterUsersByDND(targetUserIds);
-            log.info("DND 過濾後，最終目標使用者數量: {}", finalUserIds.size());
+            // 2. 查詢所有目標用戶的通知偏好
+            List<NotificationPreference> allPreferences = preferenceRepository.findByUser_UserIdIn(targetUserIds);
+            Map<Integer, List<NotificationPreference>> userPrefMap = allPreferences.stream()
+                    .collect(Collectors.groupingBy(p -> p.getUser().getUserId()));
 
-            if (finalUserIds.isEmpty()) {
-                log.warn("通知 ID: {} 的所有目標使用者均處於勿擾時段，標記為已完成但無人接收。", notification.getNotificationId());
-                notification.setStatus(4); // 4: SENT_DND
+            // 3. 根據偏好與勿擾時段，決定每位用戶的發送管道
+            List<MemberNotification> memberNotifications = targetUserIds.stream()
+                    .flatMap(userId -> {
+                        List<MemberNotification> list = new java.util.ArrayList<>();
+                        List<NotificationPreference> prefs = userPrefMap.getOrDefault(userId, Collections.emptyList());
+                        boolean inDND = isInDoNotDisturb(prefs);
+                        if (inDND) {
+                            log.info("用戶 {} 處於勿擾時段，跳過發送", userId);
+                            return list.stream();
+                        }
+                        // Email
+                        if (prefs.stream().anyMatch(NotificationPreference::getEmailEnabled)) {
+                            list.add(buildMemberNotification(notification, userId, "EMAIL"));
+                        }
+                        // 推播
+                        if (prefs.stream().anyMatch(NotificationPreference::getPushEnabled)) {
+                            list.add(buildMemberNotification(notification, userId, "PUSH"));
+                        }
+                        // 站內
+                        if (prefs.stream().anyMatch(NotificationPreference::getInAppEnabled)) {
+                            list.add(buildMemberNotification(notification, userId, "IN_APP"));
+                        }
+                        return list.stream();
+                    })
+                    .collect(Collectors.toList());
+
+            if (memberNotifications.isEmpty()) {
+                log.warn("通知 ID: {} 無可發送用戶（全部因勿擾或偏好關閉）", notification.getNotificationId());
+                notification.setStatus(DeliveryStatus.FAILED.getCode());
                 notificationRepository.save(notification);
                 return;
             }
 
-            List<MemberNotification> memberNotifications = finalUserIds.stream()
-                .map(userId -> {
-                    MemberNotification mn = new MemberNotification();
-                    mn.setUser(usersRepository.getReferenceById(userId)); 
-                    mn.setNotification(notification);
-                    mn.setIsRead(false);
-                    // 初始狀態設為 PENDING
-                    mn.setDeliveryStatus(DeliveryStatus.PENDING);
-                    mn.setDeliveryMethod("SYSTEM"); // 基礎派送方式
-                    mn.setUserInteraction(0); // 0 for no interaction
-                    mn.setRetryCount(0);
-                    return mn;
-                })
-                .collect(Collectors.toList());
+            // 4. 批量保存 MemberNotification
+            memberNotificationRepository.saveAll(memberNotifications);
 
-            List<MemberNotification> savedMemberNotifications = memberNotificationRepository.saveAll(memberNotifications);
+            // 5. 分渠道發送
+            for (MemberNotification mn : memberNotifications) {
+                try {
+                    if ("EMAIL".equals(mn.getDeliveryMethod())) {
+                        log.info("[模擬] 發送Email給用戶ID: {}，標題: {}，內容: {}", mn.getUser(), notification.getTitle(), notification.getMessage());
+                        mn.setDeliveryStatus(DeliveryStatus.SUCCESS);
+                    } else if ("PUSH".equals(mn.getDeliveryMethod())) {
+                        log.info("[模擬] 發送推播給用戶ID: {}，標題: {}，內容: {}", mn.getUser(), notification.getTitle(), notification.getMessage());
+                        mn.setDeliveryStatus(DeliveryStatus.SUCCESS);
+                    } else if ("SMS".equals(mn.getDeliveryMethod())) {
+                        // 集成PhoneStorageService獲取手機號碼發送SMS
+                        Optional<String> phoneNumber = phoneStorageService.getPhoneByUserId(mn.getUser());
+                        if (phoneNumber.isPresent()) {
+                            log.info("[模擬] 發送SMS給用戶ID: {}，手機號: {}，標題: {}，內容: {}", 
+                                mn.getUser(), phoneStorageService.validatePhoneFormat(phoneNumber.get()) ? "09****" + phoneNumber.get().substring(phoneNumber.get().length()-3) : "格式錯誤", 
+                                notification.getTitle(), notification.getMessage());
+                        mn.setDeliveryStatus(DeliveryStatus.SUCCESS);
+                        } else {
+                            log.warn("[SMS] 用戶 {} 沒有綁定手機號碼，跳過SMS發送", mn.getUser());
+                            mn.setDeliveryStatus(DeliveryStatus.FAILED);
+                            mn.setErrorMessage("用戶沒有綁定手機號碼");
+                        }
+                    } else if ("IN_APP".equals(mn.getDeliveryMethod())) {
+                        NotificationWebSocketHandler.sendMessageToUser(mn.getUser(), notification.getMessage());
+                        mn.setDeliveryStatus(DeliveryStatus.SUCCESS);
+                    }
+                } catch (Exception e) {
+                    mn.setDeliveryStatus(DeliveryStatus.FAILED);
+                    mn.setErrorMessage(e.getMessage());
+                    log.error("通知發送失敗: 用戶 {}，管道 {}，錯誤: {}", mn.getUser(), mn.getDeliveryMethod(), e.getMessage());
+                }
+            }
+            memberNotificationRepository.saveAll(memberNotifications);
 
-            // WebSocket push logic
-            sendNotificationsViaWebSocket(savedMemberNotifications);
-
-            // Email push logic
-            sendNotificationsViaEmail(savedMemberNotifications);
-
-            notification.setStatus(2); // 1: SENT
+            // 6. 更新通知狀態
+            notification.setStatus(NotificationStatus.PUBLISHED.getCode());
             notificationRepository.save(notification);
-            log.info("成功派送通知 ID: {}", notification.getNotificationId());
-
+            log.info("通知 ID: {} 已完成多渠道發送", notification.getNotificationId());
         } catch (Exception e) {
             log.error("派送通知 ID: {} 時發生錯誤", notification.getNotificationId(), e);
-            notification.setStatus(3); // 2: FAILED
+            notification.setStatus(DeliveryStatus.FAILED.getCode());
             notificationRepository.save(notification);
         }
     }
 
-    private String renderTemplate(String template, Map<String, Object> params) {
-        if (template == null) return "";
-        if (params == null || params.isEmpty()) return template;
-
-        String result = template;
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            result = result.replace("${" + entry.getKey() + "}", String.valueOf(entry.getValue()));
-        }
-        return result;
-    }
-
-    private void sendNotificationsViaWebSocket(List<MemberNotification> notifications) {
-        if (notifications == null || notifications.isEmpty()) {
-            return;
-        }
-        log.info("準備透過 WebSocket 推送 {} 則通知", notifications.size());
-        notifications.forEach(mn -> {
-            try {
-                NotificationDto dto = new NotificationDto();
-                // 手動映射
-                dto.setNotificationId(mn.getNotification().getNotificationId());
-                dto.setTitle(mn.getNotification().getTitle());
-                dto.setMessage(mn.getNotification().getMessage());
-                dto.setLink(mn.getNotification().getLink());
-                dto.setCreatedTime(mn.getNotification().getCreatedTime());
-                dto.setIsRead(mn.getIsRead());
-                dto.setReadTime(mn.getReadTime());
-
-                String jsonMessage = objectMapper.writeValueAsString(dto);
-                NotificationWebSocketHandler.sendMessageToUser(mn.getUser().getUserId(), jsonMessage);
-            } catch (JsonProcessingException e) {
-                log.error("序列化 NotificationDto 失敗 for user: {}", mn.getUser().getUserId(), e);
-            } catch (Exception e) {
-                log.error("透過 WebSocket 推送通知給使用者 {} 時發生未知錯誤", mn.getUser().getUserId(), e);
+    // 解析目標用戶ID
+    private List<Integer> resolveTargetUserIds(Notification notification) {
+        if ("ALL".equals(notification.getTargetType())) {
+            return usersRepository.findAll().stream().map(Users::getUserId).collect(Collectors.toList());
+        } else if ("SPECIFIC".equals(notification.getTargetType())) {
+            Map<String, Object> criteria = notification.getTargetCriteria();
+            Object ids = criteria != null ? criteria.get("userIds") : null;
+            if (ids instanceof List<?>) {
+                return ((List<?>) ids).stream().filter(i -> i instanceof Integer).map(i -> (Integer) i).collect(Collectors.toList());
             }
-        });
+        } else if ("TAG".equals(notification.getTargetType())) {
+            // TODO: 根據標籤條件查詢
+            // 這裡假設有 userSpecificationBuilder 可用
+            // return usersRepository.findAll(userSpecificationBuilder.buildSpecification(notification.getTargetCriteria())).stream().map(Users::getUserId).collect(Collectors.toList());
+            return Collections.emptyList(); // 需根據實際標籤查詢實現
+        }
+        return Collections.emptyList();
     }
 
-    private void sendNotificationsViaEmail(List<MemberNotification> notifications) {
-        if (notifications == null || notifications.isEmpty()) {
-            return;
-        }
-
-        List<Integer> userIds = notifications.stream().map(mn -> mn.getUser().getUserId()).distinct().collect(Collectors.toList());
-        Map<Integer, NotificationPreference> prefMap = preferenceRepository.findByUser_UserIdIn(userIds).stream()
-                .collect(Collectors.toMap(p -> p.getUser().getUserId(), Function.identity()));
-
-        log.info("準備透過 Email 推送 {} 則通知", notifications.size());
-        notifications.forEach(mn -> {
-            try {
-                NotificationPreference pref = prefMap.get(mn.getUser().getUserId());
-                // 檢查使用者是否啟用了 Email 通知
-                if (pref != null && pref.getEmailEnabled() != null && pref.getEmailEnabled()) {
-                    String userEmail = mn.getUser().getEmail();
-                    if (userEmail != null && !userEmail.isEmpty()) {
-                        
-                        try {
-                            // 此方法現在會自動重試
-                            emailService.sendHtmlEmail(mn, mn.getNotification().getTitle(), mn.getNotification().getMessage());
-
-                            // 如果沒有拋出異常，代表發送成功 (包含重試後成功)
-                            mn.setDeliveryStatus(DeliveryStatus.SUCCESS);
-                            mn.setDeliveryMethod(mn.getDeliveryMethod() + ",EMAIL");
-                            mn.setErrorMessage(null); // 清除舊的錯誤訊息
-                            memberNotificationRepository.save(mn);
-
-                        } catch (Exception e) {
-                            // 這裡的異常是重試最終失敗後，由 @Recover 方法拋出的 (如果它拋出的話)
-                            // 或者，如果 sendHtmlEmail 本身有 @Recover，異常可能不會傳播到這裡。
-                            // @Recover 已經處理了失敗狀態的更新，所以這裡只需要記錄協調層級的錯誤。
-                            log.error("Email 派送給使用者 {} (通知ID: {}) 最終失敗。詳細錯誤已在 EmailService 中記錄。", mn.getUser().getUserId(), mn.getNotification().getNotificationId(), e);
-                        }
-                        
-                    } else {
-                        log.warn("使用者 {} 已啟用郵件通知，但未設定 Email 地址。", mn.getUser().getUserId());
-                    }
-                }
-            } catch (Exception e) {
-                log.error("在 Email 推送循環中為使用者 {} 處理通知時發生非預期錯誤。", mn.getUser().getUserId(), e);
-            }
-        });
-    }
-
-    private List<Integer> filterUsersByDND(List<Integer> userIds) {
-        if (userIds == null || userIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<NotificationPreference> preferences = preferenceRepository.findByUser_UserIdIn(userIds);
-        log.debug("為 {} 位使用者獲取了 {} 條偏好設定", userIds.size(), preferences.size());
-        
-        Map<Integer, NotificationPreference> prefMap = preferences.stream()
-                .collect(Collectors.toMap(p -> p.getUser().getUserId(), Function.identity()));
-
+    // 判斷是否在勿擾時段
+    private boolean isInDoNotDisturb(List<NotificationPreference> prefs) {
         LocalTime now = LocalTime.now();
-
-        return userIds.stream().filter(userId -> {
-            NotificationPreference pref = prefMap.get(userId);
-            // 預設行為：如果使用者沒有設定偏好，或者明確禁用了DND，則允許通知。
-            if (pref == null || pref.getQuietHoursEnabled() == null || !pref.getQuietHoursEnabled()) {
-                return true; 
+        for (NotificationPreference pref : prefs) {
+            if (Boolean.TRUE.equals(pref.getQuietHoursEnabled()) && pref.getQuietHoursStart() != null && pref.getQuietHoursEnd() != null) {
+                if (isWithinTimeRange(now, pref.getQuietHoursStart(), pref.getQuietHoursEnd())) {
+                    return true;
+                }
             }
+        }
+        return false;
+    }
 
-            LocalTime start = pref.getQuietHoursStart();
-            LocalTime end = pref.getQuietHoursEnd();
+    private boolean isWithinTimeRange(LocalTime now, LocalTime start, LocalTime end) {
+        if (start.isBefore(end)) {
+            return !now.isBefore(start) && now.isBefore(end);
+        } else {
+            // 跨午夜
+            return !now.isBefore(start) || now.isBefore(end);
+        }
+    }
 
-            // 如果DND時間未完整設定，則視為無效，允許通知。
-            if (start == null || end == null) {
-                log.warn("使用者 {} 的DND時間設定不完整，本次將放行", userId);
-                return true; 
+    // 構建 MemberNotification
+    private MemberNotification buildMemberNotification(Notification notification, Integer userId, String method) {
+        MemberNotification mn = new MemberNotification();
+        mn.setNotification(notification.getNotificationId());
+        mn.setUser(userId);
+        mn.setDeliveryMethod(method);
+        mn.setDeliveryStatus(DeliveryStatus.PENDING);
+        mn.setIsRead(false);
+        mn.setRetryCount(0);
+        mn.setUserInteraction(0);
+        return mn;
+    }
+
+    /**
+     * 發送通知給單一用戶 (業務模組對接專用)
+     * 實施分級發送機制：EMAIL/PUSH/SMS為模擬發送，IN_APP為真實發送
+     */
+    @Async("asyncTaskExecutor")
+    @Override
+    public void sendNotification(Integer userId, String title, String content, String deliveryMethod) {
+        log.info("發送通知給用戶 ID: {}, 方式: {}, 標題: {}", userId, deliveryMethod, title);
+        
+        try {
+            if ("EMAIL".equals(deliveryMethod)) {
+                // 模擬發送 EMAIL
+                log.info("[模擬] 發送Email給用戶ID: {}，標題: {}，內容: {}", userId, title, content);
+                
+            } else if ("PUSH".equals(deliveryMethod)) {
+                // 模擬發送 PUSH
+                log.info("[模擬] 發送推播給用戶ID: {}，標題: {}，內容: {}", userId, title, content);
+                
+            } else if ("SMS".equals(deliveryMethod)) {
+                // 集成PhoneStorageService獲取手機號碼發送SMS
+                Optional<String> phoneNumber = phoneStorageService.getPhoneByUserId(userId);
+                if (phoneNumber.isPresent()) {
+                    log.info("[模擬] 發送SMS給用戶ID: {}，手機號: {}，標題: {}，內容: {}", 
+                        userId, phoneStorageService.validatePhoneFormat(phoneNumber.get()) ? "09****" + phoneNumber.get().substring(phoneNumber.get().length()-3) : "格式錯誤", 
+                        title, content);
+                } else {
+                    log.warn("[SMS] 用戶 {} 沒有綁定手機號碼，跳過SMS發送", userId);
+                }
+                
+            } else if ("IN_APP".equals(deliveryMethod)) {
+                // 真實發送 IN_APP 通知
+                try {
+                    NotificationWebSocketHandler.sendMessageToUser(userId, content);
+                    log.info("[真實] 發送站內通知給用戶ID: {}，內容: {}", userId, content);
+                } catch (Exception e) {
+                    log.error("發送站內通知失敗: 用戶 {}，錯誤: {}", userId, e.getMessage(), e);
+                }
+                
+            } else {
+                log.warn("未知的發送方式: {}", deliveryMethod);
             }
             
-            // 判斷當前時間是否在勿擾時段內。
-            // 處理跨午夜的情況 (e.g., start=22:00, end=06:00)。
-            // 在這種情況下，勿擾時段被定義為 start 到午夜，以及午夜到 end。
-            // 也就是說，"非勿擾"時段是從 end 到 start。
-            if (start.isAfter(end)) {
-                // 如果現在的時間在 end 之後，並且在 start 之前，那麼就不是勿擾時段。
-                // 例如，end=06:00, start=22:00, now=10:00 -> 10:00在06:00之後且在22:00之前 -> 放行。
-                return now.isAfter(end) && now.isBefore(start);
-            } else {
-                // 處理不跨午夜的情況 (e.g., start=09:00, end=17:00)。
-                // "非勿擾"時段是 start 之前或 end 之後。
-                return now.isBefore(start) || now.isAfter(end);
-            }
-        }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("發送通知失敗: 用戶 {}，方式 {}，錯誤: {}", userId, deliveryMethod, e.getMessage(), e);
+        }
     }
 } 

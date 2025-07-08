@@ -38,4 +38,13 @@ public interface NotificationPreferenceService {
      * @param preferenceDto 包含更新資訊的DTO
      */
     void updatePreferences(Integer userId, NotificationPreferenceDto preferenceDto);
+
+    /**
+     * 更新或創建使用者的通知偏好設定，並回傳最新結果。
+     *
+     * @param userId 使用者ID
+     * @param preferenceDto 包含更新資訊的DTO
+     * @return 更新後的DTO
+     */
+    NotificationPreferenceDto updatePreferencesWithResult(Integer userId, NotificationPreferenceDto preferenceDto);
 } 

@@ -1,12 +1,62 @@
 $(document).ready(function () {
     const apiBaseUrl = '/api/admin/notifications/templates';
     const templateModal = new bootstrap.Modal(document.getElementById('template-modal'));
+    
+    // 智能欄位顯示控制
+    function toggleHtmlTemplateField(templateType) {
+        const htmlGroup = $('#htmlTemplateGroup');
+        const htmlField = $('#htmlTemplate');
+        
+        if (templateType === 'EMAIL') {
+            htmlGroup.show();
+            htmlField.removeAttr('disabled');
+        } else {
+            htmlGroup.hide();
+            htmlField.attr('disabled', true).val('');
+        }
+    }
+    
+    // 監聽模板類型變更
+    $('#templateType').on('change', function() {
+        toggleHtmlTemplateField($(this).val());
+    });
+    
+    // 字符計數功能
+    $('#contentTemplate').on('input', function() {
+        const current = $(this).val().length;
+        const max = 255;
+        const remaining = max - current;
+        
+        let color = 'text-muted';
+        if (remaining < 50) color = 'text-warning';
+        if (remaining < 20) color = 'text-danger';
+        
+        $(this).siblings('.form-text').html(
+            `可使用預留位置，例如 {{userName}}、{{actionUrl}}。適用於所有類型的通知 📝 
+            <span class="${color}">(${current}/${max} 字符，剩餘 ${remaining})</span>`
+        );
+    });
     let dt = $('#templates-table').DataTable({
         processing: true,
-        serverSide: false,
+        serverSide: true, // 啟用伺服器端分頁
         ajax: {
             url: apiBaseUrl,
-            dataSrc: 'content', // Spring Pageable returns data in 'content'
+            data: function(d) {
+                // 將DataTables參數轉換為Spring Pageable參數
+                return {
+                    page: Math.floor(d.start / d.length), // 計算頁碼
+                    size: d.length, // 每頁大小
+                    sort: d.order.length > 0 ? 
+                        d.columns[d.order[0].column].data + ',' + d.order[0].dir : 
+                        'templateId,asc' // 排序參數
+                };
+            },
+            // 設置數據來源和分頁信息
+            dataSrc: function(json) {
+                json.recordsTotal = json.totalElements;
+                json.recordsFiltered = json.totalElements;
+                return json.content;
+            },
             error: function(xhr, error, thrown) {
                 console.error('DataTables Ajax error:', error);
                 console.error('XHR status:', xhr.status);
@@ -66,6 +116,10 @@ $(document).ready(function () {
         $('#template-form')[0].reset();
         $('#templateId').val('');
         $('#templateModalLabel').text('新增範本');
+        
+        // 重置HTML欄位顯示狀態
+        toggleHtmlTemplateField('');
+        
         templateModal.show();
     });
 
@@ -83,15 +137,23 @@ $(document).ready(function () {
             $('#templateCode').val(rowData.templateCode);
             $('#templateName').val(rowData.templateName);
             $('#templateType').val(rowData.templateType);
-            $('#templateCategory').val(rowData.templateCategory);
+            $('#templateCategory').val(rowData.templateCategory || '系統通知');
             $('#titleTemplate').val(rowData.titleTemplate);
-            $('#messageTemplate').val(rowData.messageTemplate);
+            $('#contentTemplate').val(rowData.contentTemplate);
+            $('#htmlTemplate').val(rowData.htmlTemplate);
+            $('#isActive').val(rowData.isActive ? 'true' : 'false');
+            $('#isSystem').val(rowData.isSystem ? 'true' : 'false');
             $('#templateModalLabel').text('編輯範本');
+            
+            // 根據模板類型顯示/隱藏HTML欄位
+            toggleHtmlTemplateField(rowData.templateType);
             
             console.log('Form fields populated:');
             console.log('- templateId:', $('#templateId').val());
+            console.log('- templateCode:', $('#templateCode').val());
             console.log('- templateName:', $('#templateName').val());
             console.log('- templateType:', $('#templateType').val());
+            console.log('- templateCategory:', $('#templateCategory').val());
             
             templateModal.show();
         } else {
@@ -128,9 +190,27 @@ $(document).ready(function () {
         });
     });
 
+    // 自定義驗證：至少需要一個內容模板
+    function validateTemplateContent() {
+        const contentTemplate = $('#contentTemplate').val().trim();
+        const htmlTemplate = $('#htmlTemplate').val().trim();
+        
+        if (!contentTemplate && !htmlTemplate) {
+            Swal.fire('驗證錯誤！', '至少需要填寫一個內容模板（純文字或HTML）', 'error');
+            return false;
+        }
+        return true;
+    }
+
     // Handle form submission
     $('#template-form').on('submit', function (e) {
         e.preventDefault();
+        
+        // 自定義驗證
+        if (!validateTemplateContent()) {
+            return;
+        }
+        
         const id = $('#templateId').val();
         const method = id ? 'PUT' : 'POST';
         const url = id ? `${apiBaseUrl}/${id}` : apiBaseUrl;
@@ -141,11 +221,12 @@ $(document).ready(function () {
             templateName: $('#templateName').val(),
             templateType: $('#templateType').val(),
             titleTemplate: $('#titleTemplate').val(),
-            messageTemplate: $('#messageTemplate').val(),
+            contentTemplate: $('#contentTemplate').val(),
+            htmlTemplate: $('#htmlTemplate').val() || null,
             templateCategory: $('#templateCategory').val() || '系統通知',
             variables: '{}', // 提供預設的 JSON 值
-            isActive: true,
-            isSystem: false
+            isActive: $('#isActive').val() === 'true',
+            isSystem: $('#isSystem').val() === 'true',
         };
 
         console.log('=== Form submission ===');

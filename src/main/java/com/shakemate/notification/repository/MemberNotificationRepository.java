@@ -13,52 +13,64 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface MemberNotificationRepository extends JpaRepository<MemberNotification, Integer> {
+import com.shakemate.notification.entity.MemberNotificationId;
+
+// @Repository
+public interface MemberNotificationRepository extends JpaRepository<MemberNotification, MemberNotificationId> {
     /**
      * 分頁後的通知列表
      * @return 分頁後的通知列表
      */
-    Page<MemberNotification> findByUser_UserIdOrderByNotification_CreatedTimeDesc(Integer userId, Pageable pageable);
+    Page<MemberNotification> findByUserOrderByNotificationDesc(Integer user, Pageable pageable);
 
     /**
      * 分頁後的未讀通知列表
      * @return 分頁後的未讀通知列表
      */
-    Page<MemberNotification> findByUser_UserIdAndIsReadFalseOrderByNotification_CreatedTimeDesc(Integer userId, Pageable pageable);
+    Page<MemberNotification> findByUserAndIsReadFalseOrderByNotificationDesc(Integer user, Pageable pageable);
 
     /**
      * 將指定使用者的所有未讀通知標記為已讀
      * @param userId 使用者 ID
      */
     @Modifying
-    @Query("UPDATE MemberNotification mn SET mn.isRead = true, mn.readTime = CURRENT_TIMESTAMP WHERE mn.user.userId = :userId AND mn.notification.notificationId = :notificationId AND mn.isRead = false")
+    @Query("UPDATE MemberNotification mn SET mn.isRead = true, mn.readTime = CURRENT_TIMESTAMP WHERE mn.user = :userId AND mn.notification = :notificationId AND mn.isRead = false")
     void markAsRead(@Param("userId") Integer userId, @Param("notificationId") Integer notificationId);
 
     // 查詢特定使用者的特定通知
-    Optional<MemberNotification> findByUser_UserIdAndNotification_NotificationId(Integer userId, Integer notificationId);
+    Optional<MemberNotification> findByUserAndNotification(Integer user, Integer notification);
 
     // 將特定使用者的所有未讀通知標記為已讀
     @Modifying
-    @Query("UPDATE MemberNotification mn SET mn.isRead = true, mn.readTime = CURRENT_TIMESTAMP WHERE mn.user.userId = :userId AND mn.isRead = false")
+    @Query("UPDATE MemberNotification mn SET mn.isRead = true, mn.readTime = CURRENT_TIMESTAMP WHERE mn.user = :userId AND mn.isRead = false")
     void markAllAsReadByUserId(@Param("userId") Integer userId);
 
     // Add this method to count unread notifications for a user
-    long countByUser_UserIdAndIsReadFalse(Integer userId);
+    long countByUserAndIsReadFalse(Integer user);
+
+    // 查詢用戶的所有通知記錄
+    List<MemberNotification> findByUser(Integer user);
+
+    // 統計用戶的已讀/未讀通知數量
+    long countByUserAndIsRead(Integer user, Boolean isRead);
 
     // 刪除指定通知ID的所有會員通知記錄
     @Modifying
     @Transactional
-    @Query("DELETE FROM MemberNotification mn WHERE mn.notification.notificationId = :notificationId")
-    void deleteByNotification_NotificationId(@Param("notificationId") Integer notificationId);
+    @Query("DELETE FROM MemberNotification mn WHERE mn.notification = :notificationId")
+    void deleteByNotification(@Param("notificationId") Integer notificationId);
 
     // --- Methods for Statistics ---
 
-    long countByNotification_NotificationId(Integer notificationId);
+    long countByNotification(Integer notificationId);
 
-    long countByNotification_NotificationIdAndDeliveryStatus(Integer notificationId, com.shakemate.notification.enums.DeliveryStatus deliveryStatus);
+    long countByNotificationAndDeliveryStatus(Integer notificationId, com.shakemate.notification.enums.DeliveryStatus deliveryStatus);
 
-    long countByNotification_NotificationIdAndIsReadTrue(Integer notificationId);
+    long countByNotificationAndIsReadTrue(Integer notificationId);
 
-    long countByNotification_NotificationIdAndUserInteraction(Integer notificationId, Integer userInteraction);
+    long countByNotificationAndUserInteraction(Integer notificationId, Integer userInteraction);
+
+    // 按天统计指定通知的发送量（返回日期字符串和数量）
+    @Query("SELECT DATE_FORMAT(mn.sentTime, '%Y-%m-%d') as day, COUNT(mn) FROM MemberNotification mn WHERE mn.notification = :notificationId GROUP BY day ORDER BY day")
+    List<Object[]> findSendTrendByNotification(@Param("notificationId") Integer notificationId);
 } 

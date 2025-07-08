@@ -8,31 +8,172 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --template-gradient: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
-            --creative-gradient: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
-        }
-        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            margin: 0;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(
+                185deg,
+                #DCFF61 0%,
+                #DCFF61 55%,
+                #2EC4B6 55%,
+                #2EC4B6 100%
+            );
+            font-family: 'Noto Sans TC', sans-serif;
             position: relative;
             overflow-x: hidden;
         }
         
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.25);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            border: 2px solid gray;
+        }
+        
+        .card-header {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid gray;
+        }
+        
+        .card-header h3 {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .header-icon {
+            font-size: 2.5rem;
+            color: #2EC4B6;
+        }
+        
+        .btn {
+            border-radius: 1rem;
+            padding: 0.8rem 1.6rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #2EC4B6, #DCFF61);
+            border: none;
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 196, 182, 0.2);
+            background: linear-gradient(45deg, #DCFF61, #2EC4B6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #eee;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table {
+            margin-top: 1rem;
+        }
+        
+        .table thead th {
+            background: #DCFF61;
+            color: #000;
+            font-weight: 500;
+            border: none;
+            padding: 1.2rem 1rem;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(220, 255, 97, 0.1);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 0.8rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-edit {
+            background: linear-gradient(45deg, #2EC4B6, #4A90E2);
+            border: none;
+            color: #fff;
+        }
+        
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
+        }
+        
+        .btn-delete {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+            border: none;
+            color: #fff;
+        }
+        
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+        }
+        
+        .form-control {
+            border: 2px solid gray;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-size: 1.4rem;
+        }
+        
+        .form-control:focus {
+            border-color: #2EC4B6;
+            box-shadow: 0 0 0 0.2rem rgba(46, 196, 182, 0.25);
         }
         
         .floating-icons {
@@ -49,186 +190,30 @@
         .floating-icon {
             position: absolute;
             font-size: 2rem;
-            opacity: 0.08;
-            animation: float 8s ease-in-out infinite;
+            animation: float 20s linear infinite;
+            opacity: 0.2;
         }
         
-        .floating-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
-        .floating-icon:nth-child(2) { top: 60%; right: 15%; animation-delay: 1.5s; }
-        .floating-icon:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 3s; }
-        .floating-icon:nth-child(4) { top: 40%; right: 25%; animation-delay: 4.5s; }
-        .floating-icon:nth-child(5) { bottom: 10%; left: 50%; animation-delay: 6s; }
-        .floating-icon:nth-child(6) { top: 80%; right: 10%; animation-delay: 7.5s; }
+        .floating-icon:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { top: 20%; left: 80%; animation-delay: -4s; }
+        .floating-icon:nth-child(3) { top: 60%; left: 20%; animation-delay: -8s; }
+        .floating-icon:nth-child(4) { top: 40%; left: 60%; animation-delay: -12s; }
+        .floating-icon:nth-child(5) { top: 80%; left: 40%; animation-delay: -16s; }
+        .floating-icon:nth-child(6) { top: 30%; left: 30%; animation-delay: -20s; }
         
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            25% { transform: translateY(-20px) rotate(5deg); }
-            50% { transform: translateY(-10px) rotate(-5deg); }
-            75% { transform: translateY(-15px) rotate(3deg); }
-        }
-        
-        .main-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            margin: 2rem 0;
-            overflow: hidden;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .main-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
-            background-size: 300% 100%;
-            animation: shimmer 3s ease-in-out infinite;
-        }
-        
-        @keyframes shimmer {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        .card-header {
-            background: var(--primary-gradient);
-            border: none;
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card-header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/><circle cx="30" cy="30" r="5" fill="rgba(255,255,255,0.3)"/><circle cx="70" cy="25" r="3" fill="rgba(255,255,255,0.2)"/></svg>');
-            opacity: 0.6;
-        }
-        
-        .card-header h3 {
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-weight: 700;
-        }
-        
-        .header-icon {
-            font-size: 2.5rem;
-            animation: bounce 2s infinite;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0) scale(1); }
-            40% { transform: translateY(-10px) scale(1.1); }
-            60% { transform: translateY(-5px) scale(1.05); }
-        }
-        
-        .btn {
-            border-radius: 25px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transition: all 0.4s ease;
-            transform: translate(-50%, -50%);
-        }
-        
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-success {
-            background: var(--success-gradient);
-            border: none;
-            color: white;
-        }
-        
-        .btn-light {
-            background: rgba(255, 255, 255, 0.95);
-            color: #333;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(10px);
-        }
-        
-        .table {
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            background: white;
-            position: relative;
-        }
-        
-        .table thead th {
-            background: var(--template-gradient);
-            color: white;
-            border: none;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.8rem;
-            padding: 1.5rem 1rem;
-            position: relative;
-        }
-        
-        .table thead th::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-        }
-        
-        .table tbody tr {
-            transition: all 0.4s ease;
-            position: relative;
-        }
-        
-        .table tbody tr:hover {
-            background: linear-gradient(90deg, rgba(156, 39, 176, 0.1), rgba(233, 30, 99, 0.1));
-            transform: scale(1.02) translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .table td {
-            border: none;
-            padding: 1.2rem 1rem;
-            vertical-align: middle;
-            position: relative;
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, -50px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-30px, 50px) rotate(240deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
         }
         
         .modal-content {
@@ -270,22 +255,6 @@
             font-size: 1.5rem;
         }
         
-        .form-control, .form-select {
-            border-radius: 15px;
-            border: 2px solid #e9ecef;
-            padding: 1rem 1.5rem;
-            transition: all 0.4s ease;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: #9C27B0;
-            box-shadow: 0 0 0 0.3rem rgba(156, 39, 176, 0.25);
-            transform: translateY(-3px) scale(1.02);
-            background: white;
-        }
-        
         .form-label {
             font-weight: 700;
             color: #555;
@@ -313,37 +282,7 @@
         .type-push { background: linear-gradient(135deg, #2196F3, #1976D2); color: white; }
         .type-system { background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; }
         
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-        
-        .action-btn {
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 2px solid transparent;
-        }
-        
-        .action-btn:hover {
-            transform: rotate(10deg) scale(1.2);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-edit {
-            background: var(--creative-gradient);
-            color: white;
-        }
-        
-        .btn-delete {
-            background: linear-gradient(135deg, #F44336, #D32F2F);
-            color: white;
-        }
+
         
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             border-radius: 25px !important;
@@ -414,12 +353,12 @@
 </head>
 <body>
     <div class="floating-icons">
-        <div class="floating-icon">📝</div>
-        <div class="floating-icon">📋</div>
-        <div class="floating-icon">✉️</div>
-        <div class="floating-icon">📄</div>
-        <div class="floating-icon">📖</div>
-        <div class="floating-icon">��️</div>
+        <div class="floating-icon">📢</div>
+        <div class="floating-icon">📨</div>
+        <div class="floating-icon">🔔</div>
+        <div class="floating-icon">📱</div>
+        <div class="floating-icon">💌</div>
+        <div class="floating-icon">📬</div>
     </div>
     
     <div class="container py-5">
@@ -430,10 +369,10 @@
                     通知範本創作中心
                 </h3>
                 <div>
-                    <button id="add-template-btn" class="btn btn-success me-3">
+                    <button id="add-template-btn" class="btn btn-primary me-3">
                         <i class="fas fa-plus me-2"></i>新增範本
                     </button>
-                    <a class="btn btn-light" th:href="@{/adm/adminHome}">
+                    <a class="btn btn-secondary" th:href="@{/adm/adminHome}">
                         <i class="fas fa-home me-2"></i>回管理員首頁
                     </a>
                 </div>
@@ -526,11 +465,65 @@
                             <small class="form-text text-muted">可使用變數，例如：歡迎 {{userName}} 🎊</small>
                         </div>
                         <div class="mb-4">
-                            <label for="messageTemplate" class="form-label">
-                                <i class="fas fa-edit text-danger"></i>內容範本
+                            <label for="contentTemplate" class="form-label">
+                                <i class="fas fa-edit text-info"></i>純文字內容範本 (可選)
                             </label>
-                            <textarea class="form-control" id="messageTemplate" name="messageTemplate" rows="6" required placeholder="在這裡輸入您的創意內容..."></textarea>
-                            <small class="form-text text-muted">可使用預留位置，例如 {{userName}}、{{actionUrl}}。讓您的訊息更生動！ 🌟</small>
+                            <textarea class="form-control" id="contentTemplate" name="contentTemplate" rows="6" placeholder="在這裡輸入純文字內容..." maxlength="255"></textarea>
+                            <small class="form-text text-muted">適用於所有類型的通知。如未填寫，系統將自動從HTML模板提取 📝 (最多255字符)</small>
+                        </div>
+                        <div class="mb-4" id="htmlTemplateGroup" style="display: none;">
+                            <label for="htmlTemplate" class="form-label">
+                                <i class="fas fa-code text-success"></i>HTML內容範本 (可選)
+                            </label>
+                            <textarea class="form-control" id="htmlTemplate" name="htmlTemplate" rows="8" placeholder="在這裡輸入HTML格式內容..."></textarea>
+                            <small class="form-text text-muted">HTML格式內容，EMAIL類型時優先使用。可使用 {{變數}} 和 HTML 標籤 🌟</small>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="isActive" class="form-label">
+                                    <i class="fas fa-toggle-on text-success"></i>是否啟用
+                                </label>
+                                <select class="form-control" id="isActive" name="isActive" required>
+                                    <option value="true">啟用</option>
+                                    <option value="false">停用</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="isSystem" class="form-label">
+                                    <i class="fas fa-cogs text-secondary"></i>是否系統預設
+                                </label>
+                                <select class="form-control" id="isSystem" name="isSystem" required>
+                                    <option value="false">否</option>
+                                    <option value="true">是</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-info-circle text-info"></i>範本說明 (可選)
+                            </label>
+                            <input type="text" class="form-control" id="description" name="description" maxlength="200">
+                        </div>
+                        <div class="mb-4">
+                            <label for="variables" class="form-label">
+                                <i class="fas fa-list text-primary"></i>可用變數 (JSON格式，可選)
+                            </label>
+                            <textarea class="form-control" id="variables" name="variables" rows="3" placeholder='{"userName": "string", "actionUrl": "string"}'></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="previewImage" class="form-label">
+                                <i class="fas fa-image text-warning"></i>預覽圖URL (可選)
+                            </label>
+                            <input type="text" class="form-control" id="previewImage" name="previewImage">
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>模板規則：</strong>
+                            <ul class="mb-0 mt-2">
+                                <li><strong>EMAIL類型：</strong>優先使用HTML模板，回退到純文字模板</li>
+                                <li><strong>其他類型：</strong>優先使用純文字模板，可從HTML自動提取</li>
+                                <li><strong>必須提供：</strong>至少填寫一個內容模板（純文字或HTML）</li>
+                            </ul>
                         </div>
                     </form>
                 </div>

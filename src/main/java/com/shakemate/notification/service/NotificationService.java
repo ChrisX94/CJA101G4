@@ -4,10 +4,58 @@ import com.shakemate.notification.dto.NotificationDto;
 import com.shakemate.notification.dto.MemberNotificationDto;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
+
+    /**
+     * 發送模板通知給單一用戶
+     * @param templateCode 模板代碼
+     * @param userId 用戶ID
+     * @param variables 模板變數
+     * @return 發送結果
+     */
+    CompletableFuture<Boolean> sendTemplateNotification(String templateCode, Integer userId, Map<String, Object> variables);
+
+    /**
+     * 發送模板通知給多個用戶
+     * @param templateCode 模板代碼
+     * @param userIds 用戶ID列表
+     * @param variables 模板變數
+     * @return 發送結果
+     */
+    CompletableFuture<Boolean> sendTemplateNotificationToUsers(String templateCode, List<Integer> userIds, Map<String, Object> variables);
+
+    /**
+     * 發送即時通知
+     * @param userId 用戶ID
+     * @param title 通知標題
+     * @param content 通知內容
+     * @param notificationType 通知類型
+     * @param deliveryMethods 發送方式列表
+     * @return 發送結果
+     */
+    CompletableFuture<Boolean> sendInstantNotification(Integer userId, String title, String content, String notificationType, List<String> deliveryMethods);
+
+    /**
+     * 廣播模板通知
+     * @param templateCode 模板代碼
+     * @param variables 模板變數
+     * @param targetCriteria 目標篩選條件
+     * @return 發送結果
+     */
+    CompletableFuture<Boolean> broadcastTemplateNotification(String templateCode, Map<String, Object> variables, Map<String, Object> targetCriteria);
+
+    /**
+     * 條件發送通知
+     * @param templateCode 模板代碼
+     * @param variables 模板變數
+     * @param targetCriteria 目標篩選條件
+     * @return 發送結果
+     */
+    CompletableFuture<Boolean> sendConditionalNotification(String templateCode, Map<String, Object> variables, Map<String, Object> targetCriteria);
 
     /**
      * 為單一使用者生成通知 (通常由事件觸發，如新配對、新訊息)

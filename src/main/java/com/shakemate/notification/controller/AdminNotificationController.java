@@ -3,7 +3,8 @@ package com.shakemate.notification.controller;
 import com.shakemate.adm.model.AdmVO;
 import com.shakemate.notification.dto.NotificationCreateDto;
 import com.shakemate.notification.dto.NotificationDto;
-import com.shakemate.notification.dto.NotificationStatsDto;
+import com.shakemate.notification.dto.NotificationPreviewDto;
+import com.shakemate.notification.dto.NotificationReportDto;
 import com.shakemate.notification.dto.NotificationTemplateDto;
 import com.shakemate.notification.service.AdminNotificationService;
 import com.shakemate.notification.service.NotificationReportService;
@@ -27,58 +28,9 @@ public class AdminNotificationController {
     @Autowired
     private NotificationReportService notificationReportService;
 
-    // Page navigation
-    @GetMapping("/templates-page")
-    public String templatesPage() {
-        return "back-end/notification/templates";
-    }
-
-    @GetMapping("/manage-page")
-    public String notificationsPage() {
-        return "back-end/notification/notifications";
-    }
-
-    @GetMapping("/report/page")
-    public String getReportPage() {
-        return "back-end/notification/report";
-    }
-
-    // TODO:
-    // POST /: 建立一則新的通知（廣播、精準、標籤）
-    // GET /: 查詢通知列表
-    // PUT /{id}: 更新處於草稿狀態的通知
-    // DELETE /{id}: 刪除通知
-    // POST /{id}/send: 手動觸發發送
-    // GET /{id}/report: 查看通知成效報告
-
-    @PostMapping("/")
-    @ResponseBody
-    public ResponseEntity<NotificationDto> createNotification(@Valid @RequestBody NotificationCreateDto createDto, HttpSession session) {
-        System.out.println("=== createNotification called ===");
-        System.out.println("CreateDto: " + createDto);
-        
-        AdmVO currentAdmin = (AdmVO) session.getAttribute("loggedInAdm");
-        System.out.println("Current admin from session: " + currentAdmin);
-        
-        Integer adminId;
-        if (currentAdmin == null) {
-            System.out.println("No admin in session, using default adminId = 1");
-            adminId = 1; // 暫時使用預設值
-        } else {
-            adminId = currentAdmin.getAdmId();
-        }
-        
-        try {
-            NotificationDto notification = adminNotificationService.createNotification(createDto, adminId);
-            System.out.println("Notification created successfully: " + notification);
-            return new ResponseEntity<>(notification, HttpStatus.CREATED);
-        } catch (Exception e) {
-            System.err.println("Error creating notification: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
+    /**
+     * 獲取通知列表（分頁）
+     */
     @GetMapping("/")
     @ResponseBody
     public ResponseEntity<Page<NotificationDto>> getAllNotifications(Pageable pageable) {
@@ -86,94 +38,165 @@ public class AdminNotificationController {
         return ResponseEntity.ok(notifications);
     }
 
-    @PostMapping("/{id}/send")
+    /**
+     * 建立新通知
+     */
+    @PostMapping("/")
     @ResponseBody
-    public ResponseEntity<Void> sendNotification(@PathVariable Integer id) {
-        adminNotificationService.sendNotification(id);
-        return ResponseEntity.accepted().build();
+    public ResponseEntity<NotificationDto> createNotification(
+            @Valid @RequestBody NotificationCreateDto createDto,
+            HttpSession session) {
+        
+        // 從 session 中獲取管理員 ID
+        AdmVO admin = (AdmVO) session.getAttribute("loggedInAdm");
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        NotificationDto createdNotification = adminNotificationService.createNotification(createDto, admin.getAdmId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdNotification);
     }
 
-    @DeleteMapping("/{id}")
+    /**
+     * 發送通知
+     */
+    @PostMapping("/{notificationId}/send")
     @ResponseBody
-    public ResponseEntity<Void> deleteNotification(@PathVariable Integer id) {
-        adminNotificationService.deleteNotification(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> sendNotification(@PathVariable Integer notificationId) {
+        adminNotificationService.sendNotification(notificationId);
+        return ResponseEntity.ok().build();
     }
 
-    // === Template Management ===
+    /**
+     * 刪除通知
+     */
+    @DeleteMapping("/{notificationId}")
+    @ResponseBody
+    public ResponseEntity<Void> deleteNotification(@PathVariable Integer notificationId) {
+        adminNotificationService.deleteNotification(notificationId);
+        return ResponseEntity.ok().build();
+    }
 
+    /**
+     * 獲取通知報告
+     */
+    @GetMapping("/{notificationId}/report")
+    @ResponseBody
+    public ResponseEntity<NotificationReportDto> getNotificationReport(@PathVariable Integer notificationId) {
+        NotificationReportDto report = adminNotificationService.getNotificationReport(notificationId);
+        return ResponseEntity.ok(report);
+    }
+
+    /**
+     * 獲取通知預覽信息
+     */
+    @GetMapping("/{notificationId}/preview")
+    @ResponseBody
+    public ResponseEntity<NotificationPreviewDto> getNotificationPreview(@PathVariable Integer notificationId) {
+        NotificationPreviewDto preview = adminNotificationService.getNotificationPreview(notificationId);
+        return ResponseEntity.ok(preview);
+    }
+
+    /**
+     * 通知管理頁面
+     */
+    @GetMapping("/manage-page")
+    public String getNotificationManagePage() {
+        return "back-end/notification/notifications";
+    }
+
+    /**
+     * 通知模板管理頁面
+     */
+    @GetMapping("/templates-page")
+    public String getTemplatesPage() {
+        return "back-end/notification/templates";
+    }
+
+    /**
+     * 通知報表頁面
+     */
+    @GetMapping("/report/page")
+    public String getReportPage() {
+        return "back-end/notification/report";
+    }
+
+    /**
+     * 獲取通知模板列表（分頁）
+     */
     @GetMapping("/templates")
     @ResponseBody
     public ResponseEntity<Page<NotificationTemplateDto>> getAllTemplates(Pageable pageable) {
-        System.out.println("=== AdminNotificationController.getAllTemplates() called ===");
-        System.out.println("Pageable: " + pageable);
-        try {
-            Page<NotificationTemplateDto> templates = adminNotificationService.getAllTemplates(pageable);
-            System.out.println("Templates found: " + templates.getTotalElements());
-            System.out.println("Templates content: " + templates.getContent());
-            return ResponseEntity.ok(templates);
-        } catch (Exception e) {
-            System.err.println("Error in getAllTemplates: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        Page<NotificationTemplateDto> templates = adminNotificationService.getAllTemplates(pageable);
+        return ResponseEntity.ok(templates);
     }
 
+    /**
+     * 建立新模板
+     */
     @PostMapping("/templates")
     @ResponseBody
-    public ResponseEntity<NotificationTemplateDto> createTemplate(@Valid @RequestBody NotificationTemplateDto templateDto, HttpSession session) {
-        System.out.println("=== createTemplate called ===");
-        System.out.println("TemplateDto: " + templateDto);
-        
-        AdmVO currentAdmin = (AdmVO) session.getAttribute("loggedInAdm");
-        System.out.println("Current admin from session: " + currentAdmin);
-        
-        if (currentAdmin == null) {
-            System.out.println("No admin in session, setting default createdById to 1");
-            templateDto.setCreatedById(1); // 暫時使用預設值
-        } else {
-            templateDto.setCreatedById(currentAdmin.getAdmId());
+    public ResponseEntity<NotificationTemplateDto> createTemplate(
+            @Valid @RequestBody NotificationTemplateDto templateDto,
+            HttpSession session) {
+        // 从 session 中获取管理员对象
+        AdmVO admin = (AdmVO) session.getAttribute("loggedInAdm");
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
-        try {
-            NotificationTemplateDto createdTemplate = adminNotificationService.createTemplate(templateDto);
-            System.out.println("Template created successfully: " + createdTemplate);
-            return new ResponseEntity<>(createdTemplate, HttpStatus.CREATED);
-        } catch (Exception e) {
-            System.err.println("Error creating template: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+        templateDto.setCreatedById(admin.getAdmId());
+        if (templateDto.getIsActive() == null) {
+            templateDto.setIsActive(true);
         }
+        NotificationTemplateDto createdTemplate = adminNotificationService.createTemplate(templateDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTemplate);
     }
 
-    @PutMapping("/templates/{id}")
+    /**
+     * 更新模板
+     */
+    @PutMapping("/templates/{templateId}")
     @ResponseBody
-    public ResponseEntity<NotificationTemplateDto> updateTemplate(@PathVariable Integer id, @Valid @RequestBody NotificationTemplateDto templateDto) {
-        System.out.println("=== updateTemplate called ===");
-        System.out.println("ID: " + id);
-        System.out.println("TemplateDto: " + templateDto);
-        
-        try {
-            NotificationTemplateDto updatedTemplate = adminNotificationService.updateTemplate(id, templateDto);
-            System.out.println("Template updated successfully: " + updatedTemplate);
-            return ResponseEntity.ok(updatedTemplate);
-        } catch (Exception e) {
-            System.err.println("Error updating template: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+    public ResponseEntity<NotificationTemplateDto> updateTemplate(
+            @PathVariable Integer templateId,
+            @Valid @RequestBody NotificationTemplateDto templateDto) {
+        NotificationTemplateDto updatedTemplate = adminNotificationService.updateTemplate(templateId, templateDto);
+        return ResponseEntity.ok(updatedTemplate);
     }
 
-    @DeleteMapping("/templates/{id}")
+    /**
+     * 刪除模板
+     */
+    @DeleteMapping("/templates/{templateId}")
     @ResponseBody
-    public ResponseEntity<Void> deleteTemplate(@PathVariable Integer id) {
-        adminNotificationService.deleteTemplate(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteTemplate(@PathVariable Integer templateId) {
+        adminNotificationService.deleteTemplate(templateId);
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}/report")
-    public ResponseEntity<NotificationStatsDto> getReport(@PathVariable("id") Integer notificationId) {
-        NotificationStatsDto stats = notificationReportService.getNotificationStats(notificationId);
-        return ResponseEntity.ok(stats);
+    /**
+     * 檢查管理員登入狀態
+     */
+    @GetMapping("/check-auth")
+    @ResponseBody
+    public ResponseEntity<Void> checkAuth(HttpSession session) {
+        AdmVO admin = (AdmVO) session.getAttribute("loggedInAdm");
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 查詢單筆通知詳情
+     */
+    @GetMapping("/{notificationId}")
+    @ResponseBody
+    public ResponseEntity<NotificationDto> getNotificationDetail(@PathVariable Integer notificationId) {
+        NotificationDto dto = adminNotificationService.getNotificationById(notificationId);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
     }
 } 
