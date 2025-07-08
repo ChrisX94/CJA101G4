@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,21 +10,59 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
   <style>
     /* 全局 */
-    html { font-size: 62.5%; font-family: "Noto Sans TC", sans-serif; }
-    body { margin: 0; background: rgba(170,198,202,1); color: #333; }
-    *, *::before, *::after { box-sizing: border-box; }
+    html {
+      font-size: 62.5%;
+      font-family: "Noto Sans TC", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: rgba(170, 198, 202, 1);
+      color: #333;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    /* 全頁背景漸層 */
+    .bg {
+      position: relative;
+      min-height: 100vh;
+      background: linear-gradient(185deg,
+          #DCFF61 0%,
+          #DCFF61 55%,
+          #2EC4B6 55%,
+          #2EC4B6 100%);
+      overflow: hidden;
+    }
+
+    .bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+    }
 
     /* 容器 */
     .container {
+      z-index: 1000;
       max-width: 100rem;
       margin: 2rem auto;
       padding: 1rem;
       background: #fff;
       border-radius: 0.8rem;
-      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.1);
+      box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.1);
     }
 
-    h2 { font-size: 2.4rem; margin-bottom: 1.6rem; text-align: center; }
+    h2 {
+      font-size: 2.4rem;
+      margin-bottom: 1.6rem;
+      text-align: center;
+    }
 
     /* 搜尋表單 */
     .search-form {
@@ -32,12 +71,18 @@
       gap: 1.2rem;
       margin-bottom: 2rem;
     }
+
     .search-form .field {
       flex: 1 1 20rem;
       display: flex;
       flex-direction: column;
     }
-    .search-form label { font-size: 1.6rem; margin-bottom: 0.4rem; }
+
+    .search-form label {
+      font-size: 1.6rem;
+      margin-bottom: 0.4rem;
+    }
+
     .search-form input,
     .search-form select {
       padding: 0.8rem 1rem;
@@ -59,7 +104,11 @@
       align-self: flex-end;
       margin-top: 1.2rem;
     }
-    .search-button:hover { transform: translateY(-0.2rem); box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.1); }
+
+    .search-button:hover {
+      transform: translateY(-0.2rem);
+      box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.1);
+    }
 
     /* 結果表格 */
     table {
@@ -69,14 +118,38 @@
       background: #fff;
       border-radius: 0.8rem;
       overflow: hidden;
-      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.1);
+      box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.1);
       font-size: 1.6rem;
     }
-    th, td { padding: 0.8rem 1.2rem; text-align: center; border: 0.1rem solid #ddd; }
-    th { background: #f7f7f7; font-weight: bold; }
-    tbody tr:nth-child(odd)  { background: rgba(91,58,54,1); color: white; }
-    tbody tr:nth-child(even) { background: rgba(91,58,54,1); opacity: 0.8; color: white; }
-    tbody tr:hover          { background: #f1f1f1; color: black; opacity:1; }
+
+    th,
+    td {
+      padding: 0.8rem 1.2rem;
+      text-align: center;
+      border: 0.1rem solid #ddd;
+    }
+
+    th {
+      background: #f7f7f7;
+      font-weight: bold;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(91, 58, 54, 1);
+      color: white;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(91, 58, 54, 1);
+      opacity: 0.8;
+      color: white;
+    }
+
+    tbody tr:hover {
+      background: #f1f1f1;
+      color: black;
+      opacity: 1;
+    }
 
     /* 操作按鈕 */
     .actions a {
@@ -91,171 +164,189 @@
       justify-content: center;
       margin: 0 0.4rem;
     }
-    .actions .edit { background: lightskyblue; }
-    .actions .delete { background: lightcoral; }
-    .actions a:hover { transform: translateY(-0.1rem); box-shadow: 0 0.3rem 0.6rem rgba(0,0,0,0.1); color: black; }
- 
- 
-  
+
+    .actions .edit {
+      background: lightskyblue;
+    }
+
+    .actions .delete {
+      background: lightcoral;
+    }
+
+    .actions a:hover {
+      transform: translateY(-0.1rem);
+      box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.1);
+      color: black;
+    }
+
+
+
     .pagination-controls {
-    margin-top: 1rem;
-    text-align: center;
-  }
-  .page-btn {
-    margin: 0 0.3rem;
-    padding: 0.5rem 1rem;
-    font-size: 1.4rem;
-    border: 1px solid #ccc;
-    background: #eee;
-    cursor: pointer;
-    border-radius: 0.4rem;
-  }
-  .page-btn.active {
-    background-color: #03a9f4;
-    color: #fff;
-    font-weight: bold;
-  }
-  
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .page-btn {
+      margin: 0 0.3rem;
+      padding: 0.5rem 1rem;
+      font-size: 1.4rem;
+      border: 1px solid #ccc;
+      background: #eee;
+      cursor: pointer;
+      border-radius: 0.4rem;
+    }
+
+    .page-btn.active {
+      background-color: #03a9f4;
+      color: #fff;
+      font-weight: bold;
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h2>查詢服務案件</h2>
-    <form th:action="@{/servicecase/search}" method="get" class="search-form">
-      <div class="field">
-        <label for="userId">使用者 ID</label>
-        <input type="number" id="userId" name="userId" placeholder="輸入使用者 ID" />
-      </div>
-      <div class="field">
-        <label for="caseType">案件類型</label>
-        <select id="caseType" name="caseTypeId">
-          <option value="">全部</option>
-          <option th:each="type: ${allTypes}" th:value="${type.caseTypeId}" th:text="${type.typeName}"></option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="status">狀態</label>
-        <select id="status" name="caseStatus">
-          <option value="">全部</option>
-          <option value="0">未處理</option>
-          <option value="1">處理中</option>
-          <option value="2">已完成</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="from">起始日期</label>
-        <input type="date" id="from" name="fromDate" />
-      </div>
-      <div class="field">
-        <label for="to">結束日期</label>
-        <input type="date" id="to" name="toDate" />
-      </div>
-      <button type="submit" class="search-button">查  詢</button>
-    </form>
 
-    <table>
-      <thead>
-        <tr>
-          <th>編號</th>
-          <th>類別</th>
-          <th>用戶</th>
-          <th>Email</th> <!-- 新增 -->
-          <th>標題</th>
-          <th>狀態</th>
-          <th>建立時間</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr th:each="sc : ${cases}">
-          <td th:text="${sc.caseId}"></td>
-          <td th:text="${sc.caseType.typeName}"></td>
-          <td th:text="${sc.userId}"></td>
-          <td th:text="${sc.email}"></td> <!-- 新增 -->
-          <td th:text="${sc.title}"></td>
-<!--           <td th:text="${#lists.arrayList('未處理','處理中','已完成')[sc.caseStatus]}"></td> -->
-          <td th:text="${sc.statusName}"></td>
-          <td th:text="${#dates.format(sc.createTime,'yyyy-MM-dd')}"></td>
-          <td class="actions">
-            <a th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
-            <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}" class="delete"
-               th:onclick="|return confirm('確定刪除 ID=${sc.caseId}?');|">刪除</a>
-          </td>
-        </tr>
-        <tr th:if="${cases.empty}"><td colspan="8">無符合條件的案件</td></tr>
-      </tbody>
-    </table>
-        
-                  <!-- 分頁資訊與控制器 -->
-<div class="pagination-controls">
-  <div id="pagination-info" style="margin-bottom: 0.8rem; font-size: 1.6rem;"></div>
-  <div id="pagination"></div>
-</div>
-        
+<body>
+  <div class="bg">
+    <div class="container">
+      <h2>查詢服務案件</h2>
+      <form th:action="@{/servicecase/search}" method="get" class="search-form">
+        <div class="field">
+          <label for="userId">使用者 ID</label>
+          <input type="number" id="userId" name="userId" placeholder="輸入使用者 ID" />
+        </div>
+        <div class="field">
+          <label for="caseType">案件類型</label>
+          <select id="caseType" name="caseTypeId">
+            <option value="">全部</option>
+            <option th:each="type: ${allTypes}" th:value="${type.caseTypeId}" th:text="${type.typeName}"></option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="status">狀態</label>
+          <select id="status" name="caseStatus">
+            <option value="">全部</option>
+            <option value="0">未處理</option>
+            <option value="1">處理中</option>
+            <option value="2">已完成</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="from">起始日期</label>
+          <input type="date" id="from" name="fromDate" />
+        </div>
+        <div class="field">
+          <label for="to">結束日期</label>
+          <input type="date" id="to" name="toDate" />
+        </div>
+        <button type="submit" class="search-button">查 詢</button>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>編號</th>
+            <th>類別</th>
+            <th>用戶</th>
+            <th>Email</th> <!-- 新增 -->
+            <th>標題</th>
+            <th>狀態</th>
+            <th>建立時間</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr th:each="sc : ${cases}">
+            <td th:text="${sc.caseId}"></td>
+            <td th:text="${sc.caseType.typeName}"></td>
+            <td th:text="${sc.userId}"></td>
+            <td th:text="${sc.email}"></td> <!-- 新增 -->
+            <td th:text="${sc.title}"></td>
+            <!--           <td th:text="${#lists.arrayList('未處理','處理中','已完成')[sc.caseStatus]}"></td> -->
+            <td th:text="${sc.statusName}"></td>
+            <td th:text="${#dates.format(sc.createTime,'yyyy-MM-dd')}"></td>
+            <td class="actions">
+              <a th:href="@{/servicecase/edit/{id}(id=${sc.caseId})}" class="edit">更改</a>
+              <a th:href="@{/servicecase/delete/{id}(id=${sc.caseId})}" class="delete"
+                th:onclick="|return confirm('確定刪除 ID=${sc.caseId}?');|">刪除</a>
+            </td>
+          </tr>
+          <tr th:if="${cases.empty}">
+            <td colspan="8">無符合條件的案件</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 分頁資訊與控制器 -->
+      <div class="pagination-controls">
+        <div id="pagination-info" style="margin-bottom: 0.8rem; font-size: 1.6rem;"></div>
+        <div id="pagination"></div>
+      </div>
+
+    </div>
   </div>
 
   <script defer>
-  const rowsPerPage = 5;
-  const tbody = document.getElementById("tableBody");
-  const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
-  const pagination = document.getElementById("pagination");
-  const pageInfo = document.getElementById("pagination-info");
+    const rowsPerPage = 5;
+    const tbody = document.getElementById("tableBody");
+    const rows = Array.from(tbody.querySelectorAll("tr")).filter(r => !r.querySelector("td[colspan]"));
+    const pagination = document.getElementById("pagination");
+    const pageInfo = document.getElementById("pagination-info");
 
-  let currentPage = 1;
-  let totalPages = Math.ceil(rows.length / rowsPerPage);
+    let currentPage = 1;
+    let totalPages = Math.ceil(rows.length / rowsPerPage);
 
-  function showPage(page) {
-    currentPage = page;
-    totalPages = Math.ceil(rows.length / rowsPerPage);
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+    function showPage(page) {
+      currentPage = page;
+      totalPages = Math.ceil(rows.length / rowsPerPage);
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
 
-    rows.forEach((row, index) => {
-      row.style.display = index >= start && index < end ? "" : "none";
-    });
+      rows.forEach((row, index) => {
+        row.style.display = index >= start && index < end ? "" : "none";
+      });
 
-    renderPagination();
-    updatePageInfo();
-  }
-
-  function updatePageInfo() {
-    pageInfo.innerText = `共 ${rows.length} 筆，頁數 ${currentPage} / ${totalPages}`;
-  }
-
-  function renderPagination() {
-    pagination.innerHTML = "";
-
-    // 上一頁
-    if (currentPage > 1) {
-      const prevBtn = document.createElement("button");
-      prevBtn.innerText = "上一頁";
-      prevBtn.className = "page-btn";
-      prevBtn.onclick = () => showPage(currentPage - 1);
-      pagination.appendChild(prevBtn);
+      renderPagination();
+      updatePageInfo();
     }
 
-    // 頁碼按鈕
-    for (let i = 1; i <= totalPages; i++) {
-      const btn = document.createElement("button");
-      btn.innerText = i;
-      btn.className = "page-btn";
-      if (i === currentPage) btn.classList.add("active");
-      btn.onclick = () => showPage(i);
-      pagination.appendChild(btn);
+    function updatePageInfo() {
+      pageInfo.innerText = `共 ${rows.length} 筆，頁數 ${currentPage} / ${totalPages}`;
     }
 
-    // 下一頁
-    if (currentPage < totalPages) {
-      const nextBtn = document.createElement("button");
-      nextBtn.innerText = "下一頁";
-      nextBtn.className = "page-btn";
-      nextBtn.onclick = () => showPage(currentPage + 1);
-      pagination.appendChild(nextBtn);
-    }
-  }
+    function renderPagination() {
+      pagination.innerHTML = "";
 
-  showPage(currentPage); // 初始顯示
-</script>
-  
+      // 上一頁
+      if (currentPage > 1) {
+        const prevBtn = document.createElement("button");
+        prevBtn.innerText = "上一頁";
+        prevBtn.className = "page-btn";
+        prevBtn.onclick = () => showPage(currentPage - 1);
+        pagination.appendChild(prevBtn);
+      }
+
+      // 頁碼按鈕
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.innerText = i;
+        btn.className = "page-btn";
+        if (i === currentPage) btn.classList.add("active");
+        btn.onclick = () => showPage(i);
+        pagination.appendChild(btn);
+      }
+
+      // 下一頁
+      if (currentPage < totalPages) {
+        const nextBtn = document.createElement("button");
+        nextBtn.innerText = "下一頁";
+        nextBtn.className = "page-btn";
+        nextBtn.onclick = () => showPage(currentPage + 1);
+        pagination.appendChild(nextBtn);
+      }
+    }
+
+    showPage(currentPage); // 初始顯示
+  </script>
+
 </body>
+
 </html>

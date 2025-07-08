@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -38,14 +39,15 @@ public class UserService {
     private MailService mailService;
 
     @Autowired
-    private UsersRepository usersRepository;
+    private PasswordConvert passwordConvert;
+
 
     public Users getUserByEmail(String email) {
         return usersRepo.findByEmail(email);
     }
 
     public enum LoginResult {
-        SUCCESS, WRONG_PASSWORD, USER_NOT_FOUND, ACCOUNT_SUSPENDED, ACCOUNT_DELETED
+        SUCCESS, WRONG_PASSWORD, USER_NOT_FOUND, ACCOUNT_SUSPENDED, ACCOUNT_DELETED, NOT_VERIFIED
     }
 
     public LoginResult login(String email, String inputPassword) {
@@ -54,12 +56,16 @@ public class UserService {
             return LoginResult.USER_NOT_FOUND;
 
         // 檢查帳戶狀態
+        if (user.getUserStatus() == (byte) 0) {
+            return LoginResult.NOT_VERIFIED;
+        }
         if (user.getUserStatus() == (byte) 2) {
             return LoginResult.ACCOUNT_SUSPENDED;
         }
         if (user.getUserStatus() == (byte) 3) {
             return LoginResult.ACCOUNT_DELETED;
         }
+
         if (user.getUserStatus() != 1) {
             return LoginResult.USER_NOT_FOUND;
         }
@@ -113,7 +119,9 @@ public class UserService {
     }
 
     public void sendResetPasswordEmail(String email) {
-        Users user = usersRepository.findByEmail(email);
+
+        Users user = usersRepo.findByEmail(email);
+
         if (user == null) {
             throw new IllegalArgumentException("此 Email 尚未註冊");
         }
@@ -125,10 +133,40 @@ public class UserService {
         redisUtil.setObject("resetToken:" + token, user.getUserId(), 1800); // 1800 秒 = 30 分鐘
 
         // 準備信件內容
-        String resetLink = "http://localhost:8080/user/reset-password?token=" + token;
+
+        String resetLink = "http://localhost:8080/login/resetPassword?token=" + token;
+
         String subject = "重設密碼通知";
         String content = "請點擊下列連結以重設密碼（30 分鐘內有效）：\n" + resetLink;
 
         mailService.sendMail(email, subject, content);
     }
+
+
+    public void updatePassword(Integer userId, String rawPassword) {
+        Users user = getUserById(userId);
+        if (user != null) {
+            String hashedPwd = passwordConvert.hashing(rawPassword); // 密碼加密
+            user.setPwd(hashedPwd);
+            user.setUpdatedTime(Timestamp.from(Instant.now()));
+            usersRepo.save(user); // 存回資料庫
+        }
+    }
+
+    public void handlePostRegister(Users user) {
+        // 產生隨機 token
+        String token = UUID.randomUUID().toString();
+
+        // 儲存 token -> email，設定有效時間（例如 24 小時）
+        redisUtil.set("verify:token:" + token, user.getEmail(), 300); // 5 MINS有效
+
+        // 構造驗證連結
+        String link = "http://localhost:8080/login/verify?token=" + token;
+        String content = "請點擊以下連結完成帳號驗證：" + link + "\n驗證帳號";
+
+        // 寄信
+        mailService.sendMail(user.getEmail(), "帳號驗證", content);
+    }
+
+
 }

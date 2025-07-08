@@ -58,8 +58,12 @@ public class MailService {
 
     // 專用：忘記密碼信
     public void sendResetPasswordEmail(String to, String resetLink) {
-        String subject = "重設密碼連結";
-        String content = "請點選以下連結重設密碼：\n" + resetLink;
+
+        String subject = "重設密碼通知";
+        String content = "您好，\n\n請點選以下連結重新設定您的密碼（連結 15 分鐘內有效）：\n\n" + resetLink + "\n\n" +
+                "如果您沒有請求此重設，請忽略本信件。\n\nShakemate團隊敬上";
         sendMail(to, subject, content);
     }
+
+
 }

@@ -11,7 +11,29 @@
     html { font-size: 62.5%; font-family: "Noto Sans TC", sans-serif; }
     body { margin: 0; background: rgba(170,198,202,1); color: #333; }
     *, *::before, *::after { box-sizing: border-box; }
+    
+        /* 全頁背景漸層 */
+    .bg {
+      position: relative;
+      min-height: 100vh;
+      background: linear-gradient(185deg,
+          #DCFF61 0%,
+          #DCFF61 55%,
+          #2EC4B6 55%,
+          #2EC4B6 100%);
+      overflow: hidden;
+    }
+
+    .bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+    }
+    
     .container {
+            z-index: 1000;
       max-width: 60rem;
       margin: 2rem auto;
       padding: 1rem;
@@ -71,6 +93,7 @@
   </style>
 </head>
 <body>
+  <div class="bg">
   <div class="container">
     <h2>編輯服務案件</h2>
 
@@ -141,6 +164,7 @@
         <a th:href="@{/servicecase}" class="btn cancel">取消</a>
       </div>
     </form>
+  </div>
   </div>
 </body>
 </html>
