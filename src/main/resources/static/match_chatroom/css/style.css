@@ -53,7 +53,6 @@ html {
 @media (min-width: 769px) and (max-width: 1199px) {
   .chat-layout {
     max-width: 90%;
-    border: none;
   }
 }
 @media (min-width: 481px) and (max-width: 768px) {
