@@ -144,14 +144,16 @@
     <div class="container">
       <h2>新增服務案件</h2>
       <form th:action="@{/servicecase/save}" th:object="${serviceCaseDTO}" method="post">
-        <div>
+        <div th:classappend="${#fields.hasErrors('userId')}? 'has-error'">
           <label for="userId">使用者 ID：</label>
           <input type="number" id="userId" th:field="*{userId}" placeholder="輸入使用者 ID" required />
+          <div class="error-msg" th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}"></div>
         </div>
-        <div>
+        <div th:classappend="${#fields.hasErrors('admId')}? 'has-error'">
           <label for="admId">管理員 ID：</label>
-<!--           <input type="number" id="admId" th:field="*{admId}" readonly /> -->
+          <!--           <input type="number" id="admId" th:field="*{admId}" readonly /> -->
           <input type="number" id="admId" th:field="*{admId}" placeholder="輸入管理員 ID" />
+          <div class="error-msg" th:if="${#fields.hasErrors('admId')}" th:errors="*{admId}"></div>
         </div>
         <div th:classappend="${#fields.hasErrors('email')}? 'has-error'">
           <label for="email">Email：</label>
