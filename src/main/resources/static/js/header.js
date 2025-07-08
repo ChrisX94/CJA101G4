@@ -40,7 +40,7 @@ includeHTML(() => {
         const iconEl = document.getElementById('userIcon');
         const memberEl = iconEl?.parentNode;
         if (iconEl && memberEl) {
-          memberEl.href = "/profile";
+          memberEl.href = "/user/profile";
           memberEl.innerHTML = `<img src="${data.userAvatar}" alt="會員頭像" class="avatar-img">`;
 
 
