@@ -268,6 +268,19 @@
         font-size: 2rem;
       }
     }
+
+    .has-error input,
+    .has-error textarea,
+    .has-error select {
+      border-color: #dc3545;
+    }
+
+    .error-msg {
+      color: #dc3545;
+      font-size: 1.3rem;
+      margin-top: -0.8rem;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 
@@ -290,13 +303,14 @@
         <!-- 表單區域 -->
         <div class="table-container">
           <div class="form-box">
-            <form action="/news/save" method="POST"  th:object="${newsDto}">
-            
+            <form action="/news/save" method="POST" th:object="${newsDto}">
+
               <!-- 管理員 ID（可手動輸入） -->
-  <div>
-<label for="adminId">管理員 ID：</label>
-<input type="number" th:field="*{adminId}" required>
-  </div>      
+              <div th:classappend="${#fields.hasErrors('adminId')}? 'has-error'">
+                <label for="adminId">管理員 ID：</label>
+                <input type="number" th:field="*{adminId}" required>
+                <div class="error-msg" th:if="${#fields.hasErrors('adminId')}" th:errors="*{adminId}"></div>
+              </div>
               <div>
                 <label for="categoryId">類別：</label>
                 <select name="categoryId" required>
@@ -305,14 +319,16 @@
                 </select>
               </div>
 
-              <div>
+              <div th:classappend="${#fields.hasErrors('title')}? 'has-error'">
                 <label for="title">標題：</label>
                 <input type="text" id="title" name="title" required>
+                <div class="error-msg" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
               </div>
 
-              <div>
+              <div th:classappend="${#fields.hasErrors('content')}? 'has-error'">
                 <label for="content">內容：</label>
                 <textarea id="content" name="content" required></textarea>
+                <div class="error-msg" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
               </div>
 
               <div class="form-actions">

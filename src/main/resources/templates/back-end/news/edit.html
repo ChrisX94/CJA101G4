@@ -263,6 +263,19 @@
         font-size: 2rem;
       }
     }
+
+    .has-error input,
+    .has-error textarea,
+    .has-error select {
+      border-color: #dc3545;
+    }
+
+    .error-msg {
+      color: #dc3545;
+      font-size: 1.3rem;
+      margin-top: -0.8rem;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 
@@ -285,15 +298,19 @@
         <!-- 表單 -->
         <div class="table-container">
           <div class="form-box">
-            <form th:action="@{${newsDto.newsId == null} ? '/news/add' : '/news/update/' + ${newsDto.newsId}}" method="POST"
-              th:object="${newsDto}">
+            <form th:action="@{${newsDto.newsId} != null ? '/news/update/' + ${newsDto.newsId} : '/news/add'}"
+              th:object="${newsDto}" method="POST">
 
-              <div>
+              <div th:if="${#fields.hasGlobalErrors()}">
+                <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">全域錯誤</p>
+              </div>
+              <div th:classappend="${#fields.hasErrors('adminId')}? 'has-error'">
                 <label for="adminId">管理員 ID：</label>
                 <input type="number" th:field="*{adminId}" required>
+                <div class="error-msg" th:if="${#fields.hasErrors('adminId')}" th:errors="*{adminId}"></div>
               </div>
 
-              <div>
+              <div th:classappend="${#fields.hasErrors('categoryId')}? 'has-error'">
                 <label for="categoryId">類別：</label>
                 <select name="categoryId" required>
                   <option th:each="type : ${allTypes}" th:value="${type.categoryId}"
@@ -301,14 +318,16 @@
                 </select>
               </div>
 
-              <div>
+              <div th:classappend="${#fields.hasErrors('title')}? 'has-error'">
                 <label for="title">標題：</label>
                 <input type="text" id="title" name="title" th:value="${newsDto.title}" required>
+                <div class="error-msg" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
               </div>
 
-              <div>
+              <div th:classappend="${#fields.hasErrors('content')}? 'has-error'">
                 <label for="content">內容：</label>
                 <textarea id="content" name="content" required th:text="${newsDto.content}"></textarea>
+                <div class="error-msg" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
               </div>
 
               <div class="form-actions">

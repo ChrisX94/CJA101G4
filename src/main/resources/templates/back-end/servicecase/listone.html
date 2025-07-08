@@ -47,6 +47,19 @@
       pointer-events: none;
     }
 
+    .date-group-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 1.2rem;
+      flex: 1 1 100%;
+    }
+
+    .date-group-row .date-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
     /* 容器 */
     .container {
       z-index: 1000;
@@ -179,8 +192,6 @@
       color: black;
     }
 
-
-
     .pagination-controls {
       margin-top: 1rem;
       text-align: center;
@@ -200,6 +211,18 @@
       background-color: #03a9f4;
       color: #fff;
       font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .date-group-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-button {
+        align-self: stretch;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -229,15 +252,17 @@
             <option value="2">已完成</option>
           </select>
         </div>
-        <div class="field">
-          <label for="from">起始日期</label>
-          <input type="date" id="from" name="fromDate" />
-        </div>
-        <div class="field">
-          <label for="to">結束日期</label>
-          <input type="date" id="to" name="toDate" />
-        </div>
-        <button type="submit" class="search-button">查 詢</button>
+<!--         <div class="date-group-row"> -->
+<!--           <div class="field"> -->
+<!--             <label for="from">起始日期</label> -->
+<!--             <input type="date" id="from" name="fromDate" /> -->
+<!--           </div> -->
+<!--           <div class="field"> -->
+<!--             <label for="to">結束日期</label> -->
+<!--             <input type="date" id="to" name="toDate" /> -->
+<!--           </div> -->
+          <button type="submit" class="search-button">查 詢</button>
+<!--         </div> -->
       </form>
 
       <table>

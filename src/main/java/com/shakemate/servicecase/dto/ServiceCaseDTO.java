@@ -8,11 +8,20 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 
+import jakarta.validation.constraints.NotNull;
+
+
 public class ServiceCaseDTO {
 	private Integer caseId;
+	
+    /** 使用者、管理員 ID 都不能為空，空值交給 Spring 檢查 */
+    @NotNull(message = "使用者 ID 不可為空")
 	private Integer userId;
+    
+    @NotNull(message = "管理員 ID 不可為空")
 	private Integer admId;
-	private Integer caseTypeId;
+	
+    private Integer caseTypeId;
 	private String caseTypeName; // 額外欄位：直接顯示 CaseType 的名稱
 	private Timestamp createTime;
 	private Timestamp updateTime;

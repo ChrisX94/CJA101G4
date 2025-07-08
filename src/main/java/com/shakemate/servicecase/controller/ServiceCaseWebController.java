@@ -2,11 +2,13 @@ package com.shakemate.servicecase.controller;
 //負責後台 HTML 頁面的 CRUD（Thymeleaf／JSP 等）。
 import com.shakemate.casetype.model.CaseType;
 import com.shakemate.casetype.model.CaseTypeRepository;
+import com.shakemate.adm.model.AdmRepository;
 import com.shakemate.adm.model.AdmVO; // 根據你的專案結構調整
 import com.shakemate.servicecase.dto.ServiceCaseDTO;
 import com.shakemate.servicecase.mapper.ServiceCaseMapper;
 import com.shakemate.servicecase.model.ServiceCase;
 import com.shakemate.servicecase.service.ServiceCaseService;
+import com.shakemate.user.dao.UsersRepository;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -39,6 +41,13 @@ public class ServiceCaseWebController {
 	public List<CaseType> populateCaseTypes() {
 		return caseTypeRepo.findAll();
 	}
+	
+	// 1. 注入使用者、管理員 Repository
+    @Autowired
+    private UsersRepository userRepository;     // 你的 User JPA repo
+
+    @Autowired
+    private AdmRepository adminRepository;   // 你的 AdmVO JPA repo
 
 	// 顯示全部案件
 	@GetMapping({"", "/list"})
@@ -69,6 +78,24 @@ public class ServiceCaseWebController {
             BindingResult errors,
             Model model,
             RedirectAttributes ra) {
+    	
+    	// 2. 手動檢查 userId
+        if (dto.getUserId() != null && !userRepository.existsById(dto.getUserId())) {
+            errors.rejectValue(
+                "userId",            // 欄位名
+                "NotFound.userId",   // code (對應 messages.properties)
+                "使用者 ID 不存在"   // defaultMessage
+            );
+        }
+
+        // 2. 手動檢查 admId
+        if (dto.getAdmId() != null && !adminRepository.existsById(dto.getAdmId())) {
+            errors.rejectValue(
+                "admId",
+                "NotFound.admId",
+                "管理員 ID 不存在"
+            );
+        }
 
         if (errors.hasErrors()) {
             // 驗證失敗 → 留在 add 頁面，Thymeleaf 會顯示錯誤
@@ -136,8 +163,28 @@ public class ServiceCaseWebController {
             BindingResult errors,
             Model model,
             RedirectAttributes ra) {
+    	
+        // 使用者 ID 存在性檢查
+        if (dto.getUserId() != null && !userRepository.existsById(dto.getUserId())) {
+            errors.rejectValue(
+                "userId",
+                "NotFound.userId",
+                "使用者 ID 不存在"
+            );
+        }
+
+        // 管理員 ID 存在性檢查
+        if (dto.getAdmId() != null && !adminRepository.existsById(dto.getAdmId())) {
+            errors.rejectValue(
+                "admId",
+                "NotFound.admId",
+                "管理員 ID 不存在"
+            );
+        }
 
         if (errors.hasErrors()) {
+            // 千萬別忘記把下拉選單資料再塞一次
+            model.addAttribute("allTypes", caseTypeRepo.findAll());
             return "back-end/servicecase/edit";
         }
         ServiceCase entity = ServiceCaseMapper.toEntity(dto);
