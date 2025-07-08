@@ -185,12 +185,12 @@ public class UserController {
 
         // 處理密碼更新
         if (newPassword != null && !newPassword.trim().isEmpty()) {
-            // 驗證密碼長度
-            if (newPassword.length() < 6) {
-                redirectAttributes.addFlashAttribute("error", "密碼長度至少需要6個字符");
+            // 密碼格式檢查（英數混合+特殊符號+至少8碼）
+            if (!newPassword.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$")) {
+                redirectAttributes.addFlashAttribute("error", "密碼需至少8碼，且包含英文字母、數字與特殊符號");
                 return "redirect:/user/profile";
             }
-            // 加密新密碼並更新
+            // 密碼加密後更新
             original.setPwd(passwordConvert.hashing(newPassword));
         }
 

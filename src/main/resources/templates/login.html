@@ -6,33 +6,61 @@
     <title>會員登入</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f2f5;
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+        }
+
+        .bg {
+            position: relative;
+            min-height: 100vh;
+            z-index: 0;
+            background: linear-gradient(185deg,
+                    #DCFF61 0%,
+                    #DCFF61 55%,
+                    #2EC4B6 55%,
+                    #2EC4B6 100%);
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+        }
+
+        .bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.35);
+            z-index: 0;
+            pointer-events: none;
         }
 
         .login-container {
+            position: relative;
+            z-index: 1;
             background-color: #ffffff;
             padding: 30px 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .login-container img {
+            width: 120px;
+            margin-bottom: 20px;
         }
 
         h2 {
-            text-align: center;
             margin-bottom: 25px;
             color: #333;
         }
 
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
         }
 
         label {
@@ -46,23 +74,30 @@
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #ccc;
-            border-radius: 6px;
+            border-radius: 10px;
             box-sizing: border-box;
+            font-size: 1rem;
         }
 
-        button {
+        .btn {
             width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
+            height: 3.5rem;
+            font-size: 1.4rem;
             border: none;
-            border-radius: 6px;
-            color: white;
-            font-size: 16px;
+            border-radius: 2rem;
             cursor: pointer;
+            transition: background 0.3s;
         }
 
-        button:hover {
-            background-color: #45a049;
+        .right-btn {
+            background-color: #aaa;
+            border: 2px solid gray;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .right-btn:hover {
+            background-color: #888;
         }
 
         .message {
@@ -78,58 +113,63 @@
             color: green;
         }
 
-        .register-link {
+        .register-link,
+        .forgot-password-link {
             text-align: center;
             margin-top: 15px;
         }
 
-        .register-link a {
+        .register-link a,
+        .forgot-password-link a {
             color: #007BFF;
             text-decoration: none;
+            font-size: 14px;
         }
 
-        .register-link a:hover {
+        .register-link a:hover,
+        .forgot-password-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
+    <div class="bg">
+        <div class="login-container">
+            <img src="/img/logo1.png" alt="LOGO">
+            <h2>會員登入</h2>
 
-    <div class="login-container">
-        <h2>會員登入</h2>
-
-        <div class="message error" th:if="${error}">
-            <p th:utext="${error}"></p>
-        </div>
-
-        <div class="message success" th:if="${success}">
-            <p th:text="${success}"></p>
-        </div>
-
-        <form th:action="@{/login/loginHandler}" method="post">
-            <div class="form-group">
-                <label for="email">電子郵件</label>
-                <input type="email" id="email" name="account" required />
+            <div class="message error" th:if="${error}">
+                <p th:utext="${error}"></p>
             </div>
 
-            <div class="form-group">
-                <label for="pwd">密碼</label>
-                <input type="password" id="pwd" name="password" required />
+            <div class="message success" th:if="${success}">
+                <p th:text="${success}"></p>
             </div>
 
-            <button type="submit">登入</button>
-        </form>
+            <form th:action="@{/login/loginHandler}" method="post">
+                <div class="form-group">
+                    <label for="email">電子郵件</label>
+                    <input type="email" id="email" name="account" required />
+                </div>
 
-        <div class="register-link">
-            還沒有帳號？<a th:href="@{/login/signup}">註冊新會員</a>
-        </div>
+                <div class="form-group">
+                    <label for="pwd">密碼</label>
+                    <input type="password" id="pwd" name="password" required />
+                </div>
 
-        <div class="forgot-password-link" style="text-align: center; margin-top: 10px;">
-            <a th:href="@{/login/forgotPassword}" style="color: #666; text-decoration: none; font-size: 14px;">忘記密碼？</a>
+                <button type="submit" class="btn right-btn">登入</button>
+            </form>
+
+            <div class="register-link">
+                還沒有帳號？<a th:href="@{/login/signup}">註冊新會員</a>
+            </div>
+
+            <div class="forgot-password-link">
+                <a th:href="@{/login/forgotPassword}">忘記密碼？</a>
+            </div>
         </div>
     </div>
-
 </body>
 
 </html>
