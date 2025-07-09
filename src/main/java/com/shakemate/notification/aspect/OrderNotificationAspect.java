@@ -300,6 +300,21 @@ public class OrderNotificationAspect {
         variables.put("shipping_method", getShippingMethodDescription(order.getShippingMethod()));
         variables.put("shipped_time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         
+        // 為模板提供追蹤號碼和預計送達時間
+        // 如果訂單實體中沒有這些欄位，提供預設值
+        variables.put("tracking_number", "TW" + order.getShOrderId() + "00" + System.currentTimeMillis() % 10000);
+        
+        // 預計送達時間：宅配通常1-3天，超商取貨通常2-5天
+        LocalDateTime estimatedDelivery;
+        if (order.getShippingMethod() != null && order.getShippingMethod() == 1) {
+            // 超商取貨：2-5天
+            estimatedDelivery = LocalDateTime.now().plusDays(3);
+        } else {
+            // 宅配：1-3天
+            estimatedDelivery = LocalDateTime.now().plusDays(2);
+        }
+        variables.put("estimated_delivery", estimatedDelivery.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        
         return variables;
     }
 

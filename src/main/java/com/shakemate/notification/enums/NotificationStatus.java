@@ -8,7 +8,8 @@ public enum NotificationStatus {
     DRAFT(0, "草稿"),
     PUBLISHED(1, "已發布"),
     WITHDRAWN(2, "已撤回"),
-    EXPIRED(3, "已過期");
+    EXPIRED(3, "已過期"),
+    SCHEDULED(4, "已排程"); // 🔧 添加排程狀態
     
     private final int code;
     private final String description;

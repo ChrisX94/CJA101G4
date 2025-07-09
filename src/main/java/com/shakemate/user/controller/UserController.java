@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -45,6 +47,24 @@ public class UserController {
 
     @Autowired
     private PasswordConvert passwordConvert;
+
+    // 獲取當前用戶ID的API端點
+    @GetMapping("/api/current-id")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getCurrentUserId(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        Integer userId = (Integer) session.getAttribute("account");
+        if (userId == null) {
+            response.put("success", false);
+            response.put("message", "用戶未登錄");
+            return ResponseEntity.status(401).body(response);
+        }
+        
+        response.put("success", true);
+        response.put("userId", userId);
+        return ResponseEntity.ok(response);
+    }
 
     // 顯示會員個人資料
     @GetMapping("/profile")

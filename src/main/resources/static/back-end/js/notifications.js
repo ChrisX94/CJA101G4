@@ -25,8 +25,8 @@ $(document).ready(function () {
     const dt = $('#notifications-table').DataTable({
         processing: true,
         serverSide: true,
-        pageLength: 50, // 默认每页50条
-        lengthMenu: [10, 20, 50, 100, 200], // 可选每页条数
+        pageLength: 10, // 🔧 修復：預設每頁10筆
+        lengthMenu: [10, 20, 50, 100, 200], // 可選每頁條數
         ajax: {
             url: notificationsApiUrl + '/',
             data: function(d) {
@@ -53,30 +53,47 @@ $(document).ready(function () {
             }
         },
         columns: [
-            { data: 'notificationId' },
-            { data: 'title' },
-            { data: 'targetType' },
-            { data: 'status' },
             { 
-                data: 'createdTime', 
-                render: function(data) {
-                    if (!data) return '';
-                    if (Array.isArray(data) && data.length >= 5) {
-                        const year = data[0];
-                        const month = data[1] - 1;
-                        const day = data[2];
-                        const hour = data[3] || 0;
-                        const minute = data[4] || 0;
-                        const second = data[5] || 0;
-                        const date = new Date(year, month, day, hour, minute, second);
-                        return date.toLocaleString('zh-TW');
+                data: 'notificationId',
+                width: '8%',
+                className: 'text-center'
+            },
+            { 
+                data: 'title',
+                width: '20%',
+                className: 'text-left'
+            },
+            { 
+                data: 'targetType',
+                width: '10%',
+                className: 'text-center'
+            },
+            { 
+                data: 'status',
+                width: '8%',
+                className: 'text-center',
+                render: function(data, type, row) {
+                    // 🔧 使用statusCode進行狀態判斷
+                    const statusCode = row.statusCode;
+                    if (statusCode === 0) {
+                        return '<span class="badge bg-secondary">草稿</span>';
+                    } else if (statusCode === 1) {
+                        return '<span class="badge bg-success">已發布</span>';
+                    } else if (statusCode === 2) {
+                        return '<span class="badge bg-warning">已撤回</span>';
+                    } else if (statusCode === 3) {
+                        return '<span class="badge bg-danger">已過期</span>';
+                    } else if (statusCode === 4) {
+                        return '<span class="badge bg-info">已排程</span>';
+                    } else {
+                        return '<span class="badge bg-light text-dark">未知</span>';
                     }
-                    return new Date(data).toLocaleString('zh-TW');
                 }
             },
             { 
-                data: 'validFrom', 
-                title: '通知有效起始時間',
+                data: 'createdTime',
+                width: '15%',
+                className: 'text-center',
                 render: function(data) {
                     if (!data) return '';
                     if (Array.isArray(data) && data.length >= 5) {
@@ -87,16 +104,29 @@ $(document).ready(function () {
                         const minute = data[4] || 0;
                         const second = data[5] || 0;
                         const date = new Date(year, month, day, hour, minute, second);
-                        return date.toLocaleString('zh-TW');
+                        return date.toLocaleString('zh-TW', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
                     }
-                    return new Date(data).toLocaleString('zh-TW');
+                    return new Date(data).toLocaleString('zh-TW', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                 }
             },
             { 
-                data: 'validUntil', 
-                title: '通知有效結束時間',
+                data: 'validFrom',
+                width: '15%',
+                className: 'text-center',
                 render: function(data) {
-                    if (!data) return '';
+                    if (!data) return '<span class="text-muted">未設定</span>';
                     if (Array.isArray(data) && data.length >= 5) {
                         const year = data[0];
                         const month = data[1] - 1;
@@ -105,21 +135,69 @@ $(document).ready(function () {
                         const minute = data[4] || 0;
                         const second = data[5] || 0;
                         const date = new Date(year, month, day, hour, minute, second);
-                        return date.toLocaleString('zh-TW');
+                        return date.toLocaleString('zh-TW', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
                     }
-                    return new Date(data).toLocaleString('zh-TW');
+                    return new Date(data).toLocaleString('zh-TW', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            },
+            { 
+                data: 'validUntil',
+                width: '15%',
+                className: 'text-center',
+                render: function(data) {
+                    if (!data) return '<span class="text-muted">未設定</span>';
+                    if (Array.isArray(data) && data.length >= 5) {
+                        const year = data[0];
+                        const month = data[1] - 1;
+                        const day = data[2];
+                        const hour = data[3] || 0;
+                        const minute = data[4] || 0;
+                        const second = data[5] || 0;
+                        const date = new Date(year, month, day, hour, minute, second);
+                        return date.toLocaleString('zh-TW', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                    return new Date(data).toLocaleString('zh-TW', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                 }
             },
             {
                 data: null,
+                width: '9%',
                 orderable: false,
+                className: 'text-center',
                 render: function (data, type, row) {
-                    let buttons = `<button class="btn btn-primary btn-sm detail-btn" data-id="${row.notificationId}"><i class="fas fa-info-circle"></i> 詳情</button> `;
-                    buttons += `<button class="btn btn-info btn-sm report-btn" data-id="${row.notificationId}"><i class="fas fa-chart-bar"></i> 報告</button> `;
-                    if (row.status === '草稿') {
-                        buttons += `<button class="btn btn-success btn-sm send-btn" data-id="${row.notificationId}"><i class="fas fa-paper-plane"></i> 發送</button> `;
+                    let buttons = `<div class="btn-group-vertical" role="group">`;
+                    buttons += `<button class="btn btn-primary btn-sm detail-btn mb-1" data-id="${row.notificationId}" title="查看詳情"><i class="fas fa-info-circle"></i></button>`;
+                    buttons += `<button class="btn btn-info btn-sm report-btn mb-1" data-id="${row.notificationId}" title="查看報告"><i class="fas fa-chart-bar"></i></button>`;
+                    // 🔧 更新發送按鈕邏輯：草稿和排程狀態都能發送
+                    if (row.statusCode === 0 || row.statusCode === 4) {
+                        buttons += `<button class="btn btn-success btn-sm send-btn mb-1" data-id="${row.notificationId}" title="發送通知"><i class="fas fa-paper-plane"></i></button>`;
                     }
-                    buttons += `<button class="btn btn-danger btn-sm delete-btn" data-id="${row.notificationId}"><i class="fas fa-trash"></i> 刪除</button>`;
+                    buttons += `<button class="btn btn-danger btn-sm delete-btn" data-id="${row.notificationId}" title="刪除通知"><i class="fas fa-trash"></i></button>`;
+                    buttons += `</div>`;
                     return buttons;
                 }
             }
@@ -175,8 +253,9 @@ $(document).ready(function () {
             templateId: parseInt($('#templateId').val()),
             targetType: $('#targetType').val(),
             targetIds: targetIds,
-            startTime: $('#startTime').val() ? new Date($('#startTime').val()).toISOString() : null,
-            endTime: $('#endTime').val() ? new Date($('#endTime').val()).toISOString() : null,
+            scheduledTime: $('#scheduledTime').val() || null, // 🔧 添加排程時間
+            startTime: $('#startTime').val() || null,
+            endTime: $('#endTime').val() || null,
             notificationCategory: $('#notificationCategory').val(),
             notificationLevel: parseInt($('#notificationLevel').val()),
             renderParams: renderParams,

@@ -243,18 +243,19 @@
   position: absolute;
   top: 130%; /* 調整下拉選單與鈴鐺的距離 */
   right: -1rem;
-  width: 35rem; /* 調整寬度 */
-  max-height: 45rem; /* 增加最大高度 */
+  width: 38rem; /* 增加寬度讓內容更舒展 */
+  max-height: 50rem; /* 增加最大高度 */
   overflow-y: auto;
   background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.15); /* 增加陰影 */
+  border-radius: 1.2rem; /* 增加圓角 */
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2), 0 0.4rem 1rem rgba(0, 0, 0, 0.1); /* 更深的陰影效果 */
   opacity: 0;
   visibility: hidden;
   transform: translateY(-1rem);
   transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-  padding: 0.5rem 0; /* 調整內邊距 */
+  padding: 0; /* 移除內邊距，讓頭部和底部更整齊 */
   z-index: 1100;
+  border: 1px solid #e8e8e8; /* 添加邊框 */
 }
 .notification-dropdown.show {
   opacity: 1;
@@ -262,72 +263,305 @@
   transform: translateY(0);
 }
 
-.notification-dropdown .notification-item {
-  display: flex;
-  padding: 1rem 1.5rem;
-  gap: 1rem;
-  transition: background-color 0.2s;
-  cursor: pointer;
-}
-.notification-dropdown .notification-item:hover {
-  background-color: #f5f5f5;
-}
-.notification-dropdown .notification-item:last-child {
-  border-bottom: none;
-}
-.notification-dropdown .notification-item.unread {
-  background-color: #eef7ff; /* 未讀通知的背景色 */
-}
-
-/* 增加對內容的樣式設定，提高優先級 */
-.notification-dropdown .notification-content {
-  flex-grow: 1;
-}
-
-.notification-dropdown .notification-title {
-  font-size: 1.5rem; /* 調整字體大小 */
+/* 添加通知列表頭部 */
+.notification-dropdown::before {
+  content: "📢 最新通知";
+  display: block;
+  padding: 1.5rem 2rem 1rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: #333;
-  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 1.2rem 1.2rem 0 0;
 }
 
-.notification-dropdown .notification-text {
-  font-size: 1.4rem; /* 調整字體大小 */
-  color: #666;
+.notification-dropdown .notification-item {
+  display: flex;
+  flex-direction: column;
+  padding: 1.8rem 2rem;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.notification-dropdown .notification-item:hover {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  transform: translateX(0.3rem);
+  box-shadow: inset 0.4rem 0 0 #2EC4B6;
+}
+
+.notification-dropdown .notification-item:last-of-type {
+  border-bottom: none;
+}
+
+.notification-dropdown .notification-item.unread {
+  background: linear-gradient(135deg, #eef7ff 0%, #f8fbff 100%);
+  position: relative;
+}
+
+.notification-dropdown .notification-item.unread::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0.4rem;
+  background: linear-gradient(180deg, #2EC4B6 0%, #1a9d94 100%);
+  border-radius: 0 0.2rem 0.2rem 0;
+}
+
+.notification-dropdown .notification-item.unread::after {
+  content: "新";
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.2rem 0.4rem rgba(255, 107, 107, 0.3);
+}
+
+/* 通知標題樣式 */
+.notification-dropdown .notification-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.8rem;
   line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
 }
 
+.notification-dropdown .notification-title .notification-icon {
+  font-size: 1.8rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.notification-dropdown .notification-title .title-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+/* 通知內容樣式 */
+.notification-dropdown .notification-content {
+  font-size: 1.4rem;
+  color: #5a6c7d;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  padding-left: 2.6rem; /* 與標題圖標對齊 */
+  word-break: break-word;
+}
+
+/* 通知時間和底部資訊 */
 .notification-dropdown .notification-time {
-  font-size: 1.2rem; /* 調整字體大小 */
-  color: #999;
-  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  color: #95a5a6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 2.6rem; /* 與標題圖標對齊 */
 }
 
+.notification-dropdown .notification-time .time-text {
+  font-weight: 500;
+  color: #7f8c8d;
+}
+
+.notification-dropdown .notification-time .exact-time {
+  font-size: 1.1rem;
+  color: #bdc3c7;
+  font-style: italic;
+}
+
+.notification-dropdown .notification-time::before {
+  content: "🕒";
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+/* 載入、錯誤和無通知狀態樣式 */
 .notification-dropdown .loading,
 .notification-dropdown .error,
 .notification-dropdown .no-notifications {
-    text-align: center;
-    padding: 2rem;
-    color: #666;
-    font-size: 1.4rem;
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #7f8c8d;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.notification-dropdown .loading::before {
+  content: "⏳";
+  display: block;
+  font-size: 2.4rem;
+  margin-bottom: 1rem;
 }
 
 .notification-dropdown .error {
-    color: #d32f2f;
+  color: #e74c3c;
 }
 
+.notification-dropdown .error::before {
+  content: "⚠️";
+  display: block;
+  font-size: 2.4rem;
+  margin-bottom: 1rem;
+}
+
+.notification-dropdown .no-notifications::before {
+  content: "📭";
+  display: block;
+  font-size: 2.4rem;
+  margin-bottom: 1rem;
+}
+
+/* 查看更多按鈕樣式 */
 .view-all-btn {
   display: block;
   text-align: center;
-  padding: 1rem;
+  padding: 1.5rem 2rem;
   font-size: 1.4rem;
+  font-weight: 600;
   color: #2EC4B6;
   text-decoration: none;
   border-top: 1px solid #f0f0f0;
-  transition: background-color 0.2s;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 0 0 1.2rem 1.2rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
+
 .view-all-btn:hover {
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, #2EC4B6 0%, #26b5a8 100%);
+  color: white;
+  transform: translateY(-0.1rem);
+  box-shadow: 0 0.4rem 1rem rgba(46, 196, 182, 0.3);
+}
+
+.view-all-btn::before {
+  content: "📋";
+  margin-right: 0.8rem;
+}
+
+/* 滾動條樣式 */
+.notification-dropdown::-webkit-scrollbar {
+  width: 0.6rem;
+}
+
+.notification-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 0.3rem;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #2EC4B6 0%, #26b5a8 100%);
+  border-radius: 0.3rem;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #26b5a8 0%, #239b94 100%);
+}
+
+/* 響應式設計 - 平板和小螢幕 */
+@media (max-width: 768px) {
+  .notification-dropdown {
+    width: 32rem;
+    right: -0.5rem;
+    max-height: 40rem;
+  }
+  
+  .notification-dropdown .notification-item {
+    padding: 1.5rem 1.5rem;
+  }
+  
+  .notification-dropdown .notification-title {
+    font-size: 1.5rem;
+  }
+  
+  .notification-dropdown .notification-content {
+    font-size: 1.3rem;
+    padding-left: 2.3rem;
+  }
+  
+  .notification-dropdown .notification-time {
+    padding-left: 2.3rem;
+  }
+}
+
+/* 響應式設計 - 手機螢幕 */
+@media (max-width: 480px) {
+  .notification-dropdown {
+    width: 28rem;
+    right: 0;
+    max-height: 35rem;
+  }
+  
+  .notification-dropdown::before {
+    padding: 1.2rem 1.5rem 0.8rem;
+    font-size: 1.4rem;
+  }
+  
+  .notification-dropdown .notification-item {
+    padding: 1.2rem 1.5rem;
+  }
+  
+  .notification-dropdown .notification-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .notification-dropdown .notification-title .notification-icon {
+    font-size: 1.6rem;
+  }
+  
+  .notification-dropdown .notification-content {
+    font-size: 1.2rem;
+    padding-left: 2rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .notification-dropdown .notification-time {
+    font-size: 1.1rem;
+    padding-left: 2rem;
+  }
+  
+  .notification-dropdown .notification-time .exact-time {
+    display: none; /* 在小螢幕隱藏詳細時間 */
+  }
+  
+  .view-all-btn {
+    padding: 1.2rem 1.5rem;
+    font-size: 1.3rem;
+  }
+  
+  .notification-dropdown .loading,
+  .notification-dropdown .error,
+  .notification-dropdown .no-notifications {
+    padding: 2rem 1.5rem;
+    font-size: 1.3rem;
+  }
+}
+
+/* 針對小型手機的進一步優化 */
+@media (max-width: 360px) {
+  .notification-dropdown {
+    width: 26rem;
+    right: 0.5rem;
+  }
+  
+  .notification-dropdown .notification-item.unread::after {
+    top: 0.8rem;
+    right: 1rem;
+    font-size: 0.9rem;
+    padding: 0.1rem 0.4rem;
+  }
 }
 
 /* 浮動通知樣式 */

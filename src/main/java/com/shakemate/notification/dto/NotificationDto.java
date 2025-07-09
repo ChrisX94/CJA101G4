@@ -20,6 +20,7 @@ public class NotificationDto {
     private LocalDateTime scheduledTime;
     private Integer createdBy;
     private String status;
+    private Integer statusCode; // 🔧 添加狀態碼欄位
     private Map<String, Object> renderParams;
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;

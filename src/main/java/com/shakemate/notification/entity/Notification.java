@@ -94,6 +94,10 @@ public class Notification {
         return validFrom;
     }
     
+    public void setScheduledTime(LocalDateTime scheduledTime) {
+        this.validFrom = scheduledTime;
+    } // 🔧 添加設置排程時間的方法
+    
     public LocalDateTime getSentTime() {
         // TODO: 需要從其他地方獲取實際發送時間
         return null;

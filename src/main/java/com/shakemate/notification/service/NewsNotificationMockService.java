@@ -22,20 +22,20 @@ public class NewsNotificationMockService {
     /** 新聞發布廣播通知 */
     public void broadcastNewsPublished(List<Integer> userIds, Map<String, Object> newsInfo) {
         for (Integer userId : userIds) {
-            dispatchService.sendNotification(userId, "新聞發布通知", "最新新聞發布：《" + newsInfo.get("title") + "》。", "IN_APP");
+            dispatchService.sendNotificationWithCategory(userId, "新聞發布通知", "最新新聞發布：《" + newsInfo.get("title") + "》。", "IN_APP", "更新公告");
             log.info("[模擬] 已通知用戶{}: 新聞發布 - {}", userId, newsInfo);
         }
     }
 
     /** 熱門話題推薦通知 */
     public void notifyTrendingTopic(Integer userId, String topic) {
-        dispatchService.sendNotification(userId, "熱門話題推薦", "您可能感興趣的熱門話題：「" + topic + "」已上榜，快來看看！", "IN_APP");
+        dispatchService.sendNotificationWithCategory(userId, "熱門話題推薦", "您可能感興趣的熱門話題：「" + topic + "」已上榜，快來看看！", "IN_APP", "更新公告");
         log.info("[模擬] 已通知用戶{}: 熱門話題推薦 - {}", userId, topic);
     }
 
     /** 分類新聞訂閱通知 */
     public void notifyCategorySubscription(Integer userId, String category, String newsTitle) {
-        dispatchService.sendNotification(userId, "分類新聞訂閱", "您訂閱的「" + category + "」有新新聞：《" + newsTitle + "》。", "IN_APP");
+        dispatchService.sendNotificationWithCategory(userId, "分類新聞訂閱", "您訂閱的「" + category + "」有新新聞：《" + newsTitle + "》。", "IN_APP", "更新公告");
         log.info("[模擬] 已通知用戶{}: 分類新聞訂閱 - {} - {}", userId, category, newsTitle);
     }
 
@@ -48,7 +48,7 @@ public class NewsNotificationMockService {
     /** 新聞推薦演算法集成（模擬） */
     public void recommendNewsToUser(Integer userId, List<Map<String, Object>> recommendedNews) {
         for (Map<String, Object> news : recommendedNews) {
-            dispatchService.sendNotification(userId, "新聞推薦", "根據您的興趣，推薦新聞：《" + news.get("title") + "》。", "IN_APP");
+            dispatchService.sendNotificationWithCategory(userId, "新聞推薦", "根據您的興趣，推薦新聞：《" + news.get("title") + "》。", "IN_APP", "更新公告");
             log.info("[模擬] 已推薦新聞給用戶{}: {}", userId, news);
         }
     }

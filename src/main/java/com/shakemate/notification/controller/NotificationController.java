@@ -20,12 +20,16 @@ import org.springframework.data.domain.PageRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 通知控制器 - 處理用戶端通知相關請求
  */
 @Controller
 @RequestMapping("/notifications")
+@Slf4j
 public class NotificationController {
 
     @Autowired
@@ -213,6 +217,43 @@ public class NotificationController {
             System.err.println("獲取最近通知時發生錯誤: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/api/test-notification")
+    @ResponseBody
+    public ResponseEntity<?> sendTestNotification(HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("account");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("未登入，請重新登入");
+        }
+        
+        try {
+            // 發送測試通知
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("test_message", "這是一個測試通知，用於驗證數字更新功能");
+            
+            CompletableFuture<Boolean> result = notificationService.sendTemplateNotification(
+                "TEST_NOTIFICATION", 
+                userId, 
+                variables
+            );
+            
+            if (result.get()) {
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "測試通知已發送（如果您的站內通知偏好設定已啟用）。請檢查通知鈴鐺數字是否立即更新，或檢查偏好設定：/notifications/preferences"
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("success", false, "message", "測試通知發送失敗")
+                );
+            }
+        } catch (Exception e) {
+            log.error("發送測試通知失敗: userId={}", userId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                Map.of("success", false, "message", "測試通知發送失敗: " + e.getMessage())
+            );
         }
     }
 

@@ -100,7 +100,7 @@ public class NewsNotificationAspect {
                 templateVariables.put("news_title", newsResponse.getTitle());
                 templateVariables.put("news_content", truncateContent(newsResponse.getContent(), 100));
                 templateVariables.put("category_name", newsResponse.getCategoryName());
-                templateVariables.put("admin_name", newsResponse.getAdminName());
+                templateVariables.put("admin_name", "管理員"); // NewsResponse沒有adminName，使用預設值
                 templateVariables.put("publish_time", newsResponse.getPublishTime().toString());
                 templateVariables.put("action_type", actionType);
 

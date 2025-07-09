@@ -34,10 +34,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory; // 🔧 添加日誌導入
+import jakarta.annotation.PreDestroy; // 🔧 修正PreDestroy導入
 
 @Service
 @Transactional
 public class AdminNotificationServiceImpl implements AdminNotificationService {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminNotificationServiceImpl.class); // 🔧 添加日誌變量
 
     @Autowired
     private NotificationService notificationService; // 注入使用者端的Service
@@ -74,6 +79,13 @@ public class AdminNotificationServiceImpl implements AdminNotificationService {
 
     @Autowired
     private com.shakemate.notification.repository.MemberNotificationRepository memberNotificationRepository;
+
+    @Autowired
+    private NotificationSchedulerService notificationSchedulerService; // 🔧 添加排程服務注入
+    
+    // 🔧 添加共享的排程執行器
+    private final java.util.concurrent.ScheduledExecutorService notificationScheduler = 
+        java.util.concurrent.Executors.newScheduledThreadPool(5);
 
     @Override
     @Transactional(readOnly = true)
@@ -136,10 +148,35 @@ public class AdminNotificationServiceImpl implements AdminNotificationService {
         notification.setCreatedTime(LocalDateTime.now());
         notification.setCreatedBy(adminId);
         
-        // 設置通知狀態為草稿
-        notification.setStatus(com.shakemate.notification.enums.NotificationStatus.DRAFT.getCode());
+        // 🔧 處理排程時間
+        if (createDto.getScheduledTime() != null) {
+            // 如果有排程時間，設置為排程狀態
+            notification.setScheduledTime(createDto.getScheduledTime());
+            notification.setStatus(com.shakemate.notification.enums.NotificationStatus.SCHEDULED.getCode());
+        } else {
+            // 如果沒有排程時間，設置為草稿狀態
+            notification.setStatus(com.shakemate.notification.enums.NotificationStatus.DRAFT.getCode());
+        }
 
         Notification savedNotification = notificationRepository.save(notification);
+
+        // 🔧 如果有排程時間，創建排程任務
+        if (createDto.getScheduledTime() != null) {
+            try {
+                // 創建排程任務 - 使用通知ID作為任務標識
+                // 這裡我們需要創建一個自定義的排程任務來處理通知發送
+                scheduleNotificationTask(savedNotification);
+                
+                log.info("通知排程任務已創建: notificationId={}, scheduledTime={}", 
+                        savedNotification.getNotificationId(), createDto.getScheduledTime());
+                        
+            } catch (Exception e) {
+                log.error("創建通知排程任務失敗: notificationId={}", savedNotification.getNotificationId(), e);
+                // 如果排程創建失敗，將狀態改回草稿
+                savedNotification.setStatus(com.shakemate.notification.enums.NotificationStatus.DRAFT.getCode());
+                notificationRepository.save(savedNotification);
+            }
+        }
 
         return notificationMapper.toDto(savedNotification);
     }
@@ -159,10 +196,11 @@ public class AdminNotificationServiceImpl implements AdminNotificationService {
             throw new IllegalStateException("通知狀態無效: " + status);
         }
         
-        if (currentStatus == com.shakemate.notification.enums.NotificationStatus.DRAFT) {
+        if (currentStatus == com.shakemate.notification.enums.NotificationStatus.DRAFT || 
+            currentStatus == com.shakemate.notification.enums.NotificationStatus.SCHEDULED) {
             notificationDispatchService.dispatchNotification(notification);
         } else {
-            throw new IllegalStateException("只有在 PENDING 或 FAILED 狀態的通知才能被發送。目前狀態為：" + currentStatus.getDescription());
+            throw new IllegalStateException("只有在 DRAFT 或 SCHEDULED 狀態的通知才能被發送。目前狀態為：" + currentStatus.getDescription());
         }
     }
 
@@ -372,8 +410,108 @@ public class AdminNotificationServiceImpl implements AdminNotificationService {
 
     @Override
     public NotificationDto getNotificationById(Integer notificationId) {
-        return notificationRepository.findById(notificationId)
-                .map(notificationMapper::toDto)
-                .orElse(null);
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("通知不存在，ID: " + notificationId));
+        return notificationMapper.toDto(notification);
+    }
+
+    /**
+     * 🔧 創建通知排程任務
+     * @param notification 要排程的通知
+     */
+    private void scheduleNotificationTask(Notification notification) {
+        if (notification.getScheduledTime() == null) {
+            return;
+        }
+        
+        LocalDateTime scheduledTime = notification.getScheduledTime();
+        Integer notificationId = notification.getNotificationId();
+        
+        log.info("正在為通知 ID: {} 創建排程任務，排程時間: {}", notificationId, scheduledTime);
+        
+        // 檢查排程時間是否在未來
+        if (scheduledTime.isBefore(LocalDateTime.now())) {
+            log.warn("排程時間已過期，立即發送通知: notificationId={}", notificationId);
+            // 如果排程時間已過，立即發送
+            try {
+                notificationDispatchService.dispatchNotification(notification);
+            } catch (Exception e) {
+                log.error("立即發送過期排程通知失敗: notificationId={}", notificationId, e);
+            }
+            return;
+        }
+        
+        // 使用 NotificationSchedulerService 創建一個自定義的排程任務
+        try {
+            // 創建一個特殊的任務ID，用於識別這是通知記錄的排程
+            String taskId = "notification_" + notificationId + "_" + System.currentTimeMillis();
+            
+            // 計算延遲時間（分鐘）
+            long delayMinutes = java.time.Duration.between(LocalDateTime.now(), scheduledTime).toMinutes();
+            
+            if (delayMinutes > 0) {
+                // 使用延遲通知功能，但我們需要自定義執行邏輯
+                scheduleNotificationExecution(notificationId, scheduledTime);
+                log.info("通知排程任務創建成功: notificationId={}, 延遲={}分鐘", notificationId, delayMinutes);
+            } else {
+                log.warn("延遲時間為0或負數，立即發送通知: notificationId={}", notificationId);
+                notificationDispatchService.dispatchNotification(notification);
+            }
+            
+        } catch (Exception e) {
+            log.error("創建排程任務失敗: notificationId={}", notificationId, e);
+            throw e;
+        }
+    }
+    
+    /**
+     * 🔧 執行通知排程發送
+     * @param notificationId 通知ID
+     * @param scheduledTime 排程時間
+     */
+    private void scheduleNotificationExecution(Integer notificationId, LocalDateTime scheduledTime) {
+        long delay = java.time.Duration.between(LocalDateTime.now(), scheduledTime).toMillis();
+        
+        // 使用共享的排程器
+        notificationScheduler.schedule(() -> {
+            try {
+                log.info("執行排程通知發送: notificationId={}", notificationId);
+                
+                // 重新獲取通知記錄（確保最新狀態）
+                Notification notification = notificationRepository.findById(notificationId).orElse(null);
+                if (notification != null) {
+                    // 檢查通知狀態是否仍為排程狀態
+                    if (notification.getStatus() == com.shakemate.notification.enums.NotificationStatus.SCHEDULED.getCode()) {
+                        // 發送通知
+                        notificationDispatchService.dispatchNotification(notification);
+                        log.info("排程通知發送成功: notificationId={}", notificationId);
+                    } else {
+                        log.warn("通知狀態已變更，跳過發送: notificationId={}, status={}", 
+                                notificationId, notification.getStatus());
+                    }
+                } else {
+                    log.error("通知記錄不存在，無法發送: notificationId={}", notificationId);
+                }
+            } catch (Exception e) {
+                log.error("排程通知發送失敗: notificationId={}", notificationId, e);
+            }
+        }, delay, java.util.concurrent.TimeUnit.MILLISECONDS);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (notificationScheduler != null && !notificationScheduler.isShutdown()) {
+            log.info("關閉排程器...");
+            notificationScheduler.shutdown();
+            try {
+                if (!notificationScheduler.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                    notificationScheduler.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                notificationScheduler.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+            log.info("排程器已關閉。");
+        }
     }
 } 

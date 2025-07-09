@@ -8,6 +8,11 @@ import com.shakemate.notification.entity.MemberNotificationId;
 import com.shakemate.notification.dto.MemberNotificationDto;
 import com.shakemate.notification.repository.NotificationRepository;
 import com.shakemate.notification.repository.MemberNotificationRepository;
+import com.shakemate.notification.repository.NotificationPreferenceRepository;
+import com.shakemate.notification.repository.NotificationTemplateRepository;
+import com.shakemate.notification.entity.NotificationTemplate;
+import com.shakemate.notification.util.TemplateProcessor;
+import com.shakemate.notification.entity.NotificationPreference;
 import com.shakemate.notification.enums.DeliveryStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +28,8 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * 通知服務實現類 - 簡化版本用於測試數據庫操作
@@ -35,60 +42,56 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final MemberNotificationRepository memberNotificationRepository;
+    private final NotificationDispatchService notificationDispatchService;
+    private final NotificationPreferenceRepository notificationPreferenceRepository;
+    private final NotificationTemplateRepository notificationTemplateRepository;
+    private final TemplateProcessor templateProcessor;
 
     // ==================== 基本數據庫操作測試方法 ====================
 
     @Override
     public CompletableFuture<Boolean> sendTemplateNotification(String templateCode, Integer userId, Map<String, Object> variables) {
-        log.info("發送模板通知測試: templateCode={}, userId={}", templateCode, userId);
+        log.info("發送模板通知: templateCode={}, userId={}", templateCode, userId);
         
         try {
-            // 1. 創建通知記錄 - 使用模板變數生成真實內容
-            String title = "系統通知: " + templateCode;
-            String content = "您有新的通知";
+            // 1. 查找通知模板
+            Optional<NotificationTemplate> templateOpt = notificationTemplateRepository.findByTemplateCode(templateCode);
+            if (!templateOpt.isPresent()) {
+                log.error("找不到模板: {}", templateCode);
+                return CompletableFuture.completedFuture(false);
+            }
             
-            // 根據模板代碼生成不同的通知內容
-            if (variables != null && !variables.isEmpty()) {
-                switch (templateCode) {
-                    case "ACTIVITY_APPLICATION_RECEIVED":
-                        title = "新的活動申請";
-                        content = String.format("用戶 %s 申請參加您的活動「%s」", 
-                                variables.getOrDefault("applicant_name", "未知用戶"),
-                                variables.getOrDefault("activity_title", "未知活動"));
-                        break;
-                    case "ACTIVITY_APPLICATION_APPROVED":
-                        title = "活動申請已通過";
-                        content = String.format("恭喜！您對活動「%s」的申請已通過", 
-                                variables.getOrDefault("activity_title", "未知活動"));
-                        break;
-                    case "ACTIVITY_APPLICATION_REJECTED":
-                        title = "活動申請未通過";
-                        content = String.format("很抱歉，您對活動「%s」的申請未通過", 
-                                variables.getOrDefault("activity_title", "未知活動"));
-                        break;
-                    case "NEW_MATCH_SUCCESS":
-                        title = "配對成功！";
-                        content = String.format("恭喜！您與 %s 配對成功", 
-                                variables.getOrDefault("matched_user_name", "神秘會員"));
-                        break;
-                    case "NEW_MATCH_REQUEST":
-                        title = "有人對您按讚";
-                        content = String.format("%s 對您按了讚", 
-                                variables.getOrDefault("from_user_name", "神秘會員"));
-                        break;
-                    case "NOTIFICATION_PREFERENCES_UPDATED":
-                        title = "通知設定已更新";
-                        content = "您的通知偏好設定已成功更新";
-                        break;
-                    default:
-                        title = "系統通知: " + templateCode;
-                        content = "您有新的系統通知";
+            NotificationTemplate template = templateOpt.get();
+            
+            // 檢查模板是否啟用
+            if (!template.getIsActive()) {
+                log.warn("模板已停用: {}", templateCode);
+                return CompletableFuture.completedFuture(false);
+            }
+            
+            // 2. 檢查用戶的站內通知偏好設定
+            if (!checkUserInAppNotificationEnabled(userId, template.getTemplateCategory())) {
+                log.info("用戶 {} 已關閉 {} 的站內通知接收，跳過發送", userId, template.getTemplateCategory());
+                return CompletableFuture.completedFuture(true); // 返回成功但實際不發送
+            }
+            
+            // 3. 處理模板變數替換
+            String title = templateProcessor.processTemplate(template.getTitleTemplate(), variables);
+            String content = templateProcessor.processTemplate(template.getContentTemplate(), variables);
+            
+            // 如果沒有純文字內容，嘗試使用HTML內容
+            if (content == null || content.trim().isEmpty()) {
+                content = templateProcessor.processTemplate(template.getHtmlTemplate(), variables);
+                // 簡單去除HTML標籤用於純文字顯示
+                if (content != null) {
+                    content = content.replaceAll("<[^>]*>", "");
                 }
             }
             
+            // 4. 創建通知記錄
             Notification notification = Notification.builder()
-                .notificationType("TEMPLATE")
-                .notificationCategory("系統通知")
+                .notificationType(template.getTemplateType())
+                .notificationCategory(template.getTemplateCategory())
                 .notificationLevel(1)
                 .title(title)
                 .message(content)
@@ -98,11 +101,11 @@ public class NotificationServiceImpl implements NotificationService {
                 .status(1)
                 .build();
             
-            // 2. 保存通知
+            // 5. 保存通知
             notification = notificationRepository.save(notification);
-            log.info("通知已保存，ID: {}", notification.getNotificationId());
+            log.info("通知已保存，ID: {}, 標題: {}", notification.getNotificationId(), title);
             
-            // 3. 創建會員通知記錄
+            // 6. 創建會員通知記錄
             MemberNotification memberNotification = MemberNotification.builder()
                 .notification(notification.getNotificationId())
                 .user(userId)
@@ -113,9 +116,32 @@ public class NotificationServiceImpl implements NotificationService {
                 .userInteraction(0)
                 .build();
             
-            // 4. 保存會員通知記錄
-            memberNotificationRepository.save(memberNotification);
-            log.info("會員通知記錄已保存: notificationId={}, userId={}", notification.getNotificationId(), userId);
+            // 7. 保存會員通知記錄
+            memberNotification = memberNotificationRepository.save(memberNotification);
+            log.info("會員通知記錄已保存: notificationId={}, userId={}", 
+                    notification.getNotificationId(), userId);
+            
+            // 8. 立即發送WebSocket實時推送
+            try {
+                // 構建結構化的通知JSON訊息，包含完整信息
+                Map<String, Object> wsMessage = new HashMap<>();
+                wsMessage.put("type", "NOTIFICATION");
+                wsMessage.put("notificationId", notification.getNotificationId());
+                wsMessage.put("title", title);
+                wsMessage.put("message", content);
+                wsMessage.put("category", template.getTemplateCategory());
+                wsMessage.put("isRead", false);
+                wsMessage.put("sentTime", memberNotification.getSentTime() != null ? 
+                    memberNotification.getSentTime().toString() : java.time.LocalDateTime.now().toString());
+                wsMessage.put("timestamp", java.time.LocalDateTime.now().toString());
+                
+                String jsonMessage = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+                com.shakemate.notification.ws.NotificationWebSocketHandler.sendMessageToUser(userId, jsonMessage);
+                log.info("WebSocket推送已發送: notificationId={}, userId={}, 標題: {}", 
+                        notification.getNotificationId(), userId, title);
+            } catch (Exception e) {
+                log.error("WebSocket推送失敗: notificationId={}, userId={}", notification.getNotificationId(), userId, e);
+            }
             
             return CompletableFuture.completedFuture(true);
             
@@ -147,8 +173,14 @@ public class NotificationServiceImpl implements NotificationService {
             notification = notificationRepository.save(notification);
             log.info("批量通知已保存，ID: {}", notification.getNotificationId());
             
-            // 3. 為每個用戶創建會員通知記錄
+            // 3. 為每個用戶創建會員通知記錄並發送WebSocket推送
             for (Integer userId : userIds) {
+                // 🔧 新增：檢查用戶的站內通知偏好設定
+                if (!checkUserInAppNotificationEnabled(userId, "批量測試分類")) {
+                    log.info("用戶 {} 已關閉批量測試分類的站內通知接收，跳過發送", userId);
+                    continue; // 跳過此用戶，繼續處理下一個
+                }
+                
                 MemberNotification memberNotification = MemberNotification.builder()
                     .notification(notification.getNotificationId())
                     .user(userId)
@@ -159,7 +191,32 @@ public class NotificationServiceImpl implements NotificationService {
                     .userInteraction(0)
                     .build();
                 
-                memberNotificationRepository.save(memberNotification);
+                // 保存會員通知記錄
+                memberNotification = memberNotificationRepository.save(memberNotification);
+                
+                // 立即發送WebSocket實時推送
+                try {
+                    String title = "批量測試通知: " + templateCode;
+                    String content = "批量測試通知內容，發送給 " + userIds.size() + " 個用戶";
+                    
+                    // 構建結構化的通知JSON訊息
+                    Map<String, Object> wsMessage = new HashMap<>();
+                    wsMessage.put("type", "NOTIFICATION");
+                    wsMessage.put("notificationId", notification.getNotificationId());
+                    wsMessage.put("title", title);
+                    wsMessage.put("message", content);
+                    wsMessage.put("category", "批量測試分類");
+                    wsMessage.put("isRead", false);
+                    wsMessage.put("sentTime", memberNotification.getSentTime() != null ? 
+                        memberNotification.getSentTime().toString() : java.time.LocalDateTime.now().toString());
+                    wsMessage.put("timestamp", java.time.LocalDateTime.now().toString());
+                    
+                    String jsonMessage = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(wsMessage);
+                    com.shakemate.notification.ws.NotificationWebSocketHandler.sendMessageToUser(userId, jsonMessage);
+                    log.debug("批量WebSocket推送已發送: notificationId={}, userId={}", notification.getNotificationId(), userId);
+                } catch (Exception e) {
+                    log.error("批量WebSocket推送失敗: notificationId={}, userId={}", notification.getNotificationId(), userId, e);
+                }
             }
             
             log.info("批量會員通知記錄已保存，共 {} 條", userIds.size());
@@ -384,6 +441,37 @@ public class NotificationServiceImpl implements NotificationService {
         } catch (Exception e) {
             log.error("獲取未讀會員通知列表失敗: userId={}", userId, e);
             return Page.empty();
+        }
+    }
+
+    /**
+     * 檢查用戶的站內通知偏好設定
+     * @param userId 用戶ID
+     * @param category 通知類別
+     * @return true如果用戶啟用了該類別的站內通知，false則不發送
+     */
+    private boolean checkUserInAppNotificationEnabled(Integer userId, String category) {
+        try {
+            // 查找用戶針對特定類別的偏好設定
+            Optional<NotificationPreference> preferenceOpt = notificationPreferenceRepository
+                    .findByUser_UserIdAndNotificationCategory(userId, category);
+            
+            if (preferenceOpt.isPresent()) {
+                NotificationPreference preference = preferenceOpt.get();
+                // 檢查站內通知是否啟用，null值視為啟用
+                Boolean inAppEnabled = preference.getInAppEnabled();
+                boolean enabled = inAppEnabled == null || Boolean.TRUE.equals(inAppEnabled);
+                log.debug("用戶 {} 的 {} 類別站內通知設定: {}", userId, category, enabled);
+                return enabled;
+            } else {
+                // 沒有找到偏好設定，預設為啟用
+                log.debug("用戶 {} 沒有 {} 類別的偏好設定，預設啟用站內通知", userId, category);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("檢查用戶 {} 的站內通知偏好設定時發生錯誤: {}", userId, e.getMessage(), e);
+            // 發生錯誤時預設為啟用，避免影響正常功能
+            return true;
         }
     }
 } 

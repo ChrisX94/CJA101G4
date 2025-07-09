@@ -62,136 +62,231 @@ $(document).ready(function() {
     function displayPreferences(preferences) {
         const container = $('#preferences-container');
         
+        // 🎨 檢測當前頁面類型（前端或後端）
+        const isBackend = window.location.pathname.includes('/back-end/') || 
+                         document.title.includes('後台管理') ||
+                         $('.admin-card').length > 0;
+        
+        // 🎨 處理空狀態
         if (!preferences || preferences.length === 0) {
-            container.html(`
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> 
-                    目前沒有通知偏好設定，系統將使用預設設定。
-                    <br><br>
-                    <button type="button" class="btn btn-primary mt-2" onclick="createDefaultPreferences()">
-                        <i class="fas fa-plus"></i> 建立預設通知設定
-                    </button>
+            const emptyStateHtml = isBackend ? `
+                <div class="preferences-section">
+                    <div class="empty-state">
+                        <span class="empty-state-icon">🔔</span>
+                        <h3>尚未設定通知偏好</h3>
+                        <p>系統將使用預設設定為您提供通知服務</p>
+                        <button type="button" class="btn-admin btn-info-admin" onclick="createDefaultPreferences()">
+                            <i class="fas fa-magic"></i> 建立預設通知設定
+                        </button>
+                    </div>
                 </div>
-            `);
+            ` : `
+                <div class="preferences-section">
+                    <div style="text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1.5rem; border: 2px dashed #dee2e6;">
+                        <div style="font-size: 4rem; margin-bottom: 1.5rem;">🔔</div>
+                        <h3 style="color: #6c757d; margin-bottom: 1rem; font-size: 2rem;">尚未設定通知偏好</h3>
+                        <p style="color: #6c757d; margin-bottom: 2rem; font-size: 1.4rem;">系統將使用預設設定為您提供通知服務</p>
+                        <button type="button" class="save-button info-button" onclick="createDefaultPreferences()" style="margin: 0;">
+                            <i class="fas fa-magic"></i> 建立預設通知設定
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.html(emptyStateHtml);
             return;
         }
-
+        
         let html = '';
         
-        // 通知類型設定（移到最上方）
-        html += `
-            <div class="preferences-section">
-                <h2>通知類型</h2>
-        `;
+        // 🎨 通知類別設定區段
+        if (isBackend) {
+            html += `
+                <div class="preferences-section">
+                    <h2 class="section-title" data-section="categories">通知類別設定</h2>
+                    <div class="section-description">為每個通知類別分別設定您的接收偏好，讓您只收到真正重要的通知</div>
+            `;
+        } else {
+            html += `
+                <div class="preferences-section">
+                    <h2 data-icon="🔔">通知類別設定</h2>
+                    <div class="section-description">為每個通知類別分別設定您的接收偏好，讓您只收到真正重要的通知</div>
+            `;
+        }
+        
         preferences.forEach(function(pref) {
             const categoryDisplayName = categoryNames[pref.notificationCategory] || pref.notificationCategory;
             html += `
-                <div class="preference-item category-row" data-category="${pref.notificationCategory}" data-preference-id="${pref.preferenceId}">
-                    <div class="preference-title">
-                        <span>${categoryDisplayName}</span>
+                <div class="category-preference-item category-row" data-category="${pref.notificationCategory}" data-preference-id="${pref.preferenceId}">
+                    <div class="category-header">
+                        <h4>${categoryDisplayName}</h4>
+                        <p class="category-description">${getCategoryDescription(pref.notificationCategory)}</p>
                     </div>
-                    <div class="preference-description">
-                        ${getCategoryDescription(pref.notificationCategory)}
+                    
+                    <div class="notification-methods">
+                        <div class="method-row">
+                            <div class="method-info">
+                                <strong data-method="email">電子郵件通知</strong>
+                                <span class="method-desc">接收重要更新到您的信箱</span>
+                            </div>
+                            ${isBackend ? `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="emailEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.emailEnabled ? 'checked' : ''}>
+                                </div>
+                            ` : `
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="emailEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.emailEnabled ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            `}
+                        </div>
+                        
+                        <div class="method-row">
+                            <div class="method-info">
+                                <strong data-method="inapp">站內通知</strong>
+                                <span class="method-desc">在網站內即時接收通知</span>
+                            </div>
+                            ${isBackend ? `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="inAppEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.inAppEnabled ? 'checked' : ''}>
+                                </div>
+                            ` : `
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="inAppEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.inAppEnabled ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            `}
+                        </div>
+                        
+                        <div class="method-row">
+                            <div class="method-info">
+                                <strong data-method="push">APP推播通知</strong>
+                                <span class="method-desc">手機APP推播提醒</span>
+                            </div>
+                            ${isBackend ? `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="pushEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.pushEnabled ? 'checked' : ''}>
+                                </div>
+                            ` : `
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="pushEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.pushEnabled ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            `}
+                        </div>
+                        
+                        <div class="method-row">
+                            <div class="method-info">
+                                <strong data-method="sms">簡訊通知</strong>
+                                <span class="method-desc">重要提醒發送到手機</span>
+                            </div>
+                            ${isBackend ? `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="smsEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.smsEnabled ? 'checked' : ''}>
+                                </div>
+                            ` : `
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="smsEnabled_${pref.preferenceId}" data-category="${pref.notificationCategory}" ${pref.smsEnabled ? 'checked' : ''}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            `}
+                        </div>
                     </div>
                 </div>
             `;
         });
-        html += `</div>`;
-
-        // 通知方式設定
-        html += `
-            <div class="preferences-section">
-                <h2>通知方式</h2>
-        `;
         
-        // 為每個偏好設定生成對應的通知方式選項
-        preferences.forEach(function(pref, index) {
-            // 只在第一次迭代時生成通知方式控制項
-            if (index === 0) {
-                html += `
-                    <div class="preference-item" data-category="${pref.notificationCategory}" data-preference-id="${pref.preferenceId}">
+        html += `</div>`;
+        
+        // 🎨 勿擾時段設定區段
+        const firstPref = preferences[0];
+        if (isBackend) {
+            html += `
+                <div class="preferences-section">
+                    <h2 class="section-title" data-section="quiet">勿擾時段設定</h2>
+                    <div class="section-description">在指定時段內暫停推送通知，讓您享受不被打擾的休息時光</div>
+                    
+                    <div class="quiet-hours-card">
+                        <div class="quiet-hours-header">
+                            <h3 class="quiet-hours-title">啟用勿擾時段</h3>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="quietHoursEnabled" ${firstPref.quietHoursEnabled ? 'checked' : ''}>
+                            </div>
+                        </div>
+                        <div class="quiet-hours-description">
+                            在指定時段內暫停推送通知，避免干擾休息
+                        </div>
+                        
+                        <div class="time-range-container" ${!firstPref.quietHoursEnabled ? 'style="display: none;"' : ''}>
+                            <div class="time-input-group">
+                                <label for="quietHoursStart">開始時間</label>
+                                <input type="time" class="quiet-hours-start" name="quietHoursStart" 
+                                       value="${firstPref.quietHoursStart || '22:00'}">
+                            </div>
+                            <div class="time-input-group">
+                                <label for="quietHoursEnd">結束時間</label>
+                                <input type="time" class="quiet-hours-end" name="quietHoursEnd" 
+                                       value="${firstPref.quietHoursEnd || '08:00'}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="preferences-section">
+                    <h2 data-icon="🌙">勿擾時段設定</h2>
+                    <div class="section-description">在指定時段內暫停推送通知，讓您享受不被打擾的休息時光</div>
+                    
+                    <div class="preference-item">
                         <div class="preference-title">
-                            <span>電子郵件通知</span>
+                            <span>啟用勿擾時段</span>
                             <label class="toggle-switch">
-                                <input type="checkbox" name="emailEnabled" data-type="email" ${pref.emailEnabled ? 'checked' : ''}>
+                                <input type="checkbox" name="quietHoursEnabled" ${firstPref.quietHoursEnabled ? 'checked' : ''}>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
                         <div class="preference-description">
-                            接收重要更新、訂單狀態變更等通知到您的電子郵件
+                            在指定時段內暫停推送通知，避免干擾休息
                         </div>
                     </div>
-
-                    <div class="preference-item" data-category="${pref.notificationCategory}" data-preference-id="${pref.preferenceId}">
-                        <div class="preference-title">
-                            <span>站內通知</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" name="inAppEnabled" data-type="inapp" ${pref.inAppEnabled ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
+                    
+                    <div class="time-range-container" ${!firstPref.quietHoursEnabled ? 'style="display: none;"' : ''}>
+                        <div class="time-input-group">
+                            <label for="quietHoursStart">開始時間</label>
+                            <input type="time" class="quiet-hours-start" name="quietHoursStart" 
+                                   value="${firstPref.quietHoursStart || '22:00'}">
                         </div>
-                        <div class="preference-description">
-                            在網站內即時接收通知和更新
-                        </div>
-                    </div>
-
-                    <div class="preference-item" data-category="${pref.notificationCategory}" data-preference-id="${pref.preferenceId}">
-                        <div class="preference-title">
-                            <span>APP推播通知</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" name="pushEnabled" data-type="push" ${pref.pushEnabled ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="preference-description">
-                            是否接收APP推播通知（PUSH）
+                        <div class="time-input-group">
+                            <label for="quietHoursEnd">結束時間</label>
+                            <input type="time" class="quiet-hours-end" name="quietHoursEnd" 
+                                   value="${firstPref.quietHoursEnd || '08:00'}">
                         </div>
                     </div>
-
-                    <div class="preference-item" data-category="${pref.notificationCategory}" data-preference-id="${pref.preferenceId}">
-                        <div class="preference-title">
-                            <span>簡訊通知</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" name="smsEnabled" data-type="sms" ${pref.smsEnabled ? 'checked' : ''}>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="preference-description">
-                            接收重要提醒和驗證碼到您的手機
-                        </div>
-                    </div>
-                `;
+                </div>
+            `;
+        }
+        
+        container.html(html);
+        
+        // 🎨 添加勿擾時段開關事件
+        $('[name="quietHoursEnabled"]').change(function() {
+            const timeRangeContainer = $('.time-range-container');
+            if ($(this).is(':checked')) {
+                timeRangeContainer.slideDown(300);
+            } else {
+                timeRangeContainer.slideUp(300);
             }
         });
         
-        html += `</div>`;
-        
-        // 勿擾設定
-        const firstPref = preferences[0];
-        html += `
-            <div class="preferences-section">
-                <h2>勿擾設定</h2>
-                <div class="preference-item">
-                    <div class="preference-title">
-                        <span>啟用勿擾模式</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" name="quietHoursEnabled" data-type="quiet" ${firstPref.quietHoursEnabled ? 'checked' : ''}>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <div class="preference-title">
-                        <span>勿擾開始時間</span>
-                        <input type="time" name="quietHoursStart" class="quiet-hours-start" value="${firstPref.quietHoursStart || ''}">
-                    </div>
-                    <div class="preference-title">
-                        <span>勿擾結束時間</span>
-                        <input type="time" name="quietHoursEnd" class="quiet-hours-end" value="${firstPref.quietHoursEnd || ''}">
-                    </div>
-                </div>
-            </div>
-        `;
-
-        container.html(html);
+        // 🎨 添加方法行的交互效果（僅前端）
+        if (!isBackend) {
+            $('.method-row').on('click', function(e) {
+                if (e.target.type !== 'checkbox') {
+                    const checkbox = $(this).find('input[type="checkbox"]');
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+                }
+            });
+        }
     }
 
     function getCategoryDescription(category) {
@@ -215,7 +310,7 @@ $(document).ready(function() {
         
         const preferences = [];
         
-        // 收集所有通知類型偏好設定
+        // 🔧 修復：為每個通知類別分別收集設定
         $('.category-row').each(function() {
             const row = $(this);
             const preferenceId = row.data('preference-id');
@@ -223,15 +318,15 @@ $(document).ready(function() {
             
             console.log('處理偏好設定:', { preferenceId, category });
             
-            // 從通知方式區塊收集設定（使用第一個偏好設定的ID）
-            const emailEnabled = $('[name="emailEnabled"]').is(':checked');
-            const smsEnabled = $('[name="smsEnabled"]').is(':checked');
-            const inAppEnabled = $('[name="inAppEnabled"]').is(':checked');
-            const pushEnabled = inAppEnabled; // 推播和站內通知使用相同設定
+            // 為每個類別分別收集設定
+            const emailEnabled = $('[name="emailEnabled_'+preferenceId+'"]').is(':checked');
+            const smsEnabled = $('[name="smsEnabled_'+preferenceId+'"]').is(':checked');
+            const inAppEnabled = $('[name="inAppEnabled_'+preferenceId+'"]').is(':checked');
+            const pushEnabled = $('[name="pushEnabled_'+preferenceId+'"]').is(':checked');
             
-            console.log('通知方式設定:', { emailEnabled, smsEnabled, inAppEnabled, pushEnabled });
+            console.log('通知方式設定 (類別:' + category + '):', { emailEnabled, smsEnabled, inAppEnabled, pushEnabled });
             
-            // 從勿擾設定區塊收集設定
+            // 從勿擾設定區塊收集設定（所有類別共用）
             const quietHoursEnabled = $('[name="quietHoursEnabled"]').is(':checked');
             const quietHoursStart = $('.quiet-hours-start').val();
             const quietHoursEnd = $('.quiet-hours-end').val();
@@ -251,7 +346,7 @@ $(document).ready(function() {
             };
             
             preferences.push(preference);
-            console.log('添加偏好設定:', preference);
+            console.log('添加偏好設定 (類別:' + category + '):', preference);
         });
 
         console.log('=== 最終收集到的偏好設定 ===');
@@ -386,4 +481,84 @@ $(document).ready(function() {
             }
         });
     };
+    
+    // 全域函數：測試通知設定
+    window.testNotificationSettings = function() {
+        console.log('測試通知設定被點擊');
+        
+        $.ajax({
+            url: '/notifications/api/test-notification',
+            method: 'POST',
+            success: function(response) {
+                console.log('測試通知回應:', response);
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '測試通知已發送',
+                        text: response.message,
+                        confirmButtonText: '確定'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '測試通知發送失敗',
+                        text: response.message,
+                        confirmButtonText: '確定'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('測試通知失敗:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '測試通知發送失敗',
+                    text: '請檢查網路連接或稍後再試',
+                    confirmButtonText: '確定'
+                });
+            }
+        });
+    };
+    
+    // 🔧 新增：創建預設偏好設定的函數
+    window.createDefaultPreferences = function() {
+        console.log('創建預設偏好設定被點擊');
+        
+        Swal.fire({
+            title: '創建預設偏好設定',
+            text: '是否要為您創建預設的通知偏好設定？',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '確定',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/notifications/api/preferences/create-defaults',
+                    method: 'POST',
+                    success: function(response) {
+                        console.log('創建預設偏好設定回應:', response);
+                        Swal.fire({
+                            icon: 'success',
+                            title: '預設偏好設定已創建',
+                            text: '已為您創建預設的通知偏好設定',
+                            confirmButtonText: '確定'
+                        }).then(() => {
+                            // 重新載入偏好設定
+                            loadPreferences();
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('創建預設偏好設定失敗:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '創建預設偏好設定失敗',
+                            text: '請檢查網路連接或稍後再試',
+                            confirmButtonText: '確定'
+                        });
+                    }
+                });
+            }
+        });
+    };
+    
 }); 

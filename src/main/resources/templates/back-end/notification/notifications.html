@@ -99,22 +99,119 @@
             font-weight: 500;
             border: none;
             padding: 1.2rem 1rem;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
         }
         
         .table tbody td {
             padding: 1rem;
             vertical-align: middle;
             border-bottom: 1px solid #eee;
+            text-align: center;
         }
         
         .table tbody tr:hover {
             background: rgba(220, 255, 97, 0.1);
         }
         
+        /* 表格欄位寬度設定 */
+        #notifications-table th:nth-child(1) { width: 8%; }  /* ID */
+        #notifications-table th:nth-child(2) { width: 20%; } /* 標題 */
+        #notifications-table th:nth-child(3) { width: 10%; } /* 發送類型 */
+        #notifications-table th:nth-child(4) { width: 8%; }  /* 狀態 */
+        #notifications-table th:nth-child(5) { width: 15%; } /* 建立時間 */
+        #notifications-table th:nth-child(6) { width: 15%; } /* 通知有效起始時間 */
+        #notifications-table th:nth-child(7) { width: 15%; } /* 通知有效結束時間 */
+        #notifications-table th:nth-child(8) { width: 9%; }  /* 操作 */
+        
+        /* DataTables 樣式優化 */
+        .dataTables_wrapper {
+            padding: 0;
+        }
+        
+        .dataTables_length,
+        .dataTables_filter,
+        .dataTables_info,
+        .dataTables_paginate {
+            padding: 0.5rem 0;
+        }
+        
+        .dataTables_length select,
+        .dataTables_filter input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #eee;
+            border-radius: 0.8rem;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+        }
+        
+        .dataTables_length select:focus,
+        .dataTables_filter input:focus {
+            outline: none;
+            border-color: #2EC4B6;
+            box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.1);
+        }
+        
+        .dataTables_paginate .paginate_button {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #eee;
+            border-radius: 0.8rem;
+            margin: 0 0.2rem;
+            padding: 0.5rem 1rem;
+            color: #333;
+        }
+        
+        .dataTables_paginate .paginate_button:hover {
+            background: #DCFF61;
+            border-color: #2EC4B6;
+            color: #000;
+        }
+        
+        .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(45deg, #2EC4B6, #DCFF61);
+            border-color: #2EC4B6;
+            color: #000;
+        }
+        
+        .dataTables_processing {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+        }
+        
         .btn-sm {
             padding: 0.5rem 1rem;
             font-size: 0.9rem;
             border-radius: 0.8rem;
+        }
+        
+        /* 操作欄按鈕組樣式 */
+        .btn-group-vertical .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 0.6rem;
+            margin-bottom: 0.2rem;
+            min-width: 40px;
+        }
+        
+        .btn-group-vertical .btn-sm:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* 表格內容對齊 */
+        .text-left {
+            text-align: left !important;
+        }
+        
+        .text-center {
+            text-align: center !important;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+            font-style: italic;
         }
         
         .btn-info {
@@ -290,11 +387,11 @@
                     <tr>
                         <th><i class="fas fa-hashtag me-1"></i>ID</th>
                         <th><i class="fas fa-heading me-1"></i>標題</th>
-                        <th><i class="fas fa-share me-1"></i>發送類型</th>
+                        <th><i class="fas fa-share me-1"></i>類型</th>
                         <th><i class="fas fa-traffic-light me-1"></i>狀態</th>
                         <th><i class="fas fa-calendar-plus me-1"></i>建立時間</th>
-                        <th><i class="fas fa-clock me-1"></i>通知有效起始時間</th>
-                        <th><i class="fas fa-paper-plane me-1"></i>通知有效結束時間</th>
+                        <th><i class="fas fa-clock me-1"></i>開始時間</th>
+                        <th><i class="fas fa-clock me-1"></i>結束時間</th>
                         <th><i class="fas fa-cogs me-1"></i>操作</th>
                     </tr>
                     </thead>
@@ -365,6 +462,17 @@
                         <div class="mb-4">
                             <label for="content" class="form-label">通知內容</label>
                             <textarea class="form-control" id="content" name="content" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="scheduledTime" class="form-label">
+                                <i class="fas fa-clock me-1"></i>排程發送時間
+                                <small class="text-muted">(選填，如不填寫則立即發送)</small>
+                            </label>
+                            <input type="datetime-local" class="form-control" id="scheduledTime" name="scheduledTime">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                設定後通知將在指定時間自動發送，可用於預定發送通知
+                            </div>
                         </div>
                         <div class="mb-4">
                             <label for="startTime" class="form-label">通知有效起始時間</label>
