@@ -559,17 +559,17 @@ INSERT INTO NOTIFICATION (NOTIFICATION_TYPE, NOTIFICATION_CATEGORY, NOTIFICATION
 
 -- 2. 通知偏好設定表 (Notification Preference)
 CREATE TABLE IF NOT EXISTS NOTIFICATION_PREFERENCE (
-    PREFERENCE_ID INT NOT NULL AUTO_INCREMENT,
-    USER_ID INT NOT NULL,
-    NOTIFICATION_CATEGORY VARCHAR(50) NOT NULL,
-    EMAIL_ENABLED BOOLEAN NOT NULL DEFAULT TRUE,
-    SMS_ENABLED BOOLEAN NOT NULL DEFAULT TRUE,
-    PUSH_ENABLED BOOLEAN NOT NULL DEFAULT TRUE,
-    IN_APP_ENABLED BOOLEAN NOT NULL DEFAULT TRUE,
-    QUIET_HOURS_ENABLED BOOLEAN NOT NULL DEFAULT FALSE,
-    QUIET_HOURS_START TIME NULL,
-    QUIET_HOURS_END TIME NULL,
-    UPDATED_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PREFERENCE_ID INT NOT NULL AUTO_INCREMENT COMMENT '偏好設定編號 - 系統自動產生的唯一識別碼',
+    USER_ID INT NOT NULL COMMENT '會員編號 - 對應用戶的唯一識別碼',
+    NOTIFICATION_CATEGORY VARCHAR(50) NOT NULL COMMENT '通知類別 - 對應NOTIFICATION表的類別',
+    EMAIL_ENABLED BOOLEAN NOT NULL DEFAULT TRUE COMMENT '是否接收電子郵件 - TRUE(預設):接收 FALSE:不接收',
+    SMS_ENABLED BOOLEAN NOT NULL DEFAULT TRUE COMMENT '是否接收簡訊 - TRUE(預設):接收 FALSE:不接收',
+    PUSH_ENABLED BOOLEAN NOT NULL DEFAULT TRUE COMMENT '是否接收APP推播 - TRUE(預設):接收 FALSE:不接收',
+    IN_APP_ENABLED BOOLEAN NOT NULL DEFAULT TRUE COMMENT '是否接收應用內通知 - TRUE(預設):接收 FALSE:不接收',
+    QUIET_HOURS_ENABLED BOOLEAN NOT NULL DEFAULT FALSE COMMENT '勿擾時段啟用 - FALSE(預設):關閉 TRUE:啟用',
+    QUIET_HOURS_START TIME NULL COMMENT '勿擾開始時間 - 24小時制格式 HH:MM',
+    QUIET_HOURS_END TIME NULL COMMENT '勿擾結束時間 - 24小時制格式 HH:MM',
+    UPDATED_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新時間 - 系統自動更新記錄',
     
     PRIMARY KEY (PREFERENCE_ID),
     UNIQUE KEY uk_user_category (USER_ID, NOTIFICATION_CATEGORY),
@@ -596,22 +596,22 @@ INSERT INTO NOTIFICATION_PREFERENCE (USER_ID, NOTIFICATION_CATEGORY, EMAIL_ENABL
 
 -- 3. 通知模板表 (Notification Template)
 CREATE TABLE IF NOT EXISTS NOTIFICATION_TEMPLATE (
-    TEMPLATE_ID INT NOT NULL AUTO_INCREMENT,
-    CREATED_BY_ID INT NOT NULL,
-    TEMPLATE_CODE VARCHAR(50) NOT NULL,
-    TEMPLATE_NAME VARCHAR(100) NOT NULL,
-    TEMPLATE_TYPE VARCHAR(50) NOT NULL,
-    TEMPLATE_CATEGORY VARCHAR(50) NOT NULL,
-    SUBJECT VARCHAR(200) NOT NULL,
-    CONTENT TEXT NOT NULL,
-    HTML_CONTENT VARCHAR(255) NULL,
-    VARIABLES JSON NOT NULL,
-    IS_ACTIVE BOOLEAN NOT NULL DEFAULT TRUE,
-    CREATED_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPDATE_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    IS_SYSTEM BOOLEAN NOT NULL DEFAULT FALSE,
-    DESCRIPTION VARCHAR(200) NULL,
-    PREVIEW_IMAGE VARCHAR(255) NULL,
+    TEMPLATE_ID INT NOT NULL AUTO_INCREMENT COMMENT '模板編號 - 系統自動產生的唯一識別碼',
+    CREATED_BY_ID INT NOT NULL COMMENT '建立者ID - 建立此模板的管理員ID',
+    TEMPLATE_CODE VARCHAR(50) NOT NULL COMMENT '模板代碼 - 用於程式調用的唯一代碼',
+    TEMPLATE_NAME VARCHAR(100) NOT NULL COMMENT '模板名稱 - 便於管理識別的模板名稱',
+    TEMPLATE_TYPE VARCHAR(50) NOT NULL COMMENT '模板類型 - EMAIL/SMS/PUSH/IN_APP等',
+    TEMPLATE_CATEGORY VARCHAR(50) NOT NULL COMMENT '內容模板分類 - 對應通知類別',
+    SUBJECT VARCHAR(200) NOT NULL COMMENT '可用變數列表 - 郵件主旨或推播標題',
+    CONTENT  VARCHAR(255) NULL COMMENT '通知的純文字樣板內容，適用於簡訊、App 推播、系統內訊息等不支援 HTML 的格式',
+    HTML_CONTENT VARCHAR(255) NULL COMMENT '通知的 HTML 樣板內容，適用於電子郵件等支援格式化內容的通知方式',
+    VARIABLES JSON NOT NULL COMMENT '可用變數列表 - JSON格式定義可用的變數及說明',
+    IS_ACTIVE BOOLEAN NOT NULL DEFAULT TRUE COMMENT '是否啟用 - TRUE(預設):啟用 FALSE:停用',
+    CREATED_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '建立時間 - 系統自動記錄',
+    UPDATE_AT DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新時間 - 系統自動更新',
+    IS_SYSTEM BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否為系統預設模板 - DEFAULT:FALSE 系統模板不可刪除',
+    DESCRIPTION VARCHAR(200) NULL COMMENT '模板說明 - 描述模板用途及使用場景',
+    PREVIEW_IMAGE VARCHAR(255) NULL COMMENT '預覽圖URL - 模板預覽圖片的存放路径',
     
     PRIMARY KEY (TEMPLATE_ID),
     UNIQUE KEY uk_template_code (TEMPLATE_CODE),
@@ -628,33 +628,69 @@ CREATE TABLE IF NOT EXISTS NOTIFICATION_TEMPLATE (
 
 -- 3. 通知模板表 10筆資料 
 INSERT INTO NOTIFICATION_TEMPLATE (CREATED_BY_ID, TEMPLATE_CODE, TEMPLATE_NAME, TEMPLATE_TYPE, TEMPLATE_CATEGORY, SUBJECT, CONTENT, HTML_CONTENT, VARIABLES, IS_ACTIVE, IS_SYSTEM, DESCRIPTION, PREVIEW_IMAGE) VALUES
-(1, 'ORDER_SHIPPED', '訂單出貨通知模板', 'EMAIL', '訂單狀態', '您的訂單已出貨', true, '<h2>訂單出貨通知</h2><p>親愛的 {{user_name}}，您的訂單 {{order_id}} 已出貨。</p>', '{"user_name": "string", "order_id": "string", "tracking_number": "string"}', true, true, '訂單出貨時發送的電子郵件模板', NULL),
-(2, 'PAYMENT_REMINDER', '付款提醒模板', 'SMS', '付款提醒', '付款提醒', true, NULL, '{"user_name": "string", "order_id": "string", "amount": "number", "deadline": "datetime"}', true, true, '付款期限提醒簡訊模板', NULL),
-(1, 'PROMO_CAMPAIGN', '促銷活動模板', 'PUSH', '促銷活動', '限時優惠活動', true, NULL, '{"campaign_name": "string", "discount": "number", "end_date": "datetime"}', true, false, '促銷活動推播通知模板', 'promo_banner.jpg'),
-(3, 'SECURITY_ALERT', '安全警示模板', 'EMAIL', '安全提醒', '帳戶安全警示', true, '<div style="color:red;"><h2>安全警示</h2><p>{{user_name}}，偵測到異常登入。</p></div>', '{"user_name": "string", "login_time": "datetime", "ip_address": "string"}', true, true, '帳戶安全異常警示模板', NULL),
-(2, 'ORDER_COMPLETED', '訂單完成模板', 'EMAIL', '訂單狀態', '訂單交易完成', true, '<h2>交易完成</h2><p>感謝您的購買，訂單 {{order_id}} 已完成。</p>', '{"user_name": "string", "order_id": "string", "product_name": "string"}', true, true, '訂單完成確認模板', NULL),
-(1, 'WELCOME_NEW_USER', '新用戶歡迎模板', 'EMAIL', '系統通知', '歡迎加入我們', true, '<h1>歡迎 {{user_name}} 加入！</h1><p>感謝您註冊成為我們的會員。</p>', '{"user_name": "string", "registration_date": "datetime"}', true, true, '新用戶註冊歡迎訊息', 'welcome_banner.jpg'),
-(4, 'SYSTEM_MAINTENANCE', '系統維護通知模板', 'PUSH', '更新公告', '系統維護通知', true, NULL, '{"maintenance_start": "datetime", "maintenance_end": "datetime", "affected_services": "array"}', true, true, '系統維護期間通知模板', NULL),
-(2, 'REVIEW_REQUEST', '評價邀請模板', 'EMAIL', '評價提醒', '邀請您給予商品評價', true, '<h2>商品評價邀請</h2><p>{{user_name}}，請為您購買的 {{product_name}} 給予評價。</p>', '{"user_name": "string", "product_name": "string", "order_id": "string"}', true, false, '購買後評價邀請模板', NULL),
-(5, 'PASSWORD_RESET', '密碼重設模板', 'EMAIL', '安全提醒', '密碼重設要求', true, '<h2>密碼重設</h2><p>點擊連結重設密碼：<a href="{{reset_link}}">重設密碼</a></p>', '{"user_name": "string", "reset_link": "string", "expire_time": "datetime"}', true, true, '密碼重設郵件模板', NULL),
-(1, 'VIP_EXCLUSIVE', 'VIP專屬優惠模板', 'EMAIL', '會員專享', 'VIP會員專屬優惠', true, '<h1 style="color:gold;">VIP專屬優惠</h1><p>親愛的VIP會員 {{user_name}}，專屬優惠來了！</p>', '{"user_name": "string", "discount_code": "string", "valid_until": "datetime"}', true, false, 'VIP會員專屬優惠通知', 'vip_gold.jpg');
+(1, 'NEW_MATCH_SUCCESS', '配對成功通知', 'PUSH', '配對通知', '恭喜！您有新的配對', '恭喜 {{user_name}}！您與 {{matched_user_name}} 成功配對了，快去聊天室開始對話吧！', NULL, '{"user_name": "string", "matched_user_name": "string", "match_id": "number"}', true, true, '兩人互相按讚成功配對時的通知', NULL),
+(1, 'NEW_MATCH_REQUEST', '收到配對請求', 'PUSH', '配對通知', '有人對您按讚了', '{{from_user_name}} 對您按了讚！快去看看並決定是否回應吧。', NULL, '{"from_user_name": "string", "from_user_id": "number"}', true, true, '收到他人按讚時的通知', NULL),
+(1, 'CHATROOM_CREATED', '聊天室建立通知', 'PUSH', '配對通知', '聊天室已建立', '您與 {{matched_user_name}} 的聊天室已建立，開始聊天吧！', NULL, '{"matched_user_name": "string", "room_id": "number", "match_id": "number"}', true, true, '配對成功後聊天室建立的通知', NULL),
+
+-- 聊天室模組相關模板  
+(1, 'NEW_MESSAGE', '新訊息通知', 'PUSH', '聊天通知', '您有新訊息', '{{sender_name}} 傳送了一則新訊息：{{message_preview}}', NULL, '{"sender_name": "string", "sender_id": "number", "message_preview": "string", "room_id": "number"}', true, true, '收到新聊天訊息時的通知', NULL),
+(1, 'NEW_MESSAGE_EMAIL', '新訊息郵件通知', 'EMAIL', '聊天通知', '您有新的聊天訊息', '{{sender_name}} 向您傳送了新訊息。訊息內容：{{message_content}}', '<h2>新訊息通知</h2><p>{{sender_name}} 向您傳送了新訊息。<br/>訊息內容：{{message_content}}</p><p><a href="{{chatroom_link}}">立即查看</a></p>', '{"sender_name": "string", "message_content": "string", "chatroom_link": "string"}', true, true, '新訊息的郵件通知模板', NULL),
+
+-- 活動模組相關模板
+(1, 'ACTIVITY_REGISTRATION_SUCCESS', '活動報名成功', 'EMAIL', '活動通知', '活動報名成功確認', '{{user_name}}，您已成功報名活動「{{activity_title}}」。活動時間：{{activity_start_time}}，活動地點：{{activity_location}}', '<h2>報名成功</h2><p>{{user_name}}，您已成功報名活動「{{activity_title}}」</p><p>活動時間：{{activity_start_time}}<br/>活動地點：{{activity_location}}</p>', '{"user_name": "string", "activity_title": "string", "activity_start_time": "datetime", "activity_location": "string", "activity_id": "number"}', true, true, '活動報名成功確認通知', NULL),
+(1, 'ACTIVITY_STATUS_APPROVED', '活動申請通過', 'PUSH', '活動通知', '活動申請已通過', '恭喜！您的活動申請「{{activity_title}}」已通過審核，可以開始招募參與者了。', NULL, '{"activity_title": "string", "activity_id": "number"}', true, true, '活動申請通過時的通知', NULL),
+(1, 'ACTIVITY_REMINDER', '活動提醒', 'PUSH', '活動通知', '活動即將開始', '提醒：您報名的活動「{{activity_title}}」將在 {{time_until_start}} 後開始。地點：{{activity_location}}', NULL, '{"activity_title": "string", "activity_id": "number", "time_until_start": "string", "activity_location": "string"}', true, true, '活動開始前的提醒通知', NULL),
+(1, 'ACTIVITY_CANCELLED', '活動取消通知', 'EMAIL', '活動通知', '活動取消通知', '很抱歉，活動「{{activity_title}}」因故取消。取消原因：{{cancel_reason}}', '<h2>活動取消通知</h2><p>很抱歉，活動「{{activity_title}}」因故取消。<br/>取消原因：{{cancel_reason}}</p>', '{"activity_title": "string", "cancel_reason": "string", "activity_id": "number"}', true, true, '活動取消時通知參與者', NULL),
+(1, 'ACTIVITY_NEW_COMMENT', '活動新留言', 'PUSH', '活動通知', '活動有新留言', '您的活動「{{activity_title}}」有新留言來自 {{commenter_name}}：{{comment_preview}}', NULL, '{"activity_title": "string", "commenter_name": "string", "comment_preview": "string", "activity_id": "number"}', true, true, '活動有新留言時通知發起人', NULL),
+
+-- 訂單模組相關模板
+(1, 'ORDER_CREATED', '訂單建立確認', 'EMAIL', '訂單通知', '訂單建立成功', '訂單編號：{{order_id}}，商品：{{product_name}}，金額：NT$ {{amount}}。請在 {{payment_deadline}} 前完成付款。', '<h2>訂單建立成功</h2><p>訂單編號：{{order_id}}<br/>商品：{{product_name}}<br/>金額：NT$ {{amount}}</p><p>請在 {{payment_deadline}} 前完成付款。</p>', '{"order_id": "string", "product_name": "string", "amount": "number", "payment_deadline": "datetime"}', true, true, '訂單建立成功的確認通知', NULL),
+(1, 'ORDER_PAYMENT_SUCCESS', '付款成功確認', 'PUSH', '訂單通知', '付款成功', '您的訂單 {{order_id}} 付款成功，金額 NT$ {{amount}}，我們將盡快為您處理。', NULL, '{"order_id": "string", "amount": "number"}', true, true, '訂單付款成功的確認', NULL),
+(1, 'ORDER_SHIPPED', '商品出貨通知', 'EMAIL', '訂單通知', '您的商品已出貨', '您的訂單 {{order_id}} 已出貨，追蹤號碼：{{tracking_number}}，預計送達時間：{{estimated_delivery}}', '<h2>出貨通知</h2><p>您的訂單 {{order_id}} 已出貨。<br/>追蹤號碼：{{tracking_number}}<br/>預計送達時間：{{estimated_delivery}}</p>', '{"order_id": "string", "tracking_number": "string", "estimated_delivery": "string"}', true, true, '商品出貨時的通知', NULL),
+(1, 'ORDER_DELIVERED', '商品已送達', 'PUSH', '訂單通知', '商品已送達', '您的訂單 {{order_id}} 已送達，請確認收貨並給予評價。', NULL, '{"order_id": "string"}', true, true, '商品送達後的確認通知', NULL),
+
+-- 商店模組相關模板
+(1, 'PRODUCT_NEW', '新商品上架', 'PUSH', '商店通知', '有新商品上架', '您關注的賣家 {{seller_name}} 上架了新商品「{{product_name}}」，快去看看吧！', NULL, '{"seller_name": "string", "product_name": "string", "product_id": "number"}', true, true, '關注的賣家上架新商品時通知', NULL),
+(1, 'PRODUCT_LOW_STOCK', '庫存不足警告', 'EMAIL', '商店通知', '商品庫存不足', '您的商品「{{product_name}}」庫存僅剩 {{stock_quantity}} 件，請及時補貨。', '<h2>庫存警告</h2><p>您的商品「{{product_name}}」庫存僅剩 {{stock_quantity}} 件，請及時補貨。</p>', '{"product_name": "string", "stock_quantity": "number", "product_id": "number"}', true, true, '賣家商品庫存不足時的警告', NULL),
+(1, 'PRODUCT_PRICE_CHANGE', '商品價格異動', 'PUSH', '商店通知', '關注商品價格變動', '您關注的商品「{{product_name}}」價格從 NT$ {{old_price}} 調整為 NT$ {{new_price}}', NULL, '{"product_name": "string", "old_price": "number", "new_price": "number", "product_id": "number"}', true, true, '關注商品價格變動時的通知', NULL),
+
+-- 新聞模組相關模板
+(1, 'NEWS_PUBLISHED', '新聞發布通知', 'PUSH', '新聞通知', '有新文章發布', '新文章「{{news_title}}」已發布在{{category}}分類，快來看看吧！', NULL, '{"news_title": "string", "news_id": "number", "category": "string"}', true, true, '新新聞文章發布時的通知', NULL),
+(1, 'NEWS_TRENDING', '熱門話題推薦', 'EMAIL', '新聞通知', '本週熱門話題', '為您推薦本週最熱門的文章：「{{news_title}}」，已有{{view_count}}人閱讀。', '<h2>本週熱門話題</h2><p>為您推薦本週最熱門的文章：<br/>「{{news_title}}」</p><p>已有{{view_count}}人閱讀 <a href="{{news_link}}">立即閱讀</a></p>', '{"news_title": "string", "news_link": "string", "view_count": "number"}', true, true, '每週熱門話題推薦', NULL),
+
+-- 服務案件模組相關模板
+(1, 'SERVICE_CASE_CREATED', '服務案件已建立', 'EMAIL', '服務通知', '服務申請已受理', '您的服務申請已受理。案件編號：{{case_id}}，問題類型：{{case_type}}', '<h2>服務申請確認</h2><p>您的服務申請已受理。<br/>案件編號：{{case_id}}<br/>問題類型：{{case_type}}</p>', '{"case_id": "string", "case_type": "string"}', true, true, '服務案件建立時的確認通知', NULL),
+(1, 'SERVICE_CASE_PROGRESS', '案件處理進度', 'PUSH', '服務通知', '案件處理中', '您的服務案件 {{case_id}} 處理進度已更新：{{status_message}}', NULL, '{"case_id": "string", "status_message": "string", "progress": "string"}', true, true, '服務案件處理進度更新通知', NULL),
+(1, 'SERVICE_CASE_COMPLETED', '案件處理完成', 'EMAIL', '服務通知', '案件已處理完成', '您的服務案件 {{case_id}} 已處理完成。處理結果：{{resolution}}', '<h2>案件處理完成</h2><p>您的服務案件 {{case_id}} 已處理完成。<br/>處理結果：{{resolution}}</p>', '{"case_id": "string", "resolution": "string"}', true, true, '服務案件完成時的通知', NULL),
+(1, 'AI_RESPONSE_READY', 'AI回覆就緒', 'PUSH', '服務通知', 'AI助手已回覆', 'AI助手已針對您的問題提供回覆，案件：{{case_id}}。摘要：{{response_summary}}', NULL, '{"case_id": "string", "response_summary": "string"}', true, true, 'OpenAI服務回覆時的通知', NULL),
+
+-- 用戶模組相關模板
+(1, 'USER_REGISTRATION_WELCOME', '註冊歡迎', 'EMAIL', '系統通知', '歡迎加入 ShakeMate', '{{user_name}}，感謝您註冊成為我們的會員。開始探索精彩的配對之旅吧！', '<h1>歡迎加入 ShakeMate！</h1><p>{{user_name}}，感謝您註冊成為我們的會員。</p><p>開始探索精彩的配對之旅吧！</p>', '{"user_name": "string", "registration_date": "datetime"}', true, true, '新用戶註冊歡迎訊息', NULL),
+(1, 'USER_EMAIL_VERIFICATION', '郵箱驗證', 'EMAIL', '安全通知', '請驗證您的電子郵件', '請點擊以下連結驗證您的電子郵件，連結將在{{expire_time}}過期。', '<h2>電子郵件驗證</h2><p>請點擊以下連結驗證您的電子郵件：<br/><a href="{{verification_link}}">驗證電子郵件</a></p><p>連結將在{{expire_time}}過期。</p>', '{"verification_link": "string", "expire_time": "datetime"}', true, true, '電子郵件地址驗證', NULL),
+(1, 'USER_PASSWORD_CHANGED', '密碼變更通知', 'EMAIL', '安全通知', '密碼已變更', '您的帳戶密碼已於 {{change_time}} 變更，IP位址：{{ip_address}}。如非本人操作，請立即聯繫客服。', '<h2>密碼變更通知</h2><p>您的帳戶密碼已於 {{change_time}} 變更。<br/>IP位址：{{ip_address}}<br/>如非本人操作，請立即聯繫客服。</p>', '{"change_time": "datetime", "ip_address": "string"}', true, true, '密碼變更時的安全通知', NULL),
+(1, 'USER_LOGIN_ANOMALY', '異常登入警告', 'EMAIL', '安全通知', '偵測到異常登入', '偵測到您的帳戶有異常登入行為。時間：{{login_time}}，IP：{{ip_address}}，設備：{{device_info}}', '<h2 style="color:red;">安全警告</h2><p>偵測到您的帳戶有異常登入行為：<br/>時間：{{login_time}}<br/>IP：{{ip_address}}<br/>設備：{{device_info}}</p>', '{"login_time": "datetime", "ip_address": "string", "device_info": "string"}', true, true, '異常登入行為的安全警告', NULL),
+
+-- 系統管理相關模板
+(1, 'SYSTEM_MAINTENANCE', '系統維護公告', 'EMAIL', '系統公告', '系統維護通知', '系統將於 {{maintenance_start}} 至 {{maintenance_end}} 進行維護。維護期間可能影響的服務：{{affected_services}}', '<h2>系統維護公告</h2><p>系統將於 {{maintenance_start}} 至 {{maintenance_end}} 進行維護。<br/>維護期間可能影響的服務：{{affected_services}}</p>', '{"maintenance_start": "datetime", "maintenance_end": "datetime", "affected_services": "string"}', true, true, '系統維護期間的公告', NULL),
+(1, 'SYSTEM_UPDATE', '系統更新通知', 'PUSH', '系統公告', '系統功能更新', '系統已更新至新版本{{version}}，新增功能：{{new_features}}', NULL, '{"version": "string", "new_features": "string", "update_time": "datetime"}', true, true, '系統版本更新通知', NULL),
+(1, 'POLICY_UPDATE', '條款政策更新', 'EMAIL', '系統公告', '服務條款更新', '我們已更新服務條款和隱私政策，更新內容：{{update_summary}}', '<h2>服務條款更新</h2><p>我們已更新服務條款和隱私政策，更新內容：{{update_summary}}</p><p><a href="{{policy_link}}">查看完整條款</a></p>', '{"update_summary": "string", "policy_link": "string", "effective_date": "datetime"}', true, true, '服務條款和隱私政策更新通知', NULL); 
 
 -- 4. 會員通知記錄表 (MEMBER_NOTIFICATION)
 CREATE TABLE IF NOT EXISTS MEMBER_NOTIFICATION (
-    NOTIFICATION_ID INT NOT NULL,
-    USER_ID INT NOT NULL,
-    IS_READ BOOLEAN NOT NULL DEFAULT FALSE,
-    READ_TIME DATETIME NULL,
-    SENT_TIME DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    DELIVERY_METHOD VARCHAR(20) NOT NULL,
-    DELIVERY_STATUS TINYINT NOT NULL DEFAULT 0,
-    RETRY_COUNT INT NOT NULL DEFAULT 0,
-    LAST_RETRY_TIME DATETIME NULL,
-    ERROR_MESSAGE VARCHAR(400) NULL,
-    USER_INTERACTION TINYINT NOT NULL DEFAULT 0,
-    INTERACTION_TIME DATETIME NULL,
-    TRACKING_DATA JSON NULL,
-    DEVICE_INFO VARCHAR(255) NULL,
+    NOTIFICATION_ID INT NOT NULL COMMENT '通知編號 - 對應NOTIFICATION表的主鍵',
+    USER_ID INT NOT NULL COMMENT '會員編號 - 對應用戶的唯一識別碼',
+    IS_READ BOOLEAN NOT NULL DEFAULT FALSE COMMENT '是否已讀 - FALSE(預設):未讀 TRUE:已讀',
+    READ_TIME DATETIME NULL COMMENT '讀取時間 - 用戶點擊閱讀的時間記錄',
+    SENT_TIME DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '發送時間 - 系統發送通知的時間',
+    DELIVERY_METHOD VARCHAR(20) NOT NULL COMMENT '發送方式 - 推播、電子郵件、簡訊等',
+    DELIVERY_STATUS TINYINT NOT NULL DEFAULT 0 COMMENT '發送狀態 - 0:等待發送(預設) 1:發送成功 2:發送失敗',
+    RETRY_COUNT INT NOT NULL DEFAULT 0 COMMENT '重試次數 - 發送失敗時的重試計數',
+    LAST_RETRY_TIME DATETIME NULL COMMENT '最後重試時間 - 記錄最後一次重試的時間',
+    ERROR_MESSAGE VARCHAR(400) NULL COMMENT '發送失敗原因 - 記錄發送失敗的詳細錯誤訊息',
+    USER_INTERACTION TINYINT NOT NULL DEFAULT 0 COMMENT '用戶互動 - 0:無互動(預設) 1:點擊 2:回覆 3:不再接收此類通知',
+    INTERACTION_TIME DATETIME NULL COMMENT '互動時間 - 用戶進行互動操作的時間',
+    TRACKING_DATA JSON NULL COMMENT '追蹤數據 - 開啟率、點擊率等統計數據',
+    DEVICE_INFO VARCHAR(255) NULL COMMENT '閱讀裝置資訊 - 記錄用戶閱讀通知時的裝置資訊',
     
     PRIMARY KEY (NOTIFICATION_ID, USER_ID),
     INDEX idx_user_id (USER_ID),

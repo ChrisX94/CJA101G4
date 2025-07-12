@@ -21,32 +21,25 @@ $(document).ready(function() {
         const selectorHtml = `
             <div class="container py-4">
                 <div class="row justify-content-center">
-                    <div class="col-lg-8">
+                    <div class="col-lg-10">
                         <div class="card shadow">
                             <div class="card-header" style="background: linear-gradient(45deg, #2EC4B6, #DCFF61); color: #000;">
                                 <h5 class="mb-0" style="font-size: 1.2rem; font-weight: 500;"><i class="fas fa-chart-line me-2"></i>選擇要查看的通知報告</h5>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table id="notification-selector-table" class="table table-hover">
+                                    <table id="notification-selector-table" class="table table-hover" style="width:100%">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>ID</th>
-                                                <th>標題</th>
-                                                <th>狀態</th>
-                                                <th>創建時間</th>
-                                                <th>操作</th>
+                                                <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                                                <th><i class="fas fa-heading me-1"></i>標題</th>
+                                                <th><i class="fas fa-traffic-light me-1"></i>狀態</th>
+                                                <th><i class="fas fa-calendar-plus me-1"></i>創建時間</th>
+                                                <th><i class="fas fa-cogs me-1"></i>操作</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td colspan="5" class="text-center">
-                                                    <div class="spinner-border text-primary" role="status">
-                                                        <span class="visually-hidden">載入中...</span>
-                                                    </div>
-                                                    <div class="mt-2">載入通知列表中...</div>
-                                                </td>
-                                            </tr>
+                                            <!-- Data will be populated by DataTables -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -59,49 +52,89 @@ $(document).ready(function() {
         
         $('body').html(selectorHtml);
         
-        // 載入通知列表
-        $.get('/api/admin/notifications/', { size: 50 })
-            .done(function(data) {
-                const tbody = $('#notification-selector-table tbody');
-                tbody.empty();
-                
-                if (data.content && data.content.length > 0) {
-                    data.content.forEach(notification => {
-                        const createdTime = formatDateTime(notification.createdTime);
-                        const statusBadge = getStatusBadge(notification.status);
-                        
-                        const row = `
-                            <tr>
-                                <td>${notification.notificationId}</td>
-                                <td>${notification.title}</td>
-                                <td>${statusBadge}</td>
-                                <td>${createdTime}</td>
-                                <td>
-                                    <button class="btn btn-sm view-report-btn" 
-                                            style="background: linear-gradient(45deg, #2EC4B6, #4A90E2); border: none; color: #fff; padding: 0.5rem 1rem; border-radius: 0.8rem;"
-                                            data-id="${notification.notificationId}">
-                                        <i class="fas fa-chart-bar me-1"></i>查看報告
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                        tbody.append(row);
-                    });
-                    
-                    // 綁定查看報告按鈕事件
-                    $('.view-report-btn').on('click', function() {
-                        const id = $(this).data('id');
-                        window.location.href = `/api/admin/notifications/report/page?notificationId=${id}`;
-                    });
-                } else {
-                    tbody.html('<tr><td colspan="5" class="text-center text-muted">目前沒有通知記錄</td></tr>');
+        // 使用DataTables初始化表格
+        const dt = $('#notification-selector-table').DataTable({
+            processing: true,
+            serverSide: true,
+            pageLength: 10, // 🔧 預設每頁10筆
+            lengthMenu: [10, 20, 50, 100], // 可選每頁條數
+            ajax: {
+                url: '/api/admin/notifications/',
+                data: function(d) {
+                    // DataTables參數轉Spring Pageable參數
+                    return {
+                        page: Math.floor(d.start / d.length),
+                        size: d.length,
+                        sort: d.order && d.order.length > 0 ?
+                            d.columns[d.order[0].column].data + ',' + d.order[0].dir :
+                            'notificationId,desc'
+                    };
+                },
+                dataSrc: function(json) {
+                    // 兼容Spring Page對象
+                    json.recordsTotal = json.totalElements;
+                    json.recordsFiltered = json.totalElements;
+                    return json.content;
+                },
+                error: function(xhr, error, thrown) {
+                    console.error('DataTables Ajax error:', error);
+                    console.error('XHR status:', xhr.status);
+                    console.error('XHR response:', xhr.responseText);
+                    console.error('Thrown error:', thrown);
                 }
-            })
-            .fail(function() {
-                $('#notification-selector-table tbody').html(
-                    '<tr><td colspan="5" class="text-center text-danger">載入失敗，請稍後再試</td></tr>'
-                );
-            });
+            },
+            columns: [
+                { data: 'notificationId' },
+                { data: 'title' },
+                { 
+                    data: 'status',
+                    render: function(data) {
+                        return getStatusBadge(data);
+                    }
+                },
+                { 
+                    data: 'createdTime',
+                    render: function(data) {
+                        return formatDateTime(data);
+                    }
+                },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function(data, type, row) {
+                        return `
+                            <button class="btn btn-sm view-report-btn" 
+                                    style="background: linear-gradient(45deg, #2EC4B6, #4A90E2); border: none; color: #fff; padding: 0.5rem 1rem; border-radius: 0.8rem;"
+                                    data-id="${row.notificationId}">
+                                <i class="fas fa-chart-bar me-1"></i>查看報告
+                            </button>
+                        `;
+                    }
+                }
+            ],
+            language: {
+                "processing": "處理中...",
+                "loadingRecords": "載入中...",
+                "lengthMenu": "顯示 _MENU_ 筆結果",
+                "zeroRecords": "沒有符合的結果",
+                "info": "顯示第 _START_ 至 _END_ 筆結果，共 _TOTAL_ 筆",
+                "infoEmpty": "顯示第 0 至 0 筆結果，共 0 筆",
+                "infoFiltered": "(從 _MAX_ 筆結果中過濾)",
+                "search": "搜尋:",
+                "paginate": {
+                    "first": "第一頁",
+                    "previous": "上一頁",
+                    "next": "下一頁",
+                    "last": "最後一頁"
+                }
+            }
+        });
+        
+        // 綁定查看報告按鈕事件
+        $('#notification-selector-table tbody').on('click', '.view-report-btn', function() {
+            const id = $(this).data('id');
+            window.location.href = `/api/admin/notifications/report/page?notificationId=${id}`;
+        });
     }
 
     function loadNotificationReport(notificationId) {

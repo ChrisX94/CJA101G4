@@ -35,8 +35,10 @@ public class NotificationMapper {
         try {
             NotificationStatus status = NotificationStatus.fromCode(entity.getStatus());
             dto.setStatus(status.getDescription());
+            dto.setStatusCode(entity.getStatus()); // 🔧 同時設置狀態碼
         } catch (IllegalArgumentException e) {
             dto.setStatus("未知狀態");
+            dto.setStatusCode(entity.getStatus()); // 🔧 即使是未知狀態也設置原始碼
         }
         
         dto.setScheduledTime(entity.getScheduledTime());
@@ -73,6 +75,11 @@ public class NotificationMapper {
         entity.setTargetType(dto.getTargetType());
         entity.setValidFrom(dto.getStartTime());
         entity.setValidUntil(dto.getEndTime());
+        
+        // 🔧 添加排程時間的映射
+        if (dto.getScheduledTime() != null) {
+            entity.setScheduledTime(dto.getScheduledTime());
+        }
         
         // 設置目標條件
         if (dto.getTargetCriteria() != null) {

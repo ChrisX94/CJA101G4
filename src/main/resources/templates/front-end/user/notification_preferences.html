@@ -19,11 +19,14 @@
             font-family: "Noto Sans TC", sans-serif;
             background: linear-gradient(185deg, #DCFF61 0%, #DCFF61 55%, #2EC4B6 55%, #2EC4B6 100%);
         }
+        
         body {
             margin: 0;
             min-height: 100vh;
             font-family: "Noto Sans TC", sans-serif;
+            line-height: 1.6;
         }
+        
         .bg {
             position: relative;
             min-height: 100vh;
@@ -31,6 +34,7 @@
             background: linear-gradient(185deg, #DCFF61 0%, #DCFF61 55%, #2EC4B6 55%, #2EC4B6 100%);
             overflow: hidden;
         }
+        
         .bg::before {
             content: "";
             position: absolute;
@@ -39,6 +43,7 @@
             z-index: 0;
             pointer-events: none;
         }
+        
         .hero-section {
             min-height: 57rem;
             margin-top: 6.5rem;
@@ -48,90 +53,540 @@
             background: transparent;
             z-index: 1;
         }
-        .hero-section::before { display: none; }
-        /* 偏好設定內容區塊樣式 */
-        .main-content {
-            padding: 10rem 2rem 2rem;
-            max-width: 90rem;
-            margin: 0 auto;
-            padding-bottom: 12rem;
+        
+        .hero-section::before { 
+            display: none; 
         }
+        
+        /* 🎨 主要內容區域 */
+        .main-content {
+            padding: 8rem 2rem 4rem;
+            max-width: 120rem;
+            margin: 0 auto;
+            padding-bottom: 8rem;
+        }
+        
+        /* 🎨 偏好設定容器 */
         .preferences-container {
             background: rgba(255, 255, 255, 0.98);
-            border-radius: 1.5rem;
-            padding: 3rem;
-            box-shadow: 0 0.8rem 2.5rem rgba(0, 0, 0, 0.1);
+            border-radius: 2rem;
+            padding: 4rem;
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .preferences-header { 
-            display: flex; 
-            justify-content: center;
-            align-items: center; 
-            margin-bottom: 3rem;
-            padding-bottom: 1.5rem; 
-            border-bottom: 0.1rem solid #e0e0e0; 
-        }
-        .preferences-header h1 { 
-            font-size: 2.8rem;
-            color: #333; 
-            font-family: "LXGW Marker Gothic", sans-serif; 
-        }
-        .preferences-section { margin-bottom: 3.5rem; }
-        .preferences-section h2 { 
-            font-size: 2rem;
-            color: #333; 
-            margin-bottom: 2rem;
-            font-family: "LXGW Marker Gothic", sans-serif; 
-            padding-left: 1rem;
-            border-left: 4px solid #2EC4B6;
-        }
-        .preference-item { 
-            background: #fff; 
-            border-radius: 1.2rem;
-            padding: 2rem;
-            border: 1px solid #f0f0f0; 
-            margin-bottom: 1.5rem; 
-            transition: transform 0.3s, box-shadow 0.3s; 
-            box-shadow: 0 0.4rem 1.5rem rgba(0,0,0,0.05);
-        }
-        .preference-item:hover { 
-            transform: translateY(-0.3rem) scale(1.01); 
-            box-shadow: 0 0.6rem 2rem rgba(46, 196, 182, 0.15); 
-        }
-        .preference-title { font-size: 1.8rem; font-weight: 600; color: #333; margin-bottom: 0.8rem; display: flex; align-items: center; justify-content: space-between; }
-        .preference-description { font-size: 1.4rem; color: #666; margin-bottom: 1.5rem; }
         
-        /* 活泼的 Toggle Switch */
-        .toggle-switch { position: relative; display: inline-block; width: 5.2rem; height: 2.8rem; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 2.8rem; }
-        .toggle-slider:before { position: absolute; content: ""; height: 2.2rem; width: 2.2rem; left: 0.3rem; bottom: 0.3rem; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 0.2rem 0.5rem rgba(0,0,0,0.2); }
-        input:checked + .toggle-slider { background-color: #2EC4B6; }
-        input:checked + .toggle-slider:before { transform: translateX(2.4rem); }
-
-        /* 统一按钮风格 */
+        /* 🎨 標題區域 */
+        .preferences-header { 
+            text-align: center;
+            margin-bottom: 4rem;
+            padding-bottom: 2rem; 
+            border-bottom: 2px solid #f0f0f0;
+            position: relative;
+        }
+        
+        .preferences-header::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8rem;
+            height: 3px;
+            background: linear-gradient(90deg, #2EC4B6, #DCFF61);
+            border-radius: 2px;
+        }
+        
+        .preferences-header h1 { 
+            font-size: 3.2rem;
+            color: #2c3e50;
+            font-family: "LXGW Marker Gothic", sans-serif;
+            margin: 0;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .preferences-header h1::before {
+            content: "🔔";
+            font-size: 2.8rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .preferences-header p {
+            font-size: 1.6rem;
+            color: #7f8c8d;
+            margin-top: 1rem;
+            font-weight: 300;
+        }
+        
+        /* 🎨 區段標題 */
+        .preferences-section { 
+            margin-bottom: 4rem; 
+        }
+        
+        .preferences-section h2 { 
+            font-size: 2.4rem;
+            color: #2c3e50;
+            margin-bottom: 2.5rem;
+            font-family: "LXGW Marker Gothic", sans-serif;
+            padding-left: 1.5rem;
+            border-left: 5px solid #2EC4B6;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .preferences-section h2::before {
+            content: attr(data-icon);
+            font-size: 2rem;
+            color: #2EC4B6;
+        }
+        
+        .section-description {
+            font-size: 1.4rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+            font-style: italic;
+        }
+        
+        /* 🎨 類別偏好設定項目 */
+        .category-preference-item { 
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-preference-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2EC4B6, #DCFF61);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .category-preference-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 3rem rgba(46, 196, 182, 0.15);
+            border-color: #2EC4B6;
+        }
+        
+        .category-preference-item:hover::before {
+            transform: scaleX(1);
+        }
+        
+        /* 🎨 類別標題 */
+        .category-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .category-header h4 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .category-header h4::before {
+            content: "📋";
+            font-size: 1.8rem;
+        }
+        
+        .category-description {
+            font-size: 1.3rem;
+            color: #6c757d;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        /* 🎨 通知方式設定 */
+        .notification-methods {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .method-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 1rem;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .method-row:hover {
+            background: rgba(46, 196, 182, 0.05);
+            border-color: #2EC4B6;
+            transform: translateX(5px);
+        }
+        
+        .method-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .method-info strong {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .method-info strong::before {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: #2EC4B6;
+        }
+        
+        .method-info strong[data-method="email"]::before { content: "\f0e0"; }
+        .method-info strong[data-method="inapp"]::before { content: "\f0f3"; }
+        .method-info strong[data-method="push"]::before { content: "\f10a"; }
+        .method-info strong[data-method="sms"]::before { content: "\f7cd"; }
+        
+        .method-desc {
+            font-size: 1.2rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+        
+        /* 🎨 優化的開關樣式 */
+        .toggle-switch { 
+            position: relative; 
+            display: inline-block; 
+            width: 6rem; 
+            height: 3.2rem;
+            margin-left: 1rem;
+        }
+        
+        .toggle-switch input { 
+            opacity: 0; 
+            width: 0; 
+            height: 0; 
+        }
+        
+        .toggle-slider { 
+            position: absolute; 
+            cursor: pointer; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 3.2rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .toggle-slider:before { 
+            position: absolute; 
+            content: ""; 
+            height: 2.4rem; 
+            width: 2.4rem; 
+            left: 0.4rem; 
+            bottom: 0.4rem; 
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        input:checked + .toggle-slider { 
+            background: linear-gradient(135deg, #2EC4B6 0%, #20b2aa 100%);
+            box-shadow: 0 0 20px rgba(46, 196, 182, 0.3);
+        }
+        
+        input:checked + .toggle-slider:before { 
+            transform: translateX(2.8rem);
+            background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+        }
+        
+        /* 🎨 勿擾時段設定 */
+        .preference-item {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            border: 1px solid #e9ecef;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .preference-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(46, 196, 182, 0.1);
+        }
+        
+        .preference-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .preference-title span {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .preference-title span::before {
+            content: "🌙";
+            font-size: 1.6rem;
+        }
+        
+        .preference-description {
+            font-size: 1.4rem;
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        /* 🎨 時間選擇器 */
+        .time-range-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(46, 196, 182, 0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(46, 196, 182, 0.1);
+        }
+        
+        .time-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .time-input-group label {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .time-input-group label::before {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 1.2rem;
+            color: #2EC4B6;
+        }
+        
+        .time-input-group:first-child label::before { content: "\f017"; }
+        .time-input-group:last-child label::before { content: "\f2f1"; }
+        
+        .time-input-group input {
+            padding: 1rem 1.5rem;
+            border: 2px solid #e9ecef;
+            border-radius: 0.8rem;
+            font-size: 1.4rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .time-input-group input:focus {
+            outline: none;
+            border-color: #2EC4B6;
+            box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.1);
+        }
+        
+        /* 🎨 按鈕樣式 */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 4rem;
+            align-items: center;
+        }
+        
         .save-button { 
-            background: #2EC4B6; 
+            background: linear-gradient(135deg, #2EC4B6 0%, #20b2aa 100%);
             color: #fff; 
             border: none; 
-            padding: 1.2rem 2.5rem; 
-            border-radius: 3rem; 
-            font-size: 1.8rem; 
+            padding: 1.5rem 3rem; 
+            border-radius: 5rem; 
+            font-size: 1.6rem; 
             font-weight: 600;
             cursor: pointer; 
-            transition: background 0.3s, transform 0.2s; 
-            display: block; 
-            margin: 4rem auto 0; 
-            min-width: 22rem; 
-            box-shadow: 0 0.4rem 1.5rem rgba(46, 196, 182, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 20rem; 
+            box-shadow: 0 4px 15px rgba(46, 196, 182, 0.3);
+            position: relative;
+            overflow: hidden;
         }
+        
+        .save-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .save-button:hover::before {
+            left: 100%;
+        }
+        
         .save-button:hover { 
-            background: #28b3a5;
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #20b2aa 0%, #2EC4B6 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(46, 196, 182, 0.4);
         }
+        
+        .save-button:active {
+            transform: translateY(-1px);
+        }
+        
+        /* 🎨 次要按鈕樣式 */
+        .secondary-button {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .secondary-button:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #6c757d 100%);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+        }
+        
+        .info-button {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+        
+        .info-button:hover {
+            background: linear-gradient(135deg, #138496 0%, #17a2b8 100%);
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        }
+        
+        /* 🎨 載入動畫 */
+        .loading-container {
+            text-align: center;
+            padding: 4rem;
+            color: #6c757d;
+        }
+        
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2EC4B6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.4rem;
+            color: #6c757d;
+        }
+        
+        /* 🎨 響應式設計 */
         @media (max-width: 768px) {
-            .main-content { padding: 8rem 1rem 12rem; }
-            .preferences-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
-            .preference-title { flex-direction: column; gap: 1rem; align-items: flex-start; }
+            .main-content { 
+                padding: 6rem 1rem 4rem; 
+            }
+            
+            .preferences-container {
+                padding: 2rem;
+                border-radius: 1.5rem;
+            }
+            
+            .preferences-header h1 { 
+                font-size: 2.4rem; 
+            }
+            
+            .preferences-section h2 {
+                font-size: 2rem;
+            }
+            
+            .category-preference-item {
+                padding: 2rem;
+            }
+            
+            .method-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .toggle-switch {
+                margin-left: 0;
+            }
+            
+            .time-range-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .button-group {
+                margin-top: 3rem;
+            }
+            
+            .save-button {
+                min-width: 100%;
+                padding: 1.2rem 2rem;
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .preferences-header h1 { 
+                font-size: 2rem; 
+            }
+            
+            .category-header h4 {
+                font-size: 1.8rem;
+            }
+            
+            .method-info strong {
+                font-size: 1.4rem;
+            }
+            
+            .method-desc {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
@@ -139,29 +594,42 @@
     <div class="bg">
         <div th:replace="fragments/header1 :: header"></div>
         <div class="hero-section">
-          <main class="main-content">
-              <div class="preferences-container">
-                  <div class="preferences-header">
-                      <h1>通知偏好設定</h1>
-                  </div>
-                  <form id="preferences-form">
-                      <!-- 動態載入的通知偏好設定內容將插入這裡 -->
-                      <div id="preferences-container">
-                          <!-- JavaScript會動態填充這個容器 -->
-                          <div class="text-center py-4">
-                              <div class="spinner-border text-primary" role="status">
-                                  <span class="visually-hidden">載入中...</span>
-                              </div>
-                              <div class="mt-2 text-muted">正在載入通知偏好設定...</div>
-                          </div>
-                      </div>
+            <main class="main-content">
+                <div class="preferences-container">
+                    <div class="preferences-header">
+                        <h1>通知偏好設定</h1>
+                        <p>個人化您的通知體驗，只接收您關心的內容</p>
+                    </div>
+                    
+                    <form id="preferences-form">
+                        <!-- 動態載入的通知偏好設定內容將插入這裡 -->
+                        <div id="preferences-container">
+                            <!-- JavaScript會動態填充這個容器 -->
+                            <div class="loading-container">
+                                <div class="loading-spinner"></div>
+                                <div class="loading-text">正在載入通知偏好設定...</div>
+                            </div>
+                        </div>
 
-                      <button type="submit" class="save-button">儲存設定</button>
-                  </form>
-              </div>
-          </main>
+                        <div class="button-group">
+                            <button type="submit" class="save-button">
+                                <i class="fas fa-save"></i> 儲存設定
+                            </button>
+                            
+                            <button type="button" class="save-button secondary-button" onclick="testNotificationSettings()">
+                                <i class="fas fa-paper-plane"></i> 測試通知設定
+                            </button>
+                            
+                            <button type="button" class="save-button info-button" onclick="createDefaultPreferences()">
+                                <i class="fas fa-magic"></i> 創建預設偏好設定
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
         </div>
     </div>
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/js/header.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

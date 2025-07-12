@@ -10,13 +10,13 @@ function initNotificationBell() {
     if (!notificationBell) return;
 
     // 獲取未讀通知數量
-    fetch('/api/notifications/unread-count')
+    fetch('/notifications/api/unread-count')
         .then(response => response.json())
         .then(data => {
-            if (data.count > 0) {
+            if (data.unreadCount > 0) {
                 const badge = document.createElement('span');
                 badge.className = 'notification-badge';
-                badge.textContent = data.count > 99 ? '99+' : data.count;
+                badge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
                 notificationBell.appendChild(badge);
             }
         })
@@ -52,7 +52,7 @@ function initNotificationBell() {
 
     dropdown.innerHTML = '<div class="loading">載入中...</div>';
 
-    fetch('/api/notifications/recent')
+    fetch('/notifications/api/recent')
         .then(response => response.json())
         .then(data => {
             dropdown.innerHTML = '';
@@ -65,7 +65,7 @@ function initNotificationBell() {
             data.forEach(notification => {
                 const item = document.createElement('div');
                 item.className = `notification-item ${notification.isRead ? '' : 'unread'}`;
-                item.dataset.id = notification.id;
+                item.dataset.id = notification.notificationId;
                 
                 const title = document.createElement('div');
                 title.className = 'notification-title';
@@ -73,18 +73,18 @@ function initNotificationBell() {
                 
                 const content = document.createElement('div');
                 content.className = 'notification-content';
-                content.textContent = notification.content;
+                content.textContent = notification.message;
                 
                 const time = document.createElement('div');
                 time.className = 'notification-time';
-                time.textContent = formatDate(notification.createdAt);
+                time.textContent = formatDate(notification.sentTime);
                 
                 item.appendChild(title);
                 item.appendChild(content);
                 item.appendChild(time);
                 
                 item.addEventListener('click', function() {
-                    markAsRead(notification.id);
+                    markAsRead(notification.notificationId);
                     if (notification.link) {
                         window.location.href = notification.link;
                     }
@@ -110,7 +110,7 @@ function initNotificationBell() {
 
 // 標記通知為已讀
 function markAsRead(notificationId) {
-    fetch(`/api/notifications/${notificationId}/read`, {
+    fetch(`/notifications/api/${notificationId}/mark-read`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -132,13 +132,13 @@ function markAsRead(notificationId) {
 
 // 更新未讀數量
 function updateUnreadCount() {
-    fetch('/api/notifications/unread-count')
+    fetch('/notifications/api/unread-count')
         .then(response => response.json())
         .then(data => {
             const badge = document.querySelector('.notification-badge');
             if (badge) {
-                if (data.count > 0) {
-                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                if (data.unreadCount > 0) {
+                    badge.textContent = data.unreadCount > 99 ? '99+' : data.unreadCount;
                 } else {
                     badge.remove();
                 }

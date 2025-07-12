@@ -35,7 +35,7 @@ public class ServiceCaseNotificationMockService {
             String content = String.format("您的服務案件「%s」(案件編號：%s) 已成功建立，我們會儘快為您處理。", 
                 caseTitle, caseId);
             
-            notificationDispatchService.sendNotification(userId, title, content, "IN_APP");
+            notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
             log.info("✅ 服務案件建立通知已發送 - 用戶ID: {}, 案件ID: {}", userId, caseId);
             
         } catch (Exception e) {
@@ -58,7 +58,7 @@ public class ServiceCaseNotificationMockService {
             String content = String.format("您的案件 %s 狀態已更新為：%s。%s", 
                 caseId, status, note != null ? note : "");
             
-            notificationDispatchService.sendNotification(userId, title, content, "IN_APP");
+            notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
             log.info("✅ 案件進度通知已發送 - 用戶ID: {}, 案件ID: {}, 狀態: {}", userId, caseId, status);
             
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class ServiceCaseNotificationMockService {
             String content = String.format("您的案件 %s 已處理完成。解決方案：%s。感謝您的耐心等待！", 
                 caseId, solution);
             
-            notificationDispatchService.sendNotification(userId, title, content, "IN_APP");
+            notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
             log.info("✅ 案件完成通知已發送 - 用戶ID: {}, 案件ID: {}", userId, caseId);
             
         } catch (Exception e) {
@@ -100,7 +100,7 @@ public class ServiceCaseNotificationMockService {
             String title = "AI智能回覆已準備就緒";
             String content = String.format("針對您的案件 %s，AI已分析完成並提供了初步建議，請查看。", caseId);
             
-            notificationDispatchService.sendNotification(userId, title, content, "IN_APP");
+            notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
             log.info("✅ AI回覆就緒通知已發送 - 用戶ID: {}, 案件ID: {}", userId, caseId);
             
         } catch (Exception e) {
@@ -122,7 +122,7 @@ public class ServiceCaseNotificationMockService {
             String content = String.format("客服人員 %s 已針對您的案件 %s 提供了回覆，請及時查看。", 
                 staffName, caseId);
             
-            notificationDispatchService.sendNotification(userId, title, content, "IN_APP");
+            notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
             log.info("✅ 客服回覆通知已發送 - 用戶ID: {}, 案件ID: {}, 客服: {}", userId, caseId, staffName);
             
         } catch (Exception e) {
@@ -146,7 +146,7 @@ public class ServiceCaseNotificationMockService {
             String content = String.format("您的案件 %s 優先級已從 %s 調整為 %s。", 
                 caseId, oldPriority, newPriority);
             
-            notificationDispatchService.sendNotification(userId, title, content, "IN_APP");
+            notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
             log.info("✅ 案件優先級變更通知已發送 - 用戶ID: {}, 案件ID: {}, {} -> {}", 
                 userId, caseId, oldPriority, newPriority);
             
@@ -154,6 +154,71 @@ public class ServiceCaseNotificationMockService {
             log.error("❌ 發送案件優先級變更通知失敗 - 用戶ID: {}, 案件ID: {}, 錯誤: {}", 
                 userId, caseId, e.getMessage());
         }
+    }
+
+    /** 服務案例狀態更新通知 */
+    public void notifyServiceCaseStatusUpdate(Integer userId, String caseId, String oldStatus, String newStatus) {
+        String title = "服務案例狀態更新";
+        String content = String.format("您的服務案例 %s 狀態已從「%s」更新為「%s」", caseId, oldStatus, newStatus);
+        
+        log.info("[模擬] 發送服務案例狀態更新通知: 用戶ID={}, 案例ID={}, 狀態變更: {} -> {}", 
+                userId, caseId, oldStatus, newStatus);
+        
+        notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
+    }
+
+    /** 服務案例分配通知 */
+    public void notifyServiceCaseAssignment(Integer userId, String caseId, String assignedTo) {
+        String title = "服務案例分配通知";
+        String content = String.format("您的服務案例 %s 已分配給 %s 處理", caseId, assignedTo);
+        
+        log.info("[模擬] 發送服務案例分配通知: 用戶ID={}, 案例ID={}, 分配給: {}", 
+                userId, caseId, assignedTo);
+        
+        notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
+    }
+
+    /** 服務案例回覆通知 */
+    public void notifyServiceCaseReply(Integer userId, String caseId, String replyContent) {
+        String title = "服務案例回覆通知";
+        String content = String.format("您的服務案例 %s 有新的回覆: %s", caseId, replyContent);
+        
+        log.info("[模擬] 發送服務案例回覆通知: 用戶ID={}, 案例ID={}, 回覆內容長度: {}", 
+                userId, caseId, replyContent.length());
+        
+        notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
+    }
+
+    /** 服務案例完成通知 */
+    public void notifyServiceCaseCompletion(Integer userId, String caseId, String resolution) {
+        String title = "服務案例完成通知";
+        String content = String.format("您的服務案例 %s 已完成處理。處理結果: %s", caseId, resolution);
+        
+        log.info("[模擬] 發送服務案例完成通知: 用戶ID={}, 案例ID={}, 處理結果: {}", 
+                userId, caseId, resolution);
+        
+        notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
+    }
+
+    /** 服務案例評價提醒 */
+    public void notifyServiceCaseRatingReminder(Integer userId, String caseId) {
+        String title = "服務案例評價提醒";
+        String content = String.format("您的服務案例 %s 已完成，請為本次服務進行評價", caseId);
+        
+        log.info("[模擬] 發送服務案例評價提醒: 用戶ID={}, 案例ID={}", userId, caseId);
+        
+        notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
+    }
+
+    /** 服務案例逾期提醒 */
+    public void notifyServiceCaseOverdue(Integer userId, String caseId, int overdueDays) {
+        String title = "服務案例逾期提醒";
+        String content = String.format("您的服務案例 %s 已逾期 %d 天，請及時處理", caseId, overdueDays);
+        
+        log.info("[模擬] 發送服務案例逾期提醒: 用戶ID={}, 案例ID={}, 逾期天數: {}", 
+                userId, caseId, overdueDays);
+        
+        notificationDispatchService.sendNotificationWithCategory(userId, title, content, "IN_APP", "系統通知");
     }
 
     /**

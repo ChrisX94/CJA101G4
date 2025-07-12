@@ -220,13 +220,20 @@
         $(document).ready(function() {
             // 加载通知列表
             loadNotifications();
+            
+            // 设置全局回调函数，当导航栏通知状态改变时调用
+            window.notificationStateChanged = function(notificationId) {
+                console.log('收到通知状态改变事件:', notificationId);
+                // 重新加载通知列表
+                loadNotifications();
+            };
         });
 
         function loadNotifications() {
             $.ajax({
                 url: '/notifications/api', // API端點
                 type: 'GET',
-                data: { page: 0, size: 20 }, // 獲取第一頁，每頁20個
+                data: { page: 0, size: 10 }, // 🔧 修復：預設每頁10筆
                 success: function(response) {
                     const listElement = $('#notificationList');
                     if (response && response.content && response.content.length > 0) {
@@ -264,25 +271,37 @@
         }
 
         function markAsRead(notificationId, item) {
-            $.ajax({
-                url: `/notifications/api/${notificationId}/mark-read`,
-                type: 'POST',
-                contentType: 'application/json',
-                success: function() {
-                    // 前端UI变为已读
-                    item.removeClass('unread');
-                    item.find('.status').text('已讀');
-                    // 刷新导航栏未读数
-                    if (window.loadUnreadCount) {
-                        window.loadUnreadCount();
-                    } else if (window.parent && window.parent.loadUnreadCount) {
-                        window.parent.loadUnreadCount();
+            // 调用header.js中的全局函数，保证联动更新
+            if (window.markNotificationAsRead) {
+                // 使用全局函数处理标记已读
+                window.markNotificationAsRead(notificationId);
+                
+                // 本地UI立即更新（避免等待API响应的延迟）
+                item.removeClass('unread');
+                item.find('.status').text('已讀');
+                item.off('click'); // 移除点击事件
+                item.css('cursor', 'default');
+            } else {
+                // 如果全局函数不可用，使用本地AJAX调用作为后备
+                $.ajax({
+                    url: `/notifications/api/${notificationId}/mark-read`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function() {
+                        item.removeClass('unread');
+                        item.find('.status').text('已讀');
+                        item.off('click');
+                        item.css('cursor', 'default');
+                        // 尝试刷新导航栏未读数
+                        if (window.loadUnreadCount) {
+                            window.loadUnreadCount();
+                        }
+                    },
+                    error: function() {
+                        alert('標記通知為已讀失敗，請稍後再試。');
                     }
-                },
-                error: function() {
-                    alert('標記通知為已讀失敗，請稍後再試。');
-                }
-            });
+                });
+            }
         }
         
         function formatTimeAgo(dateString) {
