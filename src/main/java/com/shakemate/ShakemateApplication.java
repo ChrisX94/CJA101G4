@@ -10,7 +10,6 @@ import org.mybatis.spring.annotation.MapperScan;
 @EnableJpaRepositories(basePackages = "com.shakemate")
 @EntityScan(basePackages = "com.shakemate")
 @SpringBootApplication(scanBasePackages = "com.shakemate")
-@MapperScan("com.shakemate.activity.mapper")
 
 public class ShakemateApplication {
 

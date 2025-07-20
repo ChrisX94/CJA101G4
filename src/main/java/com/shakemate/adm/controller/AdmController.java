@@ -121,12 +121,6 @@ public class AdmController {
 			result.rejectValue("inputPwd", "error.inputPwd", "密碼至少要 6 碼");
 		}
 
-		// 暫時跳過權限檢查，專注於基本資料更新
-		// if (authFuncIds == null || authFuncIds.isEmpty()) {
-		// model.addAttribute("error", "請至少選擇一個權限！");
-		// return "back-end/adm/update_adm_input";
-		// }
-
 		// 檢查帳號是否重複（排除自己）
 		AdmVO existingAdm = admSvc.getOneAdm(admVO.getAdmId());
 		if (existingAdm == null) {
@@ -134,7 +128,6 @@ public class AdmController {
 			return "back-end/adm/update_adm_input";
 		}
 
-		// 檢查帳號是否被其他管理員使用
 		AdmVO duplicateAdm = admRepository.findByAdmAcc(admVO.getAdmAcc());
 		if (duplicateAdm != null && !duplicateAdm.getAdmId().equals(admVO.getAdmId())) {
 			model.addAttribute("error", "該帳號已被其他管理員使用！");
@@ -143,11 +136,9 @@ public class AdmController {
 
 		// 處理密碼更新
 		if (admVO.getInputPwd() != null && !admVO.getInputPwd().isBlank()) {
-			// 如果有輸入新密碼，則加密並更新
 			String hashedPwd = PasswordUtil.hashPassword(admVO.getInputPwd());
 			admVO.setAdmPwd(hashedPwd);
 		} else {
-			// 如果沒有輸入新密碼，則保持原密碼不變
 			admVO.setAdmPwd(existingAdm.getAdmPwd());
 		}
 
@@ -162,14 +153,11 @@ public class AdmController {
 			System.out.println("接收到的帳號: " + admVO.getAdmAcc());
 			System.out.println("接收到的密碼: " + (admVO.getInputPwd() != null ? "有輸入新密碼" : "沒有輸入新密碼"));
 
-			// 先測試資料庫連接
-			admSvc.testDatabaseConnection();
+			// ✅ 加入更新資料與權限
+			admSvc.updateAdmWithAuth(admVO, authFuncIds);
 
 			// 清除快取
 			admSvc.clearCache();
-
-			// 再次測試資料庫連接，查看更新結果
-			admSvc.testDatabaseConnection();
 
 			System.out.println("=== 控制器更新處理完成 ===");
 			redirectAttributes.addFlashAttribute("success", "管理員基本資料及權限修改成功！");
@@ -181,7 +169,7 @@ public class AdmController {
 			return "back-end/adm/updateProfile";
 		}
 
-		return "redirect:/adm/listAllUser";
+		return "redirect:/adm/listAllAdm";
 	}
 
 	// 權限下拉選單資料（checkbox 多選用）
@@ -246,7 +234,7 @@ public class AdmController {
 	}
 
 	// 查詢所有員工
-	@GetMapping("listAllUser")
+	@GetMapping("listAllUser") // 這裡是要查詢所有會員的資料
 	public String listAllUser(HttpSession session, ModelMap model, HttpServletResponse response) {
 		// 設置響應標頭防止快取
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");

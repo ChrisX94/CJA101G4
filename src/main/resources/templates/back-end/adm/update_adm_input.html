@@ -9,116 +9,172 @@
 	<meta http-equiv="Expires" content="0">
 	<title>管理員資料修改</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-	<style type="text/css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&family=Noto+Sans+TC:wght@100..900&display=swap"
+		rel="stylesheet">
+
+	<style>
+		/* 背景樣式 */
+		html,
+		body {
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow-x: hidden;
+			font-family: "Noto Sans TC", sans-serif;
+		}
+
+		body.bg {
+			position: relative;
+			background: linear-gradient(185deg, #DCFF61 0%, #DCFF61 55%, #2EC4B6 55%, #2EC4B6 100%);
+			overflow-y: auto;
+			z-index: 0;
+		}
+
+		body.bg::before {
+			content: "";
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(255, 255, 255, 0.35);
+			z-index: 0;
+			pointer-events: none;
+		}
+
+
+		/* 卡牌區塊 */
+		.card {
+			width: 55rem;
+			background: #fff;
+			padding: 3rem;
+			border-radius: 1.5rem;
+			border: 2px solid gray;
+			box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+			position: relative;
+			z-index: 1;
+			margin: 6rem auto 4rem auto;
+		}
+
+		/* 欄位錯誤訊息 */
 		.error {
 			color: red;
-			font-size: 12px;
+			font-size: 0.9rem;
+			margin-top: 4px;
+			display: block;
 		}
 
-		.form-container {
-			max-width: 600px;
-			margin: 0 auto;
-			padding: 20px;
-		}
-
+		/* 權限勾選區塊 */
 		.auth-checkbox {
 			margin: 5px 10px;
+		}
+
+		/* 按鈕樣式 */
+		.btn {
+			width: 12rem;
+			height: 5rem;
+			font-size: 1.6rem;
+			border: none;
+			border-radius: 2rem;
+			cursor: pointer;
+			transition: background 0.3s;
+		}
+
+		.left-btn {
+			background-color: #fff;
+			color: gray;
+			font-weight: 700;
+			border: 2px solid gray;
+		}
+
+		.left-btn:hover {
+			background-color: #888;
+		}
+
+		.right-btn {
+			background-color: #aaa;
+			border: 2px solid gray;
+			color: #fff;
+			font-weight: 600;
+		}
+
+		.right-btn:hover {
+			background-color: #888;
 		}
 	</style>
 </head>
 
-<body class="bg-light">
+<body class="bg">
 
-	<nav class="navbar navbar-expand-md navbar-dark bg-success fixed-top justify-content-center">
-		<div align="center">
-			<h2>管理員資料修改</h2>
-			<h3>
-				<a class="navbar-brand" th:href="@{/adm/select_page}"><span style="font-size:1.5em;">🔙</span> 回查詢頁</a>
-				<a class="navbar-brand" th:href="@{/adm/adminHome}" style="margin-left: 20px;">🏠 回管理員首頁</a>
-			</h3>
-		</div>
-	</nav>
+	<div class="card">
+		<h2 class="text-center fw-bold mb-4"> 修改管理員資料</h2>
 
-	<div class="container mt-5 pt-5">
-		<div class="form-container">
-			<div class="card shadow-sm">
-				<div class="card-header bg-warning text-dark">
-					<h4 class="mb-0">✏️ 修改管理員資料</h4>
-				</div>
-				<div class="card-body">
-					<div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+		<div th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></div>
 
-					<form th:action="@{update}" method="post" th:object="${admVO}">
-						<!-- 管理員ID (唯讀) -->
-						<div class="mb-3">
-							<label class="form-label">管理員ID:</label>
-							<input type="text" th:field="*{admId}" class="form-control" readonly
-								style="background-color: #f8f9fa;">
-						</div>
+		<form th:action="@{/adm/update}" method="post" th:object="${admVO}">
+			<!-- ID -->
+			<div class="mb-3">
+				<label class="form-label">管理員ID:</label>
+				<input type="text" th:field="*{admId}" class="form-control" readonly style="background-color: #f8f9fa;">
+			</div>
 
-						<!-- 管理員姓名 -->
-						<div class="mb-3">
-							<label class="form-label">管理員姓名: <span class="text-danger">*</span></label>
-							<input type="text" th:field="*{admName}" class="form-control"
-								onclick="hideContent('admName.errors');" />
-							<span th:if="${#fields.hasErrors('admName')}" th:errors="*{admName}" class="error"
-								id="admName.errors"></span>
-						</div>
+			<!-- 姓名 -->
+			<div class="mb-3">
+				<label class="form-label">管理員姓名: <span class="text-danger">*</span></label>
+				<input type="text" th:field="*{admName}" class="form-control"
+					onclick="hideContent('admName.errors');" />
+				<span th:if="${#fields.hasErrors('admName')}" th:errors="*{admName}" class="error"
+					id="admName.errors"></span>
+			</div>
 
-						<!-- 管理員帳號 -->
-						<div class="mb-3">
-							<label class="form-label">管理員帳號: <span class="text-danger">*</span></label>
-							<input type="text" th:field="*{admAcc}" class="form-control"
-								onclick="hideContent('admAcc.errors');" />
-							<span th:if="${#fields.hasErrors('admAcc')}" th:errors="*{admAcc}" class="error"
-								id="admAcc.errors"></span>
-						</div>
+			<!-- 帳號 -->
+			<div class="mb-3">
+				<label class="form-label">管理員帳號: <span class="text-danger">*</span></label>
+				<input type="text" th:field="*{admAcc}" class="form-control" onclick="hideContent('admAcc.errors');" />
+				<span th:if="${#fields.hasErrors('admAcc')}" th:errors="*{admAcc}" class="error"
+					id="admAcc.errors"></span>
+			</div>
 
-						<!-- 管理員密碼 -->
-						<div class="mb-3">
-							<label class="form-label">新密碼: <small class="text-muted">(可選，留空表示不修改密碼)</small></label>
-							<input type="password" th:field="*{inputPwd}" class="form-control"
-								onclick="hideContent('inputPwd.errors');" placeholder="輸入新密碼或留空保持原密碼" />
-							<span th:if="${#fields.hasErrors('inputPwd')}" th:errors="*{inputPwd}" class="error"
-								id="inputPwd.errors"></span>
-						</div>
+			<!-- 密碼 -->
+			<div class="mb-3">
+				<label class="form-label">新密碼: <small class="text-muted">(可留空表示不修改密碼)</small></label>
+				<input type="password" th:field="*{inputPwd}" class="form-control" placeholder="輸入新密碼或留空保持原密碼"
+					onclick="hideContent('inputPwd.errors');" />
+				<span th:if="${#fields.hasErrors('inputPwd')}" th:errors="*{inputPwd}" class="error"
+					id="inputPwd.errors"></span>
+			</div>
 
-						<!-- 權限選擇 -->
-						<div class="mb-3">
-							<label class="form-label">權限設定: <span class="text-danger">*</span></label>
-							<div class="border rounded p-3" style="background-color: #f8f9fa;">
-								<div th:each="auth : ${authFuncListData}" class="auth-checkbox">
-									<input type="checkbox" name="authFuncIds" th:value="${auth.authId}"
-										th:checked="${admVO.authFuncs != null and admVO.authFuncs.contains(auth)}"
-										class="form-check-input" id="auth_${auth.authId}">
-									<label th:for="'auth_' + ${auth.authId}" class="form-check-label"
-										th:text="${auth.authName}"></label>
-								</div>
-							</div>
-						</div>
-
-						<!-- 按鈕區域 -->
-						<div class="d-flex justify-content-between">
-							<a th:href="@{/adm/listAllAdm}" class="btn btn-secondary">🔙 返回列表</a>
-							<button type="submit" class="btn btn-warning">💾 送出修改</button>
-						</div>
-					</form>
+			<!-- 權限 -->
+			<div class="mb-3">
+				<label class="form-label">權限設定: <span class="text-danger">*</span></label>
+				<div class="border rounded p-3" style="background-color: #f8f9fa;">
+					<div th:each="auth : ${authFuncListData}" class="auth-checkbox">
+						<input type="checkbox" name="authFuncIds" th:value="${auth.authId}"
+							th:checked="${admVO.authFuncs != null and admVO.authFuncs.contains(auth)}"
+							class="form-check-input" id="auth_${auth.authId}">
+						<label th:for="'auth_' + ${auth.authId}" class="form-check-label"
+							th:text="${auth.authName}"></label>
+					</div>
 				</div>
 			</div>
-		</div>
+
+			<!-- 按鈕區 -->
+			<div class="d-flex justify-content-between mt-4">
+				<a th:href="@{/adm/listAllAdm}" class="btn left-btn"> 返回列表</a>
+				<button type="submit" class="btn right-btn"> 送出修改</button>
+			</div>
+		</form>
 	</div>
 
-	<!-- JavaScript -->
-	<script type="text/javascript">
-		// 清除提示信息
-		function hideContent(elementId) {
-			var element = document.getElementById(elementId);
-			if (element) {
-				element.style.display = "none";
-			}
+	<script>
+		function hideContent(id) {
+			const el = document.getElementById(id);
+			if (el) el.style.display = "none";
 		}
 
-		// 防止瀏覽器快取
 		window.onpageshow = function (event) {
 			if (event.persisted) {
 				window.location.reload();

@@ -23,6 +23,7 @@ public class MailService {
     private String mailPassword;
 
     public void sendMail(String to, String subject, String content) {
+        SSLBypass.disableSSLVerification();
         try {
             Properties props = new Properties();
             props.put("mail.smtp.host", "smtp.gmail.com");

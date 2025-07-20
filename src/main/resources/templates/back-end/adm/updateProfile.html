@@ -2,174 +2,219 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>會員資料修改</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <style type="text/css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=LXGW+Marker+Gothic&family=Noto+Sans+TC:wght@100..900&display=swap"
+        rel="stylesheet">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: "Noto Sans TC", sans-serif;
+        }
+
+        .bg {
+            position: relative;
+            min-height: 100vh;
+            background: linear-gradient(185deg, #DCFF61 0%, #DCFF61 55%, #2EC4B6 55%, #2EC4B6 100%);
+            overflow-x: hidden;
+            overflow-y: auto;
+            z-index: 0;
+        }
+
+        /* 背景上方有再加一層帶透明度的白色 */
+        .bg::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .card-box {
+            width: 55rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            background: #fff;
+            padding: 3rem;
+            border-radius: 1.5rem;
+            border: 2px solid gray;
+            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+            justify-content: center;
+            margin: 8rem auto;
+            z-index: 1;
+            position: relative;
+        }
+
+        .btn-custom {
+            width: 8rem;
+            height: 3.5rem;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 1.2rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            line-height: 3.5rem;
+            display: inline-block;
+            text-align: center;
+        }
+
+
+        .btn-left {
+            background-color: #fff;
+            color: gray;
+            font-weight: 700;
+            border: 2px solid gray;
+            text-decoration: none !important;
+        }
+
+        .btn-left:hover {
+            background-color: #888;
+            color: #fff;
+        }
+
+        .btn-right {
+            background-color: #aaa;
+            border: 2px solid gray;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .btn-right:hover {
+            background-color: #888;
+        }
+
+
         .error {
             color: red;
             font-size: 12px;
         }
-
-        .form-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .auth-checkbox {
-            margin: 5px 10px;
-        }
     </style>
 </head>
 
-<body class="bg-light">
+<body>
+    <div class="bg">
+        <div class="container">
+            <div class="card-box">
+                <h3 class="text-center mb-4">修改會員資料</h3>
 
-    <nav class="navbar navbar-expand-md navbar-dark bg-success fixed-top justify-content-center">
-        <div align="center">
-            <h2>會員資料修改</h2>
-            <h3>
-                <a class="navbar-brand" th:href="@{/adm/select_page}"><span style="font-size:1.5em;">🔙</span> 回查詢頁</a>
-                <a class="navbar-brand" th:href="@{/adm/adminHome}" style="margin-left: 20px;">🏠 回管理員首頁</a>
-            </h3>
-        </div>
-    </nav>
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div class="container mt-5 pt-5">
-        <div class="form-container">
-            <div class="card shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0">✏️ 修改會員資料</h4>
-                </div>
-                <div class="card-body">
-                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                <form th:action="@{/adm/updateProfile}" method="post" th:object="${userUpdate}">
+                    <!-- 會員ID -->
+                    <div class="mb-3">
+                        <label class="form-label">會員ID:</label>
+                        <input type="text" th:field="*{userId}" class="form-control" readonly
+                            style="background-color: #f8f9fa;">
+                    </div>
 
-                    <form th:action="@{/adm/updateProfile}" method="post" th:object="${userUpdate}">
-                        <!-- 會員ID (畫面顯示用，readonly) -->
-                        <div class="mb-3">
-                            <label class="form-label">會員ID:</label>
-                            <input type="text" th:value="*{userId}" class="form-control" readonly
-                                style="background-color: #f8f9fa;">
+                    <!-- 名稱 -->
+                    <div class="mb-3">
+                        <label class="form-label">會員名稱: <span class="text-danger"></span></label>
+                        <input type="text" th:field="*{username}" class="form-control"
+                            onclick="hideContent('username.errors');" />
+
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label">Email:</label>
+                        <input type="text" th:field="*{email}" class="form-control" readonly
+                            style="background-color: #f8f9fa;">
+                    </div>
+
+                    <!-- 性別 -->
+                    <div class="mb-3">
+                        <label class="form-label">性別 <span class="text-danger"></span></label>
+                        <div class="mt-2 d-flex gap-3">
+                            <label class="form-check-inline">
+                                <input type="radio" th:field="*{gender}" value="0" class="form-radio-input"> 男
+                            </label>
+                            <label class="form-check-inline">
+                                <input type="radio" th:field="*{gender}" value="1" class="form-radio-input"> 女
+                            </label>
                         </div>
 
-                        <!-- 隱藏欄位，實際送出用 -->
-                        <input type="hidden" th:field="*{userId}" />
+                    </div>
 
+                    <!-- 出生日期 -->
+                    <div class="mb-3">
+                        <label class="form-label">出生日期: <span class="text-danger"></span></label>
+                        <input type="date" th:field="*{birthday}" class="form-control"
+                            onclick="hideContent('birthday.errors');" />
+                    </div>
 
+                    <!-- 居住地 -->
+                    <div class="mb-3">
+                        <label class="form-label">居住區域: <span class="text-danger"></span></label>
+                        <input type="text" th:field="*{location}" class="form-control"
+                            onclick="hideContent('location.errors');" />
+                    </div>
 
-                        <!-- 會員名稱-->
-                        <div class="mb-3">
-                            <label class="form-label">會員名稱: <span class="text-danger">*</span></label>
-                            <input type="text" th:field="*{username}" class="form-control"
-                                onclick="hideContent('username.errors');" />
-                            <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error"
-                                id="username.errors"></span>
+                    <!-- 自介 -->
+                    <div class="mb-3">
+                        <label class="form-label">關於我: <span class="text-danger"></span></label>
+                        <input type="text" th:field="*{intro}" class="form-control"
+                            onclick="hideContent('intro.errors');" />
+
+                    </div>
+
+                    <!-- 狀態 -->
+                    <div class="mb-3">
+                        <label class="form-label">帳號狀態:</label>
+                        <div class="form-check">
+                            <input type="radio" th:field="*{userStatus}" class="form-check-input" value="1"
+                                id="statusNormal">
+                            <label class="form-check-label" for="statusNormal">一般會員（可登入）</label>
                         </div>
-
-                        <!-- 會員Email (唯讀) -->
-                        <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <input type="text" th:field="*{email}" class="form-control" readonly
-                                style="background-color: #f8f9fa;">
+                        <div class="form-check">
+                            <input type="radio" th:field="*{userStatus}" class="form-check-input" value="2"
+                                id="statusSuspended">
+                            <label class="form-check-label" for="statusSuspended">停權</label>
                         </div>
-                        <!-- 性別-->
-                        <div class="mb-3">
-                            <label class="form-label">性別 <span class="text-danger">*</span></label>
-                            <div class="mt-2 d-flex gap-3">
-                                <label class="form-check-inline">
-                                    <input type="radio" th:field="*{gender}" value="0" class="form-radio-input">
-                                    <span class="form-option-text">男</span>
-                                </label>
-                                <label class="form-check-inline">
-                                    <input type="radio" th:field="*{gender}" value="1" class="form-radio-input">
-                                    <span class="form-option-text">女</span>
-                                </label>
-                            </div>
-                            <span th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"
-                                class="text-danger small d-block mt-1"></span>
+                        <div class="form-check">
+                            <input type="radio" th:field="*{userStatus}" class="form-check-input" value="3"
+                                id="statusDeleted">
+                            <label class="form-check-label" for="statusDeleted">註銷</label>
                         </div>
+                    </div>
 
-                        <!-- 出生日期-->
-                        <div class="mb-3">
-                            <label class="form-label">出生日期: <span class="text-danger">*</span></label>
-                            <input type="date" th:field="*{birthday}" class="form-control"
-                                onclick="hideContent('birthday.errors');" />
-                            <span th:if="${#fields.hasErrors('birthday')}" th:errors="*{birthday}" class="error"
-                                id="birthday.errors"></span>
-                        </div>
-
-                        <!-- 居住區域-->
-                        <div class="mb-3">
-                            <label class="form-label">居住區域: <span class="text-danger">*</span></label>
-                            <input type="text" th:field="*{location}" class="form-control"
-                                onclick="hideContent('location.errors');" />
-                            <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="error"
-                                id="location.errors"></span>
-                        </div>
-
-                        <!--關於我-->
-                        <div class="mb-3">
-                            <label class="form-label">關於我: <span class="text-danger">*</span></label>
-                            <input type="text" th:field="*{intro}" class="form-control"
-                                onclick="hideContent('intro.errors');" />
-                            <span th:if="${#fields.hasErrors('intro')}" th:errors="*{intro}" class="error"
-                                id="intro.errors"></span>
-                        </div>
-
-                        <!-- 帳號狀態設定 -->
-                        <div class="mb-3">
-                            <label class="form-label">帳號狀態:</label>
-                            <div class="form-check">
-                                <input type="radio" th:field="*{userStatus}" class="form-check-input" value="1"
-                                    id="statusNormal">
-                                <label class="form-check-label" for="statusNormal">一般會員（可登入）</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="radio" th:field="*{userStatus}" class="form-check-input" value="2"
-                                    id="statusSuspended">
-                                <label class="form-check-label" for="statusSuspended">停權</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="radio" th:field="*{userStatus}" class="form-check-input" value="3"
-                                    id="statusDeleted">
-                                <label class="form-check-label" for="statusDeleted">註銷</label>
-                            </div>
-                        </div>
-
-
-                        <!-- 按鈕區域 -->
-                        <div class="d-flex justify-content-between">
-                            <a th:href="@{/adm/listAllUser}" class="btn btn-secondary">🔙 返回列表</a>
-                            <button type="submit" class="btn btn-warning">💾 送出修改</button>
-                        </div>
-                    </form>
-                </div>
+                    <!-- 按鈕 -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a th:href="@{/adm/listAllUser}" class="btn-custom btn-left text-center">返回列表</a>
+                        <button type="submit" class="btn-custom btn-right">送出修改</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <script type="text/javascript">
-        // 清除提示信息
+    <script>
         function hideContent(elementId) {
-            var element = document.getElementById(elementId);
-            if (element) {
-                element.style.display = "none";
-            }
+            const el = document.getElementById(elementId);
+            if (el) el.style.display = "none";
         }
 
-        // 防止瀏覽器快取
         window.onpageshow = function (event) {
-            if (event.persisted) {
-                window.location.reload();
-            }
+            if (event.persisted) window.location.reload();
         };
     </script>
-
 </body>
 
 </html>
