@@ -15,7 +15,8 @@
 
     <!-- 自訂樣式 -->
     <style>
-        html {
+        html,
+        body {
             font-family: "Noto Sans TC", sans-serif;
         }
 
@@ -168,7 +169,7 @@
                         </td>
                         <td th:text="${user.createdTime}"></td>
                         <td>
-                            <form method="post" th:action="@{/adm/updateProfile}" class="mb-0">
+                            <form method="get" th:action="@{/adm/updateProfile}" class="mb-0">
                                 <input type="hidden" name="userId" th:value="${user.userId}" />
                                 <input type="submit" class="btn btn-warning btn-sm" value="修改">
                             </form>
